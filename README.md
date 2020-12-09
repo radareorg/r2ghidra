@@ -1,8 +1,8 @@
-<img width="150" height="150" align="left" style="float: left; margin: 0 10px 0 0;" alt="r2ghidra-dec logo" src="https://raw.githubusercontent.com/radareorg/r2ghidra-dec/master/assets/logo.png">
+<img width="150" height="150" align="left" style="float: left; margin: 0 10px 0 0;" alt="r2ghidra logo" src="https://raw.githubusercontent.com/radareorg/r2ghidra/master/assets/logo.png">
 
-# r2ghidra-dec
+# r2ghidra
 
-[![Build Status](https://travis-ci.com/radareorg/r2ghidra-dec.svg?token=JDmXp2pDhXxtPErySVHM&branch=master)](https://travis-ci.com/radareorg/r2ghidra-dec)
+[![Build Status](https://travis-ci.com/radareorg/r2ghidra.svg?token=JDmXp2pDhXxtPErySVHM&branch=master)](https://travis-ci.com/radareorg/r2ghidra)
 
 This is an integration of the Ghidra decompiler for [radare2](https://github.com/radareorg/radare2).
 It is solely based on the decompiler part of Ghidra, which is written entirely in
@@ -13,7 +13,7 @@ This project was presented at r2con 2019 as part of the Cutter talk: [https://yo
 
 An r2pm package is available that can easily be installed like:
 ```
-r2pm -i r2ghidra-dec
+r2pm -i r2ghidra
 ```
 
 This package only installs the radare2 part.
@@ -74,11 +74,11 @@ The install step is necessary for the plugin to work because it includes install
 To also build the Cutter plugin, pass `-DBUILD_CUTTER_PLUGIN=ON -DCUTTER_SOURCE_DIR=/path/to/cutter/source` to cmake, for example like this:
 ```
 /my/path> git clone https://github.com/radareorg/cutter
-/my/path> # build Cutter, clone r2ghidra-dec, etc.
+/my/path> # build Cutter, clone r2ghidra, etc.
 ...
-/my/path/r2ghidra-dec> mkdir build && cd build
-/my/path/r2ghidra-dec/build> cmake -DBUILD_CUTTER_PLUGIN=ON -DCUTTER_SOURCE_DIR=/my/path/cutter -DCMAKE_INSTALL_PREFIX=~/.local ..
-/my/path/r2ghidra-dec/build> make && make install
+/my/path/r2ghidra> mkdir build && cd build
+/my/path/r2ghidra/build> cmake -DBUILD_CUTTER_PLUGIN=ON -DCUTTER_SOURCE_DIR=/my/path/cutter -DCMAKE_INSTALL_PREFIX=~/.local ..
+/my/path/r2ghidra/build> make && make install
 ```
 
 ## License
