@@ -32,7 +32,7 @@ G_DECOMPILER+= pcodecompile.cc
 
 G_DECOMPILER+= xml.cc ## yacc
 G_DECOMPILER+= pcodeparse.cc ## yacc
-G_DECOMPILER+= slghparse.cc ## yacc
+# G_DECOMPILER+= slghparse.cc ## yacc
 
 # ghidra/ghidra/Ghidra/Features/Decompiler/src/decompile/cpp/xml.y
 # ghidra/ghidra/Ghidra/Features/Decompiler/src/decompile/cpp/grammar.y
@@ -53,7 +53,16 @@ $(GHIDRA_DECOMPILER)/pcodeparse.cc: $(GHIDRA_DECOMPILER)/pcodeparse.y
 	yacc -p pcodeparser -o $(GHIDRA_DECOMPILER)/pcodeparse.cc $(GHIDRA_DECOMPILER)/pcodeparse.y
 
 $(GHIDRA_DECOMPILER)/slghparse.cc: $(GHIDRA_DECOMPILER)/slghparse.y
+	echo '#include \"slghparse.hpp\"' > $(GHIDRA_DECOMPILER)/slghparse.tab.hpp
+	yacc -d -o $(GHIDRA_DECOMPILER)/slghparse.tab.hh $(GHIDRA_DECOMPILER)/slghparse.y
 	yacc -o $(GHIDRA_DECOMPILER)/slghparse.cc $(GHIDRA_DECOMPILER)/slghparse.y
+
+.PHONY: $(GHIDRA_DECOMPILER)/slghparse.cc
+.PHONY: $(GHIDRA_DECOMPILER)/slghscan.cc
+
+
+$(GHIDRA_DECOMPILER)/slghscan.cc: $(GHIDRA_DECOMPILER)/slghscan.l $(GHIDRA_DECOMPILER)/slghparse.cc
+	flex --header-file=$(GHIDRA_DECOMPILER)/slghscan.tab.hh -o $(GHIDRA_DECOMPILER)/slghscan.cc $(GHIDRA_DECOMPILER)/slghscan.l
 
 GHIDRA_SRCS=$(addprefix $(GHIDRA_DECOMPILER)/,$(G_DECOMPILER))
 GHIDRA_OBJS+=$(subst .cc,.o,$(GHIDRA_SRCS))
@@ -67,8 +76,8 @@ GHIDRA_SLEIGH_COMPILER_OBJS=$(subst .cc,.o,$(GHIDRA_SLEIGH_COMPILER_SRCS))
 sleigh: sleighc
 	$(SLEIGHC) $(SPECFILE) $(SLAFILE)
 
-sleighc: $(GHIDRA_DECOMPILER)/slgh_compile.o
-	#$(CXX) -o sleighc $(GHIDRA_DECOMPILER)/slgh_compile.o $(GHIDRA_DECOMPILER)/xml.o $(GHIDRA_DECOMPILER)/pcodeparse.o $(GHIDRA_OBJS)
+sleighc: $(GHIDRA_DECOMPILER)/slgh_compile.o $(GHIDRA_DECOMPILER)/slghscan.o $(GHIDRA_DECOMPILER)/slghparse.o
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o sleighc $(GHIDRA_DECOMPILER)/slgh_compile.o $(GHIDRA_DECOMPILER)/slghparse.o $(GHIDRA_DECOMPILER)/slghscan.o $(GHIDRA_OBJS)
 
 GHIDRA_SLEIGH_FILES=$(GHIDRA_HOME)/Ghidra/Processors/*.cspec
 GHIDRA_SLEIGH_FILES+=$(GHIDRA_HOME)/Ghidra/Processors/*.ldefs

@@ -1,4 +1,6 @@
 -include config.mk
+DESTDIR?=
+BINDIR=$(PREFIX)/bin
 
 all: ghidra/ghidra
 	$(MAKE) -C src
@@ -9,6 +11,8 @@ clean:
 
 install:
 	$(MAKE) -C src install
+	mkdir -p $(DESTDIR)/$(BINDIR)
+	cp -f src/sleighc $(DESTDIR)/$(BINDIR)
 
 uninstall:
 	$(MAKE) -C src uninstall

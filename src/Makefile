@@ -17,7 +17,12 @@ R2G_PLUG_SRCS= anal_ghidra.cpp asm_ghidra.cpp core_ghidra.cpp
 
 PUGIXML_HOME=../third-party/pugixml/src/
 PUGIXML_CFLAGS=-I$(PUGIXML_HOME)
+PUGIXML_SRCS= $(PUGIXML_HOME)/pugixml.cpp
 PUGIXML_OBJS= $(PUGIXML_HOME)/pugixml.o
+#PUGIXML_OBJS= pugixml.o
+
+$(PUGIXML_OBJS): $(PUGIXML_SRCS)
+	$(CXX) -c $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $<
 
 CXXFLAGS+=$(PUGIXML_CFLAGS)
 # CXXFLAGS+=-DR2GHIDRA_SLEIGHHOME_DEFAULT=\"$(GHIDRA_HOME)\"
