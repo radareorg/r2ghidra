@@ -1,4 +1,4 @@
 all: ghidra
 
 ghidra:
-	git submodule --init update
+	git submodule update --init

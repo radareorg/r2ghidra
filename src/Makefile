@@ -52,6 +52,9 @@ R2G_ANAL_PLUGIN=anal_ghidra.so
 
 all: plugins
 
+clean:
+	rm *.o $(GHIDRA_HOME)/*.o
+
 plugins: $(R2G_CORE_PLUGIN) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN)
 
 deps: $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(R2G_PLUGIN_OBJS) $(PUGIXML_OBJS)

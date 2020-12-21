@@ -14,3 +14,8 @@ uninstall:
 
 ghidra/ghidra:
 	$(MAKE) -C ghidra
+
+mrproper:
+	rm -rf ghidra/ghidra
+	rm -rf third-party/pugixml
+	$(MAKE) -C src clean
