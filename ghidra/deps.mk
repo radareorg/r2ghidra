@@ -15,8 +15,9 @@ G_DECOMPILER+= merge.cc double.cc coreaction.cc condexe.cc override.cc
 G_DECOMPILER+= dynamic.cc crc32.cc prettyprint.cc printlanguage.cc
 G_DECOMPILER+= printc.cc printjava.cc memstate.cc opbehavior.cc
 G_DECOMPILER+= paramid.cc transform.cc string_ghidra.cc stringmanage.cc
+G_DECOMPILER+= xml.cc
 
-GHIDRA_SRCS=$(addprefix $(GHIDRA_DECOMPILER),$(G_DECOMPILER))
+GHIDRA_SRCS=$(addprefix $(GHIDRA_DECOMPILER)/,$(G_DECOMPILER))
 GHIDRA_OBJS+=$(subst .cc,.o,$(GHIDRA_SRCS))
 
 GHIDRA_LIBDECOMP_SRCS=libdecomp.cc

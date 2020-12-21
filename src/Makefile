@@ -15,11 +15,12 @@ R2G_PLUG_SRCS= anal_ghidra.cpp asm_ghidra.cpp core_ghidra.cpp
 
 PUGIXML_HOME=../third-party/pugixml/src/
 PUGIXML_CFLAGS=-I$(PUGIXML_HOME)
+PUGIXML_OBJS= $(PUGIXML_HOME)/pugixml.o
 
 CXXFLAGS+=$(PUGIXML_CFLAGS)
 CXXFLAGS+=-DR2GHIDRA_SLEIGHHOME_DEFAULT=\"$(GHIDRA_HOME)\"
 
-R2GHIDRA_OBJS=$(subst .cpp,.o, $(R2GHIDRA_SRCS))
+R2GHIDRA_OBJS=$(subst .cpp,.o,$(R2GHIDRA_SRCS))
 R2G_PLUGIN_OBJS=$(subst .cpp,.o,$(R2G_PLUG_SRCS))
 
 CXX=clang++
@@ -53,10 +54,10 @@ all: plugins
 
 plugins: $(R2G_CORE_PLUGIN) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN)
 
-deps: $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(R2G_PLUGIN_OBJS)
+deps: $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(R2G_PLUGIN_OBJS) $(PUGIXML_OBJS)
 
 $(R2G_CORE_PLUGIN): deps
-	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) core_ghidra.o
+	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) pugixml.o $(GHIDRA_OBJS) core_ghidra.o
 
 $(R2G_ASM_PLUGIN): deps
 	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) asm_ghidra.o
