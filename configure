@@ -420,7 +420,9 @@ if [ "" = 1 ]; then
 echo "Cannot find r2" >&2
 else
 echo no
-fi ; fi
+fi
+	echo "error: This program is required." >&2
+	exit 1 ; fi
 ochof "checking for bison... "
 if [ -x "${BISON}" ]; then
 	FIND=${BISON}
@@ -446,7 +448,9 @@ if [ "" = 1 ]; then
 echo "Cannot find bison" >&2
 else
 echo no
-fi ; fi
+fi
+	echo "error: This program is required." >&2
+	exit 1 ; fi
 ochof "checking for flex... "
 if [ -x "${flex}" ]; then
 	FIND=${flex}
@@ -472,7 +476,9 @@ if [ "" = 1 ]; then
 echo "Cannot find flex" >&2
 else
 echo no
-fi ; fi
+fi
+	echo "error: This program is required." >&2
+	exit 1 ; fi
 printf "checking exec r2 -H R2_PREFIX... "
 R2_PREFIX="`r2 -H R2_PREFIX 2>/dev/null`"
 if [ $? = 0 ]; then
