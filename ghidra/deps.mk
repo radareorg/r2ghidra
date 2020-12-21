@@ -15,7 +15,29 @@ G_DECOMPILER+= merge.cc double.cc coreaction.cc condexe.cc override.cc
 G_DECOMPILER+= dynamic.cc crc32.cc prettyprint.cc printlanguage.cc
 G_DECOMPILER+= printc.cc printjava.cc memstate.cc opbehavior.cc
 G_DECOMPILER+= paramid.cc transform.cc string_ghidra.cc stringmanage.cc
-G_DECOMPILER+= xml.cc
+
+G_DECOMPILER+= $(GHIDRA_LIBDECOMP_SRCS)
+G_DECOMPILER+= xml.cc ## yacc
+
+G_DECOMPILER+= sleigh_arch.cc
+G_DECOMPILER+= sleigh.cc
+G_DECOMPILER+= inject_sleigh.cc
+G_DECOMPILER+= filemanage.cc
+G_DECOMPILER+= semantics.cc
+G_DECOMPILER+= slghsymbol.cc
+G_DECOMPILER+= context.cc
+G_DECOMPILER+= sleighbase.cc
+G_DECOMPILER+= slghpatexpress.cc
+G_DECOMPILER+= slghpattern.cc
+G_DECOMPILER+= pcodecompile.cc
+
+G_DECOMPILER+= pcodeparse.cc ## yacc
+
+$(GHIDRA_DECOMPILER)/xml.cc: $(GHIDRA_DECOMPILER)/xml.y
+	bison -o $(GHIDRA_DECOMPILER)/xml.cc $(GHIDRA_DECOMPILER)/xml.y
+
+$(GHIDRA_DECOMPILER)/pcodeparse.cc: $(GHIDRA_DECOMPILER)/pcodeparse.y
+	bison -p pcodeparser -o $(GHIDRA_DECOMPILER)/pcodeparse.cc $(GHIDRA_DECOMPILER)/pcodeparse.y
 
 GHIDRA_SRCS=$(addprefix $(GHIDRA_DECOMPILER)/,$(G_DECOMPILER))
 GHIDRA_OBJS+=$(subst .cc,.o,$(GHIDRA_SRCS))
