@@ -28,11 +28,12 @@ R2G_PLUGIN_OBJS=$(subst .cpp,.o,$(R2G_PLUG_SRCS))
 CXX=clang++
 
 CFLAGS+=-DR2GHIDRA_SLEIGHHOME_DEFAULT=\"$(shell r2 -H R2_USER_PLUGINS)/r2ghidra_sleigh\"
+CFLAGS+=-w
 CFLAGS+=-fPIC
 CFLAGS+=-I$(GHIDRA_DECOMPILER)
 CFLAGS+=-I.
 ifeq ($(shell uname),FreeBSD)
-## CXXFLAGS+=-DHOST_ENDIAN=1
+CFLAGS+=-DHOST_ENDIAN=1
 CFLAGS+=-Dint1=char
 CFLAGS+=-Dint2=short
 CFLAGS+=-Duint1=unsigned" char"
@@ -43,10 +44,6 @@ CFLAGS+=-Dint8="long long"
 CFLAGS+=-Duint8="unsigned long long"
 CFLAGS+=-Duintm="unsigned long long"
 CFLAGS+=-Duintp="unsigned long long"
-# needed for freebsd
-# ------------------
-# CXXFLAGS+=-Duintp=size_t
-# CXXFLAGS+=-Duint1="unsigned char"
 endif
 
 CXXFLAGS+=-std=c++11
