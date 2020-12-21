@@ -31,20 +31,24 @@ CFLAGS+=-DR2GHIDRA_SLEIGHHOME_DEFAULT=\"$(shell r2 -H R2_USER_PLUGINS)/r2ghidra_
 CFLAGS+=-fPIC
 CFLAGS+=-I$(GHIDRA_DECOMPILER)
 CFLAGS+=-I.
-ifeq (1,2)
+ifeq ($(shell uname),FreeBSD)
 ## CXXFLAGS+=-DHOST_ENDIAN=1
+CFLAGS+=-Dint1=char
 CFLAGS+=-Dint2=short
+CFLAGS+=-Duint1=unsigned" char"
 CFLAGS+=-Duint2=unsigned" short"
 CFLAGS+=-Dint4=int
 CFLAGS+=-Duint4=unsigned" long long"
 CFLAGS+=-Dint8="long long"
 CFLAGS+=-Duint8="unsigned long long"
 CFLAGS+=-Duintm="unsigned long long"
+CFLAGS+=-Duintp="unsigned long long"
 # needed for freebsd
 # ------------------
 # CXXFLAGS+=-Duintp=size_t
 # CXXFLAGS+=-Duint1="unsigned char"
 endif
+
 CXXFLAGS+=-std=c++11
 CXXFLAGS+=$(CFLAGS)
 
