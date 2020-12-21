@@ -16,6 +16,7 @@ install:
 
 uninstall:
 	$(MAKE) -C src uninstall
+	rm -f $(DESTDIR)/$(BINDIR)/sleighc
 
 ghidra/ghidra:
 	$(MAKE) -C ghidra
