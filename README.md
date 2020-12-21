@@ -13,12 +13,22 @@ This project was presented at r2con 2019 as part of the Cutter talk: [https://yo
 
 An r2pm package is available that can easily be installed like:
 ```
-r2pm -i r2ghidra
+r2pm update
+r2pm -ci r2ghidra
 ```
-
 This package only installs the radare2 part.
 To use r2ghidra from cutter, either use a provided pre-built release starting with
 Cutter 1.9, which bundles r2ghidra, or follow the build instructions below.
+
+## Portability
+
+r2ghidra is known to work on the following operating systems:
+
+* Termux (Android-arm64)
+* macOS / iOS
+* GNU/Linux
+* Windows
+* FreeBSD/x86-64
 
 ## Usage
 
@@ -50,7 +60,21 @@ Here, `r2ghidra.sleighhome` must point to a directory containing the `*.sla`, `*
 the architectures that should supported by the decompiler. This is however set up automatically when using
 the r2pm package or installing as shown below.
 
-## Building
+## Building with ACR/Make
+
+The procedure is like the standard autoconf:
+
+```
+$ ./configure
+$ make
+$ make install
+```
+
+At the moment there is no way to select which processors to support, so it builds them all and takes a lot of time to compile the sleighfiles.
+
+The plugins and sleigh files will be installed in the user home.
+
+## Building with CMake
 
 First, make sure the submodule contained within this repository is fetched and up to date:
 
