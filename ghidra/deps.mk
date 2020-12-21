@@ -30,9 +30,9 @@ G_DECOMPILER+= slghpatexpress.cc
 G_DECOMPILER+= slghpattern.cc
 G_DECOMPILER+= pcodecompile.cc
 
-G_DECOMPILER+= xml.cc ## yacc
-G_DECOMPILER+= pcodeparse.cc ## yacc
-# G_DECOMPILER+= slghparse.cc ## yacc
+G_DECOMPILER+= xml.cc ## bison
+G_DECOMPILER+= pcodeparse.cc ## bison
+# G_DECOMPILER+= slghparse.cc ## bison
 
 # ghidra/ghidra/Ghidra/Features/Decompiler/src/decompile/cpp/xml.y
 # ghidra/ghidra/Ghidra/Features/Decompiler/src/decompile/cpp/grammar.y
@@ -41,21 +41,21 @@ G_DECOMPILER+= pcodeparse.cc ## yacc
 # ghidra/ghidra/Ghidra/Features/Decompiler/src/decompile/cpp/slghparse.y yy_lex
 
 $(GHIDRA_DECOMPILER)/grammar.cc: $(GHIDRA_DECOMPILER)/grammar.y
-	yacc -p grammar -o $(GHIDRA_DECOMPILER)/grammar.cc $(GHIDRA_DECOMPILER)/grammar.y
+	bison -p grammar -o $(GHIDRA_DECOMPILER)/grammar.cc $(GHIDRA_DECOMPILER)/grammar.y
 
 $(GHIDRA_DECOMPILER)/ruleparser.cc: $(GHIDRA_DECOMPILER)/grammar.y
-	yacc -p ruleparser -o $(GHIDRA_DECOMPILER)/ruleparser.cc $(GHIDRA_DECOMPILER)/ruleparser.y
+	bison -p ruleparser -o $(GHIDRA_DECOMPILER)/ruleparser.cc $(GHIDRA_DECOMPILER)/ruleparser.y
 
 $(GHIDRA_DECOMPILER)/xml.cc: $(GHIDRA_DECOMPILER)/xml.y
-	yacc -p xml -o $(GHIDRA_DECOMPILER)/xml.cc $(GHIDRA_DECOMPILER)/xml.y
+	bison -p xml -o $(GHIDRA_DECOMPILER)/xml.cc $(GHIDRA_DECOMPILER)/xml.y
 
 $(GHIDRA_DECOMPILER)/pcodeparse.cc: $(GHIDRA_DECOMPILER)/pcodeparse.y
-	yacc -p pcodeparser -o $(GHIDRA_DECOMPILER)/pcodeparse.cc $(GHIDRA_DECOMPILER)/pcodeparse.y
+	bison -p pcodeparser -o $(GHIDRA_DECOMPILER)/pcodeparse.cc $(GHIDRA_DECOMPILER)/pcodeparse.y
 
 $(GHIDRA_DECOMPILER)/slghparse.cc: $(GHIDRA_DECOMPILER)/slghparse.y
 	echo '#include \"slghparse.hpp\"' > $(GHIDRA_DECOMPILER)/slghparse.tab.hpp
-	yacc -d -o $(GHIDRA_DECOMPILER)/slghparse.tab.hh $(GHIDRA_DECOMPILER)/slghparse.y
-	yacc -o $(GHIDRA_DECOMPILER)/slghparse.cc $(GHIDRA_DECOMPILER)/slghparse.y
+	bison -d -o $(GHIDRA_DECOMPILER)/slghparse.tab.hh $(GHIDRA_DECOMPILER)/slghparse.y
+	bison -o $(GHIDRA_DECOMPILER)/slghparse.cc $(GHIDRA_DECOMPILER)/slghparse.y
 
 .PHONY: $(GHIDRA_DECOMPILER)/slghparse.cc
 .PHONY: $(GHIDRA_DECOMPILER)/slghscan.cc
