@@ -32,10 +32,22 @@ G_DECOMPILER+= pcodecompile.cc
 
 G_DECOMPILER+= xml.cc ## yacc
 G_DECOMPILER+= pcodeparse.cc ## yacc
-# G_DECOMPILER+= slghparse.cc ## yacc
+G_DECOMPILER+= slghparse.cc ## yacc
+
+# ghidra/ghidra/Ghidra/Features/Decompiler/src/decompile/cpp/xml.y
+# ghidra/ghidra/Ghidra/Features/Decompiler/src/decompile/cpp/grammar.y
+# ghidra/ghidra/Ghidra/Features/Decompiler/src/decompile/cpp/ruleparse.y
+# ghidra/ghidra/Ghidra/Features/Decompiler/src/decompile/cpp/pcodeparse.y pcodeparse_lex
+# ghidra/ghidra/Ghidra/Features/Decompiler/src/decompile/cpp/slghparse.y yy_lex
+
+$(GHIDRA_DECOMPILER)/grammar.cc: $(GHIDRA_DECOMPILER)/grammar.y
+	yacc -p grammar -o $(GHIDRA_DECOMPILER)/grammar.cc $(GHIDRA_DECOMPILER)/grammar.y
+
+$(GHIDRA_DECOMPILER)/ruleparser.cc: $(GHIDRA_DECOMPILER)/grammar.y
+	yacc -p ruleparser -o $(GHIDRA_DECOMPILER)/ruleparser.cc $(GHIDRA_DECOMPILER)/ruleparser.y
 
 $(GHIDRA_DECOMPILER)/xml.cc: $(GHIDRA_DECOMPILER)/xml.y
-	yacc -o $(GHIDRA_DECOMPILER)/xml.cc $(GHIDRA_DECOMPILER)/xml.y
+	yacc -p xml -o $(GHIDRA_DECOMPILER)/xml.cc $(GHIDRA_DECOMPILER)/xml.y
 
 $(GHIDRA_DECOMPILER)/pcodeparse.cc: $(GHIDRA_DECOMPILER)/pcodeparse.y
 	yacc -p pcodeparser -o $(GHIDRA_DECOMPILER)/pcodeparse.cc $(GHIDRA_DECOMPILER)/pcodeparse.y
