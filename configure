@@ -547,7 +547,7 @@ do_remove
 if [ "$QUIET" = 0 ]; then
 echo
 echo "Final report:"
-for A in  R2_PREFIX PREFIX PKGCONFIG ; do
+for A in  VERSION R2_PREFIX PREFIX PKGCONFIG ; do
 eval VAL="\$${A}"
 [ -z "${VAL}" ] && VAL="(null)"
 echo " - ${A} = ${VAL}"
