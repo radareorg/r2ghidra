@@ -54,7 +54,6 @@ endif
 CXXFLAGS+=-std=c++11
 CXXFLAGS+=$(CFLAGS)
 
-
 R2_LIBEXT=$(shell r2 -H R2_LIBEXT)
 R2G_CORE_PLUGIN=core_ghidra.$(R2_LIBEXT)
 R2G_ASM_PLUGIN=asm_ghidra.$(R2_LIBEXT)

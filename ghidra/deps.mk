@@ -79,10 +79,21 @@ sleigh: sleighc
 sleighc: $(GHIDRA_DECOMPILER)/slgh_compile.o $(GHIDRA_DECOMPILER)/slghscan.o $(GHIDRA_DECOMPILER)/slghparse.o
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o sleighc $(GHIDRA_DECOMPILER)/slgh_compile.o $(GHIDRA_DECOMPILER)/slghparse.o $(GHIDRA_DECOMPILER)/slghscan.o $(GHIDRA_OBJS)
 
+GHIDRA_SLEIGH_SLASPECS=$(GHIDRA_HOME)/Ghidra/Processors/*.slaspec
 GHIDRA_SLEIGH_FILES=$(GHIDRA_HOME)/Ghidra/Processors/*.cspec
 GHIDRA_SLEIGH_FILES+=$(GHIDRA_HOME)/Ghidra/Processors/*.ldefs
 GHIDRA_SLEIGH_FILES+=$(GHIDRA_HOME)/Ghidra/Processors/*.pspec
 
+sleigh-build:
+	./sleighc -a $(GHIDRA_HOME)/Ghidra/Processors 2>&1 | perl -ne '$$|=1;s/\n/\r/;print "\x1b[2K$$_";'
+
+GHIDRA_PROCS=$(GHIDRA_HOME)/Ghidra/Processors/*/*/*
+
+D=$(R2_USER_PLUGINS)/r2ghidra_sleigh
+
 sleigh-install:
-	mkdir -p $(R2_USER_PLUGINS)/r2ghidra_sleigh
-	cp -rf $(GHIDRA_SLEIGH_FILES) $(R2_USER_PLUGINS)/r2ghidra_sleigh
+	mkdir -p $(D)
+	cp -rf $(GHIDRA_PROCS)/*.cspec $(D)
+	cp -rf $(GHIDRA_PROCS)/*.ldefs $(D)
+	cp -rf $(GHIDRA_PROCS)/*.pspec $(D)
+	cp -rf $(GHIDRA_PROCS)/*.sla $(D)
