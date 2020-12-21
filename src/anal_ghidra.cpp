@@ -823,6 +823,23 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 			return false;
 	};
 
+	auto print_operand = [&esil_stack, &ss](const PcodeOperand *arg, int offset = 0) -> bool {
+		if(arg->is_unique()) {
+			int index = index_of_unique(esil_stack, arg);
+			if(-1 == index)
+				throw LowlevelError(
+				    "print_if_unique: Can't find required unique varnodes in stack.");
+
+			ss << index + offset << ",PICK";
+		}
+		else {
+			if(!arg->is_ram())
+				ss << *arg << (arg->is_reg()? ",NUM": "");
+			else
+				ss << *arg << ",[" << arg->size << "]";
+		}
+	};
+
 	auto push_stack = [&esil_stack](PcodeOperand *arg = nullptr) {
 		if(!arg)
 			throw LowlevelError("push_stack: arg is nullptr.");
@@ -861,8 +878,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 				if(iter->input0 && iter->output)
 				{
 					ss << ",";
-					if(!print_if_unique(iter->input0))
-						ss << *iter->input0 << (iter->input0->is_reg()? ",NUM": "");
+					print_operand(iter->input0);
 
 					if(iter->type == CPUI_INT_SEXT)
 					{
@@ -885,13 +901,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 				if(iter->input0 && iter->output)
 				{
 					ss << ",";
-					if(!print_if_unique(iter->input0))
-					{
-						if(!iter->input0->is_ram())
-							ss << *iter->input0 << (iter->input0->is_reg()? ",NUM": "");
-						else
-							ss << *iter->input0 << ",[" << iter->input0->size << "]";
-					}
+					print_operand(iter->input0);
 
 					if(iter->output->is_unique())
 						push_stack(iter->output);
@@ -985,10 +995,13 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 					if(iter->input0->is_const())
 						// throw LowlevelError("Sleigh_esil: const input case of BRANCH appear.");
 						// This means conditional jump in P-codes
-						goto branch_in_pcodes;
-					ss << ",";
-					if(!print_if_unique(iter->input0))
-						ss << *iter->input0 << (iter->input0->is_reg()? ",NUM": "");
+						// goto branch_in_pcodes;
+						ss << "," << sanal.reg_mapping[sanal.pc_name]; // oof
+					else {
+						ss << ",";
+						if(!print_if_unique(iter->input0))
+							ss << *iter->input0 << (iter->input0->is_reg()? ",NUM": "");
+					}
 					ss << "," << sanal.reg_mapping[sanal.pc_name] << ",=,}";
 				}
 				else
@@ -1061,11 +1074,11 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 				if(iter->input0 && iter->input1 && iter->output)
 				{
 					ss << ",";
-					if(!print_if_unique(iter->input1))
-						ss << *iter->input1 << (iter->input1->is_reg()? ",NUM": "");
+					print_operand(iter->input1);
+
 					ss << ",";
-					if(!print_if_unique(iter->input0, 1))
-						ss << *iter->input0 << (iter->input0->is_reg()? ",NUM": "");
+					print_operand(iter->input0, 1);
+
 					ss << ",";
 					switch(iter->type)
 					{
@@ -1089,8 +1102,8 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 							ss << iter->input0->size * 8 << ",SWAP,SIGN,SWAP,"
 							   << iter->input1->size * 8 << ",SWAP,SIGN,SWAP,";
 						case CPUI_INT_LESSEQUAL: ss << "<="; break;
-						case CPUI_INT_NOTEQUAL: ss << "==,!"; break;
-						case CPUI_INT_EQUAL: ss << "=="; break;
+						case CPUI_INT_NOTEQUAL: ss << "-,!,!,"; break;
+						case CPUI_INT_EQUAL: ss << "-,!,"; break;
 					}
 
 					if(iter->output->is_unique())
@@ -1123,11 +1136,11 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 				if(iter->input0 && iter->input1 && iter->output)
 				{
 					ss << ",";
-					if(!print_if_unique(iter->input1))
-						ss << *iter->input1 << (iter->input1->is_reg()? ",NUM": "");
+					print_operand(iter->input1);
+
 					ss << ",";
-					if(!print_if_unique(iter->input0, 1))
-						ss << *iter->input0 << (iter->input0->is_reg()? ",NUM": "");
+					print_operand(iter->input0, 1);
+
 					ss << ",";
 					switch(iter->type)
 					{
@@ -1135,8 +1148,16 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 						// If divide by zero happen, give out 0
 						case CPUI_INT_DIV: ss << "SWAP,DUP,!,?{,1,|,SWAP,0,&,},/"; break;
 						case CPUI_INT_REM: ss << "SWAP,DUP,!,?{,1,|,SWAP,0,&,},%"; break;
-						case CPUI_INT_SDIV: ss << "SIGN,SWAP,SIGN,DUP,!,?{,1,|,SWAP,0,&,},/"; break;
-						case CPUI_INT_SREM: ss << "SIGN,SWAP,SIGN,DUP,!,?{,1,|,SWAP,0,&,},%"; break;
+						case CPUI_INT_SDIV: 
+							ss << iter->input0->size * 8 << ",SWAP,SIGN"; 
+							ss << ",SWAP," << iter->input1->size * 8 << ",SWAP,SIGN"; 
+							ss << ",DUP,!,?{,1,|,SWAP,0,&,},~/"; 
+							break;
+						case CPUI_INT_SREM:
+							ss << iter->input0->size * 8 << ",SWAP,SIGN"; 
+							ss << ",SWAP," << iter->input1->size * 8 << ",SWAP,SIGN"; 
+							ss << ",DUP,!,?{,1,|,SWAP,0,&,},~%"; 
+							break;
 						case CPUI_INT_SUB: ss << "-"; break;
 						case CPUI_INT_ADD: ss << "+"; break;
 						case CPUI_BOOL_XOR:
@@ -1305,8 +1326,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 				if(iter->input0 && iter->output)
 				{
 					ss << ",";
-					if(!print_if_unique(iter->input0))
-						ss << *iter->input0 << (iter->input0->is_reg()? ",NUM": "");
+					print_operand(iter->input0);
 
 					switch(iter->type)
 					{
@@ -3309,7 +3329,7 @@ R_API RLibStruct radare_plugin = {
 	/* .version = */ R2_VERSION,
 	/* .free = */ nullptr
 #if R2_VERSION_MAJOR >= 4 && R2_VERSION_MINOR >= 2
-	, "r2ghidra"
+	, "r2ghidra-dec"
 #endif
 };
 #endif
