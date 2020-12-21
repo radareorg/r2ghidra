@@ -3,12 +3,6 @@ all: plugins
 include ../config.mk
 include ../ghidra/deps.mk
 
-# PKGCONFIG=pkgconf
-# PKGCONF=PKG_CONFIG_PATH=/tmp/r2/lib/pkgconfig $(PKGCONFIG)
-# R2_CFLAGS=$(shell $(PKGCONF) --cflags r_core)
-# R2_LDFLAGS=$(shell $(PKGCONF) --libs r_core)
-# R2_USER_PLUGINS=$(shell r2 -H R2_USER_PLUGINS)
-
 
 R2GHIDRA_SRCS= ArchMap.cpp CodeXMLParse.cpp R2Architecture.cpp R2CommentDatabase.cpp R2LoadImage.cpp
 R2GHIDRA_SRCS+= R2PrintC.cpp R2Scope.cpp R2TypeFactory.cpp RCoreMutex.cpp SleighAnalValue.cpp SleighAsm.cpp
@@ -32,7 +26,7 @@ R2G_PLUGIN_OBJS=$(subst .cpp,.o,$(R2G_PLUG_SRCS))
 
 CXX=clang++
 
-CFLAGS+=-DR2GHIDRA_SLEIGHHOME_DEFAULT=\"$(shell r2 -H R2_USER_PLUGINS)/r2ghidra_sleigh\"
+CFLAGS+=-DR2GHIDRA_SLEIGHHOME_DEFAULT=\"$(R2_USER_PLUGINS)/r2ghidra_sleigh\"
 CFLAGS+=-w
 CFLAGS+=-fPIC
 CFLAGS+=-I$(GHIDRA_DECOMPILER)

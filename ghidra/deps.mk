@@ -84,7 +84,7 @@ GHIDRA_SLEIGH_FILES=$(GHIDRA_HOME)/Ghidra/Processors/*.cspec
 GHIDRA_SLEIGH_FILES+=$(GHIDRA_HOME)/Ghidra/Processors/*.ldefs
 GHIDRA_SLEIGH_FILES+=$(GHIDRA_HOME)/Ghidra/Processors/*.pspec
 
-sleigh-build:
+sleigh-build: sleighc
 	./sleighc -a $(GHIDRA_HOME)/Ghidra/Processors 2>&1 | perl -ne '$$|=1;s/\n/\r/;print "\x1b[2K$$_";'
 
 GHIDRA_PROCS=$(GHIDRA_HOME)/Ghidra/Processors/*/*/*
@@ -97,3 +97,6 @@ sleigh-install:
 	cp -rf $(GHIDRA_PROCS)/*.ldefs $(D)
 	cp -rf $(GHIDRA_PROCS)/*.pspec $(D)
 	cp -rf $(GHIDRA_PROCS)/*.sla $(D)
+
+sleigh-uninstall:
+	rm -rf "$(D)"
