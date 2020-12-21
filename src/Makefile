@@ -20,13 +20,14 @@ PUGIXML_CFLAGS=-I$(PUGIXML_HOME)
 PUGIXML_OBJS= $(PUGIXML_HOME)/pugixml.o
 
 CXXFLAGS+=$(PUGIXML_CFLAGS)
-CXXFLAGS+=-DR2GHIDRA_SLEIGHHOME_DEFAULT=\"$(GHIDRA_HOME)\"
+# CXXFLAGS+=-DR2GHIDRA_SLEIGHHOME_DEFAULT=\"$(GHIDRA_HOME)\"
 
 R2GHIDRA_OBJS=$(subst .cpp,.o,$(R2GHIDRA_SRCS))
 R2G_PLUGIN_OBJS=$(subst .cpp,.o,$(R2G_PLUG_SRCS))
 
 CXX=clang++
 
+CFLAGS+=-DR2GHIDRA_SLEIGHHOME_DEFAULT=\"$(shell r2 -H R2_USER_PLUGINS)/r2ghidra_sleigh\"
 CFLAGS+=-fPIC
 CFLAGS+=-I$(GHIDRA_DECOMPILER)
 CFLAGS+=-I.
@@ -53,22 +54,20 @@ R2G_CORE_PLUGIN=core_ghidra.$(R2_LIBEXT)
 R2G_ASM_PLUGIN=asm_ghidra.$(R2_LIBEXT)
 R2G_ANAL_PLUGIN=anal_ghidra.$(R2_LIBEXT)
 
-
-
 clean:
 	rm -f *.o $(GHIDRA_HOME)/*.o
 
-plugins: $(R2G_CORE_PLUGIN) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN)
+plugins: $(R2G_CORE_PLUGIN) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
 
-deps: $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(R2G_PLUGIN_OBJS) $(PUGIXML_OBJS)
+deps=$(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(R2G_PLUGIN_OBJS) $(PUGIXML_OBJS)
 
-$(R2G_CORE_PLUGIN): deps
-	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) pugixml.o $(GHIDRA_OBJS) core_ghidra.o
+$(R2G_CORE_PLUGIN): $(deps)
+	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) core_ghidra.o pugixml.o
 
-$(R2G_ASM_PLUGIN): deps
+$(R2G_ASM_PLUGIN): $(deps)
 	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) asm_ghidra.o pugixml.o
 
-$(R2G_ANAL_PLUGIN): deps
+$(R2G_ANAL_PLUGIN): $(deps)
 	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) anal_ghidra.o pugixml.o
 
 %.o: %.cpp
