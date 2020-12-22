@@ -6,10 +6,13 @@ all: ghidra/ghidra
 	$(MAKE) -C src sleigh-build
 
 help:
-	@echo "./configure         # first you need to run configure"
-	@echo "make                # build r2ghidra plugins"
-	@echo "make install        # install plugin and sleighs into prefix"
-	@echo "make user-install   # install in your home"
+	@echo
+	@echo "./configure       # first you need to run configure"
+	@echo "make              # build r2ghidra plugins"
+	@echo "make install      # install plugin and sleighs into prefix"
+	@echo "make user-install # install in your home"
+	@echo "make uninstall    # uninstall r2ghidra from prefix (see user-uninstall)"
+	@echo
 
 clean:
 	$(MAKE) -C src clean
