@@ -1,21 +1,15 @@
 #!/bin/sh
-[ -z "${VERSION}" ] && VERSION=3.9.0
+[ -z "${VERSION}" ] && VERSION=5.0.0
 RV=${VERSION}
 RA=amd64
 (
-	echo "[*] Downloading r2-${RV}-${RA}"
-	if [ ! -f radare2_${RV}_${RA}.deb ]; then
-		wget -c http://radare.mikelloc.com/get/${RV}/radare2_${RV}_${RA}.deb
-	fi
-	if [ ! -f radare2-dev_${RV}_${RA}.deb ]; then
-		wget -c http://radare.mikelloc.com/get/${RV}/radare2-dev_${RV}_${RA}.deb
-	fi
-	echo "[*] Installing r2-${RV}-${RA}"
-	sudo dpkg -i radare2_${RV}_${RA}.deb
-	sudo dpkg -i radare2-dev_${RV}_${RA}.deb
+	wget -c https://github.com/radareorg/radare2/archive/5.0.0.tar.gz
+	tar xzvf 5.0.0.tar.gz
+	cd radare2-5.0.0
+	sys/debian.sh
+	sudo dpkg -i sys/debian/radare2/*.deb sys/debian/radare2-dev/*.deb
 )
 
-export PATH=/tmp/node-${NV}-${NA}/bin:$PATH
 [ -z "${DESTDIR}" ] && DESTDIR=/
 [ -z "${R2_LIBR_PLUGINS}" ] && R2_LIBR_PLUGINS=/usr/lib/radare2/last
 make R2_PLUGDIR=${R2_LIBR_PLUGINS} DESTDIR=${DESTDIR}
