@@ -26,7 +26,7 @@ uninstall:
 	$(MAKE) -C src sleigh-uninstall D=$(DESTDIR)/$(DATADIR)/r2ghidra/sleigh
 	rm -f $(DESTDIR)/$(BINDIR)/sleighc
 
-HOMEBIN=$(R2_RDATAHOME)/prefix/bin
+HOMEBIN=$(shell r2 -H R2_RDATAHOME)/prefix/bin
 
 user-install:
 	mkdir -p $(HOMEBIN)
