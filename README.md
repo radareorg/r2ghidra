@@ -67,12 +67,9 @@ The procedure is like the standard autoconf:
 ```
 $ ./configure
 $ make
-$ make install
+$ make install  # or make user-install
 ```
-
 At the moment there is no way to select which processors to support, so it builds them all and takes a lot of time to compile the sleighfiles.
-
-The plugins and sleigh files will be installed in the user home.
 
 ## Building with CMake
 
