@@ -100,12 +100,16 @@ sleigh-archs:
 
 GHIDRA_PROCS=$(GHIDRA_HOME)/Ghidra/Processors/*/*/*
 
+S=$(GHIDRA_HOME)/Ghidra/Processors
 D=$(R2_USER_PLUGINS)/r2ghidra_sleigh
 
 sleigh-install:
 	mkdir -p $(D)
 	for a in $(shell cat ../ghidra-processors.txt) ; do \
-		cp $(GHIDRA_HOME)/Ghidra/Processors/$$a/*/*/*.{cspec,ldefs,pspec,sla} ; done
+		for b in cspec ldefs pspec sla ; do \
+			cp -f $(S)/$$a/*/*/*.$$b "$(D)"; \
+		done ;\
+	done
 ifeq ($(GHIDRA_BUILD_ALL),1)
 	cp -rf $(GHIDRA_PROCS)/*.cspec $(D)
 	cp -rf $(GHIDRA_PROCS)/*.ldefs $(D)
