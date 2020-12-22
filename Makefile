@@ -1,6 +1,5 @@
 -include config.mk
 DESTDIR?=
-BINDIR=$(PREFIX)/bin
 
 all: ghidra/ghidra
 	$(MAKE) -C src
