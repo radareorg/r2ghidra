@@ -89,14 +89,7 @@ GHIDRA_SLEIGH_FILES+=$(GHIDRA_HOME)/Ghidra/Processors/*.pspec
 
 GHIDRA_BUILD_ALL=0
 sleigh-build: sleighc ../ghidra-processors.txt
-ifeq ($(GHIDRA_BUILD_ALL),1)
-	./sleighc -a $(GHIDRA_HOME)/Ghidra/Processors 2>&1 | perl -ne '$$|=1;s/\n/\r/;print "\x1b[2K$$_";'
-else
-	for a in $(shell cat ../ghidra-processors.txt) ; do ./sleighc -a $(GHIDRA_HOME)/Ghidra/Processors/$$a ; done
-endif
-
-sleigh-archs:
-	@ls ../ghidra/ghidra/Ghidra/Processors|cat
+	for a in DATA $(shell cat ../ghidra-processors.txt) ; do ./sleighc -a $(GHIDRA_HOME)/Ghidra/Processors/$$a ; done
 
 GHIDRA_PROCS=$(GHIDRA_HOME)/Ghidra/Processors/*/*/*
 
@@ -105,17 +98,11 @@ D=$(R2_USER_PLUGINS)/r2ghidra_sleigh
 
 sleigh-install:
 	mkdir -p $(D)
-	for a in $(shell cat ../ghidra-processors.txt) ; do \
+	for a in DATA $(shell cat ../ghidra-processors.txt) ; do \
 		for b in cspec ldefs pspec sla ; do \
 			cp -f $(S)/$$a/*/*/*.$$b "$(D)"; \
 		done ;\
 	done
-ifeq ($(GHIDRA_BUILD_ALL),1)
-	cp -rf $(GHIDRA_PROCS)/*.cspec $(D)
-	cp -rf $(GHIDRA_PROCS)/*.ldefs $(D)
-	cp -rf $(GHIDRA_PROCS)/*.pspec $(D)
-	cp -rf $(GHIDRA_PROCS)/*.sla $(D)
-endif
 
 sleigh-uninstall:
 	rm -rf "$(D)"
