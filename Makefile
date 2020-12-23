@@ -1,7 +1,7 @@
 -include config.mk
 DESTDIR?=
 
-all: ghidra/ghidra ghidra-processors.txt
+all: ghidra/ghidra/Ghidra ghidra-processors.txt
 	$(MAKE) -C src
 	$(MAKE) -C src sleigh-build
 
@@ -46,7 +46,7 @@ user-uninstall:
 	$(MAKE) -C src sleigh-uninstall
 	rm -f $(DESTDIR)/$(BINDIR)/sleighc
 
-ghidra/ghidra:
+ghidra/ghidra/Ghidra:
 	$(MAKE) -C ghidra
 
 mrproper: clean
