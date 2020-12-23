@@ -1,9 +1,14 @@
 -include config.mk
 DESTDIR?=
 
+ifeq ($(shell test -f config.mk && echo $$?),0)
 all: ghidra/ghidra/Ghidra ghidra-processors.txt
 	$(MAKE) -C src
 	$(MAKE) -C src sleigh-build
+else
+all:
+	@echo Run ./configure
+endif
 
 ghidra-processors.txt:
 	cp -f ghidra-processors.txt.default ghidra-processors.txt
