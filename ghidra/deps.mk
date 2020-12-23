@@ -87,7 +87,6 @@ GHIDRA_SLEIGH_FILES+=$(GHIDRA_HOME)/Ghidra/Processors/*.pspec
 ../ghidra-processors.txt:
 	cp -f ../ghidra-processors.txt.default ../ghidra-processors.txt
 
-GHIDRA_BUILD_ALL=0
 sleigh-build: sleighc ../ghidra-processors.txt
 	for a in DATA $(shell cat ../ghidra-processors.txt) ; do ./sleighc -a $(GHIDRA_HOME)/Ghidra/Processors/$$a ; done
 
