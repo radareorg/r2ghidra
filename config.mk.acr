@@ -1,5 +1,7 @@
 # processed by ./configure
 
+CXX=@CXX@
+
 PKGCONFIG=@PKGCONFIG@
 PREFIX=@PREFIX@
 DATADIR=@DATADIR@
