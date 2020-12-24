@@ -13,10 +13,9 @@ PUGIXML_HOME=../third-party/pugixml/src/
 PUGIXML_CFLAGS=-I$(PUGIXML_HOME)
 PUGIXML_SRCS= $(PUGIXML_HOME)/pugixml.cpp
 PUGIXML_OBJS= $(PUGIXML_HOME)/pugixml.o
-#PUGIXML_OBJS= pugixml.o
 
 $(PUGIXML_OBJS): $(PUGIXML_SRCS)
-	$(CXX) -c $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $<
+	$(CXX) -c $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(GHIDRA_OBJS) $(GHIDRA_OBJS2) $<
 
 CXXFLAGS+=$(PUGIXML_CFLAGS)
 # CXXFLAGS+=-DR2GHIDRA_SLEIGHHOME_DEFAULT=\"$(GHIDRA_HOME)\"
@@ -29,19 +28,6 @@ CFLAGS+=-w
 CFLAGS+=-fPIC
 CFLAGS+=-I$(GHIDRA_DECOMPILER)
 CFLAGS+=-I.
-ifeq ($(shell uname),FreeBSD)
-CFLAGS+=-DHOST_ENDIAN=1
-CFLAGS+=-Dint1=char
-CFLAGS+=-Dint2=short
-CFLAGS+=-Duint1=unsigned" char"
-CFLAGS+=-Duint2=unsigned" short"
-CFLAGS+=-Dint4=int
-CFLAGS+=-Duint4=unsigned" long long"
-CFLAGS+=-Dint8="long long"
-CFLAGS+=-Duint8="unsigned long long"
-CFLAGS+=-Duintm="unsigned long long"
-CFLAGS+=-Duintp="unsigned long long"
-endif
 
 CXXFLAGS+=-std=c++11
 CXXFLAGS+=$(CFLAGS)
@@ -56,16 +42,18 @@ clean:
 
 plugins: $(R2G_CORE_PLUGIN) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
 
-deps=$(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(R2G_PLUGIN_OBJS) $(PUGIXML_OBJS)
+deps=$(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(GHIDRA_OBJS2) $(R2G_PLUGIN_OBJS) $(PUGIXML_OBJS)
+
+$(R2GHIDRA_OBJS): grammars
 
 $(R2G_CORE_PLUGIN): $(deps)
-	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) core_ghidra.o
+	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(GHIDRA_OBJS2) $(PUGIXML_OBJS) core_ghidra.o
 
 $(R2G_ASM_PLUGIN): $(deps)
-	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) asm_ghidra.o
+	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(GHIDRA_OBJS2) $(PUGIXML_OBJS) asm_ghidra.o
 
 $(R2G_ANAL_PLUGIN): $(deps)
-	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) anal_ghidra.o
+	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(GHIDRA_OBJS2) $(PUGIXML_OBJS) anal_ghidra.o
 
 %.o: %.cpp
 	$(CXX) -fPIC $(CXXFLAGS) $(R2_CFLAGS) -c $<

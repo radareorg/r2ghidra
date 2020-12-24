@@ -1,0 +1,66 @@
+# This is a basic workflow that is manually triggered
+
+name: ci
+
+on: push
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+# on:
+#   workflow_dispatch:
+#     # Inputs the workflow accepts.
+#     inputs:
+#       name:
+#         # Friendly description to be shown in the UI instead of 'name'
+#         description: 'Build and test'
+#         # Default value if no value is explicitly provided
+#         default: 'ACR'
+#         # Input has to be provided for the workflow to run
+#         required: true
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build-linux:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - name: Cloning Repo
+      run: git clone https://github.com/radareorg/radare2
+    - name: Building Debian packages
+      run: cd radare2 ; sys/debian.sh ; cd ..
+    - name: Installing Radare2
+      run: sudo dpkg -i radare2/sys/debian/*/*.deb
+    - name: Building r2ghidra
+      run: git clone https://github.com/radareorg/r2ghidra && cd r2ghidra ; git submodule update --init ; ./configure ; make -j4 ; make user-install
+    - name: Building r2ghidra Package
+      run: make -C scripts/debian
+    - name: Testing r2ghidra
+      run: r2 -qc 'af;pdg' /bin/ls
+    - name: Pub
+      uses: actions/upload-artifact@v2
+      with:
+        path: radare2/sys/debian/*/*.deb r2ghidra/scripts/debian/*.deb
+
+  build-mac:
+
+    # The type of runner that the job will run on
+    runs-on: macos-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - name: Cloning Repo
+      run: git clone https://github.com/radareorg/radare2
+    - name: Building and Install radare2
+      run: cd radare2 ; sys/install.sh ; cd ..
+    - name: Building r2ghidra
+      run: git clone https://github.com/radareorg/r2ghidra && cd r2ghidra ; git submodule update --init ; ./configure ; make -j4 ; make user-install
+    - name: Building r2ghidra Package
+      run: make -C scripts/debian
+    - name: Testing r2ghidra
+      run: r2 -qc 'af;pdg' /bin/ls
+    - name: Pub
+      uses: actions/upload-artifact@v2
+      with:
+        path: radare2/sys/debian/*/*.deb r2ghidra/scripts/debian/*.deb

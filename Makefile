@@ -1,8 +1,21 @@
 -include config.mk
+
+HOMEBIN=$(shell r2 -H R2_RDATAHOME)/prefix/bin
 DESTDIR?=
 
+# SUBMODULES=$(addsuffix /.gitignore,$(shell git submodule foreach --quiet pwd))
+SUBMODULES=ghidra/ghidra/Ghidra/.gitignore third-party/pugixml/docs/.gitignore
+
 ifeq ($(shell test -f config.mk && echo $$?),0)
-all: ghidra/ghidra/Ghidra ghidra-processors.txt
+all: ghidra-processors.txt
+	$(MAKE) $(SUBMODULES)
+	$(MAKE) -C src grammars
+	$(MAKE) -C src
+	# $(MAKE) -C src sleigh-build
+
+alle: ghidra-processors.txt
+	$(MAKE) ghidra/ghidra/Ghidra
+	$(MAKE) -C src grammars GHIDRA_HOME=$(shell pwd)/ghidra/ghidra/
 	$(MAKE) -C src
 	$(MAKE) -C src sleigh-build
 else
@@ -37,26 +50,22 @@ uninstall:
 	$(MAKE) -C src sleigh-uninstall D=$(DESTDIR)/$(DATADIR)/r2ghidra/sleigh
 	rm -f $(DESTDIR)/$(BINDIR)/sleighc
 
-HOMEBIN=$(shell r2 -H R2_RDATAHOME)/prefix/bin
-
 user-install:
 	mkdir -p $(HOMEBIN)
 	cp -f src/sleighc $(HOMEBIN)
 	$(MAKE) -C src install
 	$(MAKE) -C src sleigh-install
 
-
 user-uninstall:
 	$(MAKE) -C src uninstall
 	$(MAKE) -C src sleigh-uninstall
 	rm -f $(DESTDIR)/$(BINDIR)/sleighc
 
-ghidra/ghidra/Ghidra:
-	$(MAKE) -C ghidra
+$(SUBMODULES):
+	git submodule update --init
 
 mrproper: clean
-	rm -rf ghidra/ghidra
-	rm -rf third-party/pugixml
+	git submodule deinit --all
 	$(MAKE) -C src clean
 
 .PHONY: mrproper clean install uninstall all

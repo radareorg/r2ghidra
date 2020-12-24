@@ -1,3 +1,18 @@
+# should be fixed in ghidra/ghidra//Ghidra/Features/Decompiler/src/decompile/cpp/types.h
+ifeq (1,2)
+CFLAGS+=-DHOST_ENDIAN=1
+CFLAGS+=-Dint1=char
+CFLAGS+=-Dint2=short
+CFLAGS+=-Duint1=unsigned" char"
+CFLAGS+=-Duint2=unsigned" short"
+CFLAGS+=-Dint4=int
+CFLAGS+=-Duint4=unsigned" long long"
+CFLAGS+=-Dint8="long long"
+CFLAGS+=-Duint8="unsigned long long"
+CFLAGS+=-Duintm="unsigned long long"
+CFLAGS+=-Duintp="unsigned long long"
+endif
+
 GHIDRA_HOME=../ghidra/ghidra/
 GHIDRA_DECOMPILER=$(GHIDRA_HOME)/Ghidra/Features/Decompiler/src/decompile/cpp
 
@@ -15,6 +30,7 @@ G_DECOMPILER+=merge.cc double.cc coreaction.cc condexe.cc override.cc
 G_DECOMPILER+=dynamic.cc crc32.cc prettyprint.cc printlanguage.cc
 G_DECOMPILER+=printc.cc printjava.cc memstate.cc opbehavior.cc
 G_DECOMPILER+=paramid.cc transform.cc string_ghidra.cc stringmanage.cc
+G_DECOMPILER+=slgh_compile.cc
 
 # set(DECOMPILER_SOURCE_GHIDRA_CXX
 # G_DECOMPILER+=ghidra_process.cc
@@ -52,39 +68,72 @@ G_DECOMPILER+=pcodecompile.cc
 ## G_DECOMPILER+=callgraph.cc
 ## G_DECOMPILER+=raw_arch.cc
 
-G_DECOMPILER+= xml.cc ## bison
-G_DECOMPILER+= pcodeparse.cc ## bison
+#    G_DECOMPILER+= xml.cc ## bison
+#    G_DECOMPILER+= pcodeparse.cc ## bison
+#    G_DECOMPILER+= ruleparse.cc ## bison
+#    G_DECOMPILER+= slghparse.cc ## bison
+#    G_DECOMPILER+= slghscan.cc ## bison
+#    G_DECOMPILER+= grammar.cc ## bison
+
 # G_DECOMPILER+= slghparse.cc ## bison
 # G_DECOMPILER+= grammar.cc ## bison
 # G_DECOMPILER+= ruleparse.cc ## bison
 
-$(GHIDRA_DECOMPILER)/grammar.cc: $(GHIDRA_DECOMPILER)/grammar.y
-	$(BISON) -p grammar -o $(GHIDRA_DECOMPILER)/grammar.cc $(GHIDRA_DECOMPILER)/grammar.y
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(GHIDRA_DECOMPILER)/grammar.o -c $(GHIDRA_DECOMPILER)/grammar.cc
+grammars:
+	$(MAKE) $(GHIDRA_DECOMPILER)/grammar.o
+	$(MAKE) $(GHIDRA_DECOMPILER)/ruleparse.o
+	$(MAKE) $(GHIDRA_DECOMPILER)/xml.o
+	$(MAKE) $(GHIDRA_DECOMPILER)/pcodeparse.o
+	$(MAKE) $(GHIDRA_DECOMPILER)/slghparse.o
+	$(MAKE) $(GHIDRA_DECOMPILER)/slghscan.o
 
-$(GHIDRA_DECOMPILER)/ruleparser.cc: $(GHIDRA_DECOMPILER)/grammar.y
-	$(BISON) -p ruleparser -o $(GHIDRA_DECOMPILER)/ruleparser.cc $(GHIDRA_DECOMPILER)/ruleparser.y
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(GHIDRA_DECOMPILER)/ruleparser.o -c $(GHIDRA_DECOMPILER)/ruleparser.cc
+grammars-clean:
+	rm -f $(GHIDRA_DECOMPILER)/grammar.cc
+	rm -f $(GHIDRA_DECOMPILER)/grammar.hh
+	rm -f $(GHIDRA_DECOMPILER)/ruleparse.cc
+	rm -f $(GHIDRA_DECOMPILER)/ruleparse.hh
+	rm -f $(GHIDRA_DECOMPILER)/xml.cc
+	rm -f $(GHIDRA_DECOMPILER)/xml.hh
+	rm -f $(GHIDRA_DECOMPILER)/pcodeparse.cc
+	rm -f $(GHIDRA_DECOMPILER)/pcodeparse.hh
+	rm -f $(GHIDRA_DECOMPILER)/slghparse.cc
+	rm -f $(GHIDRA_DECOMPILER)/slghparse.hh
+	rm -f $(GHIDRA_DECOMPILER)/slghscan.cc
+	rm -f $(GHIDRA_DECOMPILER)/slghscan.hh
 
-$(GHIDRA_DECOMPILER)/xml.cc: $(GHIDRA_DECOMPILER)/xml.y
-	$(BISON) -p xml -o $(GHIDRA_DECOMPILER)/xml.cc $(GHIDRA_DECOMPILER)/xml.y
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(GHIDRA_DECOMPILER)/xml.o -c $(GHIDRA_DECOMPILER)/xml.cc
+$(GHIDRA_DECOMPILER)/slghparse.o: $(GHIDRA_DECOMPILER)/slghparse.cpp
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(GHIDRA_DECOMPILER)/slghparse.o -c $(GHIDRA_DECOMPILER)/slghparse.cpp
+$(GHIDRA_DECOMPILER)/pcodeparse.o: $(GHIDRA_DECOMPILER)/pcodeparse.cpp
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(GHIDRA_DECOMPILER)/pcodeparse.o -c $(GHIDRA_DECOMPILER)/pcodeparse.cpp
+$(GHIDRA_DECOMPILER)/ruleparse.o: $(GHIDRA_DECOMPILER)/ruleparse.cpp
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(GHIDRA_DECOMPILER)/ruleparse.o -c $(GHIDRA_DECOMPILER)/ruleparse.cpp
+$(GHIDRA_DECOMPILER)/grammar.o: $(GHIDRA_DECOMPILER)/grammar.cpp
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(GHIDRA_DECOMPILER)/grammar.o -c $(GHIDRA_DECOMPILER)/grammar.cpp
+$(GHIDRA_DECOMPILER)/xml.o: $(GHIDRA_DECOMPILER)/xml.cpp
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(GHIDRA_DECOMPILER)/xml.o -c $(GHIDRA_DECOMPILER)/xml.cpp
 
-$(GHIDRA_DECOMPILER)/pcodeparse.cc: $(GHIDRA_DECOMPILER)/pcodeparse.y
-	$(BISON) -p pcodeparser -o $(GHIDRA_DECOMPILER)/pcodeparse.cc $(GHIDRA_DECOMPILER)/pcodeparse.y
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(GHIDRA_DECOMPILER)/pcodeparse.o -c $(GHIDRA_DECOMPILER)/pcodeparse.cc
+$(GHIDRA_DECOMPILER)/xml.cpp: $(GHIDRA_DECOMPILER)/xml.y
+	$(BISON) -d -p xml -o $(GHIDRA_DECOMPILER)/xml.cpp $(GHIDRA_DECOMPILER)/xml.y
 
-$(GHIDRA_DECOMPILER)/slghparse.cc: $(GHIDRA_DECOMPILER)/slghparse.y
-	echo '#include \"slghparse.hpp\"' > $(GHIDRA_DECOMPILER)/slghparse.tab.hpp
-	$(BISON) -d -o $(GHIDRA_DECOMPILER)/slghparse.tab.hh $(GHIDRA_DECOMPILER)/slghparse.y
-	$(BISON) -o $(GHIDRA_DECOMPILER)/slghparse.cc $(GHIDRA_DECOMPILER)/slghparse.y
+$(GHIDRA_DECOMPILER)/grammar.cpp: $(GHIDRA_DECOMPILER)/grammar.y
+	$(BISON) -d -p grammar -o $(GHIDRA_DECOMPILER)/grammar.cpp $(GHIDRA_DECOMPILER)/grammar.y
 
-.PHONY: $(GHIDRA_DECOMPILER)/slghparse.cc
-.PHONY: $(GHIDRA_DECOMPILER)/slghscan.cc
+$(GHIDRA_DECOMPILER)/ruleparse.cpp: $(GHIDRA_DECOMPILER)/grammar.y
+	$(BISON) -d -p ruleparse -o $(GHIDRA_DECOMPILER)/ruleparse.cpp $(GHIDRA_DECOMPILER)/ruleparse.y
 
+$(GHIDRA_DECOMPILER)/pcodeparse.cpp: $(GHIDRA_DECOMPILER)/pcodeparse.y
+	$(BISON) -d -p pcodeparser -o $(GHIDRA_DECOMPILER)/pcodeparse.cpp $(GHIDRA_DECOMPILER)/pcodeparse.y
 
-$(GHIDRA_DECOMPILER)/slghscan.cc: $(GHIDRA_DECOMPILER)/slghscan.l $(GHIDRA_DECOMPILER)/slghparse.cc
-	$(FLEX) --header-file=$(GHIDRA_DECOMPILER)/slghscan.tab.hh -o $(GHIDRA_DECOMPILER)/slghscan.cc $(GHIDRA_DECOMPILER)/slghscan.l
+$(GHIDRA_DECOMPILER)/slghparse.cpp: $(GHIDRA_DECOMPILER)/slghparse.y
+	echo '#include "slghparse.hpp"' > $(GHIDRA_DECOMPILER)/slghparse.tab.hh
+	$(BISON) -d -o $(GHIDRA_DECOMPILER)/slghparse.cpp $(GHIDRA_DECOMPILER)/slghparse.y
+
+$(GHIDRA_DECOMPILER)/slghscan.o: $(GHIDRA_DECOMPILER)/slghscan.cpp
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(GHIDRA_DECOMPILER)/slghscan.o -c $(GHIDRA_DECOMPILER)/slghscan.cpp
+
+$(GHIDRA_DECOMPILER)/slghscan.cpp: $(GHIDRA_DECOMPILER)/slghscan.l $(GHIDRA_DECOMPILER)/slghparse.cpp
+	# $(FLEX) --header-file=$(GHIDRA_DECOMPILER)/slghscan.tab.hh -o $(GHIDRA_DECOMPILER)/slghscan.cpp $(GHIDRA_DECOMPILER)/slghscan.l
+	$(FLEX) -o $(GHIDRA_DECOMPILER)/slghscan.cpp $(GHIDRA_DECOMPILER)/slghscan.l
 
 GHIDRA_SRCS=$(addprefix $(GHIDRA_DECOMPILER)/,$(G_DECOMPILER))
 GHIDRA_OBJS+=$(subst .cc,.o,$(GHIDRA_SRCS))
@@ -92,14 +141,19 @@ GHIDRA_OBJS+=$(subst .cc,.o,$(GHIDRA_SRCS))
 GHIDRA_LIBDECOMP_SRCS=libdecomp.cc
 GHIDRA_LIBDECOMP_OBJS+=$(subst .cc,.o,$(GHIDRA_LIBDECOMP_SRCS))
 
-GHIDRA_SLEIGH_COMPILER_SRCS=slgh_compile.cc
+
+GHIDRA_SLEIGH_COMPILER_SRCS=$(addprefix $(GHIDRA_DECOMPILER)/,slgh_compile.cc)
 GHIDRA_SLEIGH_COMPILER_OBJS=$(subst .cc,.o,$(GHIDRA_SLEIGH_COMPILER_SRCS))
+
+BISON_OBJS= xml.o pcodeparse.o ruleparse.o slghparse.o slghscan.o grammar.o
+GHIDRA_OBJS2=$(addprefix $(GHIDRA_DECOMPILER)/,$(BISON_OBJS))
+# GHIDRA_OBJS+=$(GHIDRA_SLEIGH_COMPILER_OBJS)
 
 sleigh: sleighc
 	$(SLEIGHC) $(SPECFILE) $(SLAFILE)
 
-sleighc: $(GHIDRA_DECOMPILER)/slgh_compile.o $(GHIDRA_DECOMPILER)/slghscan.o $(GHIDRA_DECOMPILER)/slghparse.o
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o sleighc $(GHIDRA_DECOMPILER)/slgh_compile.o $(GHIDRA_DECOMPILER)/slghparse.o $(GHIDRA_DECOMPILER)/slghscan.o $(GHIDRA_OBJS)
+sleighc: $(GHIDRA_DECOMPILER)/slgh_compile.cc $(GHIDRA_DECOMPILER)/slghscan.o $(GHIDRA_DECOMPILER)/slghparse.o
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o sleighc $(GHIDRA_DECOMPILER)/slgh_compile.cc $(GHIDRA_OBJS) $(GHIDRA_OBJS2)
 
 GHIDRA_SLEIGH_SLASPECS=$(GHIDRA_HOME)/Ghidra/Processors/*.slaspec
 GHIDRA_SLEIGH_FILES=$(GHIDRA_HOME)/Ghidra/Processors/*.cspec
