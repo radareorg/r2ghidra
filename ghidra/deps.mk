@@ -76,7 +76,7 @@ $(GHIDRA_DECOMPILER)/pcodeparse.cc: $(GHIDRA_DECOMPILER)/pcodeparse.y
 
 $(GHIDRA_DECOMPILER)/slghparse.cc: $(GHIDRA_DECOMPILER)/slghparse.y
 	$(BISON) -d -o $(GHIDRA_DECOMPILER)/slghparse.cc $(GHIDRA_DECOMPILER)/slghparse.y
-	echo '#include "slghparse.hpp"' > $(GHIDRA_DECOMPILER)/slghparse.tab.hh
+	echo '#include "slghparse.hh"' > $(GHIDRA_DECOMPILER)/slghparse.tab.hh
 	## $(BISON) -o $(GHIDRA_DECOMPILER)/slghparse.cc $(GHIDRA_DECOMPILER)/slghparse.y
 
 .PHONY: $(GHIDRA_DECOMPILER)/slghparse.cc
