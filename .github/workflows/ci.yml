@@ -53,14 +53,12 @@ jobs:
     - name: Cloning Repo
       run: git clone https://github.com/radareorg/radare2
     - name: Building and Install radare2
-      run: cd radare2 ; sys/install.sh ; cd ..
+      run: cd radare2 ; sys/osx-pkg.sh ; sys/install.sh ; cd ..
     - name: Building r2ghidra
       run: git clone https://github.com/radareorg/r2ghidra && cd r2ghidra ; git submodule update --init ; ./configure ; make -j4 ; make user-install
-    - name: Building r2ghidra Package
-      run: make -C scripts/debian
     - name: Testing r2ghidra
       run: r2 -qc 'af;pdg' /bin/ls
     - name: Pub
       uses: actions/upload-artifact@v2
       with:
-        path: radare2/sys/debian/*/*.deb r2ghidra/scripts/debian/*.deb
+        path: radare2/sys/osx-pkg/*.pkg
