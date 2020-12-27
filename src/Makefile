@@ -40,7 +40,8 @@ R2G_ANAL_PLUGIN=anal_ghidra.$(R2_LIBEXT)
 clean:
 	rm -f *.o $(GHIDRA_HOME)/*.o
 
-plugins: $(GHIDRA_OBJS2)
+plugins: grammars
+#$(GHIDRA_OBJS2)
 	$(MAKE) plugins_real
 
 plugins_real: $(R2G_CORE_PLUGIN) $(GHIDRA_OBJS2) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
