@@ -55,7 +55,7 @@ jobs:
     - name: Building and Install radare2
       run: cd radare2 ; sys/osx-pkg.sh ; sys/install.sh ; cd ..
     - name: Building r2ghidra
-      run: git clone https://github.com/radareorg/r2ghidra && cd r2ghidra ; git submodule update --init ; echo 6502 > ghidra-processors.txt ; ./configure ; make -j4 ; make user-install
+      run: git clone https://github.com/radareorg/r2ghidra && cd r2ghidra ; git submodule update --init ; echo x86 > ghidra-processors.txt ; ./configure ; make -j4 ; make user-install
     - name: Testing r2ghidra
       run: r2 -a 6502 -b16 -qc 'af;pdg' /bin/ls
     - name: Pub
