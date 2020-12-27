@@ -30,7 +30,7 @@ G_DECOMPILER+=merge.cc double.cc coreaction.cc condexe.cc override.cc
 G_DECOMPILER+=dynamic.cc crc32.cc prettyprint.cc printlanguage.cc
 G_DECOMPILER+=printc.cc printjava.cc memstate.cc opbehavior.cc
 G_DECOMPILER+=paramid.cc transform.cc string_ghidra.cc stringmanage.cc
-G_DECOMPILER+=slgh_compile.cc
+#G_DECOMPILER+=slgh_compile.cc
 
 # set(DECOMPILER_SOURCE_GHIDRA_CXX
 # G_DECOMPILER+=ghidra_process.cc
@@ -146,7 +146,7 @@ GHIDRA_SLEIGH_COMPILER_SRCS=$(addprefix $(GHIDRA_DECOMPILER)/,slgh_compile.cc)
 GHIDRA_SLEIGH_COMPILER_OBJS=$(subst .cc,.o,$(GHIDRA_SLEIGH_COMPILER_SRCS))
 
 BISON_OBJS= xml.o pcodeparse.o ruleparse.o slghparse.o slghscan.o grammar.o
-GHIDRA_OBJS2=$(addprefix $(GHIDRA_DECOMPILER)/,$(BISON_OBJS))
+GHIDRA_OBJS2=$(addprefix $(GHIDRA_DECOMPILER)/,$(BISON_OBJS) slgh_compile.o)
 # GHIDRA_OBJS+=$(GHIDRA_SLEIGH_COMPILER_OBJS)
 
 sleigh: sleighc

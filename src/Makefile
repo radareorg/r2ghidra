@@ -40,7 +40,7 @@ R2G_ANAL_PLUGIN=anal_ghidra.$(R2_LIBEXT)
 clean:
 	rm -f *.o $(GHIDRA_HOME)/*.o
 
-plugins: $(R2G_CORE_PLUGIN) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
+plugins: $(R2G_CORE_PLUGIN) $(GHIDRA_OBJS2) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
 
 deps=$(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(GHIDRA_OBJS2) $(R2G_PLUGIN_OBJS) $(PUGIXML_OBJS)
 
@@ -59,6 +59,7 @@ $(R2G_ANAL_PLUGIN): $(deps)
 	$(CXX) -fPIC $(CXXFLAGS) $(R2_CFLAGS) -c $<
 
 install:
+	mkdir -p $(R2_USER_PLUGINS)
 	cp -f *.$(R2_LIBEXT) $(R2_USER_PLUGINS)
 
 uninstall:

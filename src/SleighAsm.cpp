@@ -284,7 +284,11 @@ void SleighAsm::resolveArch(const string &archid)
 		{
 			languageindex = i;
 			if(description[i].isDeprecated())
-				throw LowlevelError("Language " + baseid + " is deprecated");
+			{
+				std::cerr << "Language " + baseid + " is deprecated" << std::endl;
+				// XXX should be just a warning
+				// throw LowlevelError("Language " + baseid + " is deprecated");
+			}
 			break;
 		}
 	}
