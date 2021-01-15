@@ -124,11 +124,6 @@ static void ApplyPrintCConfig(RConfig *cfg, PrintC *print_c)
 	else
 		print_c->setCStyleComments();
 
-	print_c->setSpaceAfterComma(true);
-
-	print_c->setNewlineBeforeOpeningBrace(cfg_var_nl_brace.GetBool(cfg));
-	print_c->setNewlineBeforeElse(cfg_var_nl_else.GetBool(cfg));
-	print_c->setNewlineAfterPrototype(false);
 	print_c->setIndentIncrement(cfg_var_indent.GetInt(cfg));
 	print_c->setLineCommentIndent(cfg_var_cmt_indent.GetInt(cfg));
 	print_c->setMaxLineSize(cfg_var_linelen.GetInt(cfg));
