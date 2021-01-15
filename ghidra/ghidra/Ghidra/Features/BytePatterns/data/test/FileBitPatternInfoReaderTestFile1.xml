@@ -1,0 +1,1096 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FileBitPatternInfo ghidraURL="TODO: url" languageID="x86:LE:64:default" numFirstBytes="16" numFirstInstructions="4" numPreBytes="12" numPreInstructions="3" numReturnBytes="12" numReturnInstructions="3">
+  <funcBitPatternInfoList>
+    <FunctionBitPatternInfo firstBytes="554889e54883ec20897dec8b45ec89c7" address="0000">
+      <returnBytesList>
+        <returnBytes value="720300008945fc8b45fcc9c3" />
+      </returnBytesList>
+      <firstInst>
+        <instructions>
+          <instruction value="PUSH" />
+          <instruction value="MOV" />
+          <instruction value="SUB" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="3" />
+          <size value="4" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands value="RBP" />
+          <operands value="RBP,RSP" />
+          <operands value="RSP,0x20" />
+          <operands value="[RBP + -0x14],EDI" />
+        </commaSeparatedOperands>
+      </firstInst>
+      <preInst>
+        <instructions>
+          <instruction />
+          <instruction />
+          <instruction />
+        </instructions>
+        <sizes>
+          <size />
+          <size />
+          <size />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands />
+          <operands />
+          <operands />
+        </commaSeparatedOperands>
+      </preInst>
+      <returnInstList>
+        <InstructionSequence>
+          <instructions>
+            <instruction value="RET" />
+            <instruction value="LEAVE" />
+            <instruction value="MOV" />
+          </instructions>
+          <sizes>
+            <size value="1" />
+            <size value="1" />
+            <size value="3" />
+          </sizes>
+          <commaSeparatedOperands>
+            <operands  />
+            <operands  />
+            <operands value="EAX,[RBP + -0x4]" />
+          </commaSeparatedOperands>
+        </InstructionSequence>
+      </returnInstList>
+      <contextRegistersList>
+        <ContextRegisterInfo contextRegister="cReg1" value="0" /> 
+        <ContextRegisterInfo contextRegister="cReg2" value="0" />
+        <ContextRegisterInfo contextRegister="cReg3" value="0" />
+        <ContextRegisterInfo contextRegister="cReg4" value="0" />
+      </contextRegistersList>
+    </FunctionBitPatternInfo>
+    <FunctionBitPatternInfo firstBytes="554889e54883ec20897dec8b45ec89c7" preBytes="720300008945fc8b45fcc9c3" address="0001">
+      <returnBytesList>
+        <returnBytes value="4a0300008945fc8b45fcc9c3" />
+      </returnBytesList>
+      <firstInst>
+        <instructions>
+          <instruction value="PUSH" />
+          <instruction value="MOV" />
+          <instruction value="SUB" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="3" />
+          <size value="4" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands value="RBP" />
+          <operands value="RBP,RSP" />
+          <operands value="RSP,0x20" />
+          <operands value="[RBP + -0x14],EDI" />
+        </commaSeparatedOperands>
+      </firstInst>
+      <preInst>
+        <instructions>
+          <instruction value="RET" />
+          <instruction value="LEAVE" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="1" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands />
+          <operands />
+          <operands value="EAX,[RBP + -0x4]" />
+        </commaSeparatedOperands>
+      </preInst>
+      <returnInstList>
+        <InstructionSequence>
+          <instructions>
+            <instruction value="RET" />
+            <instruction value="LEAVE" />
+            <instruction value="MOV" />
+          </instructions>
+          <sizes>
+            <size value="1" />
+            <size value="1" />
+            <size value="3" />
+          </sizes>
+          <commaSeparatedOperands>
+            <operands  />
+            <operands  />
+            <operands value="EAX,[RBP + -0x4]" />
+          </commaSeparatedOperands>
+        </InstructionSequence>
+      </returnInstList>
+      <contextRegistersList>
+        <ContextRegisterInfo contextRegister="cReg1" value="0" /> 
+        <ContextRegisterInfo contextRegister="cReg2" value="1" />
+        <ContextRegisterInfo contextRegister="cReg3" value="1" />
+        <ContextRegisterInfo contextRegister="cReg4" value="1" />
+      </contextRegistersList>
+    </FunctionBitPatternInfo>
+    <FunctionBitPatternInfo firstBytes="554889e54883ec20897decc745f80000" preBytes="4a0300008945fc8b45fcc9c3" address="0002">
+      <returnBytesList>
+        <returnBytes value="000300008945fc8b45fcc9c3" />
+      </returnBytesList>
+      <firstInst>
+        <instructions>
+          <instruction value="PUSH" />
+          <instruction value="MOV" />
+          <instruction value="SUB" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="3" />
+          <size value="4" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands value="RBP" />
+          <operands value="RBP,RSP" />
+          <operands value="RSP,0x20" />
+          <operands value="[RBP + -0x14],EDI" />
+        </commaSeparatedOperands>
+      </firstInst>
+      <preInst>
+        <instructions>
+          <instruction value="RET" />
+          <instruction value="LEAVE" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="1" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands />
+          <operands />
+          <operands value="EAX,[RBP + -0x4]" />
+        </commaSeparatedOperands>
+      </preInst>
+      <returnInstList>
+        <InstructionSequence>
+          <instructions>
+            <instruction value="RET" />
+            <instruction value="LEAVE" />
+            <instruction value="MOV" />
+          </instructions>
+          <sizes>
+            <size value="1" />
+            <size value="1" />
+            <size value="3" />
+          </sizes>
+          <commaSeparatedOperands>
+            <operands  />
+            <operands  />
+            <operands value="EAX,[RBP + -0x4]" />
+          </commaSeparatedOperands>
+        </InstructionSequence>
+      </returnInstList>
+      <contextRegistersList>
+        <ContextRegisterInfo contextRegister="cReg1" value="0" /> 
+        <ContextRegisterInfo contextRegister="cReg2" value="0" />
+        <ContextRegisterInfo contextRegister="cReg3" value="2" />
+        <ContextRegisterInfo contextRegister="cReg4" value="2" />
+      </contextRegistersList>
+    </FunctionBitPatternInfo>
+    <FunctionBitPatternInfo firstBytes="554889e54883ec20897dec8b45ec89c7" preBytes="000300008945fc8b45fcc9c3" address="0003">
+      <returnBytesList>
+        <returnBytes value="01837df8097edc8b45f4c9c3" />
+      </returnBytesList>
+      <firstInst>
+        <instructions>
+          <instruction value="PUSH" />
+          <instruction value="MOV" />
+          <instruction value="SUB" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="3" />
+          <size value="4" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands value="RBP" />
+          <operands value="RBP,RSP" />
+          <operands value="RSP,0x20" />
+          <operands value="[RBP + -0x14],EDI" />
+        </commaSeparatedOperands>
+      </firstInst>
+      <preInst>
+        <instructions>
+          <instruction value="RET" />
+          <instruction value="LEAVE" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="1" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands />
+          <operands />
+          <operands value="EAX,[RBP + -0x4]" />
+        </commaSeparatedOperands>
+      </preInst>
+      <returnInstList>
+        <InstructionSequence>
+          <instructions>
+            <instruction value="RET" />
+            <instruction value="LEAVE" />
+            <instruction value="MOV" />
+          </instructions>
+          <sizes>
+            <size value="1" />
+            <size value="1" />
+            <size value="3" />
+          </sizes>
+          <commaSeparatedOperands>
+            <operands  />
+            <operands  />
+            <operands value="EAX,[RBP + -0xc]" />
+          </commaSeparatedOperands>
+        </InstructionSequence>
+      </returnInstList>
+      <contextRegistersList>
+        <ContextRegisterInfo contextRegister="cReg1" value="0" /> 
+        <ContextRegisterInfo contextRegister="cReg2" value="1" />
+        <ContextRegisterInfo contextRegister="cReg3" value="3" />
+        <ContextRegisterInfo contextRegister="cReg4" value="3" />
+      </contextRegistersList>
+    </FunctionBitPatternInfo>
+    <FunctionBitPatternInfo firstBytes="554889e54883ec20897dec8b45ec89c7" preBytes="01837df8097edc8b45f4c9c3" address="0004">
+      <returnBytesList>
+        <returnBytes value="910200008945fc8b45fcc9c3" />
+      </returnBytesList>
+      <firstInst>
+        <instructions>
+          <instruction value="PUSH" />
+          <instruction value="MOV" />
+          <instruction value="SUB" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="3" />
+          <size value="4" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands value="RBP" />
+          <operands value="RBP,RSP" />
+          <operands value="RSP,0x20" />
+          <operands value="[RBP + -0x14],EDI" />
+        </commaSeparatedOperands>
+      </firstInst>
+      <preInst>
+        <instructions>
+          <instruction value="RET" />
+          <instruction value="LEAVE" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="1" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands />
+          <operands />
+          <operands value="EAX,[RBP + -0xc]" />
+        </commaSeparatedOperands>
+      </preInst>
+      <returnInstList>
+        <InstructionSequence>
+          <instructions>
+            <instruction value="RET" />
+            <instruction value="LEAVE" />
+            <instruction value="MOV" />
+          </instructions>
+          <sizes>
+            <size value="1" />
+            <size value="1" />
+            <size value="3" />
+          </sizes>
+          <commaSeparatedOperands>
+            <operands  />
+            <operands  />
+            <operands value="EAX,[RBP + -0x4]" />
+          </commaSeparatedOperands>
+        </InstructionSequence>
+      </returnInstList>
+      <contextRegistersList>
+        <ContextRegisterInfo contextRegister="cReg1" value="0" /> 
+        <ContextRegisterInfo contextRegister="cReg2" value="0" />
+        <ContextRegisterInfo contextRegister="cReg3" value="0" />
+        <ContextRegisterInfo contextRegister="cReg4" value="4" />
+      </contextRegistersList>
+    </FunctionBitPatternInfo>
+    <FunctionBitPatternInfo firstBytes="554889e54883ec20897dec8b45ec89c7" preBytes="910200008945fc8b45fcc9c3" address="0005">
+      <returnBytesList>
+        <returnBytes value="360200008945fc8b45fcc9c3" />
+      </returnBytesList>
+      <firstInst>
+        <instructions>
+          <instruction value="PUSH" />
+          <instruction value="MOV" />
+          <instruction value="SUB" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="3" />
+          <size value="4" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands value="RBP" />
+          <operands value="RBP,RSP" />
+          <operands value="RSP,0x20" />
+          <operands value="[RBP + -0x14],EDI" />
+        </commaSeparatedOperands>
+      </firstInst>
+      <preInst>
+        <instructions>
+          <instruction value="RET" />
+          <instruction value="LEAVE" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="1" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands />
+          <operands />
+          <operands value="EAX,[RBP + -0xc]" />
+        </commaSeparatedOperands>
+      </preInst>
+      <returnInstList>
+        <InstructionSequence>
+          <instructions>
+            <instruction value="RET" />
+            <instruction value="LEAVE" />
+            <instruction value="MOV" />
+          </instructions>
+          <sizes>
+            <size value="1" />
+            <size value="1" />
+            <size value="3" />
+          </sizes>
+          <commaSeparatedOperands>
+            <operands  />
+            <operands  />
+            <operands value="EAX,[RBP + -0x4]" />
+          </commaSeparatedOperands>
+        </InstructionSequence>
+      </returnInstList>
+      <contextRegistersList>
+        <ContextRegisterInfo contextRegister="cReg1" value="0" /> 
+        <ContextRegisterInfo contextRegister="cReg2" value="1" />
+        <ContextRegisterInfo contextRegister="cReg3" value="1" />
+        <ContextRegisterInfo contextRegister="cReg4" value="5" />
+      </contextRegistersList>
+    </FunctionBitPatternInfo>
+    <FunctionBitPatternInfo firstBytes="554889e54883ec20897dec8b45ec89c7" preBytes="360200008945fc8b45fcc9c3" address="0006">
+      <returnBytesList>
+        <returnBytes value="370200008945fc8b45fcc9c3" />
+      </returnBytesList>
+      <firstInst>
+        <instructions>
+          <instruction value="PUSH" />
+          <instruction value="MOV" />
+          <instruction value="SUB" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="3" />
+          <size value="4" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands value="RBP" />
+          <operands value="RBP,RSP" />
+          <operands value="RSP,0x20" />
+          <operands value="[RBP + -0x14],EDI" />
+        </commaSeparatedOperands>
+      </firstInst>
+      <preInst>
+        <instructions>
+          <instruction value="RET" />
+          <instruction value="LEAVE" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="1" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands />
+          <operands />
+          <operands value="EAX,[RBP + -0x4]" />
+        </commaSeparatedOperands>
+      </preInst>
+      <returnInstList>
+        <InstructionSequence>
+          <instructions>
+            <instruction value="RET" />
+            <instruction value="LEAVE" />
+            <instruction value="MOV" />
+          </instructions>
+          <sizes>
+            <size value="1" />
+            <size value="1" />
+            <size value="3" />
+          </sizes>
+          <commaSeparatedOperands>
+            <operands  />
+            <operands  />
+            <operands value="EAX,[RBP + -0x4]" />
+          </commaSeparatedOperands>
+        </InstructionSequence>
+      </returnInstList>
+      <contextRegistersList>
+        <ContextRegisterInfo contextRegister="cReg1" value="0" /> 
+        <ContextRegisterInfo contextRegister="cReg2" value="0" />
+        <ContextRegisterInfo contextRegister="cReg3" value="2" />
+        <ContextRegisterInfo contextRegister="cReg4" value="6" />
+      </contextRegistersList>
+    </FunctionBitPatternInfo>
+    <FunctionBitPatternInfo firstBytes="554889e5534883ec38897dcc8b45cc89" preBytes="370200008945fc8b45fcc9c3" address="0007">
+      <returnBytesList>
+        <returnBytes value="e8ad0200004883c4385bc9c3" />
+      </returnBytesList>
+      <firstInst>
+        <instructions>
+          <instruction value="PUSH" />
+          <instruction value="MOV" />
+          <instruction value="PUSH" />
+          <instruction value="SUB" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="3" />
+          <size value="1" />
+          <size value="4" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands value="RBP" />
+          <operands value="RBP,RSP" />
+          <operands value="RBX" />
+          <operands value="RSP,0x38" />
+        </commaSeparatedOperands>
+      </firstInst>
+      <preInst>
+        <instructions>
+          <instruction value="RET" />
+          <instruction value="LEAVE" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="1" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands />
+          <operands />
+          <operands value="EAX,[RBP + -0x4]" />
+        </commaSeparatedOperands>
+      </preInst>
+      <returnInstList>
+        <InstructionSequence>
+          <instructions>
+            <instruction value="RET" />
+            <instruction value="LEAVE" />
+            <instruction value="POP" />
+          </instructions>
+          <sizes>
+            <size value="1" />
+            <size value="1" />
+            <size value="1" />
+          </sizes>
+          <commaSeparatedOperands>
+            <operands  />
+            <operands  />
+            <operands value="RBX" />
+          </commaSeparatedOperands>
+        </InstructionSequence>
+      </returnInstList>
+      <contextRegistersList>
+        <ContextRegisterInfo contextRegister="cReg1" value="0" /> 
+        <ContextRegisterInfo contextRegister="cReg2" value="1" />
+        <ContextRegisterInfo contextRegister="cReg3" value="3" />
+        <ContextRegisterInfo contextRegister="cReg4" value="7" />
+      </contextRegistersList>
+    </FunctionBitPatternInfo>
+    <FunctionBitPatternInfo firstBytes="554889e54883ec30897ddc8b45dc89c7" preBytes="e8ad0200004883c4385bc9c3" address="0008">
+      <returnBytesList>
+        <returnBytes value="f88b55f48d04020345fcc9c3" />
+      </returnBytesList>
+      <firstInst>
+        <instructions>
+          <instruction value="PUSH" />
+          <instruction value="MOV" />
+          <instruction value="SUB" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="3" />
+          <size value="4" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands value="RBP" />
+          <operands value="RBP,RSP" />
+          <operands value="RSP,0x30" />
+          <operands value="[RBP + -0x24],EDI" />
+        </commaSeparatedOperands>
+      </firstInst>
+      <preInst>
+        <instructions>
+          <instruction value="RET" />
+          <instruction value="LEAVE" />
+          <instruction value="POP" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="1" />
+          <size value="1" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands />
+          <operands />
+          <operands value="RBX"/>
+        </commaSeparatedOperands>
+      </preInst>
+      <returnInstList>
+        <InstructionSequence>
+          <instructions>
+            <instruction value="RET" />
+            <instruction value="LEAVE" />
+            <instruction value="ADD" />
+          </instructions>
+          <sizes>
+            <size value="1" />
+            <size value="1" />
+            <size value="3" />
+          </sizes>
+          <commaSeparatedOperands>
+            <operands  />
+            <operands  />
+            <operands value="EAX,[RBP + -0x4]" />
+          </commaSeparatedOperands>
+        </InstructionSequence>
+      </returnInstList>
+      <contextRegistersList>
+        <ContextRegisterInfo contextRegister="cReg1" value="0" /> 
+        <ContextRegisterInfo contextRegister="cReg2" value="0" />
+        <ContextRegisterInfo contextRegister="cReg3" value="0" />
+        <ContextRegisterInfo contextRegister="cReg4" value="0" />
+      </contextRegistersList>
+    </FunctionBitPatternInfo>
+    <FunctionBitPatternInfo firstBytes="554889e54883ec20897dec8b45ec89c7" preBytes="f88b55f48d04020345fcc9c3" address="0009">
+      <returnBytesList>
+        <returnBytes value="488945f8488b45f88b00c9c3" />
+      </returnBytesList>
+      <firstInst>
+        <instructions>
+          <instruction value="PUSH" />
+          <instruction value="MOV" />
+          <instruction value="SUB" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="3" />
+          <size value="4" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands value="RBP" />
+          <operands value="RBP,RSP" />
+          <operands value="RSP,0x20" />
+          <operands value="[RBP + -0x14],EDI" />
+        </commaSeparatedOperands>
+      </firstInst>
+      <preInst>
+        <instructions>
+          <instruction value="RET" />
+          <instruction value="LEAVE" />
+          <instruction value="ADD" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="1" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands />
+          <operands />
+          <operands value="EAX,[RBP + -0x4]" />
+        </commaSeparatedOperands>
+      </preInst>
+      <returnInstList>
+        <InstructionSequence>
+          <instructions>
+            <instruction value="RET" />
+            <instruction value="LEAVE" />
+            <instruction value="MOV" />
+          </instructions>
+          <sizes>
+            <size value="1" />
+            <size value="1" />
+            <size value="2" />
+          </sizes>
+          <commaSeparatedOperands>
+            <operands  />
+            <operands  />
+            <operands value="EAX,[RAX]" />
+          </commaSeparatedOperands>
+        </InstructionSequence>
+      </returnInstList>
+      <contextRegistersList>
+        <ContextRegisterInfo contextRegister="cReg1" value="0" /> 
+        <ContextRegisterInfo contextRegister="cReg2" value="1" />
+        <ContextRegisterInfo contextRegister="cReg3" value="1" />
+        <ContextRegisterInfo contextRegister="cReg4" value="1" />
+      </contextRegistersList>
+    </FunctionBitPatternInfo>
+    <FunctionBitPatternInfo firstBytes="554889e54883ec20897decc745f80000" preBytes="488945f8488b45f88b00c9c3" address="000a">
+      <returnBytesList>
+        <returnBytes value="7affffff488b45f88b00c9c3" />
+      </returnBytesList>
+      <firstInst>
+        <instructions>
+          <instruction value="PUSH" />
+          <instruction value="MOV" />
+          <instruction value="SUB" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="3" />
+          <size value="4" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands value="RBP" />
+          <operands value="RBP,RSP" />
+          <operands value="RSP,0x20" />
+          <operands value="[RBP + -0x14],EDI" />
+        </commaSeparatedOperands>
+      </firstInst>
+      <preInst>
+        <instructions>
+          <instruction value="RET" />
+          <instruction value="LEAVE" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="1" />
+          <size value="2" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands />
+          <operands />
+          <operands value="EAX,[RAX]" />
+        </commaSeparatedOperands>
+      </preInst>
+      <returnInstList>
+        <InstructionSequence>
+          <instructions>
+            <instruction value="RET" />
+            <instruction value="LEAVE" />
+            <instruction value="MOV" />
+          </instructions>
+          <sizes>
+            <size value="1" />
+            <size value="1" />
+            <size value="2" />
+          </sizes>
+          <commaSeparatedOperands>
+            <operands  />
+            <operands  />
+            <operands value="EAX,[RAX]" />
+          </commaSeparatedOperands>
+        </InstructionSequence>
+      </returnInstList>
+      <contextRegistersList>
+        <ContextRegisterInfo contextRegister="cReg1" value="0" /> 
+        <ContextRegisterInfo contextRegister="cReg2" value="0" />
+        <ContextRegisterInfo contextRegister="cReg3" value="2" />
+        <ContextRegisterInfo contextRegister="cReg4" value="2" />
+      </contextRegistersList>
+    </FunctionBitPatternInfo>
+    <FunctionBitPatternInfo firstBytes="554889e5897dfc8b45fc83c001c9c3" preBytes="7affffff488b45f88b00c9c3" address="000b">
+      <returnBytesList>
+        <returnBytes value="e5897dfc8b45fc83c001c9c3" />
+      </returnBytesList>
+      <firstInst>
+        <instructions>
+          <instruction value="PUSH" />
+          <instruction value="MOV" />
+          <instruction value="MOV" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="3" />
+          <size value="3" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands value="RBP" />
+          <operands value="RBP,RSP" />
+          <operands value="[RBP + -0x4],EDI" />
+          <operands value="EAX,[RBP + -0x4]" />
+        </commaSeparatedOperands>
+      </firstInst>
+      <preInst>
+        <instructions>
+          <instruction value="RET" />
+          <instruction value="LEAVE" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="1" />
+          <size value="2" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands />
+          <operands />
+          <operands value="EAX,[RAX]" />
+        </commaSeparatedOperands>
+      </preInst>
+      <returnInstList>
+        <InstructionSequence>
+          <instructions>
+            <instruction value="RET" />
+            <instruction value="LEAVE" />
+            <instruction value="MOV" />
+          </instructions>
+          <sizes>
+            <size value="1" />
+            <size value="1" />
+            <size value="3" />
+          </sizes>
+          <commaSeparatedOperands>
+            <operands  />
+            <operands  />
+            <operands value="EAX,0x1" />
+          </commaSeparatedOperands>
+        </InstructionSequence>
+      </returnInstList>
+      <contextRegistersList>
+        <ContextRegisterInfo contextRegister="cReg1" value="0" /> 
+        <ContextRegisterInfo contextRegister="cReg2" value="1" />
+        <ContextRegisterInfo contextRegister="cReg3" value="3" />
+        <ContextRegisterInfo contextRegister="cReg4" value="3" />
+      </contextRegistersList>
+    </FunctionBitPatternInfo>
+    <FunctionBitPatternInfo firstBytes="554889e5897dfc8b45fc83c002c9c3" preBytes="e5897dfc8b45fc83c001c9c3" address="000c">
+      <returnBytesList>
+        <returnBytes value="e5897dfc8b45fc83c002c9c3" />
+      </returnBytesList>
+      <firstInst>
+        <instructions>
+          <instruction value="PUSH" />
+          <instruction value="MOV" />
+          <instruction value="MOV" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="3" />
+          <size value="3" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands value="RBP" />
+          <operands value="RBP,RSP" />
+          <operands value="[RBP + -0x4],EDI" />
+          <operands value="EAX,[RBP + -0x4]" />
+        </commaSeparatedOperands>
+      </firstInst>
+      <preInst>
+        <instructions>
+          <instruction value="RET" />
+          <instruction value="LEAVE" />
+          <instruction value="ADD" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="1" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands />
+          <operands />
+          <operands value="EAX,0x1" />
+        </commaSeparatedOperands>
+      </preInst>
+      <returnInstList>
+        <InstructionSequence>
+          <instructions>
+            <instruction value="RET" />
+            <instruction value="LEAVE" />
+            <instruction value="ADD" />
+          </instructions>
+          <sizes>
+            <size value="1" />
+            <size value="1" />
+            <size value="3" />
+          </sizes>
+          <commaSeparatedOperands>
+            <operands  />
+            <operands  />
+            <operands value="EAX,0x2" />
+          </commaSeparatedOperands>
+        </InstructionSequence>
+      </returnInstList>
+      <contextRegistersList>
+        <ContextRegisterInfo contextRegister="cReg1" value="0" /> 
+        <ContextRegisterInfo contextRegister="cReg2" value="0" />
+        <ContextRegisterInfo contextRegister="cReg3" value="0" />
+        <ContextRegisterInfo contextRegister="cReg4" value="4" />
+      </contextRegistersList>
+    </FunctionBitPatternInfo>
+    <FunctionBitPatternInfo firstBytes="554889e5897dfc8b45fc83c003c9c3" preBytes="e5897dfc8b45fc83c002c9c3" address="000d">
+      <returnBytesList>
+        <returnBytes value="e5897dfc8b45fc83c003c9c3" />
+      </returnBytesList>
+      <firstInst>
+        <instructions>
+          <instruction value="PUSH" />
+          <instruction value="MOV" />
+          <instruction value="MOV" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="3" />
+          <size value="3" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands value="RBP" />
+          <operands value="RBP,RSP" />
+          <operands value="[RBP + -0x4],EDI" />
+          <operands value="EAX,[RBP + -0x4]" />
+        </commaSeparatedOperands>
+      </firstInst>
+      <preInst>
+        <instructions>
+          <instruction value="RET" />
+          <instruction value="LEAVE" />
+          <instruction value="ADD" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="1" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands />
+          <operands />
+          <operands value="EAX,0x2" />
+        </commaSeparatedOperands>
+      </preInst>
+      <returnInstList>
+        <InstructionSequence>
+          <instructions>
+            <instruction value="RET" />
+            <instruction value="LEAVE" />
+            <instruction value="ADD" />
+          </instructions>
+          <sizes>
+            <size value="1" />
+            <size value="1" />
+            <size value="3" />
+          </sizes>
+          <commaSeparatedOperands>
+            <operands  />
+            <operands  />
+            <operands value="EAX,0x3" />
+          </commaSeparatedOperands>
+        </InstructionSequence>
+      </returnInstList>
+      <contextRegistersList>
+        <ContextRegisterInfo contextRegister="cReg1" value="0" /> 
+        <ContextRegisterInfo contextRegister="cReg2" value="1" />
+        <ContextRegisterInfo contextRegister="cReg3" value="1" />
+        <ContextRegisterInfo contextRegister="cReg4" value="5" />
+      </contextRegistersList>
+    </FunctionBitPatternInfo>
+    <FunctionBitPatternInfo firstBytes="554889e548897df8488b45f88b0083c0" preBytes="e5897dfc8b45fc83c003c9c3" address="000e">
+      <returnBytesList>
+        <returnBytes value="f8488b45f88b0083c001c9c3" />
+      </returnBytesList>
+      <firstInst>
+        <instructions>
+          <instruction value="PUSH" />
+          <instruction value="MOV" />
+          <instruction value="MOV" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="3" />
+          <size value="4" />
+          <size value="4" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands value="RBP" />
+          <operands value="RBP,RSP" />
+          <operands value="[RBP + -0x8],RDI" />
+          <operands value="RAX,[RBP+ -0x8]" />
+        </commaSeparatedOperands>
+      </firstInst>
+      <preInst>
+        <instructions>
+          <instruction value="RET" />
+          <instruction value="LEAVE" />
+          <instruction value="ADD" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="1" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands />
+          <operands />
+          <operands value="EAX,0x3" />
+        </commaSeparatedOperands>
+      </preInst>
+      <returnInstList>
+        <InstructionSequence>
+          <instructions>
+            <instruction value="RET" />
+            <instruction value="LEAVE" />
+            <instruction value="ADD" />
+          </instructions>
+          <sizes>
+            <size value="1" />
+            <size value="1" />
+            <size value="3" />
+          </sizes>
+          <commaSeparatedOperands>
+            <operands  />
+            <operands  />
+            <operands value="EAX,0x1" />
+          </commaSeparatedOperands>
+        </InstructionSequence>
+      </returnInstList>
+      <contextRegistersList>
+        <ContextRegisterInfo contextRegister="cReg1" value="0" /> 
+        <ContextRegisterInfo contextRegister="cReg2" value="0" />
+        <ContextRegisterInfo contextRegister="cReg3" value="2" />
+        <ContextRegisterInfo contextRegister="cReg4" value="6" />
+      </contextRegistersList>
+    </FunctionBitPatternInfo>
+    <FunctionBitPatternInfo firstBytes="554889e5534883ec38897dcc8b45cc89" preBytes="370200008945fc8b45fcc9c3" address="000f">
+      <returnBytesList>
+        <returnBytes value="e8ad0200004883c4385bc9c3" />
+        <returnBytes value="f8488b45f88b0083c001c9c3" />
+      </returnBytesList>
+      <firstInst>
+        <instructions>
+          <instruction value="PUSH" />
+          <instruction value="MOV" />
+          <instruction value="PUSH" />
+          <instruction value="SUB" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="3" />
+          <size value="1" />
+          <size value="4" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands value="RBP" />
+          <operands value="RBP,RSP" />
+          <operands value="RBX" />
+          <operands value="RSP,0x38" />
+        </commaSeparatedOperands>
+      </firstInst>
+      <preInst>
+        <instructions>
+          <instruction value="RET" />
+          <instruction value="LEAVE" />
+          <instruction value="MOV" />
+        </instructions>
+        <sizes>
+          <size value="1" />
+          <size value="1" />
+          <size value="3" />
+        </sizes>
+        <commaSeparatedOperands>
+          <operands />
+          <operands />
+          <operands value="EAX,[RBP + -0x4]" />
+        </commaSeparatedOperands>
+      </preInst>
+      <returnInstList>
+        <InstructionSequence>
+          <instructions>
+            <instruction value="RET" />
+            <instruction value="LEAVE" />
+            <instruction value="POP" />
+          </instructions>
+          <sizes>
+            <size value="1" />
+            <size value="1" />
+            <size value="1" />
+          </sizes>
+          <commaSeparatedOperands>
+            <operands  />
+            <operands  />
+            <operands value="RBX" />
+          </commaSeparatedOperands>
+        </InstructionSequence>
+        <InstructionSequence>
+          <instructions>
+            <instruction value="RET" />
+            <instruction value="LEAVE" />
+            <instruction value="ADD" />
+          </instructions>
+          <sizes>
+            <size value="1" />
+            <size value="1" />
+            <size value="3" />
+          </sizes>
+          <commaSeparatedOperands>
+            <operands  />
+            <operands  />
+            <operands value="EAX,0x1" />
+          </commaSeparatedOperands>
+        </InstructionSequence>
+      </returnInstList>
+      <contextRegistersList>
+        <ContextRegisterInfo contextRegister="cReg1" value="0" /> 
+        <ContextRegisterInfo contextRegister="cReg2" value="1" />
+        <ContextRegisterInfo contextRegister="cReg3" value="3" />
+        <ContextRegisterInfo contextRegister="cReg4" value="7" />
+      </contextRegistersList>
+    </FunctionBitPatternInfo>
+  </funcBitPatternInfoList>
+</FileBitPatternInfo>
+
