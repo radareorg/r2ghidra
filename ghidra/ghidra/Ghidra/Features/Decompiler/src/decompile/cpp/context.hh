@@ -89,6 +89,8 @@ private:
   ConstructState *base_state;
   int4 alloc;			// Number of ConstructState's allocated
   int4 delayslot;		// delayslot depth
+protected:
+  ConstructState **getBaseState(void) { return &base_state; }
 public:
   ParserContext(ContextCache *ccache);
   ~ParserContext(void) { if (context != (uintm *)0) delete [] context; }

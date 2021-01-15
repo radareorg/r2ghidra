@@ -113,6 +113,7 @@ protected:
   ParserContext *obtainContext(const Address &addr,int4 state) const;
   void resolve(ParserContext &pos) const;
   void resolveHandles(ParserContext &pos) const;
+  ContextCache *getContextCache(void) { return cache; }
 public:
   Sleigh(LoadImage *ld,ContextDatabase *c_db);
   virtual ~Sleigh(void);
