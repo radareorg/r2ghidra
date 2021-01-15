@@ -21,6 +21,9 @@ class R2Scope : public Scope
 	private:
 		R2Architecture *arch;
 		ScopeInternal *cache;
+		std::unique_ptr<uint8> next_id;
+
+		uint8 makeId() const { return (*next_id)++; }
 
 		FunctionSymbol *registerFunction(RAnalFunction *fcn) const;
 		Symbol *registerFlag(RFlagItem *flag) const;
@@ -39,7 +42,7 @@ class R2Scope : public Scope
 		explicit R2Scope(R2Architecture *arch);
 		~R2Scope() override;
 
-		Scope *buildSubScope(const string &nm) override;
+		Scope *buildSubScope(uint8 id, const string &nm) override;
 		void clear(void) override										{ cache->clear(); }
 		SymbolEntry *addSymbol(const string &name, Datatype *ct, const Address &addr, const Address &usepoint) override	{ return cache->addSymbol(name, ct, addr, usepoint); }
 		string buildVariableName(const Address &addr, const Address &pc, Datatype *ct,int4 &index,uint4 flags) const override { return cache->buildVariableName(addr,pc,ct,index,flags); }
@@ -47,6 +50,7 @@ class R2Scope : public Scope
 		void setAttribute(Symbol *sym,uint4 attr) override				{ cache->setAttribute(sym,attr); }
 		void clearAttribute(Symbol *sym,uint4 attr) override			{ cache->clearAttribute(sym,attr); }
 		void setDisplayFormat(Symbol *sym,uint4 attr) override			{ cache->setDisplayFormat(sym,attr); }
+		void adjustCaches(void) override { cache->adjustCaches(); }
 
 		SymbolEntry *findAddr(const Address &addr,const Address &usepoint) const override;
 		SymbolEntry *findContainer(const Address &addr,int4 size, const Address &usepoint) const override;

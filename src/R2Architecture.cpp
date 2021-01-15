@@ -141,13 +141,10 @@ void R2Architecture::buildLoader(DocumentStorage &store)
 	loader = new R2LoadImage(getCore());
 }
 
-Scope *R2Architecture::buildGlobalScope()
+Scope *R2Architecture::buildDatabase(DocumentStorage &store)
 {
-	Scope *globalscope = symboltab->getGlobalScope();
-	if(globalscope)
-		return globalscope;
-
-	globalscope = new R2Scope(this);
+	symboltab = new Database(this, false);
+	Scope *globalscope = new R2Scope(this);
 	symboltab->attachScope(globalscope, nullptr);
 	return globalscope;
 }

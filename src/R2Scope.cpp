@@ -13,10 +13,12 @@
 #include "R2Utils.h"
 
 R2Scope::R2Scope(R2Architecture *arch)
-		: Scope("", arch, this),
+		: Scope(0, "", arch, this),
 		  arch(arch),
-		  cache(new ScopeInternal("radare2-internal", arch, this))
+		  cache(new ScopeInternal(0, "radare2-internal", arch, this)),
+		  next_id(new uint8)
 {
+	*next_id = 1;
 }
 
 R2Scope::~R2Scope()
@@ -24,9 +26,9 @@ R2Scope::~R2Scope()
 	delete cache;
 }
 
-Scope *R2Scope::buildSubScope(const string &nm)
+Scope *R2Scope::buildSubScope(uint8 id, const string &nm)
 {
-	return new ScopeInternal(nm, arch);
+	return new ScopeInternal(id, nm, arch);
 }
 
 static std::string hex(ut64 v)
