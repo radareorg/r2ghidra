@@ -104,8 +104,10 @@ GHIDRA_SLEIGH_COMPILER_OBJS=$(subst .cc,.o,$(GHIDRA_SLEIGH_COMPILER_SRCS))
 sleigh: sleighc
 	$(SLEIGHC) $(SPECFILE) $(SLAFILE)
 
-sleighc: $(GHIDRA_DECOMPILER)/slgh_compile.o $(GHIDRA_DECOMPILER)/slghscan.o $(GHIDRA_DECOMPILER)/slghparse.o
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o sleighc $(GHIDRA_DECOMPILER)/slgh_compile.o $(GHIDRA_DECOMPILER)/slghparse.o $(GHIDRA_DECOMPILER)/slghscan.o $(GHIDRA_OBJS)
+SLEIGHTC_OBJS=$(GHIDRA_DECOMPILER)/slgh_compile.o $(GHIDRA_DECOMPILER)/slghscan.o $(GHIDRA_DECOMPILER)/slghparse.o
+
+sleighc: $(SLEIGHTC_OBJS) $(GHIDRA_OBJS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o sleighc $(SLEIGHTC_OBJS) $(GHIDRA_OBJS)
 
 GHIDRA_SLEIGH_SLASPECS=$(GHIDRA_HOME)/Ghidra/Processors/*.slaspec
 GHIDRA_SLEIGH_FILES=$(GHIDRA_HOME)/Ghidra/Processors/*.cspec
