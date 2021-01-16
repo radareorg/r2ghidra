@@ -81,6 +81,10 @@ Datatype *R2TypeFactory::queryR2Struct(const string &n, std::set<std::string> &s
 			});
 		}
 
+		if (fields.empty()) {
+			arch->addWarning("Struct " + n + " has no fields.");
+			return nullptr;
+		}
 		setFields(fields, r, 0, 0);
 		return r;
 	}
@@ -114,10 +118,14 @@ Datatype *R2TypeFactory::queryR2Enum(const string &n)
 
 	if(namelist.empty())
 		return nullptr;
-
-	auto enumType = getTypeEnum(n);
-	setEnumValues(namelist, vallist, assignlist, enumType);
-	return enumType;
+	try {
+		auto enumType = getTypeEnum(n);
+		setEnumValues(namelist, vallist, assignlist, enumType);
+		return enumType;
+	} catch (LowlevelError &e) {
+		arch->addWarning("Failed to load " + n);
+		return nullptr;
+	}
 }
 
 Datatype *R2TypeFactory::queryR2Typedef(const string &n, std::set<std::string> &stackTypes)

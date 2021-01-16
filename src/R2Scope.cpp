@@ -133,7 +133,8 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const
 
 	auto functionElement = child(&doc, "function", {
 			{ "name", fcn_name },
-			{ "size", "1" }
+			{ "size", "1" },
+			{ "id", hex(makeId()) }
 	});
 
 	childAddr(functionElement, "addr", Address(arch->getDefaultCodeSpace(), fcn->addr));
@@ -147,7 +148,10 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const
 			{ "name", fcn_name }
 	});
 
-	child(child(scopeElement, "parent"), "val");
+	auto parentElement = child(scopeElement, "parent", {
+		{"id", hex(uniqueId)} });
+	child(parentElement, "val");
+
 	child(scopeElement, "rangelist");
 
 	auto symbollistElement = child(scopeElement, "symbollist");
@@ -224,6 +228,10 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const
 				type = arch->types->getBase(core->anal->bits / 8, TYPE_UNKNOWN);
 				if(!type)
 					return;
+			}
+			if (type->getSize() < 1) {
+				arch->addWarning("Type " + type->getName () + " of variable " + to_string(var->name) + " has size 0");
+				return;
 			}
 			var_types[var] = type;
 
