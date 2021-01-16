@@ -568,7 +568,6 @@ static void SetInitialSleighHome(RConfig *cfg)
 		cfg_var_sleighhome.Set(cfg, sleighhomepath);
 		return;
 	}
-
 #ifdef R2GHIDRA_SLEIGHHOME_DEFAULT
 	if(r_file_is_directory(R2GHIDRA_SLEIGHHOME_DEFAULT))
 	{
@@ -576,7 +575,6 @@ static void SetInitialSleighHome(RConfig *cfg)
 		return;
 	}
 #endif
-
 	// r2pm-installed ghidra
 	char *homepath = r_str_home(".local/share/radare2/r2pm/git/ghidra");
 	if(homepath && r_file_is_directory(homepath))
@@ -597,12 +595,10 @@ static int r2ghidra_init(void *user, const char *cmd)
 	r_config_lock (cfg, false);
 	for(const auto var : ConfigVar::GetAll())
 	{
-		RConfigNode *node;
-		if(var->GetCallback())
-			node = r_config_set_cb(cfg, var->GetName(), var->GetDefault(), var->GetCallback());
-		else
-			node = r_config_set(cfg, var->GetName(), var->GetDefault());
-		r_config_node_desc(node, var->GetDesc());
+		RConfigNode *node = var->GetCallback()
+			? r_config_set_cb (cfg, var->GetName(), var->GetDefault(), var->GetCallback())
+			: r_config_set (cfg, var->GetName(), var->GetDefault());
+		r_config_node_desc (node, var->GetDesc());
 	}
 	r_config_lock (cfg, true);
 

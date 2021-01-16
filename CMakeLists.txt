@@ -3,7 +3,7 @@ set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH True)
 
 project(r2ghidra)
 
-set(RADARE2_INSTALL_PLUGDIR "share/radare2/plugins" CACHE STRING "Directory to install radare2 plugin into")
+set(RADARE2_INSTALL_PLUGDIR "lib/radare2/last" CACHE STRING "Directory to install radare2 plugin into")
 set(CUTTER_INSTALL_PLUGDIR "share/RadareOrg/Cutter/plugins/native" CACHE STRING "Directory to install Cutter plugin into")
 
 set(CUTTER_SOURCE_DIR CUTTER_SOURCE_DIR-NOTFOUND CACHE STRING "Root directory of Cutter source")

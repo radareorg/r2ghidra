@@ -55,8 +55,6 @@ ghidra/ghidra/Ghidra:
 	$(MAKE) -C ghidra
 
 mrproper: clean
-	rm -rf ghidra/ghidra
-	rm -rf third-party/pugixml
-	$(MAKE) -C src clean
+	git submodule deinit --all -f
 
 .PHONY: mrproper clean install uninstall all

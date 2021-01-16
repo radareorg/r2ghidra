@@ -1,3 +1,7 @@
+
+# hardcoded for now
+USE_BISON=0
+
 GHIDRA_HOME=../ghidra/ghidra/
 GHIDRA_DECOMPILER=$(GHIDRA_HOME)/Ghidra/Features/Decompiler/src/decompile/cpp
 
@@ -52,8 +56,6 @@ G_DECOMPILER+=pcodecompile.cc
 ## G_DECOMPILER+=callgraph.cc
 ## G_DECOMPILER+=raw_arch.cc
 
-USE_BISON=0
-
 ifeq ($(USE_BISON),1)
 $(GHIDRA_DECOMPILER)/grammar.cc: $(GHIDRA_DECOMPILER)/grammar.y
 	$(BISON) -p grammar -o $(GHIDRA_DECOMPILER)/grammar.cc $(GHIDRA_DECOMPILER)/grammar.y
@@ -75,21 +77,20 @@ $(GHIDRA_DECOMPILER)/slghparse.cc: $(GHIDRA_DECOMPILER)/slghparse.y
 	echo '#include \"slghparse.hpp\"' > $(GHIDRA_DECOMPILER)/slghparse.tab.hpp
 	$(BISON) -d -o $(GHIDRA_DECOMPILER)/slghparse.tab.hh $(GHIDRA_DECOMPILER)/slghparse.y
 	$(BISON) -o $(GHIDRA_DECOMPILER)/slghparse.cc $(GHIDRA_DECOMPILER)/slghparse.y
+
+.PHONY: $(GHIDRA_DECOMPILER)/slghparse.cc
+.PHONY: $(GHIDRA_DECOMPILER)/slghscan.cc
+
+$(GHIDRA_DECOMPILER)/slghscan.cc: $(GHIDRA_DECOMPILER)/slghscan.l $(GHIDRA_DECOMPILER)/slghparse.cc
+	$(FLEX) --header-file=$(GHIDRA_DECOMPILER)/slghscan.tab.hh -o $(GHIDRA_DECOMPILER)/slghscan.cc $(GHIDRA_DECOMPILER)/slghscan.l
 else
 G_DECOMPILER+= grammar.cc
-G_DECOMPILER+= ruleparse.cc
+# no .cc? G_DECOMPILER+= ruleparser.cc
 G_DECOMPILER+= xml.cc
 G_DECOMPILER+= pcodeparse.cc
 # G_DECOMPILER+= slghparse.cc ## bison
 # G_DECOMPILER+= pcodeparse.cc ## bison
 endif
-
-.PHONY: $(GHIDRA_DECOMPILER)/slghparse.cc
-.PHONY: $(GHIDRA_DECOMPILER)/slghscan.cc
-
-
-$(GHIDRA_DECOMPILER)/slghscan.cc: $(GHIDRA_DECOMPILER)/slghscan.l $(GHIDRA_DECOMPILER)/slghparse.cc
-	$(FLEX) --header-file=$(GHIDRA_DECOMPILER)/slghscan.tab.hh -o $(GHIDRA_DECOMPILER)/slghscan.cc $(GHIDRA_DECOMPILER)/slghscan.l
 
 GHIDRA_SRCS=$(addprefix $(GHIDRA_DECOMPILER)/,$(G_DECOMPILER))
 GHIDRA_OBJS+=$(subst .cc,.o,$(GHIDRA_SRCS))

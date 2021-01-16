@@ -52,7 +52,8 @@ R2G_ASM_PLUGIN=asm_ghidra.$(R2_LIBEXT)
 R2G_ANAL_PLUGIN=anal_ghidra.$(R2_LIBEXT)
 
 clean:
-	rm -f *.o $(GHIDRA_HOME)/*.o
+	rm -f *.o $(PUGIXML_HOME)/*.o
+	rm -f *.o $(GHIDRA_DECOMPILER)/*.o
 
 plugins: $(R2G_CORE_PLUGIN) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
 
