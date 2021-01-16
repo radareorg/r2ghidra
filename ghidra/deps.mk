@@ -52,12 +52,9 @@ G_DECOMPILER+=pcodecompile.cc
 ## G_DECOMPILER+=callgraph.cc
 ## G_DECOMPILER+=raw_arch.cc
 
-G_DECOMPILER+= xml.cc ## bison
-G_DECOMPILER+= pcodeparse.cc ## bison
-# G_DECOMPILER+= slghparse.cc ## bison
-# G_DECOMPILER+= grammar.cc ## bison
-# G_DECOMPILER+= ruleparse.cc ## bison
+USE_BISON=0
 
+ifeq ($(USE_BISON),1)
 $(GHIDRA_DECOMPILER)/grammar.cc: $(GHIDRA_DECOMPILER)/grammar.y
 	$(BISON) -p grammar -o $(GHIDRA_DECOMPILER)/grammar.cc $(GHIDRA_DECOMPILER)/grammar.y
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(GHIDRA_DECOMPILER)/grammar.o -c $(GHIDRA_DECOMPILER)/grammar.cc
@@ -78,6 +75,14 @@ $(GHIDRA_DECOMPILER)/slghparse.cc: $(GHIDRA_DECOMPILER)/slghparse.y
 	echo '#include \"slghparse.hpp\"' > $(GHIDRA_DECOMPILER)/slghparse.tab.hpp
 	$(BISON) -d -o $(GHIDRA_DECOMPILER)/slghparse.tab.hh $(GHIDRA_DECOMPILER)/slghparse.y
 	$(BISON) -o $(GHIDRA_DECOMPILER)/slghparse.cc $(GHIDRA_DECOMPILER)/slghparse.y
+else
+G_DECOMPILER+= grammar.cc
+G_DECOMPILER+= ruleparse.cc
+G_DECOMPILER+= xml.cc
+G_DECOMPILER+= pcodeparse.cc
+# G_DECOMPILER+= slghparse.cc ## bison
+# G_DECOMPILER+= pcodeparse.cc ## bison
+endif
 
 .PHONY: $(GHIDRA_DECOMPILER)/slghparse.cc
 .PHONY: $(GHIDRA_DECOMPILER)/slghscan.cc

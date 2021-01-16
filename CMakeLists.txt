@@ -13,6 +13,7 @@ option(BUILD_DECOMPILE_EXECUTABLE "Build \"decompile\" executable as used by Ghi
 option(BUILD_DECOMPILE_CLI_EXECUTABLE "Build REPL decompiler (not needed for r2)" OFF)
 option(BUILD_SLASPECS "Build Sleigh specs for architectures from Ghidra" ON)
 option(BUILD_SLEIGH_PLUGIN "Build asm and anal plugin to use sleigh as a disassembler in r2" ON)
+option(GENERATE_PARSERS "Re-generate all parsers with Bison/Flex instead of using pre-generated ones" OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 

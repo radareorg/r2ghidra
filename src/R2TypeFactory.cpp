@@ -125,13 +125,13 @@ Datatype *R2TypeFactory::queryR2Typedef(const string &n, std::set<std::string> &
 	RCoreLock core(arch->getCore());
 	Sdb *sdb = core->anal->sdb_types;
 	const char *target = sdb_const_get(sdb, ("typedef." + n).c_str(), nullptr);
-	if(!target)
+	if(!target) {
 		return nullptr;
-
+	}
 	Datatype *resolved = fromCString(target, nullptr, &stackTypes);
-	if(!resolved)
+	if(!resolved) {
 		return nullptr;
-
+	}
 	Datatype *typedefd = resolved->clone();
 	setName(typedefd, n); // this removes the old name from the nametree
 	setName(resolved, resolved->getName()); // add the old name back

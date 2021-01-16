@@ -1,4 +1,4 @@
-/* radare - LGPL - Copyright 2019 - thestr4ng3r */
+/* radare - LGPL - Copyright 2019-2021 - thestr4ng3r */
 
 #include "R2Architecture.h"
 #include "CodeXMLParse.h"
@@ -619,7 +619,7 @@ static int r2ghidra_fini(void *user, const char *cmd)
 
 RCorePlugin r_core_plugin_ghidra = {
 	/* .name = */ "r2ghidra",
-	/* .desc = */ "Ghidra integration",
+	/* .desc = */ "Ghidra decompiler with pdg command",
 	/* .license = */ "GPL3",
 	/* .author = */ "thestr4ng3r",
 	/* .version = */ nullptr,
