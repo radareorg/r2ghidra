@@ -9,7 +9,7 @@
 #include "SleighAsm.h"
 #include "SleighAnalValue.h"
 
-static SleighAsm sanal;
+static SleighAsm *sanal = nullptr;
 
 static int archinfo(RAnal *anal, int query)
 {
@@ -24,7 +24,7 @@ static int archinfo(RAnal *anal, int query)
 
 	try
 	{
-		sanal.init(anal->cpu, anal->bits, anal->big_endian, anal? anal->iob.io : nullptr, SleighAsm::getConfig(anal));
+		sanal->init(anal->cpu, anal->bits, anal->big_endian, anal? anal->iob.io : nullptr, SleighAsm::getConfig(anal));
 	}
 	catch(const LowlevelError &e)
 	{
@@ -33,7 +33,7 @@ static int archinfo(RAnal *anal, int query)
 	}
 
 	if(query == R_ANAL_ARCHINFO_ALIGN)
-		return sanal.alignment;
+		return sanal->alignment;
 	else
 		return -1;
 }
@@ -316,8 +316,8 @@ static ut32 anal_type_XPUSH(RAnal *anal, RAnalOp *anal_op, const std::vector<Pco
 
 			out.mem(iter->output->size);
 
-			if((out.reg && sanal.reg_mapping[sanal.sp_name] == out.reg->name) ||
-			   (out.regdelta && sanal.reg_mapping[sanal.sp_name] == out.regdelta->name))
+			if((out.reg && sanal->reg_mapping[sanal->sp_name] == out.reg->name) ||
+			   (out.regdelta && sanal->reg_mapping[sanal->sp_name] == out.regdelta->name))
 			{
 				anal_op->type = R_ANAL_OP_TYPE_UPUSH;
 				anal_op->stackop = R_ANAL_STACK_INC;
@@ -360,8 +360,8 @@ static ut32 anal_type_POP(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcode
 			if(!in0.is_valid())
 				continue;
 
-			if((in0.reg && sanal.reg_mapping[sanal.sp_name] == in0.reg->name) ||
-			   (in0.regdelta && sanal.reg_mapping[sanal.sp_name] == in0.regdelta->name))
+			if((in0.reg && sanal->reg_mapping[sanal->sp_name] == in0.reg->name) ||
+			   (in0.regdelta && sanal->reg_mapping[sanal->sp_name] == in0.regdelta->name))
 			{
 				if(iter->output)
 					outs = SleighAnalValue::resolve_out(anal, iter, raw_ops.cend(), iter->output);
@@ -691,12 +691,12 @@ static void anal_type(RAnal *anal, RAnalOp *anal_op, PcodeSlg &pcode_slg, Assemb
 	std::vector<std::string> args = string_split(assem.str);
 	std::unordered_set<std::string> reg_set;
 	std::map<VarnodeData, std::string> reglist;
-	sanal.trans.getAllRegisters(reglist);
+	sanal->trans.getAllRegisters(reglist);
 	for(auto iter = args.cbegin(); iter != args.cend(); ++iter)
 	{
 		for(auto p = reglist.cbegin(); p != reglist.cend(); ++p)
 		{
-			if(sanal.reg_mapping[p->second] == *iter)
+			if(sanal->reg_mapping[p->second] == *iter)
 			{
 				reg_set.insert(*iter);
 				break;
@@ -782,13 +782,11 @@ static char *getIndirectReg(SleighInstruction &ins, bool &isRefed)
 		data.size &= ~0x80000000;
 
 	AddrSpace *space = data.space;
-	if(space->getName() == "register")
-		return strdup(
-		    sanal
-		        .reg_mapping[space->getTrans()->getRegisterName(data.space, data.offset, data.size)]
-		        .c_str());
-	else
-		return nullptr;
+	if(space->getName() == "register") {
+		auto index = space->getTrans()->getRegisterName(data.space, data.offset, data.size);
+		return strdup(sanal->reg_mapping[index].c_str());
+	}
+	return nullptr;
 }
 
 static int index_of_unique(const std::vector<PcodeOperand *> &esil_stack, const PcodeOperand *arg)
@@ -966,7 +964,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 					ss << ",";
 					if(!print_if_unique(iter->input0))
 						ss << *iter->input0 << (iter->input0->is_reg()? ",NUM": "");
-					ss << "," << sanal.reg_mapping[sanal.pc_name] << ",=";
+					ss << "," << sanal->reg_mapping[sanal->pc_name] << ",=";
 				}
 				else
 					throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
@@ -989,7 +987,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 					ss << ",";
 					if(!print_if_unique(iter->input0))
 						ss << *iter->input0 << (iter->input0->is_reg()? ",NUM": "");
-					ss << "," << sanal.reg_mapping[sanal.pc_name] << ",=,}";
+					ss << "," << sanal->reg_mapping[sanal->pc_name] << ",=,}";
 				}
 				else
 					throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
@@ -1378,18 +1376,18 @@ static int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int
 {
 	try
 	{
-		sanal.init(a->cpu, a->bits, a->big_endian, a? a->iob.io : nullptr, SleighAsm::getConfig(a));
+		sanal->init(a->cpu, a->bits, a->big_endian, a? a->iob.io : nullptr, SleighAsm::getConfig(a));
 
 		anal_op->addr = addr;
 		anal_op->sign = true;
 		anal_op->type = R_ANAL_OP_TYPE_ILL;
 
-		PcodeSlg pcode_slg(&sanal);
-		AssemblySlg assem(&sanal);
-		Address caddr(sanal.trans.getDefaultCodeSpace(), addr);
-		sanal.check(addr, data, len);
-		anal_op->size = sanal.genOpcode(pcode_slg, caddr);
-		if((anal_op->size < 1) || (sanal.trans.printAssembly(assem, caddr) < 1))
+		PcodeSlg pcode_slg(sanal);
+		AssemblySlg assem(sanal);
+		Address caddr(sanal->trans.getDefaultCodeSpace(), addr);
+		sanal->check(addr, data, len);
+		anal_op->size = sanal->genOpcode(pcode_slg, caddr);
+		if((anal_op->size < 1) || (sanal->trans.printAssembly(assem, caddr) < 1))
 			return anal_op->size; // When current place has no available code, return ILL.
 
 		if(pcode_slg.pcodes.empty())
@@ -1399,7 +1397,7 @@ static int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int
 			return anal_op->size;
 		}
 
-		SleighInstruction &ins = *sanal.trans.getInstruction(caddr);
+		SleighInstruction &ins = *sanal->trans.getInstruction(caddr);
 		FlowType ftype = ins.getFlowType();
 		bool isRefed = false;
 
@@ -1637,12 +1635,12 @@ static const char *r_reg_string_arr[] = {"gpr", "gpr", "gpr", "gpr", "gpr", "gpr
 
 static int get_reg_type(const std::string &name)
 {
-	auto p = sanal.reg_mapping.cbegin();
-	for(; p != sanal.reg_mapping.cend() && p->second != name; ++p) {}
-	if(p == sanal.reg_mapping.cend())
+	auto p = sanal->reg_mapping.cbegin();
+	for(; p != sanal->reg_mapping.cend() && p->second != name; ++p) {}
+	if(p == sanal->reg_mapping.cend())
 		throw LowlevelError("get_reg_type: reg doesn't exist.");
 
-	const std::string &group = sanal.reg_group[p->first];
+	const std::string &group = sanal->reg_group[p->first];
 
 	if(group.empty())
 		return R_REG_TYPE_GPR;
@@ -1790,7 +1788,7 @@ static char *get_reg_profile(RAnal *anal)
 
 	try
 	{
-		sanal.init(anal->cpu, anal->bits, anal->big_endian, anal? anal->iob.io: nullptr, SleighAsm::getConfig(anal));
+		sanal->init(anal->cpu, anal->bits, anal->big_endian, anal? anal->iob.io: nullptr, SleighAsm::getConfig(anal));
 	}
 	catch(const LowlevelError &e)
 	{
@@ -1798,60 +1796,60 @@ static char *get_reg_profile(RAnal *anal)
 		return nullptr;
 	}
 
-	auto reg_list = sanal.getRegs();
+	auto reg_list = sanal->getRegs();
 	std::stringstream buf;
 
 	for(auto p = reg_list.begin(); p != reg_list.end(); p++)
 	{
-		const std::string &group = sanal.reg_group[p->name];
+		const std::string &group = sanal->reg_group[p->name];
 		if(group.empty())
 		{
-			buf << "gpr\t" << sanal.reg_mapping[p->name] << "\t." << p->size * 8 << "\t"
-			    << p->offset << "\t"
+			buf << "gpr\t" << sanal->reg_mapping[p->name] << "\t." << p->size * 8 << "\t"
+				    << p->offset << "\t"
+				    << "0\n";
+				continue;
+			}
+
+			for(size_t i = 0;; i++)
+			{
+				if(!r_reg_type_arr[i])
+				{
+					fprintf(stderr,
+						"anal_ghidra.cpp:get_reg_profile() -> Get unexpected Register group(%s) "
+						"from SLEIGH, abort.",
+						group.c_str());
+					return nullptr;
+				}
+
+				if(group == r_reg_type_arr[i])
+				{
+					buf << r_reg_string_arr[i] << '\t';
+					break;
+				}
+			}
+
+			buf << sanal->reg_mapping[p->name] << "\t." << p->size * 8 << "\t" << p->offset << "\t"
 			    << "0\n";
-			continue;
 		}
 
-		for(size_t i = 0;; i++)
-		{
-			if(!r_reg_type_arr[i])
-			{
-				fprintf(stderr,
-				        "anal_ghidra.cpp:get_reg_profile() -> Get unexpected Register group(%s) "
-				        "from SLEIGH, abort.",
-				        group.c_str());
-				return nullptr;
-			}
+		if(!sanal->pc_name.empty())
+			buf << "=PC\t" << sanal->reg_mapping[sanal->pc_name] << '\n';
+		if(!sanal->sp_name.empty())
+			buf << "=SP\t" << sanal->reg_mapping[sanal->sp_name] << '\n';
 
-			if(group == r_reg_type_arr[i])
-			{
-				buf << r_reg_string_arr[i] << '\t';
-				break;
-			}
-		}
+		for(unsigned i = 0; i != sanal->arg_names.size() && i <= 9; ++i)
+			buf << "=A" << i << '\t' << sanal->reg_mapping[sanal->arg_names[i]] << '\n';
 
-		buf << sanal.reg_mapping[p->name] << "\t." << p->size * 8 << "\t" << p->offset << "\t"
-		    << "0\n";
-	}
-
-	if(!sanal.pc_name.empty())
-		buf << "=PC\t" << sanal.reg_mapping[sanal.pc_name] << '\n';
-	if(!sanal.sp_name.empty())
-		buf << "=SP\t" << sanal.reg_mapping[sanal.sp_name] << '\n';
-
-	for(unsigned i = 0; i != sanal.arg_names.size() && i <= 9; ++i)
-		buf << "=A" << i << '\t' << sanal.reg_mapping[sanal.arg_names[i]] << '\n';
-
-	for(unsigned i = 0; i != sanal.ret_names.size() && i <= 3; ++i)
-		buf << "=R" << i << '\t' << sanal.reg_mapping[sanal.ret_names[i]] << '\n';
+		for(unsigned i = 0; i != sanal->ret_names.size() && i <= 3; ++i)
+			buf << "=R" << i << '\t' << sanal->reg_mapping[sanal->ret_names[i]] << '\n';
 
 	ut64 pp = 0;
-	string arch = sanal.sleigh_id.substr(pp, sanal.sleigh_id.find(':', pp) - pp);
-	pp = sanal.sleigh_id.find(':', pp) + 1;
-	bool little = sanal.sleigh_id.substr(pp, sanal.sleigh_id.find(':', pp) - pp) == "LE";
-	pp = sanal.sleigh_id.find(':', pp) + 1;
-	int bits = std::stoi(sanal.sleigh_id.substr(pp, sanal.sleigh_id.find(':', pp) - pp));
-	pp = sanal.sleigh_id.find(':', pp) + 1;
+	string arch = sanal->sleigh_id.substr(pp, sanal->sleigh_id.find(':', pp) - pp);
+	pp = sanal->sleigh_id.find(':', pp) + 1;
+	bool little = sanal->sleigh_id.substr(pp, sanal->sleigh_id.find(':', pp) - pp) == "LE";
+	pp = sanal->sleigh_id.find(':', pp) + 1;
+	int bits = std::stoi(sanal->sleigh_id.substr(pp, sanal->sleigh_id.find(':', pp) - pp));
+	pp = sanal->sleigh_id.find(':', pp) + 1;
 
 	append_hardcoded_regs(buf, arch, little, bits);
 
@@ -3263,13 +3261,28 @@ static int esil_sleigh_init(RAnalEsil *esil)
 	return true;
 }
 
+static int sanal_init(void *p) {
+	if (sanal == nullptr)
+		sanal = new SleighAsm();
+	return true;
+}
+
 static int esil_sleigh_fini(RAnalEsil *esil)
 {
 	float_mem.clear();
 	return true;
 }
 
-RAnalPlugin r_anal_plugin_ghidra = {
+static int sanal_fini(void *p)
+{
+	if (sanal) {
+		delete sanal;
+		sanal = nullptr;
+	}
+	return true;
+}
+
+static RAnalPlugin r_anal_plugin_ghidra = {
 	/* .name = */ "r2ghidra",
 	/* .desc = */ "SLEIGH Disassembler from Ghidra",
 	/* .license = */ "GPL3",
@@ -3279,8 +3292,8 @@ RAnalPlugin r_anal_plugin_ghidra = {
 	/* .bits = */ 0,
 	/* .esil = */ true,
 	/* .fileformat_type = */ 0,
-	/* .init = */ nullptr,
-	/* .fini = */ nullptr,
+	/* .init = */ &sanal_init,
+	/* .fini = */ &sanal_fini,
 	/* .archinfo = */ &archinfo,
 	/* .anal_mask = */ nullptr,
 	/* .preludes = */ nullptr,
