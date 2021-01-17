@@ -4,7 +4,7 @@
 #include <r_asm.h>
 #include "SleighAsm.h"
 
-static SleighAsm sasm;
+static SleighAsm *sasm = nullptr;
 static RIO *rio = nullptr;
 
 //#define DEBUG_EXCEPTIONS
@@ -27,7 +27,10 @@ static int disassemble(RAsm *a, RAsmOp *op, const ut8 *buf, int len)
 			if(!rio)
 			{
 				rio = r_io_new();
-				sasm.sleigh_id.clear(); // For newly created RIO, refresh SleighAsm.
+				if (!sasm) {
+					sasm = new SleighAsm();
+				}
+				sasm->sleigh_id.clear(); // For newly created RIO, refresh SleighAsm.
 			}
 			else
 				r_io_close_all(rio);
@@ -37,9 +40,12 @@ static int disassemble(RAsm *a, RAsmOp *op, const ut8 *buf, int len)
 			r_buf_free(tmp_buf);
 		}
 
-		sasm.init(a->cpu, a->bits, a->big_endian, bin? bin->iob.io : rio, SleighAsm::getConfig(a));
-		sasm.check(bin? a->pc : 0, buf, len);
-		r = sasm.disassemble(op, bin? a->pc : 0);
+		if (!sasm) {
+			sasm = new SleighAsm();
+		}
+		sasm->init(a->cpu, a->bits, a->big_endian, bin? bin->iob.io : rio, SleighAsm::getConfig(a));
+		sasm->check(bin? a->pc : 0, buf, len);
+		r = sasm->disassemble(op, bin? a->pc : 0);
 #ifndef DEBUG_EXCEPTIONS
 	}
 	catch(const LowlevelError &e)
@@ -55,13 +61,18 @@ static int disassemble(RAsm *a, RAsmOp *op, const ut8 *buf, int len)
 
 static bool fini(void *p)
 {
-	if(rio)
+	if (sasm) {
+		delete sasm;
+		sasm = nullptr;
+	}
+	if (rio) {
 		r_io_free(rio);
-	rio = nullptr;
+		rio = nullptr;
+	}
 	return true;
 }
 
-RAsmPlugin r_asm_plugin_ghidra = {
+static RAsmPlugin r_asm_plugin_ghidra = {
 	/* .name = */ "r2ghidra",
 	/* .arch = */ "sleigh",
 	/* .author = */ "FXTi",
@@ -83,7 +94,7 @@ RAsmPlugin r_asm_plugin_ghidra = {
 
 #ifndef CORELIB
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
 R_API RLibStruct radare_plugin = {
 	/* .type = */ R_LIB_TYPE_ASM,
@@ -94,4 +105,5 @@ R_API RLibStruct radare_plugin = {
 	, "r2ghidra"
 #endif
 };
+}
 #endif
