@@ -18,15 +18,7 @@ all: root
 
 root:
 	cd ../.. && $(DOCKCROSS) --image dockcross/linux-$(CROSSARCH) \
-	bash -c 'sh dist/build.sh\
-		; rm -rf build \
-		&& mkdir -p build \
-		&& cd build \
-		&& cmake .. \
-			-DRADARE2_INSTALL_PLUGDIR=$(shell r2 -HR2_LIBR_PLUGINS) \
-			-DCMAKE_INSTALL_PREFIX=$(shell r2 -HR2_PREFIX) \
-		&& make -j4 \
-		&& make install DESTDIR=/work/dist/debian/root'
+	bash -c 'DESTDIR=/work/scripts/debian/root sh scripts/build.sh'
 
 purge: clean
 	rm -rf root

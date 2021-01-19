@@ -45,7 +45,6 @@ user-install:
 	$(MAKE) -C src install
 	$(MAKE) -C src sleigh-install
 
-
 user-uninstall:
 	$(MAKE) -C src uninstall
 	$(MAKE) -C src sleigh-uninstall
