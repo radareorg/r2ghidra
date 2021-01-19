@@ -13,6 +13,9 @@ endif
 ghidra-processors.txt:
 	cp -f ghidra-processors.txt.default ghidra-processors.txt
 
+asan:
+	CFLAGS="-fsanitize=address" $(MAKE) -C src
+
 help:
 	@echo
 	@echo "./configure       # first you need to run configure"
