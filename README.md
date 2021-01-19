@@ -2,7 +2,7 @@
 
 # r2ghidra
 
-[![Build Status](https://travis-ci.com/radareorg/r2ghidra.svg?token=JDmXp2pDhXxtPErySVHM&branch=master)](https://travis-ci.com/radareorg/r2ghidra)
+![ci](https://github.com/radareorg/r2ghidra/workflows/ci/badge.svg)
 
 This is an integration of the Ghidra decompiler for [radare2](https://github.com/radareorg/radare2).
 It is solely based on the decompiler part of Ghidra, which is written entirely in
