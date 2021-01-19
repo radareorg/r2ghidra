@@ -43,7 +43,7 @@ jobs:
     #  run: ( git clone --depth=1 https://github.com/radareorg/radare2 && cd radare2 && sys/sanitize.sh --install /usr )
       run: ( git clone --depth=1 https://github.com/radareorg/radare2 && cd radare2 && sys/install.sh --install )
     - name: Building r2ghidra with acr
-      run: git submodule update --init ; ./configure ; make asan ; make sleigh-build; make user-install
+      run: git submodule update --init ; ./configure ; make asan ; make -C src sleigh-build; make user-install
     - name: Testing r2ghidra oneliner
       run: r2 -qc 'af;pdg' /bin/ls || exit 0
 
