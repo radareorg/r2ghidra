@@ -29,7 +29,7 @@ CFLAGS+=-w
 CFLAGS+=-fPIC
 CFLAGS+=-I$(GHIDRA_DECOMPILER)
 CFLAGS+=-I.
-ifeq ($(shell uname),FreeBSD)
+ifeq ($(shell uname),Unsupported)
 CFLAGS+=-DHOST_ENDIAN=1
 CFLAGS+=-Dint1=char
 CFLAGS+=-Dint2=short
@@ -72,6 +72,7 @@ $(R2G_ANAL_PLUGIN): $(deps)
 	$(CXX) -fPIC $(CXXFLAGS) $(R2_CFLAGS) -c $<
 
 install:
+	mkdir -p $(R2_USER_PLUGINS)
 	cp -f *.$(R2_LIBEXT) $(R2_USER_PLUGINS)
 
 uninstall:

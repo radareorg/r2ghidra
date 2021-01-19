@@ -1,4 +1,4 @@
-all: ghidra
+all: ghidra/.gitignore
 
-ghidra:
+ghidra/.gitignore:
 	git submodule update --init
