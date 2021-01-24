@@ -1,5 +1,6 @@
 .idea
 cmake-build-*
+src/sleighc
 build
 *.swp
 compile_commands.json

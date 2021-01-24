@@ -174,6 +174,9 @@ void R2Architecture::buildTypegrp(DocumentStorage &store)
 	types->setCoreType("undefined8", 8, TYPE_UNKNOWN, false);
 	types->setCoreType("code", 1, TYPE_CODE, false);
 	types->setCoreType("wchar", 2, TYPE_INT, true);
+	types->setCoreType("char", 1, TYPE_INT, true);
+	types->setCoreType("char16_t", 2, TYPE_INT, true);
+	types->setCoreType("char32_t", 4, TYPE_INT, true);
 	types->cacheCoreTypes();
 }
 

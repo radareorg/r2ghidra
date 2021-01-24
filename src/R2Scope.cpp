@@ -431,8 +431,38 @@ Symbol *R2Scope::registerFlag(RFlagItem *flag) const
 	Datatype *type = nullptr;
 	if(flag->space && !strcmp(flag->space->name, R_FLAGS_FS_STRINGS))
 	{
-		Datatype *ptype = arch->types->findByName("char");
-		type = arch->types->getTypeArray(static_cast<int4>(flag->size), ptype);
+		RBinString *str = nullptr;
+		RListIter *iter;
+		void *pos;
+		r_list_foreach (core->bin->binfiles, iter, pos)
+		{
+			auto bf = reinterpret_cast<RBinFile *>(pos);
+			if(!bf->o)
+				continue;
+			void *s = ht_up_find(bf->o->strings_db, flag->offset, nullptr);
+			if(s)
+			{
+				str = reinterpret_cast<RBinString *>(s);
+				break;
+			}
+		}
+		Datatype *ptype;
+		const char *tn = "char";
+		if(str)
+		{
+			switch(str->type)
+			{
+				case R_STRING_TYPE_WIDE:
+					tn = "char16_t";
+					break;
+				case R_STRING_TYPE_WIDE32:
+					tn = "char32_t";
+					break;
+			}
+		}
+		ptype = arch->types->findByName(tn);
+		int4 sz = static_cast<int4>(flag->size) / ptype->getSize();
+		type = arch->types->getTypeArray(sz, ptype);
 		attr |= Varnode::readonly;
 	}
 
