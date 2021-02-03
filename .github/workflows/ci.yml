@@ -120,9 +120,7 @@ jobs:
       shell: bash
       run: |
         pip install ninja meson wget
-        choco install winflexbison3
-        choco install zip
-        choco install cmake
+        choco install winflexbison3 zip cmake
     - name: install r2
       shell: bash
       run: |
@@ -131,9 +129,18 @@ jobs:
         mv radare2-${R2V}_w64 radare2
     - name: cmake
       run: |
-        git submodule update --init ; mkdir build && cd build && cmake .. && make -j4 
-        make install DESTDIR=destdir
-        cd destdir
+        export R2=$PWD/radare2
+        export PKG_CONFIG_PATH=$R2/lib/pkgconfig
+        export CFLAGS=-I$R2/include
+        export LDFLAGS=-L$R2/lib
+        export PATH=$R2/bin:$PATH
+        export DESTDIR=$PWD/destdir
+        export ARCH=x64
+        git submodule update --init ; mkdir build
+        cd build
+        cmake --build .. --config Release
+        # make install DESTDIR=$DESTDIR
+        cd $DESTDIR
         zip -r ../r2ghidra-w64.zip *
     - uses: actions/upload-artifact@v2
       with:
