@@ -128,16 +128,17 @@ jobs:
         python -m wget https://github.com/radareorg/radare2/releases/download/${R2V}/radare2-${R2V}_w64.zip -o r2.zip
         unzip r2.zip
         mv radare2-${R2V}_w64 radare2
-    - name: cmake
+    - name: make
+      shell: cmd
       run: |
-        set R2=%CD%\radare2
-        set PKG_CONFIG_PATH=%R2%\lib\pkgconfig
-        set CFLAGS=-I%R2%\include
-        set LDFLAGS=-L%R2%\lib
-        set PATH=%R2%\bin:$PATH
+        set PKG_CONFIG_PATH=%CD%\radare2\lib\pkgconfig
+        set CFLAGS=-I%CD%\radare2\include
+        set LDFLAGS=-L%CD%\radare2\lib
+        set PATH=%CD%\radare2\bin;%PATH%
         set DESTDIR=%CD%\destdir
         set ARCH=x64
         git submodule update --init
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
         mkdir destdir
         mkdir build
         cd build
