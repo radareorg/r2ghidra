@@ -60,6 +60,9 @@ endif
 	echo "Section: ${SECTION}" >> $@/control
 	echo "Priority: ${PRIORITY}" >> $@/control
 	echo "Architecture: ${ARCH}" >> $@/control
+ifneq (${REPLACES},)
+	echo "Replaces: ${REPLACES}" >> $@/control
+endif
 ifneq (${DEPENDS},)
 	echo "Depends: ${DEPENDS}" >> $@/control
 endif
