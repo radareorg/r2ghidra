@@ -129,18 +129,19 @@ jobs:
         mv radare2-${R2V}_w64 radare2
     - name: cmake
       run: |
-        set R2=%CD%/radare2
-        set PKG_CONFIG_PATH=%R2T/lib/pkgconfig
-        set CFLAGS=-I%R2%/include
-        set LDFLAGS=-L%R2%/lib
-        set PATH=%R2%/bin:$PATH
-        set DESTDIR=%CD%/destdir
+        set R2=%CD%\radare2
+        set PKG_CONFIG_PATH=%R2%\lib\pkgconfig
+        set CFLAGS=-I%R2%\include
+        set LDFLAGS=-L%R2%\lib
+        set PATH=%R2%\bin:$PATH
+        set DESTDIR=%CD%\destdir
         set ARCH=x64
-        git submodule update --init ; mkdir build
+        git submodule update --init
+        mkdir build
         cd build
         cmake --build .. --config Release
-        # make install DESTDIR=$DESTDIR
-        cd %DESTDIR%
+        make install DESTDIR=%CD%\..\destdir
+        cd ..\destdir
         zip -r ..\r2ghidra-w64.zip *
     - uses: actions/upload-artifact@v2
       with:
