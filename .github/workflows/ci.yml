@@ -30,6 +30,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         # path: radare2/dist/debian/*/*.deb r2ghidra/scripts/debian/*.deb
+        name: r2ghidra-${{env.R2V}}_amd64.deb
         path: r2ghidra/scripts/debian/*.deb
 
   linux-asan:
@@ -120,7 +121,7 @@ jobs:
       shell: bash
       run: |
         pip install ninja meson wget
-        choco install winflexbison3 zip cmake
+        choco install zip 
     - name: install r2
       shell: bash
       run: |
