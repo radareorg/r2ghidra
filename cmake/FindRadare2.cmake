@@ -19,15 +19,15 @@ if(WIN32)
         find_path(Radare2_INCLUDE_DIRS
                         NAMES r_core.h r_bin.h r_util.h
                         HINTS
-                        "$ENV{HOME}/bin/prefix/radare2/include/libr"
                         ../radare2/include/libr
+                        "$ENV{HOME}/bin/prefix/radare2/include/libr"
                         /usr/local/include/libr
                         /usr/include/libr)
         find_path(SDB_INCLUDE_DIR
                         NAMES sdb.h sdbht.h sdb_version.h
                         HINTS
-                        "$ENV{HOME}/bin/prefix/radare2/include/libr/sdb"
                         ../radare2/include/libr/sdb
+                        "$ENV{HOME}/bin/prefix/radare2/include/libr/sdb"
                         /usr/local/include/libr/sdb
                         /usr/include/libr/sdb)
 
@@ -64,8 +64,8 @@ if(WIN32)
 		find_library(Radare2_LIBRARY_${libname}
 				r_${libname}
 				HINTS
-				"$ENV{HOME}/bin/prefix/radare2/lib"
                         	../radare2/lib
+				"$ENV{HOME}/bin/prefix/radare2/lib"
 				/usr/local/lib
 				/usr/lib)
 
