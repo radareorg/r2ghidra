@@ -137,10 +137,13 @@ jobs:
         set DESTDIR=%CD%\destdir
         set ARCH=x64
         git submodule update --init
+        mkdir destdir
         mkdir build
         cd build
         cmake --build .. --config Release
-        make install DESTDIR=%CD%\..\destdir
+        make -j3
+        # make install DESTDIR=%CD%\..\destdir
+        cp *.dll ..\destdir
         cd ..\destdir
         zip -r ..\r2ghidra-w64.zip *
     - uses: actions/upload-artifact@v2
