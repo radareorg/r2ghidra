@@ -64,7 +64,7 @@ if(WIN32)
 	foreach(libname ${Radare2_LIBRARY_NAMES})
 	    message(STATUS "searching for file: r_${libname}")
 		find_library(Radare2_LIBRARY_${libname}
-				libr_${libname}.a
+				r_${libname}
 				HINTS
                 ../radare2/lib
 				"$ENV{HOME}/bin/prefix/radare2/lib"
@@ -75,7 +75,6 @@ if(WIN32)
 		list(APPEND Radare2_LIBRARIES_VARS "Radare2_LIBRARY_${libname}")
      	message(STATUS "Library set to ${Radare2_LIBRARY_${libname}}")
 	endforeach()
-	message(STATUS "the variable Radare2_LIBRARIES equals ${Radare2_LIBRARIES}")
 
 	add_library(Radare2::libr UNKNOWN IMPORTED)
 	set_target_properties(Radare2::libr PROPERTIES
