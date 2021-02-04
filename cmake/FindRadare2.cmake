@@ -19,14 +19,12 @@ if(WIN32)
         find_path(Radare2_INCLUDE_DIRS
                         NAMES r_core.h r_bin.h r_util.h
                         HINTS
-						../radare2/include/libr
                         "$ENV{HOME}/bin/prefix/radare2/include/libr"
                         /usr/local/include/libr
                         /usr/include/libr)
         find_path(SDB_INCLUDE_DIR
                         NAMES sdb.h sdbht.h sdb_version.h
                         HINTS
-						../radare2/include/libr/sdb
                         "$ENV{HOME}/bin/prefix/radare2/include/libr/sdb"
                         /usr/local/include/libr/sdb
                         /usr/include/libr/sdb)
@@ -58,26 +56,21 @@ if(WIN32)
 			magic
 			crypto)
 
-	#set(Radare2_LIBRARIES "libr_core.a libr_config.a libr_cons.a libr_io.a	libr_util.a libr_flag.a	libr_asm.a libr_debug.a	libr_hash.a libr_bin.a	libr_lang.a	io	libr_anal.a	libr_parse.a	libr_bp.a	libr_egg.a	libr_reg.	libr_search.a	libr_syscall.a	libr_socket.a	libr_fs.a	libr_magic.a libr_crypto.a")
-	set (Radare2_LIBRARIES "" )
+	set(Radare2_LIBRARIES "")
 	set(Radare2_LIBRARIES_VARS "")
-	set (CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 	foreach(libname ${Radare2_LIBRARY_NAMES})
-	    message(STATUS "searching for file: libr_${libname}.a")
 		find_library(Radare2_LIBRARY_${libname}
-				libr_${libname}.a
+				r_${libname}
 				HINTS
 				"$ENV{HOME}/bin/prefix/radare2/lib"
-				../radare2/lib
 				/usr/local/lib
 				/usr/lib)
+
 		list(APPEND Radare2_LIBRARIES ${Radare2_LIBRARY_${libname}})
 		list(APPEND Radare2_LIBRARIES_VARS "Radare2_LIBRARY_${libname}")
-     	message(STATUS "Running in loop variable=${Radare2_LIBRARY_${libname}}")
 	endforeach()
-	message(STATUS "the variable Radare2_LIBRARIES equals ${Radare2_LIBRARIES}")
 
-	set(Radare2_LIBRARY_DIRS "C:/Users/Sab/AppData/Local/Programs/radare2/lib")
+	set(Radare2_LIBRARY_DIRS "")
 
 	add_library(Radare2::libr UNKNOWN IMPORTED)
 	set_target_properties(Radare2::libr PROPERTIES

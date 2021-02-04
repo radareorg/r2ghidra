@@ -11,10 +11,6 @@
 #include <unordered_map>
 #include <list>
 
-#ifdef LoadImage
-#undef LoadImage
-#endif
-
 template<typename K, typename V>
 class LRUCache
 {
