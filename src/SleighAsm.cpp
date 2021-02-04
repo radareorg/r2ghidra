@@ -558,7 +558,7 @@ ostream &operator<<(ostream &s, const PcodeOperand &arg)
 		case PcodeOperand::UNIQUE: s << "unique(" << arg.offset << ", " << arg.size << ")"; break;
 		// case PcodeOperand::RAM: s << "ram(" << arg.offset << ", " << arg.size << ")";
 		case PcodeOperand::RAM: s << arg.offset; break;
-		case PcodeOperand::CONST: s << arg.number; break;
+		case PcodeOperand::CONSTANT: s << arg.number; break;
 		default: throw LowlevelError("Unexpected type of PcodeOperand found in operator<<.");
 	}
 	return s;
@@ -617,7 +617,7 @@ PcodeOperand *PcodeSlg::parse_vardata(VarnodeData &data)
 	{
 		// space.cc's ConstantSpace::printRaw()
 		operand = new PcodeOperand(data.offset);
-		operand->type = PcodeOperand::CONST;
+		operand->type = PcodeOperand::CONSTANT;
 		operand->size = data.size; // To aviod ctor's signature collide with RAM's
 	}
 	else if(space->getName() == "unique")

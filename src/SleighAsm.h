@@ -52,7 +52,7 @@ public:
 struct PcodeOperand
 {
 	PcodeOperand(uintb offset, uint4 size): type(RAM), offset(offset), size(size) {}
-	PcodeOperand(uintb number): type(CONST), number(number), size(0) {}
+	PcodeOperand(uintb number): type(CONSTANT), number(number), size(0) {}
 	PcodeOperand(const std::string &name, uint4 size): type(REGISTER), name(name), size(size) {}
 	virtual ~PcodeOperand()
 	{
@@ -72,7 +72,7 @@ struct PcodeOperand
 	{
 		REGISTER,
 		RAM,
-		CONST,
+		CONSTANT,
 		UNIQUE
 	} type;
 
@@ -86,7 +86,7 @@ struct PcodeOperand
 			case REGISTER: name = rhs.name; break;
 			case UNIQUE: /* Same as RAM */
 			case RAM: offset = rhs.offset; break;
-			case CONST: number = rhs.number; break;
+			case CONSTANT: number = rhs.number; break;
 			default: throw LowlevelError("Unexpected type of PcodeOperand found in operator==.");
 		}
 	}
@@ -101,14 +101,14 @@ struct PcodeOperand
 			case REGISTER: return name == rhs.name;
 			case UNIQUE: /* Same as RAM */
 			case RAM: return offset == rhs.offset && size == rhs.size;
-			case CONST: return number == rhs.number;
+			case CONSTANT: return number == rhs.number;
 			default: throw LowlevelError("Unexpected type of PcodeOperand found in operator==.");
 		}
 	}
 
 	bool is_unique() const { return type == UNIQUE; }
 
-	bool is_const() const { return type == CONST; }
+	bool is_const() const { return type == CONSTANT; }
 
 	bool is_ram() const { return type == RAM; }
 
