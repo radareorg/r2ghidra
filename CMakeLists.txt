@@ -56,7 +56,9 @@ set(ASM_SOURCE
 		src/SleighAsm.cpp
 		src/SleighInstruction.h
 		src/SleighInstruction.cpp
-		src/asm_ghidra.cpp)
+		src/asm_ghidra.cpp
+		src/ArchMap.h
+		src/ArchMap.cpp)
 
 set(ANAL_SOURCE
 		src/SleighAsm.h
@@ -65,7 +67,9 @@ set(ANAL_SOURCE
 		src/SleighInstruction.cpp
 		src/SleighAnalValue.h
 		src/SleighAnalValue.cpp
-		src/anal_ghidra.cpp)
+		src/anal_ghidra.cpp
+		src/ArchMap.h
+		src/ArchMap.cpp)
 endif()
 
 find_package(Radare2 REQUIRED)
@@ -74,6 +78,10 @@ add_library(core_ghidra SHARED ${CORE_SOURCE})
 target_link_libraries(core_ghidra ghidra_decompiler_base ghidra_libdecomp ghidra_decompiler_sleigh)
 target_link_libraries(core_ghidra pugixml)
 target_link_libraries(core_ghidra Radare2::libr)
+if (WIN32)
+    target_link_libraries(core_ghidra Ws2_32.lib wininet)
+endif()
+
 set_target_properties(core_ghidra PROPERTIES
 		OUTPUT_NAME core_ghidra
 		PREFIX "")
