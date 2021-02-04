@@ -2369,7 +2369,7 @@ static bool sleigh_esil_float_add(RAnalEsil *esil)
 			long double tmp = s + d;
 			auto raised = fetestexcept(FE_OVERFLOW);
 			if(raised & FE_OVERFLOW)
-				ret = esil_pushnum_float(esil, 0.0 / 0.0);
+				ret = esil_pushnum_float(esil, 0.0);
 			else
 				ret = esil_pushnum_float(esil, s + d);
 		}
@@ -2414,7 +2414,7 @@ static bool sleigh_esil_float_sub(RAnalEsil *esil)
 			long double tmp = d - s;
 			auto raised = fetestexcept(FE_OVERFLOW);
 			if(raised & FE_OVERFLOW)
-				ret = esil_pushnum_float(esil, 0.0 / 0.0);
+				ret = esil_pushnum_float(esil, 0.0 );
 			else
 				ret = esil_pushnum_float(esil, d - s);
 		}
@@ -2459,7 +2459,7 @@ static bool sleigh_esil_float_mul(RAnalEsil *esil)
 			long double tmp = s * d;
 			auto raised = fetestexcept(FE_OVERFLOW);
 			if(raised & FE_OVERFLOW)
-				ret = esil_pushnum_float(esil, 0.0 / 0.0);
+				ret = esil_pushnum_float(esil, 0.0 );
 			else
 				ret = esil_pushnum_float(esil, s * d);
 		}
@@ -2504,7 +2504,7 @@ static bool sleigh_esil_float_div(RAnalEsil *esil)
 			long double tmp = d / s;
 			auto raised = fetestexcept(FE_OVERFLOW);
 			if(raised & FE_OVERFLOW)
-				ret = esil_pushnum_float(esil, 0.0 / 0.0);
+				ret = esil_pushnum_float(esil, 0.0 );
 			else
 				ret = esil_pushnum_float(esil, d / s);
 		}
