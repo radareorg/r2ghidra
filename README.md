@@ -2,7 +2,7 @@
 
 # r2ghidra
 
-![ci](https://github.com/radareorg/r2ghidra/workflows/ci/badge.svg)
+[![ci](https://github.com/radareorg/r2ghidra/workflows/ci/badge.svg)](https://github.com/radareorg/r2ghidra/actions?query=workflow%3Aci)
 
 This is an integration of the Ghidra decompiler for [radare2](https://github.com/radareorg/radare2).
 It is solely based on the decompiler part of Ghidra, which is written entirely in
