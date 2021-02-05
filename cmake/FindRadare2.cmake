@@ -26,7 +26,7 @@ if(WIN32)
         find_path(SDB_INCLUDE_DIR
                         NAMES sdb.h sdbht.h sdb_version.h
                         HINTS
-						../radare2/include/libr/sdb
+		                ../radare2/include/libr/sdb
                         "$ENV{HOME}/bin/prefix/radare2/include/libr/sdb"
                         /usr/local/include/libr/sdb
                         /usr/include/libr/sdb)
@@ -58,7 +58,7 @@ if(WIN32)
 			magic
 			crypto)
 
-	set (Radare2_LIBRARIES "" )
+	set (Radare2_LIBRARIES "")
 	set(Radare2_LIBRARIES_VARS "")
 	set (CMAKE_FIND_LIBRARY_SUFFIXES ".lib")
 	foreach(libname ${Radare2_LIBRARY_NAMES})
