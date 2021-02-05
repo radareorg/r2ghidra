@@ -141,7 +141,7 @@ jobs:
         mkdir destdir
         mkdir build
         cd build
-        cmake ..
+        cmake -GNinja ..
         cmake --build .
         copy *.dll ..\destdir
         cd ..\destdir

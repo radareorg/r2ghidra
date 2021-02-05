@@ -3,7 +3,6 @@
 #ifndef R2GHIDRA_R2LOADIMAGE_H
 #define R2GHIDRA_R2LOADIMAGE_H
 
-#include "loadimage.hh"
 
 #include <r_core.h>
 
@@ -11,6 +10,7 @@
 #ifdef LoadImage
 #undef LoadImage
 #endif
+#include "loadimage.hh"
 
 class RCoreMutex;
 

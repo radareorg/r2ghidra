@@ -16,22 +16,22 @@
 #  Radare2_LIBRARY_<name> - Path to library r_<name>
 
 if(WIN32)
-        find_path(Radare2_INCLUDE_DIRS
-                        NAMES r_core.h r_bin.h r_util.h
-                        HINTS
-                        ../radare2/include/libr
-                        "$ENV{HOME}/bin/prefix/radare2/include/libr"
-                        /usr/local/include/libr
-                        /usr/include/libr)
-        find_path(SDB_INCLUDE_DIR
-                        NAMES sdb.h sdbht.h sdb_version.h
-                        HINTS
-                        ../radare2/include/libr/sdb
-                        "$ENV{HOME}/bin/prefix/radare2/include/libr/sdb"
-                        /usr/local/include/libr/sdb
-                        /usr/include/libr/sdb)
+		find_path(Radare2_INCLUDE_DIRS
+						NAMES r_core.h r_bin.h r_util.h
+						HINTS
+						../radare2/include/libr
+						"$ENV{HOME}/bin/prefix/radare2/include/libr"
+						/usr/local/include/libr
+						/usr/include/libr)
+		find_path(SDB_INCLUDE_DIR
+						NAMES sdb.h sdbht.h sdb_version.h
+						HINTS
+						../radare2/include/libr/sdb
+						"$ENV{HOME}/bin/prefix/radare2/include/libr/sdb"
+						/usr/local/include/libr/sdb
+						/usr/include/libr/sdb)
 
-        list(APPEND Radare2_INCLUDE_DIRS ${SDB_INCLUDE_DIR})
+		list(APPEND Radare2_INCLUDE_DIRS ${SDB_INCLUDE_DIR})
 
 	set(Radare2_LIBRARY_NAMES
 			core
@@ -58,22 +58,23 @@ if(WIN32)
 			magic
 			crypto)
 
-	set(Radare2_LIBRARIES "")
+	set (Radare2_LIBRARIES "")
 	set(Radare2_LIBRARIES_VARS "")
+	set (CMAKE_FIND_LIBRARY_SUFFIXES ".lib")
 	foreach(libname ${Radare2_LIBRARY_NAMES})
+		message(STATUS "searching for file: r_${libname}")
 		find_library(Radare2_LIBRARY_${libname}
 				r_${libname}
 				HINTS
-                        	../radare2/lib
+				../radare2/lib
 				"$ENV{HOME}/bin/prefix/radare2/lib"
+				../radare2/lib
 				/usr/local/lib
 				/usr/lib)
-
 		list(APPEND Radare2_LIBRARIES ${Radare2_LIBRARY_${libname}})
 		list(APPEND Radare2_LIBRARIES_VARS "Radare2_LIBRARY_${libname}")
+		message(STATUS "Library set to ${Radare2_LIBRARY_${libname}}")
 	endforeach()
-
-	set(Radare2_LIBRARY_DIRS "")
 
 	add_library(Radare2::libr UNKNOWN IMPORTED)
 	set_target_properties(Radare2::libr PROPERTIES
