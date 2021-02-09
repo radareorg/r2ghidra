@@ -95,7 +95,21 @@ static const std::map<std::string, ArchMapper> arch_map = {
 			return "default";
 		}),
 		32 } },
-
+	{ "tricore", {
+		"tricore",
+		CUSTOM_FLAVOR((RCore *core) {
+			const char *cpu = r_config_get(core->config, "asm.cpu");
+			if(!cpu)
+				return "default";
+			if(strcmp(cpu, "tc29x") == 0)
+				return "tc29x";
+			if(strcmp(cpu, "tc172x") == 0)
+				return "tc172x";
+			if(strcmp(cpu, "tc176x") == 0)
+				return "tc176x";
+			return "default";
+		}),
+		32 } },
 	{ "arm", {
 	 	CUSTOM_BASEID((RCore *core) {
 			return BITS == 64 ? "AARCH64" : "ARM";
