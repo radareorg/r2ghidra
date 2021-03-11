@@ -1,4 +1,4 @@
-/* radare - LGPL - Copyright 2019 - thestr4ng3r */
+/* r2ghidra - LGPL - Copyright 2019-2021 - thestr4ng3r, pancake */
 
 #include "ArchMap.h"
 #include <error.hh>

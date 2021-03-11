@@ -1,4 +1,4 @@
-/* radare - LGPL - Copyright 2019 - thestr4ng3r */
+/* r2ghidra - LGPL - Copyright 2019-2021 - thestr4ng3r, pancake */
 
 #include "R2TypeFactory.h"
 #include "R2Architecture.h"

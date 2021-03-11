@@ -1,4 +1,4 @@
-/* radare - LGPL - Copyright 2020 - FXTi */
+/* r2ghidra - LGPL - Copyright 2020-2021 - pancake, FXTi */
 
 #include <r_lib.h>
 #include <r_anal.h>

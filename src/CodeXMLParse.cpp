@@ -1,3 +1,4 @@
+/* r2ghidra - LGPL - Copyright 2019-2021 - pancake */
 
 #include "CodeXMLParse.h"
 #include <r_util/r_annotated_code.h>
