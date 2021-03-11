@@ -290,7 +290,7 @@ void SleighAsm::resolveArch(const string &archid)
 	}
 
 	if(languageindex == -1)
-		throw LowlevelError("No sleigh specification for " + baseid);
+		throw LowlevelError("No sleigh specification for " + baseid + " from " + archid);
 }
 
 /*
