@@ -180,8 +180,9 @@ std::string StrToLower(std::string s)
 
 std::string SleighIdFromSleighAsmConfig(const char *cpu, int bits, bool bigendian, const vector<LanguageDescription> &langs)
 {
-	if(std::string(cpu).find(':') != string::npos) // complete id specified
+	if(std::string(cpu).find(':') != string::npos) {// complete id specified
 		return cpu;
+	}
 	// short form if possible
 	std::string low_cpu = StrToLower(cpu);
 	for(const auto &lang : langs)
