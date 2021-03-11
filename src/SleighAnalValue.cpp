@@ -1,4 +1,4 @@
-/* radare - LGPL - Copyright 2020 - FXTi */
+/* r2ghidra - LGPL - Copyright 2020-2021 - FXTi, pancake */
 
 #include "SleighAnalValue.h"
 

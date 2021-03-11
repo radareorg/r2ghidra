@@ -1,3 +1,4 @@
+/* r2ghidra - LGPL - Copyright 2019-2021 - thestr4ng3r, pancake */
 
 #include "RCoreMutex.h"
 #include <r_cons.h>
