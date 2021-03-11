@@ -6,36 +6,42 @@
 #include <cfloat>
 #include <cmath>
 #include <cfenv>
+#include "ArchMap.h"
 #include "SleighAsm.h"
 #include "SleighAnalValue.h"
 
+// XXX dont use globals
 static SleighAsm *sanal = nullptr;
+
+static char *slid(const char *cpu, int bits, int be) {
+	if (!strchr (cpu, ':')) {
+		auto langs = SleighArchitecture::getLanguageDescriptions();
+		std::string res = SleighIdFromSleighAsmConfig(cpu, bits, be, langs);
+		return strdup (res.c_str());
+	}
+	return strdup (cpu);
+}
 
 static int archinfo(RAnal *anal, int query)
 {
 	// This is to check if RCore plugin set cpu properly.
-	if(!anal->cpu)
+	r_return_val_if_fail (anal && anal->cpu, -1);
+	if (R_STR_ISEMPTY (anal->cpu)) {
 		return -1;
-
-	ut64 length = strlen(anal->cpu), i = 0;
-	for(; i < length && anal->cpu[i] != ':'; ++i) {}
-	if(i == length)
-		return -1;
-
-	try
-	{
-		sanal->init(anal->cpu, anal->bits, anal->big_endian, anal? anal->iob.io : nullptr, SleighAsm::getConfig(anal));
 	}
-	catch(const LowlevelError &e)
-	{
+
+	char *arch = slid (anal->cpu, anal->bits, anal->big_endian);
+
+	try {
+		sanal->init(arch, anal->bits, anal->big_endian, anal? anal->iob.io : nullptr, SleighAsm::getConfig(anal));
+		free (arch);
+	} catch (const LowlevelError &e) {
+		free (arch);
 		std::cerr << "SleightInit " << e.explain << std::endl;
 		return -1;
 	}
 
-	if(query == R_ANAL_ARCHINFO_ALIGN)
-		return sanal->alignment;
-	else
-		return -1;
+	return (query == R_ANAL_ARCHINFO_ALIGN)? sanal->alignment: -1;
 }
 
 static std::vector<std::string> string_split(const std::string &s)
@@ -1440,12 +1446,16 @@ static bool anal_type_NOP(const std::vector<Pcodeop> &Pcodes)
 }
 */
 
-static int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int len,
-                     RAnalOpMask mask)
+static int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int len, RAnalOpMask mask)
 {
+	if (R_STR_ISEMPTY (a->cpu)) {
+		return -1;
+	}
+	char *arch = slid (a->cpu, a->bits, a->big_endian);
 	try
 	{
-		sanal->init(a->cpu, a->bits, a->big_endian, a? a->iob.io : nullptr, SleighAsm::getConfig(a));
+		sanal->init(arch, a->bits, a->big_endian, a? a->iob.io : nullptr, SleighAsm::getConfig(a));
+		free (arch);
 
 		anal_op->addr = addr;
 		anal_op->sign = true;
@@ -1676,9 +1686,8 @@ static int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int
 			sleigh_esil(a, anal_op, addr, data, len, pcode_slg.pcodes);
 
 		return anal_op->size;
-	}
-	catch(const LowlevelError &e)
-	{
+	} catch(const LowlevelError &e) {
+		free (arch);
 		return 0;
 	}
 }
@@ -1845,22 +1854,18 @@ static void append_hardcoded_regs(std::stringstream &buf, const std::string &arc
 	}
 }
 
-static char *get_reg_profile(RAnal *anal)
-{
-	if(!anal->cpu)
+static char *get_reg_profile(RAnal *anal) {
+	r_return_val_if_fail (anal && anal->cpu, nullptr);
+	if (R_STR_ISEMPTY (anal->cpu)) {
 		return nullptr;
-
-	ut64 length = strlen(anal->cpu), z = 0;
-	for(; z < length && anal->cpu[z] != ':'; ++z) {}
-	if(z == length)
-		return nullptr;
-
-	try
-	{
-		sanal->init(anal->cpu, anal->bits, anal->big_endian, anal? anal->iob.io: nullptr, SleighAsm::getConfig(anal));
 	}
-	catch(const LowlevelError &e)
-	{
+	char *cpu = slid (anal->cpu, anal->bits, anal->big_endian);
+
+	try {
+		sanal->init(cpu, anal->bits, anal->big_endian, anal? anal->iob.io: nullptr, SleighAsm::getConfig(anal));
+		free (cpu);
+	} catch(const LowlevelError &e) {
+		free (cpu);
 		std::cerr << "SleightInit " << e.explain << std::endl;
 		return nullptr;
 	}
