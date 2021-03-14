@@ -1724,8 +1724,8 @@ static int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int
 static const char *r_reg_type_arr[] = {"PC",  "Cx",          "DCR", "STATUS", "SVE",   "CONTROL",
                                 "SPR", "SPR_UNNAMED", "Alt", "NEON",   "FLAGS", "Flags",
                                 "AVX", "MMX",         "ST",  "FPU",    "DEBUG", "VSX", nullptr};
-static const char *r_reg_string_arr[] = {"gpr", "gpr", "gpr", "gpr", "gpr", "gpr",
-                                  "gpr", "gpr", "gpr", "gpr", "flg", "flg",
+static const char *r_reg_string_arr[] = {"gpr", "drx", "drx", "drx", "drx", "drx",
+                                  "drx", "gpr", "gpr", "gpr", "flg", "flg",
                                   "ymm", "mmx", "fpu", "fpu", "drx", "ymm", nullptr};
 
 static int get_reg_type(const std::string &name)
@@ -1871,6 +1871,30 @@ static void append_hardcoded_regs(std::stringstream &buf, const std::string &arc
 	}
 }
 
+static std::string regtype_name(const char *cpu, const std::string &regname) {
+	if (r_str_startswith (cpu, "x86")) {
+		if (regname.find("cr") != -1) {
+			return "drx";
+		}
+		if (regname.find("ia32") != -1) {
+			return "drx";
+		}
+		if (regname.find("bnd") == 0) {
+			return "fpu";
+		}
+		if (regname.find("_offset") != -1) {
+			return "seg";
+		}
+		if (regname.find("tr_addr") != -1) {
+			return "drx";
+		}
+		if (regname.find("mm") != -1) {
+			return "mmx";
+		}
+	}
+	return "gpr";
+}
+
 static char *get_reg_profile(RAnal *anal) {
 	r_return_val_if_fail (anal && anal->cpu, nullptr);
 	if (R_STR_ISEMPTY (anal->cpu)) {
@@ -1880,9 +1904,9 @@ static char *get_reg_profile(RAnal *anal) {
 
 	try {
 		sanal->init(cpu, anal->bits, anal->big_endian, anal? anal->iob.io: nullptr, SleighAsm::getConfig(anal));
-		free (cpu);
+		R_FREE (cpu);
 	} catch(const LowlevelError &e) {
-		free (cpu);
+		R_FREE (cpu);
 		std::cerr << "SleightInit " << e.explain << std::endl;
 		return nullptr;
 	}
@@ -1893,11 +1917,12 @@ static char *get_reg_profile(RAnal *anal) {
 	for(auto p = reg_list.begin(); p != reg_list.end(); p++)
 	{
 		const std::string &group = sanal->reg_group[p->name];
+		const std::string &regname = sanal->reg_mapping[p->name];
+		const std::string &regtype = regtype_name(anal->cpu, regname);
 		if(group.empty())
 		{
-			buf << "gpr\t" << sanal->reg_mapping[p->name] << "\t." << p->size * 8 << "\t"
-				    << p->offset << "\t"
-				    << "0\n";
+			buf << regtype << "\t" << regname << "\t." << p->size * 8 << "\t"
+				    << p->offset << "\t" << "0\n";
 				continue;
 			}
 
