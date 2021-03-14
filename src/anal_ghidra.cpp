@@ -1468,6 +1468,7 @@ static int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int
 			try {
 				sanal->trans.printAssembly(assem, at);
 				anal_op->mnemonic = strdup (assem.str);
+				r_str_case (anal_op->mnemonic, false);
 			} catch(BadDataError &err) {
 				anal_op->mnemonic = strdup ("error");
 			}

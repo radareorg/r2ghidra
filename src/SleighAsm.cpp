@@ -460,7 +460,10 @@ int SleighAsm::disassemble(RAsmOp *op, unsigned long long offset)
 	try
 	{
 		length = trans.printAssembly(assem, addr);
-		r_strbuf_set(&op->buf_asm, assem.str);
+		char *d = strdup (assem.str);
+		r_str_case (d, false);
+		r_strbuf_set(&op->buf_asm, d);
+		free (d);
 		/*
 		auto *ins = trans.getInstruction(addr);
 		stringstream ss;
