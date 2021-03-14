@@ -1455,11 +1455,23 @@ static int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int
 	if (R_STR_ISEMPTY (a->cpu)) {
 		return -1;
 	}
+
 	char *arch = slid (a->cpu, a->bits, a->big_endian);
 	try
 	{
 		sanal->init(arch, a->bits, a->big_endian, a? a->iob.io : nullptr, SleighAsm::getConfig(a));
 		R_FREE (arch);
+
+		if (mask & R_ANAL_OP_MASK_DISASM) {
+			AssemblySlg assem(sanal);
+			Address at(sanal->trans.getDefaultCodeSpace(), addr);
+			try {
+				sanal->trans.printAssembly(assem, at);
+				anal_op->mnemonic = strdup (assem.str);
+			} catch(BadDataError &err) {
+				anal_op->mnemonic = strdup ("error");
+			}
+		}
 
 		anal_op->addr = addr;
 		anal_op->sign = true;
