@@ -34,9 +34,9 @@ static int archinfo(RAnal *anal, int query)
 
 	try {
 		sanal->init(arch, anal->bits, anal->big_endian, anal? anal->iob.io : nullptr, SleighAsm::getConfig(anal));
-		free (arch);
+		R_FREE (arch);
 	} catch (const LowlevelError &e) {
-		free (arch);
+		R_FREE (arch);
 		std::cerr << "SleightInit " << e.explain << std::endl;
 		return -1;
 	}
@@ -1459,7 +1459,7 @@ static int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int
 	try
 	{
 		sanal->init(arch, a->bits, a->big_endian, a? a->iob.io : nullptr, SleighAsm::getConfig(a));
-		free (arch);
+		R_FREE (arch);
 
 		anal_op->addr = addr;
 		anal_op->sign = true;
@@ -1691,7 +1691,7 @@ static int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int
 
 		return anal_op->size;
 	} catch(const LowlevelError &e) {
-		free (arch);
+		R_FREE (arch);
 		return 0;
 	}
 }
