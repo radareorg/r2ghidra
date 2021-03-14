@@ -403,10 +403,16 @@ static ut32 anal_type_XCMP(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcod
 	in0.invalid(); in1.invalid();
 	uintb unique_off = 0;
 	PcodeOpType key_pcode = CPUI_MAX;
-
 	anal_op->type = R_ANAL_OP_TYPE_CMP;
+	anal_op->val = UT64_MAX;
 	for(auto iter = raw_ops.cbegin(); iter != raw_ops.cend(); ++iter)
 	{
+		if(iter->type == CPUI_COPY && anal_op->val == UT64_MAX) {
+			if (iter->input0->number > 0 && iter->input0->is_const ()) {
+				anal_op->val = iter->input0->number;
+			}
+			continue;
+		}
 		if(iter->type == key_pcode_sub || iter->type == key_pcode_and)
 		{
 			if(iter->input0)
@@ -425,23 +431,21 @@ static ut32 anal_type_XCMP(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcod
 			}
 		}
 
-		if(unique_off && iter->type == key_pcode_equal)
-		{
-			if(!iter->input0 || !iter->input1)
+		if(unique_off && iter->type == key_pcode_equal) {
+			if (!iter->input0 || !iter->input1) {
 				continue;
-
-			if(iter->input0->is_const() && iter->input1->is_unique())
-			{
+			}
+			if (iter->input0->is_const() && iter->input1->is_unique()) {
 				if(iter->input0->number != 0 || iter->input1->offset != unique_off)
 					continue;
-			}
-			else if(iter->input0->is_unique() && iter->input1->is_const())
-			{
-				if(iter->input1->number != 0 || iter->input0->offset != unique_off)
+			} else if(iter->input0->is_unique() && iter->input1->is_const()) {
+				// cmp 0x3, r6
+				if(iter->input1->number != 0 || iter->input0->offset != unique_off) {
 					continue;
-			}
-			else
+				}
+			} else {
 				continue;
+			}
 
 			anal_op->type = key_pcode == key_pcode_sub? R_ANAL_OP_TYPE_CMP: R_ANAL_OP_TYPE_ACMP;
 			// anal_op->cond = R_ANAL_COND_EQ; Should I enable this? I think sub can judge equal and
