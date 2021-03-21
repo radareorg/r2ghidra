@@ -114,6 +114,7 @@ else()
 		set(Radare2_TARGET Radare2::libr)
 	endif()
 endif()
+list(APPEND Radare2_INCLUDE_DIRS "src")
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Radare2 REQUIRED_VARS Radare2_TARGET Radare2_LIBRARIES Radare2_INCLUDE_DIRS)
