@@ -73,23 +73,23 @@ static bool fini(void *p)
 }
 
 static RAsmPlugin r_asm_plugin_ghidra = {
-	/* .name = */ "r2ghidra",
-	/* .arch = */ "sleigh",
-	/* .author = */ "FXTi",
-	/* .version = */ nullptr,
-	/* .cpus = */ nullptr,
-	/* .desc = */ "SLEIGH Disassembler from Ghidra",
-	/* .license = */ "GPL3",
-	/* .user = */ nullptr,
-	/* .bits = */ 8 | 16 | 32 | 64,
-	/* .endian = */ 0,
-	/* .init = */ nullptr,
-	/* .fini = */ &fini,
-	/* .disassemble = */ &disassemble,
-	/* .assemble = */ nullptr,
-	/* .modify */ nullptr,
-	/* .mnemonics = */ nullptr,
-	/* .features = */ nullptr
+	.name = "r2ghidra",
+	.arch = "sleigh",
+	.author = "FXTi",
+	.version = nullptr,
+	.cpus = nullptr,
+	.desc = "SLEIGH Disassembler from Ghidra",
+	.license = "GPL3",
+	.user = nullptr,
+	.bits = 8 | 16 | 32 | 64,
+	.endian = 0,
+	.init = nullptr,
+	.fini = &fini,
+	.disassemble = &disassemble,
+	.assemble = nullptr,
+	.modify = nullptr,
+	.mnemonics = nullptr,
+	.features = nullptr
 };
 
 #ifndef CORELIB
@@ -97,10 +97,10 @@ static RAsmPlugin r_asm_plugin_ghidra = {
 extern "C" {
 #endif
 R_API RLibStruct radare_plugin = {
-	/* .type = */ R_LIB_TYPE_ASM,
-	/* .data = */ &r_asm_plugin_ghidra,
-	/* .version = */ R2_VERSION,
-	/* .free = */ nullptr
+	.type = R_LIB_TYPE_ASM,
+	.data = &r_asm_plugin_ghidra,
+	.version = R2_VERSION,
+	.free = nullptr
 #if R2_VERSION_MAJOR >= 4 && R2_VERSION_MINOR >= 2
 	, "r2ghidra"
 #endif
