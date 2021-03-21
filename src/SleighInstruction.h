@@ -10,10 +10,7 @@
 #include "crc32.hh"
 #include <unordered_map>
 #include <list>
-
-#ifdef LoadImage
-#undef LoadImage
-#endif
+#include <R2LoadImage.h>
 
 template<typename K, typename V>
 class LRUCache
