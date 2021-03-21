@@ -1,4 +1,4 @@
-/* radare - LGPL - Copyright 2020 - FXTi */
+/* r2ghidra - LGPL - Copyright 2020-2021 - FXTi */
 
 #ifndef R2GHIDRA_SLEIGHINSTRUCTION_H
 #define R2GHIDRA_SLEIGHINSTRUCTION_H
