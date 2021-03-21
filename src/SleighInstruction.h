@@ -5,12 +5,12 @@
 
 #include <vector>
 #include <unordered_set>
+#include "R2LoadImage.h"
 #include "architecture.hh"
 #include "sleigh_arch.hh"
 #include "crc32.hh"
 #include <unordered_map>
 #include <list>
-#include <R2LoadImage.h>
 
 template<typename K, typename V>
 class LRUCache
