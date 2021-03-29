@@ -17,12 +17,25 @@ option(GENERATE_PARSERS "Re-generate all parsers with Bison/Flex instead of usin
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+# C++latest needed for designed initializers, but funnily MSVC includes fail to compile with this flag
+# if (MSVC_VERSION GREATER_EQUAL "1900")
+# 	include(CheckCXXCompilerFlag)
+# 	CHECK_CXX_COMPILER_FLAG("/std:c++latest" _cpp_latest_flag_supported)
+# 	if (_cpp_latest_flag_supported)
+# 		add_compile_options("/std:c++latest")
+# 	endif()
+# endif()
+
 if(CMAKE_VERSION VERSION_LESS "3.1")
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		add_definitions(-std=c++11)
 	endif()
 else()
 	set(CMAKE_CXX_STANDARD 11)
+endif()
+
+if (MSVC_VERSION GREATER_EQUAL "1900")
+	add_definitions(-D_WINDOWS)
 endif()
 
 add_subdirectory(ghidra)
