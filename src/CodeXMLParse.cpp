@@ -321,13 +321,6 @@ R_API RCodeMeta *ParseCodeXML(Funcdata *func, const char *xml)
 	ParseNode(doc.child("function"), &ctx, ss, code);
 
 	std::string str = ss.str();
-	code->code = reinterpret_cast<char *>(r_malloc(str.length() + 1));
-	if(!code->code)
-	{
-		r_codemeta_free(code);
-		return nullptr;
-	}
-	memcpy(code->code, str.c_str(), str.length());
-	code->code[str.length()] = '\0';
+	code->code = strdup (str.c_str());
 	return code;
 }

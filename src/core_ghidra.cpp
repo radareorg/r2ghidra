@@ -239,8 +239,7 @@ R_API RCodeMeta *r2ghidra_decompile_annotated_code(RCore *core, ut64 addr)
 	catch(const LowlevelError &error)
 	{
 		std::string s = "Ghidra Decompiler Error: " + error.explain;
-		char *err = strdup (s.c_str());
- 		code = r_codemeta_new(err);
+ 		code = r_codemeta_new(s.c_str());
 		// Push an annotation with: range = full string, type = error
 		// For this, we have to modify RCodeMeta to have one more type; for errors
 		return code;
