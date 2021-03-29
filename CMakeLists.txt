@@ -34,6 +34,10 @@ else()
 	set(CMAKE_CXX_STANDARD 11)
 endif()
 
+if (MSVC_VERSION GREATER_EQUAL "1900")
+	add_definitions(-D_WINDOWS)
+endif()
+
 add_subdirectory(ghidra)
 add_subdirectory(third-party)
 
