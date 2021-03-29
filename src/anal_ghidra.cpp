@@ -2093,47 +2093,57 @@ static int sanal_fini(void *p)
 	return true;
 }
 
+#if __WINDOWS__
+// this is not really a windows issue, but GCC/CLANG support
+// designed initializers as a C++ extension and its better
+// to not blindly fill structs
+#define KV(x, y) y
+#else
+#define KV(x, y) x = y
+#endif
+
 static RAnalPlugin r_anal_plugin_ghidra = {
-	.name = "r2ghidra",
-	.desc = "SLEIGH Disassembler from Ghidra",
-	.license = "GPL3",
-	.arch = "sleigh",
-	.author = "FXTi",
-	.version = nullptr,
-	.bits = 0,
-	.esil = true,
-	.fileformat_type = 0,
-	.init = &sanal_init,
-	.fini = &sanal_fini,
-	.archinfo = &archinfo,
-	.anal_mask = nullptr,
-	.preludes = nullptr,
-	.op = &sleigh_op,
-	.cmd_ext = nullptr,
-	.set_reg_profile = nullptr,
-	.get_reg_profile = &get_reg_profile,
-	.fingerprint_bb = nullptr,
-	.fingerprint_fcn = nullptr,
-	.diff_bb = nullptr,
-	.diff_fcn = nullptr,
-	.diff_eval = nullptr,
-	.esil_init = esil_sleigh_init,
-	.esil_post_loop = nullptr,
-	.esil_trap = nullptr,
-	.esil_fini = esil_sleigh_fini,
+	KV(.name, "r2ghidra"),
+	KV(.desc, "SLEIGH Disassembler from Ghidra"),
+	KV(.license, "GPL3"),
+	KV(.arch, "sleigh"),
+	KV(.author, "FXTi"),
+	KV(.version, nullptr),
+	KV(.bits, 0),
+	KV(.esil, true),
+	KV(.fileformat_type, 0),
+	KV(.init, &sanal_init),
+	KV(.fini, &sanal_fini),
+	KV(.archinfo, &archinfo),
+	KV(.anal_mask, nullptr),
+	KV(.preludes, nullptr),
+	KV(.op, &sleigh_op),
+	KV(.cmd_ext, nullptr),
+	KV(.set_reg_profile, nullptr),
+	KV(.get_reg_profile, &get_reg_profile),
+	KV(.fingerprint_bb, nullptr),
+	KV(.fingerprint_fcn, nullptr),
+	KV(.diff_bb, nullptr),
+	KV(.diff_fcn, nullptr),
+	KV(.diff_eval, nullptr),
+	KV(.esil_init, esil_sleigh_init),
+	KV(.esil_post_loop, nullptr),
+	KV(.esil_trap, nullptr),
+	KV(.esil_fini, esil_sleigh_fini),
 };
 
 #ifndef CORELIB
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
 R_API RLibStruct radare_plugin = {
-	/* .type = */ R_LIB_TYPE_ANAL,
-	/* .data = */ &r_anal_plugin_ghidra,
-	/* .version = */ R2_VERSION,
-	/* .free = */ nullptr
-#if R2_VERSION_MAJOR >= 4 && R2_VERSION_MINOR >= 2
-	, "r2ghidra"
-#endif
+	KV(.type, R_LIB_TYPE_ANAL),
+	KV(.data, &r_anal_plugin_ghidra),
+	KV(.version, R2_VERSION),
+	KV(.free, nullptr),
+	KV(.pkgname, "r2ghidra")
 };
+#ifdef __cplusplus
+}
+#endif
 #endif
