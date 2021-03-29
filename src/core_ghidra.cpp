@@ -135,7 +135,7 @@ static void ApplyPrintCConfig(RConfig *cfg, PrintC *print_c)
 	print_c->setMaxLineSize(cfg_var_linelen.GetInt(cfg));
 }
 
-static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstream &out_stream, RAnnotatedCode **out_code)
+static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstream &out_stream, RCodeMeta **out_code)
 {
 	RAnalFunction *function = r_anal_get_fcn_in(core->anal, addr, R_ANAL_FCN_TYPE_NULL);
 	if(!function)
@@ -223,10 +223,10 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	}
 }
 
-R_API RAnnotatedCode *r2ghidra_decompile_annotated_code(RCore *core, ut64 addr)
+R_API RCodeMeta *r2ghidra_decompile_annotated_code(RCore *core, ut64 addr)
 {
 	DecompilerLock lock;
-	RAnnotatedCode *code = nullptr;
+	RCodeMeta *code = nullptr;
 #ifndef DEBUG_EXCEPTIONS
 	try
 	{
@@ -240,9 +240,9 @@ R_API RAnnotatedCode *r2ghidra_decompile_annotated_code(RCore *core, ut64 addr)
 	{
 		std::string s = "Ghidra Decompiler Error: " + error.explain;
 		char *err = strdup (s.c_str());
- 		code = r_annotated_code_new(err);
+ 		code = r_codemeta_new(err);
 		// Push an annotation with: range = full string, type = error
-		// For this, we have to modify RAnnotatedCode to have one more type; for errors
+		// For this, we have to modify RCodeMeta to have one more type; for errors
 		return code;
 	}
 #endif
@@ -256,26 +256,26 @@ static void DecompileCmd(RCore *core, DecompileMode mode)
 	try
 	{
 #endif
-		RAnnotatedCode *code = nullptr;
+		RCodeMeta *code = nullptr;
 		std::stringstream out_stream;
 		Decompile(core, core->offset, mode, out_stream, &code);
 		switch(mode)
 		{
 			case DecompileMode::OFFSET:
 			{
-				RVector *offsets = r_annotated_code_line_offsets(code);
-				r_core_annotated_code_print(code, offsets);
+				RVector *offsets = r_codemeta_line_offsets(code);
+				r_codemeta_print(code, offsets);
 				r_vector_free(offsets);
 			}
 			break;
 			case DecompileMode::DEFAULT:
-				r_core_annotated_code_print(code, nullptr);
+				r_codemeta_print(code, nullptr);
 				break;
 			case DecompileMode::STATEMENTS:
-				r_core_annotated_code_print_comment_cmds(code);
+				r_codemeta_print_comment_cmds(code);
 				break;
 			case DecompileMode::JSON:
-				r_core_annotated_code_print_json(code);
+				r_codemeta_print_json(code);
 				break;
 			case DecompileMode::XML:
 				out_stream << "</code></result>";
@@ -284,7 +284,7 @@ static void DecompileCmd(RCore *core, DecompileMode mode)
 				r_cons_printf("%s\n", out_stream.str().c_str());
 				break;
 		}
-		r_annotated_code_free(code);
+		r_codemeta_free(code);
 #ifndef DEBUG_EXCEPTIONS
 	}
 	catch(const LowlevelError &error)
