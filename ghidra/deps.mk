@@ -1,4 +1,3 @@
-
 # hardcoded for now
 USE_BISON=0
 
@@ -20,19 +19,17 @@ G_DECOMPILER+=dynamic.cc crc32.cc prettyprint.cc printlanguage.cc
 G_DECOMPILER+=printc.cc printjava.cc memstate.cc opbehavior.cc
 G_DECOMPILER+=paramid.cc transform.cc string_ghidra.cc stringmanage.cc
 
-# set(DECOMPILER_SOURCE_GHIDRA_CXX
-# G_DECOMPILER+=ghidra_process.cc
-ifeq (1,0)
 G_DECOMPILER+=ghidra_arch.cc
 G_DECOMPILER+=loadimage_ghidra.cc
-G_DECOMPILER+=typegrp_ghidra.cc
-G_DECOMPILER+=database_ghidra.cc
 G_DECOMPILER+=ghidra_context.cc
+G_DECOMPILER+=inject_ghidra.cc
 G_DECOMPILER+=cpool_ghidra.cc
 G_DECOMPILER+=comment_ghidra.cc
-G_DECOMPILER+=inject_ghidra.cc
+G_DECOMPILER+=typegrp_ghidra.cc
 G_DECOMPILER+=ghidra_translate.cc
-endif
+G_DECOMPILER+=database_ghidra.cc
+
+# G_DECOMPILER+=ghidra_process.cc
 
 G_DECOMPILER+= $(GHIDRA_LIBDECOMP_SRCS)
 
