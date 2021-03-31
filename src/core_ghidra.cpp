@@ -12,6 +12,7 @@
 
 #include <libdecomp.hh>
 #include <printc.hh>
+#include "R2PrintC.h"
 
 #include <r_core.h>
 
@@ -37,19 +38,20 @@ struct ConfigVar
 		ConfigVar(const char *var, const char *defval, const char *desc, ConfigVarCb callback = nullptr)
 			: name(std::string(CFG_PREFIX) + "." + var), defval(defval), desc(desc), callback(callback) { vars_all.push_back(this); }
 
-		const char *GetName() const					{ return name.c_str(); }
-		const char *GetDefault() const				{ return defval; }
-		const char *GetDesc() const					{ return desc; }
-		ConfigVarCb GetCallback() const				{ return callback; }
+		const char *GetName() const { return name.c_str(); }
+		const char *GetDefault() const { return defval; }
+		const char *GetDesc() const { return desc; }
+		ConfigVarCb GetCallback() const	{ return callback; }
 
-		ut64 GetInt(RConfig *cfg) const				{ return r_config_get_i(cfg, name.c_str()); }
-		bool GetBool(RConfig *cfg) const			{ return GetInt(cfg) != 0; }
-		std::string GetString(RConfig *cfg) const	{ return r_config_get(cfg, name.c_str()); }
+		ut64 GetInt(RConfig *cfg) const	{ return r_config_get_i(cfg, name.c_str()); }
+		bool GetBool(RConfig *cfg) const { return GetInt(cfg) != 0; }
+		std::string GetString(RConfig *cfg) const { return r_config_get(cfg, name.c_str()); }
 
-		void Set(RConfig *cfg, const char *s) const	{ r_config_set(cfg, name.c_str(), s); }
+		void Set(RConfig *cfg, const char *s) const { r_config_set(cfg, name.c_str(), s); }
 
-		static const std::vector<const ConfigVar *> &GetAll()	{ return vars_all; }
+		static const std::vector<const ConfigVar *> &GetAll() { return vars_all; }
 };
+
 std::vector<const ConfigVar *> ConfigVar::vars_all;
 
 bool SleighHomeConfig(void *user, void *data);
@@ -65,6 +67,7 @@ static const ConfigVar cfg_var_linelen      ("linelen",     "120",      "Max lin
 static const ConfigVar cfg_var_maximplref   ("maximplref",  "2",        "Maximum number of references to an expression before showing an explicit variable.");
 static const ConfigVar cfg_var_rawptr       ("rawptr",      "true",     "Show unknown globals as raw addresses instead of variables");
 static const ConfigVar cfg_var_verbose      ("verbose",      "true",    "Show verbose warning messages while decompiling");
+static const ConfigVar cfg_var_casts        ("casts",        "true",    "Show type casts where needed");
 
 
 
@@ -148,6 +151,9 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	Funcdata *func = arch.symboltab->getGlobalScope()->findFunction(Address(arch.getDefaultCodeSpace(), function->addr));
 	arch.print->setOutputStream(&out_stream);
 	arch.setPrintLanguage("r2-c-language");
+	auto r2c = dynamic_cast<R2PrintC *>(arch.print);
+	bool showCasts = cfg_var_casts.GetBool(core->config);
+	r2c->setOptionNoCasts(!showCasts);
 	ApplyPrintCConfig(core->config, dynamic_cast<PrintC *>(arch.print));
 	if(!func)
 		throw LowlevelError("No function in Scope");
