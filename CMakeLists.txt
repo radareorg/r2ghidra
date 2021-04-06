@@ -36,6 +36,9 @@ endif()
 
 if (MSVC_VERSION GREATER_EQUAL "1900")
 	add_definitions(-D_WINDOWS)
+	add_compile_options("/MT")
+	set(CMAKE_CXX_FLAGS_RELEASE "/MT")
+	set(CMAKE_CXX_FLAGS_DEBUG "/MTd")
 endif()
 
 add_subdirectory(ghidra)
