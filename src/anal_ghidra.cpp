@@ -368,19 +368,8 @@ static ut32 anal_type_POP(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcode
 
 			// dispose 0x0,  { lp }, [lp]
 			if(in0.reg && !strcmp ("lp", in0.reg->name)) {
-				if(iter->output)
-					outs = SleighAnalValue::resolve_out(anal, iter, raw_ops.cend(), iter->output);
-
-				auto p = outs.cbegin();
-				for(; p != outs.cend() && !reg_set_has(reg_set, *p); ++p) {}
-				if(p == outs.cend())
-					continue;
-				out = *p;
-
 				anal_op->type = R_ANAL_OP_TYPE_RET;
-				anal_op->dst = out.dup();
 				anal_op->src[0] = in0.dup();
-
 				return this_type;
 			}
 
