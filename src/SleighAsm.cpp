@@ -438,6 +438,15 @@ std::string SleighAsm::getSleighHome(RConfig *cfg)
 		return R2GHIDRA_SLEIGHHOME_DEFAULT;
 	}
 #endif
+	path = r_str_home(".local/lib/radare2/last/r2ghidra_sleigh");
+	if(r_file_is_directory(path))
+	{
+		if(cfg)
+			r_config_set(cfg, varname, path);
+		std::string res(path);
+		r_mem_free((void *)path);
+		return res;
+	}
 
 	path = r_str_home(".local/share/radare2/r2pm/git/ghidra");
 	if(r_file_is_directory(path))
@@ -460,7 +469,10 @@ int SleighAsm::disassemble(RAsmOp *op, unsigned long long offset)
 	try
 	{
 		length = trans.printAssembly(assem, addr);
-		r_strbuf_set(&op->buf_asm, assem.str);
+		char *d = strdup (assem.str);
+		r_str_case (d, false);
+		r_strbuf_set(&op->buf_asm, d);
+		free (d);
 		/*
 		auto *ins = trans.getInstruction(addr);
 		stringstream ss;

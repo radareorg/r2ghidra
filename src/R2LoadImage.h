@@ -1,15 +1,15 @@
-/* radare - LGPL - Copyright 2019 - thestr4ng3r */
+/* r2ghidra - LGPL - Copyright 2019-2021 - thestr4ng3r */
 
 #ifndef R2GHIDRA_R2LOADIMAGE_H
 #define R2GHIDRA_R2LOADIMAGE_H
 
 
-#include <r_core.h>
-
 // Windows defines LoadImage to LoadImageA
+#include <r_core.h>
 #ifdef LoadImage
 #undef LoadImage
 #endif
+
 #include "loadimage.hh"
 
 class RCoreMutex;

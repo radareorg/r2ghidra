@@ -1,7 +1,6 @@
 /* r2ghidra - LGPL - Copyright 2019-2021 - pancake */
 
 #include "CodeXMLParse.h"
-#include <r_util/r_annotated_code.h>
 
 #ifdef LoadImage
 #undef LoadImage
@@ -39,7 +38,7 @@ struct ParseCodeXMLContext
 	}
 };
 
-#define ANNOTATOR_PARAMS pugi::xml_node node, ParseCodeXMLContext *ctx, std::vector<RCodeAnnotation> *out
+#define ANNOTATOR_PARAMS pugi::xml_node node, ParseCodeXMLContext *ctx, std::vector<RCodeMetaItem> *out
 #define ANNOTATOR [](ANNOTATOR_PARAMS) -> void
 
 void AnnotateOpref(ANNOTATOR_PARAMS)
@@ -58,7 +57,7 @@ void AnnotateOpref(ANNOTATOR_PARAMS)
 	out->emplace_back();
 	auto &annotation = out->back();
 	annotation = {};
-	annotation.type = R_CODE_ANNOTATION_TYPE_OFFSET;
+	annotation.type = R_CODEMETA_TYPE_OFFSET;
 	annotation.offset.offset = op->getAddr().getOffset();
 }
 void AnnotateFunctionName(ANNOTATOR_PARAMS)
@@ -66,8 +65,8 @@ void AnnotateFunctionName(ANNOTATOR_PARAMS)
 	const char *func_name = node.child_value();
 	if(!func_name)
 		return;
-	RCodeAnnotation annotation = {};
-	annotation.type = R_CODE_ANNOTATION_TYPE_FUNCTION_NAME;
+	RCodeMetaItem annotation = {};
+	annotation.type = R_CODEMETA_TYPE_FUNCTION_NAME;
 	pugi::xml_attribute attr = node.attribute("opref");
 	if(attr.empty())
 	{
@@ -77,8 +76,8 @@ void AnnotateFunctionName(ANNOTATOR_PARAMS)
 			annotation.reference.offset = ctx->func->getAddress().getOffset();
 			out->push_back(annotation);
 			// Code below makes an offset annotation for the function name(for the currently decompiled function)
-			RCodeAnnotation offsetAnnotation = {};
-			offsetAnnotation.type = R_CODE_ANNOTATION_TYPE_OFFSET;
+			RCodeMetaItem offsetAnnotation = {};
+			offsetAnnotation.type = R_CODEMETA_TYPE_OFFSET;
 			offsetAnnotation.offset.offset = annotation.reference.offset;
 			out->push_back(offsetAnnotation);
 		}
@@ -115,7 +114,7 @@ void AnnotateCommentOffset(ANNOTATOR_PARAMS)
 	out->emplace_back();
 	auto &annotation = out->back();
 	annotation = {};
-	annotation.type = R_CODE_ANNOTATION_TYPE_OFFSET;
+	annotation.type = R_CODEMETA_TYPE_OFFSET;
 	annotation.offset.offset = off;
 }
 
@@ -152,39 +151,39 @@ void AnnotateColor(ANNOTATOR_PARAMS)
 		type = R_SYNTAX_HIGHLIGHT_TYPE_GLOBAL_VARIABLE;
 	else
 		return;
-	RCodeAnnotation annotation = {};
-	annotation.type = R_CODE_ANNOTATION_TYPE_SYNTAX_HIGHLIGHT;
+	RCodeMetaItem annotation = {};
+	annotation.type = R_CODEMETA_TYPE_SYNTAX_HIGHLIGHT;
 	annotation.syntax_highlight.type = type;
 	out->push_back(annotation);
 }
 
-void AnnotateGlobalVariable(Varnode *varnode, std::vector<RCodeAnnotation> *out)
+void AnnotateGlobalVariable(Varnode *varnode, std::vector<RCodeMetaItem> *out)
 {
-	RCodeAnnotation annotation = {};
-	annotation.type = R_CODE_ANNOTATION_TYPE_GLOBAL_VARIABLE;
+	RCodeMetaItem annotation = {};
+	annotation.type = R_CODEMETA_TYPE_GLOBAL_VARIABLE;
 	annotation.reference.offset = varnode->getOffset();
 	out->push_back(annotation);
 }
 
-void AnnotateConstantVariable(Varnode *varnode, std::vector<RCodeAnnotation> *out)
+void AnnotateConstantVariable(Varnode *varnode, std::vector<RCodeMetaItem> *out)
 {
-	RCodeAnnotation annotation = {};
-	annotation.type = R_CODE_ANNOTATION_TYPE_CONSTANT_VARIABLE;
+	RCodeMetaItem annotation = {};
+	annotation.type = R_CODEMETA_TYPE_CONSTANT_VARIABLE;
 	annotation.reference.offset = varnode->getOffset();
 	out->push_back(annotation);
 }
 
 // Annotates local variables and function parameters
-void AnnotateLocalVariable(Symbol *symbol, std::vector<RCodeAnnotation> *out)
+void AnnotateLocalVariable(Symbol *symbol, std::vector<RCodeMetaItem> *out)
 {
 	if(symbol == (Symbol *)0)
 		return;
-	RCodeAnnotation annotation = {};
+	RCodeMetaItem annotation = {};
 	annotation.variable.name = strdup(symbol->getName().c_str());
 	if(symbol->getCategory() == 0)
-		annotation.type = R_CODE_ANNOTATION_TYPE_FUNCTION_PARAMETER;
+		annotation.type = R_CODEMETA_TYPE_FUNCTION_PARAMETER;
 	else
-		annotation.type = R_CODE_ANNOTATION_TYPE_LOCAL_VARIABLE;
+		annotation.type = R_CODEMETA_TYPE_LOCAL_VARIABLE;
 	out->push_back(annotation);
 }
 
@@ -246,9 +245,9 @@ static const std::map<std::string, std::vector <void (*)(ANNOTATOR_PARAMS)> > an
  * This function is a DFS traversal over Ghidra's AST.
  * It parses some of the annotatations (e.g. decompilation offsets, token classes, ..)
  * and translates them into a suitable format
- * that can be natively saved in the RAnnotatedCode structure.
+ * that can be natively saved in the RCodeMeta structure.
  **/
-static void ParseNode(pugi::xml_node node, ParseCodeXMLContext *ctx, std::ostream &stream, RAnnotatedCode *code)
+static void ParseNode(pugi::xml_node node, ParseCodeXMLContext *ctx, std::ostream &stream, RCodeMeta *code)
 {
 	// A leaf is an XML node which contains parts of the high level decompilation language
 	if(node.type() == pugi::xml_node_type::node_pcdata)
@@ -257,7 +256,7 @@ static void ParseNode(pugi::xml_node node, ParseCodeXMLContext *ctx, std::ostrea
 		return;
 	}
 
-	std::vector<RCodeAnnotation> annotations;
+	std::vector<RCodeMetaItem> annotations;
 #ifdef TEST_UNKNOWN_NODES
 	bool close_test = false;
 	static const std::set<std::string> boring_tags = { "syntax" };
@@ -298,7 +297,7 @@ static void ParseNode(pugi::xml_node node, ParseCodeXMLContext *ctx, std::ostrea
 	for(auto &annotation : annotations)
 	{
 		annotation.end = stream.tellp();
-		r_annotated_code_add_annotation(code, &annotation);
+		r_codemeta_add_annotation(code, &annotation);
 	}
 
 #ifdef TEST_UNKNOWN_NODES
@@ -307,14 +306,14 @@ static void ParseNode(pugi::xml_node node, ParseCodeXMLContext *ctx, std::ostrea
 #endif
 }
 
-R_API RAnnotatedCode *ParseCodeXML(Funcdata *func, const char *xml)
+R_API RCodeMeta *ParseCodeXML(Funcdata *func, const char *xml)
 {
 	pugi::xml_document doc;
 	if(!doc.load_string(xml, pugi::parse_default | pugi::parse_ws_pcdata))
 		return nullptr;
 
 	std::stringstream ss;
-	RAnnotatedCode *code = r_annotated_code_new(nullptr);
+	RCodeMeta *code = r_codemeta_new(nullptr);
 	if(!code)
 		return nullptr;
 
@@ -322,13 +321,6 @@ R_API RAnnotatedCode *ParseCodeXML(Funcdata *func, const char *xml)
 	ParseNode(doc.child("function"), &ctx, ss, code);
 
 	std::string str = ss.str();
-	code->code = reinterpret_cast<char *>(r_malloc(str.length() + 1));
-	if(!code->code)
-	{
-		r_annotated_code_free(code);
-		return nullptr;
-	}
-	memcpy(code->code, str.c_str(), str.length());
-	code->code[str.length()] = '\0';
+	code->code = strdup (str.c_str());
 	return code;
 }

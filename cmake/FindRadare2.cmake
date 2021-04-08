@@ -20,6 +20,7 @@ if(WIN32)
 						NAMES r_core.h r_bin.h r_util.h
 						HINTS
 						../radare2/include/libr
+						radare2/include/libr
 						"$ENV{HOME}/bin/prefix/radare2/include/libr"
 						/usr/local/include/libr
 						/usr/include/libr)
@@ -27,6 +28,7 @@ if(WIN32)
 						NAMES sdb.h sdbht.h sdb_version.h
 						HINTS
 						../radare2/include/libr/sdb
+						radare2/include/libr/sdb
 						"$ENV{HOME}/bin/prefix/radare2/include/libr/sdb"
 						/usr/local/include/libr/sdb
 						/usr/include/libr/sdb)

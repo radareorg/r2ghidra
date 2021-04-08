@@ -72,24 +72,33 @@ static bool fini(void *p)
 	return true;
 }
 
+#if __WINDOWS__
+// this is not really a windows issue, but GCC/CLANG support
+// designed initializers as a C++ extension and its better
+// to not blindly fill structs
+#define KV(x, y) y
+#else
+#define KV(x, y) x = y
+#endif
+
 static RAsmPlugin r_asm_plugin_ghidra = {
-	/* .name = */ "r2ghidra",
-	/* .arch = */ "sleigh",
-	/* .author = */ "FXTi",
-	/* .version = */ nullptr,
-	/* .cpus = */ nullptr,
-	/* .desc = */ "SLEIGH Disassembler from Ghidra",
-	/* .license = */ "GPL3",
-	/* .user = */ nullptr,
-	/* .bits = */ 8 | 16 | 32 | 64,
-	/* .endian = */ 0,
-	/* .init = */ nullptr,
-	/* .fini = */ &fini,
-	/* .disassemble = */ &disassemble,
-	/* .assemble = */ nullptr,
-	/* .modify */ nullptr,
-	/* .mnemonics = */ nullptr,
-	/* .features = */ nullptr
+	KV(.name, "r2ghidra"),
+	KV(.arch, "sleigh"),
+	KV(.author, "FXTi"),
+	KV(.version, nullptr),
+	KV(.cpus, nullptr),
+	KV(.desc, "SLEIGH Disassembler from Ghidra"),
+	KV(.license, "GPL3"),
+	KV(.user, nullptr),
+	KV(.bits, 8 | 16 | 32 | 64),
+	KV(.endian, 0),
+	KV(.init, nullptr),
+	KV(.fini, &fini),
+	KV(.disassemble, &disassemble),
+	KV(.assemble, nullptr),
+	KV(.modify, nullptr),
+	KV(.mnemonics, nullptr),
+	KV(.features, nullptr)
 };
 
 #ifndef CORELIB
@@ -97,13 +106,13 @@ static RAsmPlugin r_asm_plugin_ghidra = {
 extern "C" {
 #endif
 R_API RLibStruct radare_plugin = {
-	/* .type = */ R_LIB_TYPE_ASM,
-	/* .data = */ &r_asm_plugin_ghidra,
-	/* .version = */ R2_VERSION,
-	/* .free = */ nullptr
-#if R2_VERSION_MAJOR >= 4 && R2_VERSION_MINOR >= 2
-	, "r2ghidra"
-#endif
+	KV(.type, R_LIB_TYPE_ASM),
+	KV(.data, &r_asm_plugin_ghidra),
+	KV(.version, R2_VERSION),
+	KV(.free, nullptr),
+	KV(.pkgname, "r2ghidra")
 };
+#ifdef __cplusplus
 }
+#endif
 #endif

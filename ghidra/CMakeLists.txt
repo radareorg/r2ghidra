@@ -222,6 +222,8 @@ add_executable(sleighc ${SLEIGH_COMPILER_SOURCE_CXX})
 target_link_libraries(sleighc ghidra_decompiler_sleigh ghidra_decompiler_base)
 target_include_directories(sleighc PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/flex")
 
+set(CMAKE_CXX_FLAGS "-ULoadImage")
+
 if(BUILD_SLASPECS)
 	file(GLOB_RECURSE SLASPEC_FILES "ghidra/Ghidra/Processors/*.slaspec")
 	file(GLOB_RECURSE CPEC_FILES "ghidra/Ghidra/Processors/*.cspec")

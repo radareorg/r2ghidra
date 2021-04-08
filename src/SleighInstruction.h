@@ -1,19 +1,16 @@
-/* radare - LGPL - Copyright 2020 - FXTi */
+/* r2ghidra - LGPL - Copyright 2020-2021 - FXTi */
 
 #ifndef R2GHIDRA_SLEIGHINSTRUCTION_H
 #define R2GHIDRA_SLEIGHINSTRUCTION_H
 
 #include <vector>
 #include <unordered_set>
+#include "R2LoadImage.h"
 #include "architecture.hh"
 #include "sleigh_arch.hh"
 #include "crc32.hh"
 #include <unordered_map>
 #include <list>
-
-#ifdef LoadImage
-#undef LoadImage
-#endif
 
 template<typename K, typename V>
 class LRUCache
