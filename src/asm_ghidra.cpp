@@ -86,7 +86,7 @@ static RAsmPlugin r_asm_plugin_ghidra = {
 	KV(.arch, "sleigh"),
 	KV(.author, "FXTi"),
 	KV(.version, nullptr),
-	KV(.cpus, "6502,arm,avr,dalvik,hppa,java,m68k,mips,msp430,ppc,sh,sparc,sparc,tricore,v850,x86");
+	KV(.cpus, "6502,arm,avr,dalvik,hppa,java,m68k,mips,msp430,ppc,sh,sparc,sparc,tricore,v850,x86"),
 	KV(.desc, "SLEIGH Disassembler from Ghidra"),
 	KV(.license, "GPL3"),
 	KV(.user, nullptr),
