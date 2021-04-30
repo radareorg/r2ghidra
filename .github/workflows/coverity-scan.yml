@@ -1,11 +1,14 @@
 name: coverity-scan
+#  schedule:
+#    - cron: '0 9 * * 1,5' # Bi-weekly at 09:00 UTC on Monday and Thursday
 on:
-  schedule:
-    - cron: '0 9 * * 1,5' # Bi-weekly at 09:00 UTC on Monday and Thursday
+  push:
+    branches:
+      - master
 
 jobs:
   latest:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
         with:
