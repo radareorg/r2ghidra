@@ -35,7 +35,7 @@ jobs:
       with:
         # path: radare2/dist/debian/*/*.deb r2ghidra/scripts/debian/*.deb
         name: r2ghidra-${{env.R2V}}_amd64.deb
-        path: r2ghidra/scripts/debian/*.deb
+        path: scripts/debian/*.deb
 
   linux-asan:
     # The type of runner that the job will run on
@@ -83,10 +83,11 @@ jobs:
     - name: Pub
       uses: actions/upload-artifact@v2
       with:
-        path: radare2/dist/debian/*/*.deb r2ghidra/scripts/debian/*.deb
+        name: r2ghidra-${{env.R2V}}_amd64_cmake.deb
+        path: radare2/dist/debian/*/*.deb scripts/debian/*.deb
+        # path: scripts/debian/*.deb
 
   macos-acr:
-
     # The type of runner that the job will run on
     runs-on: macos-latest
 
@@ -102,14 +103,16 @@ jobs:
       run: sudo installer -pkg radare2/dist/macos/*.pkg -target /
     - name: Building r2ghidra
       run: git submodule update --init ; ./configure ; make -j4 ; make user-install
-    - name: Building r2ghidra
-      run: make install DESTDIR=/tmp/r2ghidra ; cd /tmp/r2ghidra ; tar czvf ../r2ghidra-macos.tar.gz *
+    - name: Packaging r2ghidra
+      run: make install DESTDIR=/tmp/r2ghidra ; cd /tmp/r2ghidra ; tar czvf ../r2ghidra-macos-${{env.R2V}}.tar.gz *
     - name: Testing r2ghidra
       run: r2 -qc 'af;pdg' /bin/ls
     - name: Pub
       uses: actions/upload-artifact@v2
       with:
-        path: radare2/dist/macos/*.pkg src/*.dylib /tmp/r2ghidra-macos.tar.gz
+        name: r2ghidra-${{env.R2V}}-macos.tar.gz
+        path: radare2/dist/macos/*.pkg src/*.dylib /tmp/r2ghidra-macos-${{env.R2V}}.tar.gz
+
   w64:
     runs-on: windows-latest
     steps:
