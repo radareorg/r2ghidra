@@ -21,7 +21,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Installing radare2
-      run: ( git clone --depth=1 https://github.com/radareorg/radare2 && cd radare2 && sys/install.sh )
+      run: ( git clone --depth=1 https://github.com/radareorg/radare2 && cd radare2 && sys/install.sh /usr )
     - name: Building r2ghidra with acr
       run: git submodule update --init ; ./configure ; make -j4 ; make user-install
     - name: Packaging r2ghidra for Debian
