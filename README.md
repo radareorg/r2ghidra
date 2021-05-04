@@ -16,9 +16,6 @@ An r2pm package is available that can easily be installed like:
 r2pm update
 r2pm -ci r2ghidra
 ```
-This package only installs the radare2 part.
-To use r2ghidra from cutter, either use a provided pre-built release starting with
-Cutter 1.9, which bundles r2ghidra, or follow the build instructions below.
 
 ## Portability
 
@@ -33,32 +30,48 @@ r2ghidra is known to work on the following operating systems:
 ## Usage
 
 ```
-Usage: pdg   # Native Ghidra decompiler plugin
+[0x100001060]> pdg?
+Usage: pdg  # Native Ghidra decompiler plugin
 | pdg           # Decompile current function with the Ghidra decompiler
 | pdgd          # Dump the debug XML Dump
 | pdgx          # Dump the XML of the current decompiled function
 | pdgj          # Dump the current decompiled function as JSON
 | pdgo          # Decompile current function side by side with offsets
 | pdgs          # Display loaded Sleigh Languages
+| pdgss         # Display automatically matched Sleigh Language ID
+| pdgsd N       # Disassemble N instructions with Sleigh and print pcode
+| pdga          # Switch to RAsm and RAnal plugins driven by SLEIGH from Ghidra
 | pdg*          # Decompiled code is returned to r2 as comment
+Environment:
+| %SLEIGHHOME   # Path to ghidra build root directory
 ```
 
 The following config vars (for the `e` command) can be used to adjust r2ghidra's behavior:
 
 ```
+      r2ghidra.casts: Show type casts where needed
     r2ghidra.cmt.cpp: C++ comment style
  r2ghidra.cmt.indent: Comment indent
      r2ghidra.indent: Indent increment
        r2ghidra.lang: Custom Sleigh ID to override auto-detection (e.g. x86:LE:32:default)
     r2ghidra.linelen: Max line length
+ r2ghidra.maximplref: Maximum number of references to an expression before showing an explicit variable.
    r2ghidra.nl.brace: Newline before opening '{'
     r2ghidra.nl.else: Newline before else
+     r2ghidra.rawptr: Show unknown globals as raw addresses instead of variables
  r2ghidra.sleighhome: SLEIGHHOME
+    r2ghidra.verbose: Show verbose warning messages while decompiling
 ```
 
 Here, `r2ghidra.sleighhome` must point to a directory containing the `*.sla`, `*.lspec`, ... files for
 the architectures that should supported by the decompiler. This is however set up automatically when using
 the r2pm package or installing as shown below.
+
+## Building for Windows
+
+You need to build r2 or download it from the [last release](https://github.com/radareorg/radare2/releases) unzip it under the `radare2` directory and then run the `build.bat` script.
+
+Alternatively you can download the [CI builds](https://github.com/radareorg/r2ghidra/releases) from the release page.
 
 ## Building with ACR/Make
 
@@ -90,15 +103,18 @@ make install
 ```
 
 Here, set the `CMAKE_INSTALL_PREFIX` to a location where radare2 can load the plugin from.
+
+## Iaito plugin
+
+r2ghidra works with iaito without needing to build this plugin, but it is still an option for advanced users as it provides the ability to work directly using the API instead of processing.
+
 The install step is necessary for the plugin to work because it includes installing the necessary Sleigh files.
 
-To also build the Cutter plugin, pass `-DBUILD_CUTTER_PLUGIN=ON -DCUTTER_SOURCE_DIR=/path/to/cutter/source` to cmake, for example like this:
+To also build the Cutter plugin, pass `-DBUILD_IAITO_PLUGIN=ON -DIAITO_SOURCE_DIR=/path/to/cutter/source` to cmake, for example like this:
 ```
-/my/path> git clone https://github.com/radareorg/cutter
-/my/path> # build Cutter, clone r2ghidra, etc.
-...
-/my/path/r2ghidra> mkdir build && cd build
-/my/path/r2ghidra/build> cmake -DBUILD_CUTTER_PLUGIN=ON -DCUTTER_SOURCE_DIR=/my/path/cutter -DCMAKE_INSTALL_PREFIX=~/.local ..
+$ git clone https://github.com/radareorg/iaito
+$ mkdir build && cd build
+$ cmake -DBUILD_IAITO_PLUGIN=ON -DIAITO_SOURCE_DIR=/my/path/cutter -DCMAKE_INSTALL_PREFIX=~/.local ..
 /my/path/r2ghidra/build> make && make install
 ```
 
