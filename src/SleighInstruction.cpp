@@ -43,7 +43,7 @@ SleighInstruction *R2Sleigh::getInstruction(Address &addr)
 void SleighParserContext::setPrototype(SleighInstructionPrototype *p)
 {
 	prototype = p;
-	*getBaseState() = &prototype->rootState;
+ 	*getBaseState() = &prototype->rootState;
 }
 
 void R2Sleigh::reconstructContext(ParserContext &protoContext)

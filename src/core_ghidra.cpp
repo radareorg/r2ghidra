@@ -19,6 +19,8 @@
 #include <vector>
 #include <mutex>
 
+#undef DEBUG_EXCEPTIONS
+
 #define CMD_PREFIX "pdg"
 #define CFG_PREFIX "r2ghidra"
 
@@ -116,8 +118,6 @@ static void PrintUsage(const RCore *const core)
 
 enum class DecompileMode { DEFAULT, XML, DEBUG_XML, OFFSET, STATEMENTS, JSON };
 
-//#define DEBUG_EXCEPTIONS
-
 static void ApplyPrintCConfig(RConfig *cfg, PrintC *print_c)
 {
 	if(!print_c)
@@ -128,11 +128,13 @@ static void ApplyPrintCConfig(RConfig *cfg, PrintC *print_c)
 	else
 		print_c->setCStyleComments();
 
+/*
 	print_c->setSpaceAfterComma(true);
 
 	print_c->setNewlineBeforeOpeningBrace(cfg_var_nl_brace.GetBool(cfg));
 	print_c->setNewlineBeforeElse(cfg_var_nl_else.GetBool(cfg));
 	print_c->setNewlineAfterPrototype(false);
+*/
 	print_c->setIndentIncrement(cfg_var_indent.GetInt(cfg));
 	print_c->setLineCommentIndent(cfg_var_cmt_indent.GetInt(cfg));
 	print_c->setMaxLineSize(cfg_var_linelen.GetInt(cfg));
@@ -144,18 +146,20 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	if(!function)
 		throw LowlevelError("No function at this offset");
 	R2Architecture arch(core, cfg_var_sleighid.GetString(core->config));
-	DocumentStorage store;
+	DocumentStorage store = DocumentStorage();
 	arch.max_implied_ref = cfg_var_maximplref.GetInt(core->config);
 	arch.setRawPtr(cfg_var_rawptr.GetBool(core->config));
 	arch.init(store);
-	Funcdata *func = arch.symboltab->getGlobalScope()->findFunction(Address(arch.getDefaultCodeSpace(), function->addr));
+
+	auto faddr = Address(arch.getDefaultCodeSpace(), function->addr);
+	Funcdata *func = arch.symboltab->getGlobalScope()->findFunction(faddr);
 	arch.print->setOutputStream(&out_stream);
 	arch.setPrintLanguage("r2-c-language");
 	auto r2c = dynamic_cast<R2PrintC *>(arch.print);
 	bool showCasts = cfg_var_casts.GetBool(core->config);
 	r2c->setOptionNoCasts(!showCasts);
 	ApplyPrintCConfig(core->config, dynamic_cast<PrintC *>(arch.print));
-	if(!func)
+	if(func == nullptr)
 		throw LowlevelError("No function in Scope");
 	arch.getCore()->sleepBegin();
 	auto action = arch.allacts.getCurrent();
@@ -545,7 +549,7 @@ static int r2ghidra_cmd(void *user, const char *input)
 	RCore *core = (RCore *) user;
 	if (!strncmp (input, CMD_PREFIX, strlen(CMD_PREFIX)))
 	{
-		_cmd (core, input + 3);
+		_cmd (core, input + strlen(CMD_PREFIX));
 		return true;
 	}
 	return false;

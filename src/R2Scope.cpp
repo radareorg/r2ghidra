@@ -123,7 +123,7 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const
 				auto flag = reinterpret_cast<RFlagItem *>(pos);
 				if(flag->space && flag->space->name && !strcmp(flag->space->name, R_FLAGS_FS_SECTIONS))
 					continue;
-				if (flag->realname && *flag->realname) {
+				if (!R_STR_ISEMPTY (flag->realname)) {
 					fcn_name = flag->realname;
 					break;
 				}
@@ -180,10 +180,7 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const
 			{
 				uintb off;
 				int delta = var->delta + fcn->bp_off - extraPop; // not 100% sure if extraPop is correct here
-				if(delta >= 0)
-					off = delta;
-				else
-					off = stackSpace->getHighest() + delta + 1;
+				off = (delta >= 0)? delta: stackSpace->getHighest() + delta + 1;
 				return Address(stackSpace, off);
 			}
 			case R_ANAL_VAR_KIND_REG:
@@ -496,7 +493,7 @@ Symbol *R2Scope::queryR2Absolute(ut64 addr, bool contain) const
 	RCoreLock core(arch->getCore());
 
 	RAnalFunction *fcn = r_anal_get_function_at(core->anal, addr);
-#if 0
+#if 1
 	// This can cause functions to be registered twice (hello-arm test)
 	if(!fcn && contain)
 	{
@@ -642,5 +639,7 @@ LabSymbol *R2Scope::findCodeLabel(const Address &addr) const
 
 Funcdata *R2Scope::resolveExternalRefFunction(ExternRefSymbol *sym) const
 {
+	if (!sym)
+		return nullptr;
 	return queryFunction(sym->getRefAddr());
 }

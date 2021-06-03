@@ -60,6 +60,7 @@ void AnnotateOpref(ANNOTATOR_PARAMS)
 	annotation.type = R_CODEMETA_TYPE_OFFSET;
 	annotation.offset.offset = op->getAddr().getOffset();
 }
+
 void AnnotateFunctionName(ANNOTATOR_PARAMS)
 {
 	const char *func_name = node.child_value();
@@ -180,10 +181,9 @@ void AnnotateLocalVariable(Symbol *symbol, std::vector<RCodeMetaItem> *out)
 		return;
 	RCodeMetaItem annotation = {};
 	annotation.variable.name = strdup(symbol->getName().c_str());
-	if(symbol->getCategory() == 0)
-		annotation.type = R_CODEMETA_TYPE_FUNCTION_PARAMETER;
-	else
-		annotation.type = R_CODEMETA_TYPE_LOCAL_VARIABLE;
+	annotation.type = (symbol->getCategory() == 0)
+		? R_CODEMETA_TYPE_FUNCTION_PARAMETER
+		: R_CODEMETA_TYPE_LOCAL_VARIABLE;
 	out->push_back(annotation);
 }
 
@@ -297,13 +297,8 @@ static void ParseNode(pugi::xml_node node, ParseCodeXMLContext *ctx, std::ostrea
 	for(auto &annotation : annotations)
 	{
 		annotation.end = stream.tellp();
-#if R2_VERSION_MAJOR == 5 && R2_VERSION_MINOR == 2 && R2_VERSION_PATCH == 0
-		r_codemeta_add_annotation (code, &annotation);
-#else
 		r_codemeta_add_item (code, &annotation);
-#endif
 	}
-
 #ifdef TEST_UNKNOWN_NODES
 	if(close_test)
 		stream << "</" << node.name() << ">";
