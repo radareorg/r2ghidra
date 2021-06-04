@@ -62,8 +62,10 @@ static const ConfigVar cfg_var_sleighhome   ("sleighhome",  "",         "SLEIGHH
 static const ConfigVar cfg_var_sleighid     ("lang",        "",         "Custom Sleigh ID to override auto-detection (e.g. x86:LE:32:default)");
 static const ConfigVar cfg_var_cmt_cpp      ("cmt.cpp",     "true",     "C++ comment style");
 static const ConfigVar cfg_var_cmt_indent   ("cmt.indent",  "4",        "Comment indent");
+#if 0
 static const ConfigVar cfg_var_nl_brace     ("nl.brace",    "false",    "Newline before opening '{'");
 static const ConfigVar cfg_var_nl_else      ("nl.else",     "false",    "Newline before else");
+#endif
 static const ConfigVar cfg_var_indent       ("indent",      "4",        "Indent increment");
 static const ConfigVar cfg_var_linelen      ("linelen",     "120",      "Max line length");
 static const ConfigVar cfg_var_maximplref   ("maximplref",  "2",        "Maximum number of references to an expression before showing an explicit variable.");

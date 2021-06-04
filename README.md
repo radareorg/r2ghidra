@@ -89,8 +89,8 @@ At the moment there is no way to select which processors to support, so it build
 First, make sure the submodule contained within this repository is fetched and up to date:
 
 ```
-git submodule init
-git submodule update
+git submodule update --init
+make ghidra/ghidra/Ghidra
 ```
 
 Then, the radare2 plugin can be built and installed as follows:
