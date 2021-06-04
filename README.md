@@ -69,7 +69,7 @@ the r2pm package or installing as shown below.
 
 ## Building for Windows
 
-You need to build r2 or download it from the [last release](https://github.com/radareorg/radare2/releases) unzip it under the `radare2` directory and then run the `build.bat` script.
+You need to build r2 or download it from the [last release](https://github.com/radareorg/radare2/releases) unzip the dll files inside the r2 plugins directory.
 
 Alternatively you can download the [CI builds](https://github.com/radareorg/r2ghidra/releases) from the release page.
 
