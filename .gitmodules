@@ -1,7 +1,3 @@
-[submodule "ghidra/ghidra"]
-	path = ghidra/ghidra
-	branch = r2ghidra
-	url = https://github.com/radareorg/ghidra.git
 [submodule "third-party/pugixml"]
 	path = third-party/pugixml
 	url = https://github.com/zeux/pugixml.git

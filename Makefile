@@ -13,16 +13,23 @@ endif
 ghidra-processors.txt:
 	cp -f ghidra-processors.txt.default ghidra-processors.txt
 
-asan:
-	CFLAGS="-fsanitize=address" $(MAKE) -C src
+asan: ghidra/ghidra/Ghidra ghidra-processors.txt
+	#touch ghidra/ghidra/Ghidra/Features/Decompiler/src/decompile/cpp/*.cc src/*.cpp
+	touch src/*.cpp
+	CFLAGS="-fsanitize=address -g" $(MAKE) -C src -j
+	make user-install
+
+asan-run:
+	DYLD_INSERT_LIBRARIES=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/12.0.0/lib/darwin/libclang_rt.asan_osx_dynamic.dylib r2 -s 9664 /Users/pancake/Downloads/usr-4/bin/bc
 
 help:
 	@echo
-	@echo "./configure       # first you need to run configure"
-	@echo "make              # build r2ghidra plugins"
-	@echo "make install      # install plugin and sleighs into prefix"
-	@echo "make user-install # install in your home"
-	@echo "make uninstall    # uninstall r2ghidra from prefix (see user-uninstall)"
+	@echo "./configure          # first you need to run configure"
+	@echo "make                 # build r2ghidra plugins"
+	@echo "make install         # install plugin and sleighs into prefix"
+	@echo "make uninstall       # uninstall r2ghidra from prefix (see user-uninstall)"
+	@echo "make user-install    # install in your home"
+	@echo "make user-uninstall  # uninstall r2ghidra from prefix (see user-uninstall)"
 	@echo
 
 clean:
@@ -53,8 +60,16 @@ user-uninstall:
 	$(MAKE) -C src sleigh-uninstall
 	rm -f $(DESTDIR)/$(BINDIR)/sleighc
 
+gclean:
+	rm -rf ghidra-native ghidra/ghidra/Ghidra
+
 ghidra/ghidra/Ghidra:
-	$(MAKE) -C ghidra
+	git clone https://github.com/radareorg/ghidra-native
+	$(MAKE) -C ghidra-native patch
+	mkdir -p ghidra/ghidra/Ghidra/Features/Decompiler/src/decompile/cpp
+	cp -rf ghidra-native/src/decompiler/* ghidra/ghidra/Ghidra/Features/Decompiler/src/decompile/cpp
+	mkdir -p ghidra/ghidra/Ghidra/Processors
+	cp -rf ghidra-native/src/Processors/* ghidra/ghidra/Ghidra/Processors/
 
 mrproper: clean
 	git submodule deinit --all -f
