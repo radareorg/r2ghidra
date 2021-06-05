@@ -69,9 +69,17 @@ the r2pm package or installing as shown below.
 
 ## Building for Windows
 
-You need to build r2 or download it from the [last release](https://github.com/radareorg/radare2/releases) unzip the dll files inside the r2 plugins directory.
+First, make sure you have the latest version of radare2 for Windows, which can be found as a binary package [in the releases](https://github.com/radareorg/radare2/releases).
 
-Alternatively you can download the [CI builds](https://github.com/radareorg/r2ghidra/releases) from the release page.
+Then run the following command from the radare2/bin/ directory:
+
+```
+$ r2 -hh
+```
+
+Take note of the  `R2_USER_PLUGINS` path that is displayed. If this path does not actually exist on your system, create it.
+Now, go to the [r2ghidra latest releases](https://github.com/radareorg/r2ghidra/releases) and download the Windows binary package, which contains 3 dll files. Copy these dll files to the R2_USER_PLUGINS directory.
+You should now be able to do `pdg` while in radare2 to invoke the r2ghidra decompile command.
 
 ## Building with ACR/Make
 
