@@ -77,7 +77,7 @@ Then run the following command from the radare2/bin/ directory:
 $ r2 -hh
 ```
 
-and take note of the  ``` R2_USER_PLUGINS``` path that is displayed. If this path does not actually exist on your system, create it.
+Take note of the  `R2_USER_PLUGINS` path that is displayed. If this path does not actually exist on your system, create it.
 Now, go to the [r2ghidra latest releases](https://github.com/radareorg/r2ghidra/releases) and download the Windows binary package, which contains 3 dll files. Copy these dll files to the R2_USER_PLUGINS directory.
 You should now be able to do ```pdg``` while in radare2 to invoke the r2ghidra decompile command.
 
