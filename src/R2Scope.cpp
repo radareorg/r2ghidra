@@ -123,7 +123,7 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const
 				auto flag = reinterpret_cast<RFlagItem *>(pos);
 				if(flag->space && flag->space->name && !strcmp(flag->space->name, R_FLAGS_FS_SECTIONS))
 					continue;
-				if (!R_STR_ISEMPTY (flag->realname)) {
+				if (R_STR_ISNOTEMPTY (flag->realname)) {
 					fcn_name = flag->realname;
 					break;
 				}
