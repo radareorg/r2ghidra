@@ -40,8 +40,18 @@ static int archinfo(RAnal *anal, int query)
 		std::cerr << "SleightInit " << e.explain << std::endl;
 		return -1;
 	}
+	switch (query) {
+#if 0
+	case R_ANAL_ARCHINFO_MAX_OP_SIZE:
+		return 6;
+	case R_ANAL_ARCHINFO_MIN_OP_SIZE:
+		return 2;
+#endif
+	case R_ANAL_ARCHINFO_ALIGN:
+		return sanal->alignment;
+	}
 
-	return (query == R_ANAL_ARCHINFO_ALIGN)? sanal->alignment: -1;
+	return -1;
 }
 
 static std::vector<std::string> string_split(const std::string &s)

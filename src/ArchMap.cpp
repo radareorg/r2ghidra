@@ -21,6 +21,7 @@ class BaseMapper
 template<typename T> class Mapper;
 template<> class Mapper<ut64> : public BaseMapper<ut64> { public: using BaseMapper<ut64>::BaseMapper; };
 template<> class Mapper<bool> : public BaseMapper<bool> { public: using BaseMapper<bool>::BaseMapper; };
+template<> class Mapper<int> : public BaseMapper<int> { public: using BaseMapper<int>::BaseMapper; };
 
 template<> class Mapper<std::string> : public BaseMapper<std::string>
 {
@@ -36,6 +37,8 @@ class ArchMapper
 {
 	private:
 		const Mapper<std::string> arch;
+		const Mapper<int> minopsz;
+		const Mapper<int> maxopsz;
 		const Mapper<std::string> flavor;
 		const Mapper<bool> big_endian;
 		const Mapper<ut64> bits;
@@ -43,10 +46,12 @@ class ArchMapper
 	public:
 		ArchMapper(
 				const Mapper<std::string> arch,
+				const Mapper<int> minopsz = 1,
+				const Mapper<int> maxopsz = 1,
 				const Mapper<std::string> flavor = "default",
 				const Mapper<ut64> bits = bits_mapper_default,
 				const Mapper<bool> big_endian = big_endian_mapper_default)
-			: arch(arch), flavor(flavor), bits(bits), big_endian(big_endian) {}
+			: arch(arch), minopsz(1), maxopsz(1), flavor(flavor), bits(bits), big_endian(big_endian) {}
 
 		std::string Map(RCore *core) const
 		{
@@ -66,12 +71,11 @@ class ArchMapper
 // keys = asm.arch values
 static const std::map<std::string, ArchMapper> arch_map = {
 	{ "x86", {
-		"x86",
+		"x86", 1, 16,
 		CUSTOM_FLAVOR((RCore *core) {
 			return BITS == 16 ? "Real Mode" : "default";
 		})}},
-
-	{ "mips", { "MIPS" } },
+	{ "mips", { "MIPS", 4, 4 } },
 	{ "dalvik", { "Dalvik" } },
 	{ "tricore", { "tricore", "default", 32, true } },
 	{ "6502", { "6502", "default", 16 } },
