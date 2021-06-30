@@ -50,9 +50,9 @@ class ArchMapper
 				const Mapper<std::string> flavor = "default",
 				const Mapper<ut64> bits = bits_mapper_default,
 				const Mapper<bool> big_endian = big_endian_mapper_default,
-				const Mapper<int> minopsz = 1,
-				const Mapper<int> maxopsz = 1)
-			: arch(arch), flavor(flavor), bits(bits), big_endian(big_endian), minopsz(1), maxopsz(1) {}
+				const int minopsz = 0,
+				const int maxopsz = 0)
+			: arch(arch), flavor(flavor), bits(bits), big_endian(big_endian), minopsz(minopsz), maxopsz(maxopsz) {}
 
 		std::string Map(RCore *core) const
 		{
@@ -77,32 +77,14 @@ static const std::map<std::string, ArchMapper> arch_map = {
 		"x86",
 		CUSTOM_FLAVOR((RCore *core) {
 			return BITS == 16 ? "Real Mode" : "default";
-		}), bits_mapper_default, false,
-		CUSTOM_MINOPSZ ((RCore *core) {
-			return 1;
-		}),
-		CUSTOM_MAXOPSZ ((RCore *core) {
-			return 16;
-		}),
+		}), bits_mapper_default, false, 1, 16
 	}},
 	{ "mips", { "MIPS", "default",
-		bits_mapper_default, big_endian_mapper_default,
-		CUSTOM_MINOPSZ ((RCore *core) {
-			return 4;
-		}),
-		CUSTOM_MAXOPSZ ((RCore *core) {
-			return 4;
-		}),
-	} },
+		bits_mapper_default, big_endian_mapper_default, 4, 4
+	}},
 	{ "dalvik", { "Dalvik", "default",
-		bits_mapper_default, big_endian_mapper_default,
-		CUSTOM_MINOPSZ ((RCore *core) {
-			return 2;
-		}),
-		CUSTOM_MAXOPSZ ((RCore *core) {
-			return 10;
-		}),
-	 } },
+		bits_mapper_default, big_endian_mapper_default, 2, 10
+	}},
 	{ "tricore", { "tricore", "default", 32, true } },
 	{ "6502", { "6502", "default", 16 } },
 	{ "java", { "JVM", "default", bits_mapper_default, true } },
@@ -160,14 +142,8 @@ static const std::map<std::string, ArchMapper> arch_map = {
 		CUSTOM_BITS((RCore *core) {
 			return BITS == 64 ? 64 : 32;
 		}),
-		false,
-		CUSTOM_MINOPSZ ((RCore *core) {
-			return 2;
-		}),
-		CUSTOM_MAXOPSZ ((RCore *core) {
-			return 4;
-		})}
-	},
+		false, 2, 4
+	}},
 	{ "avr", {
 		CUSTOM_BASEID((RCore *core) {
 			return BITS == 32 ? "avr32a" : "avr8";
@@ -186,12 +162,7 @@ static const std::map<std::string, ArchMapper> arch_map = {
 			return 32;
 		}),
 		false,
-		CUSTOM_MINOPSZ ((RCore *core) {
-			return 2;
-		}),
-		CUSTOM_MAXOPSZ ((RCore *core) {
-			return 6;
-		}),
+		2, 6
 	}}
 };
 
@@ -234,18 +205,21 @@ std::string StrToLower(std::string s)
 }
 
 int ai(RCore *core, std::string cpu, int query) {
-	auto arch_it = arch_map.find(cpu);
+	size_t pos = cpu.find(":");
+	std::string cpuname = (pos != string::npos)
+		? StrToLower(cpu.substr(0, pos))
+		: StrToLower(cpu);
+	auto arch_it = arch_map.find(cpuname);
 	if(arch_it == arch_map.end()) {
 		return 1; // throw LowlevelError("Could not match asm.arch " + std::string(arch) + " to sleigh arch.");
-	
 	}
-	ArchMapper am = arch_it->second;
+	const ArchMapper *am = &arch_it->second;
 	// auto res = arch_it->second.Map(core);
 	switch (query) {
-	case R_ANAL_ARCHINFO_MAX_OP_SIZE:
-		return am.maxopsz;
 	case R_ANAL_ARCHINFO_MIN_OP_SIZE:
-		return am.minopsz;
+		return am->minopsz;
+	case R_ANAL_ARCHINFO_MAX_OP_SIZE:
+		return am->maxopsz;
 	// case R_ANAL_ARCHINFO_ALIGN:
 	//	return proc.align;
 	}
