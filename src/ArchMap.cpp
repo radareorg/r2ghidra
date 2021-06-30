@@ -37,21 +37,22 @@ class ArchMapper
 {
 	private:
 		const Mapper<std::string> arch;
-		const Mapper<int> minopsz;
-		const Mapper<int> maxopsz;
 		const Mapper<std::string> flavor;
 		const Mapper<bool> big_endian;
 		const Mapper<ut64> bits;
 
 	public:
+		const int minopsz;
+		const int maxopsz;
+	public:
 		ArchMapper(
 				const Mapper<std::string> arch,
-				const Mapper<int> minopsz = 1,
-				const Mapper<int> maxopsz = 1,
 				const Mapper<std::string> flavor = "default",
 				const Mapper<ut64> bits = bits_mapper_default,
-				const Mapper<bool> big_endian = big_endian_mapper_default)
-			: arch(arch), minopsz(1), maxopsz(1), flavor(flavor), bits(bits), big_endian(big_endian) {}
+				const Mapper<bool> big_endian = big_endian_mapper_default,
+				const Mapper<int> minopsz = 1,
+				const Mapper<int> maxopsz = 1)
+			: arch(arch), flavor(flavor), bits(bits), big_endian(big_endian), minopsz(1), maxopsz(1) {}
 
 		std::string Map(RCore *core) const
 		{
@@ -67,16 +68,41 @@ class ArchMapper
 #define CUSTOM_BASEID(lambda) std::function<std::string(RCore *)>([]lambda)
 #define CUSTOM_FLAVOR(lambda) std::function<std::string(RCore *)>([]lambda)
 #define CUSTOM_BITS(lambda) std::function<ut64(RCore *)>([]lambda)
+#define CUSTOM_MINOPSZ(lambda) std::function<int(RCore *)>([]lambda)
+#define CUSTOM_MAXOPSZ(lambda) std::function<int(RCore *)>([]lambda)
 
 // keys = asm.arch values
 static const std::map<std::string, ArchMapper> arch_map = {
 	{ "x86", {
-		"x86", 1, 16,
+		"x86",
 		CUSTOM_FLAVOR((RCore *core) {
 			return BITS == 16 ? "Real Mode" : "default";
-		})}},
-	{ "mips", { "MIPS", 4, 4 } },
-	{ "dalvik", { "Dalvik" } },
+		}), bits_mapper_default, false,
+		CUSTOM_MINOPSZ ((RCore *core) {
+			return 1;
+		}),
+		CUSTOM_MAXOPSZ ((RCore *core) {
+			return 16;
+		}),
+	}},
+	{ "mips", { "MIPS", "default",
+		bits_mapper_default, big_endian_mapper_default,
+		CUSTOM_MINOPSZ ((RCore *core) {
+			return 4;
+		}),
+		CUSTOM_MAXOPSZ ((RCore *core) {
+			return 4;
+		}),
+	} },
+	{ "dalvik", { "Dalvik", "default",
+		bits_mapper_default, big_endian_mapper_default,
+		CUSTOM_MINOPSZ ((RCore *core) {
+			return 2;
+		}),
+		CUSTOM_MAXOPSZ ((RCore *core) {
+			return 10;
+		}),
+	 } },
 	{ "tricore", { "tricore", "default", 32, true } },
 	{ "6502", { "6502", "default", 16 } },
 	{ "java", { "JVM", "default", bits_mapper_default, true } },
@@ -133,8 +159,15 @@ static const std::map<std::string, ArchMapper> arch_map = {
 		}),
 		CUSTOM_BITS((RCore *core) {
 			return BITS == 64 ? 64 : 32;
-		})}},
-
+		}),
+		false,
+		CUSTOM_MINOPSZ ((RCore *core) {
+			return 2;
+		}),
+		CUSTOM_MAXOPSZ ((RCore *core) {
+			return 4;
+		})}
+	},
 	{ "avr", {
 		CUSTOM_BASEID((RCore *core) {
 			return BITS == 32 ? "avr32a" : "avr8";
@@ -151,7 +184,15 @@ static const std::map<std::string, ArchMapper> arch_map = {
 		"default",
 		CUSTOM_BITS((RCore *core) {
 			return 32;
-		})}},
+		}),
+		false,
+		CUSTOM_MINOPSZ ((RCore *core) {
+			return 2;
+		}),
+		CUSTOM_MAXOPSZ ((RCore *core) {
+			return 6;
+		}),
+	}}
 };
 
 static const std::map<std::string, std::string> compiler_map = {
@@ -190,6 +231,25 @@ std::string StrToLower(std::string s)
 {
     std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){ return std::tolower(c); });
     return s;
+}
+
+int ai(RCore *core, std::string cpu, int query) {
+	auto arch_it = arch_map.find(cpu);
+	if(arch_it == arch_map.end()) {
+		return 1; // throw LowlevelError("Could not match asm.arch " + std::string(arch) + " to sleigh arch.");
+	
+	}
+	ArchMapper am = arch_it->second;
+	// auto res = arch_it->second.Map(core);
+	switch (query) {
+	case R_ANAL_ARCHINFO_MAX_OP_SIZE:
+		return am.maxopsz;
+	case R_ANAL_ARCHINFO_MIN_OP_SIZE:
+		return am.minopsz;
+	// case R_ANAL_ARCHINFO_ALIGN:
+	//	return proc.align;
+	}
+	return 1;
 }
 
 std::string SleighIdFromSleighAsmConfig(const char *cpu, int bits, bool bigendian, const vector<LanguageDescription> &langs)

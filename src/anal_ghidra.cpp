@@ -41,12 +41,10 @@ static int archinfo(RAnal *anal, int query)
 		return -1;
 	}
 	switch (query) {
-#if 0
 	case R_ANAL_ARCHINFO_MAX_OP_SIZE:
-		return 6;
+		return sanal->minopsz;
 	case R_ANAL_ARCHINFO_MIN_OP_SIZE:
-		return 2;
-#endif
+		return sanal->maxopsz;
 	case R_ANAL_ARCHINFO_ALIGN:
 		return sanal->alignment;
 	}
