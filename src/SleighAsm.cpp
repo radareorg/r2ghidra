@@ -36,6 +36,9 @@ void SleighAsm::initInner(RIO *io, std::string sleigh_id)
 	parseProcConfig(docstorage);
 	parseCompConfig(docstorage);
 	alignment = trans.getAlignment();
+	RCore *core = (RCore *)io->corebind.core;
+	minopsz = ai (core, sleigh_id, R_ANAL_ARCHINFO_MIN_OP_SIZE);
+	maxopsz = ai (core, sleigh_id, R_ANAL_ARCHINFO_MAX_OP_SIZE);
 	trans.clearCache();
 	initRegMapping();
 

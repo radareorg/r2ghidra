@@ -10,6 +10,9 @@ all:
 	@echo Run ./configure
 endif
 
+c:
+	make -C src -j4
+
 ghidra-processors.txt:
 	cp -f ghidra-processors.txt.default ghidra-processors.txt
 

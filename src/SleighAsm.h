@@ -232,6 +232,8 @@ public:
 	R2Sleigh trans;
 	std::string sleigh_id;
 	int alignment = 1;
+	int minopsz = 1;
+	int maxopsz = 1;
 	std::string pc_name;
 	std::string sp_name;
 	std::vector<std::string> arg_names; // default ABI's function args
