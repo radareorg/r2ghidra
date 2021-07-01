@@ -2117,6 +2117,20 @@ static int sanal_fini(void *p)
 #define KV(x, y) x = y
 #endif
 
+static RList *anal_preludes(RAnal *anal) {
+	RListIter *iter;
+	int bits = anal->bits;
+	void *_plugin;
+	// reuse r2 preludes
+	r_list_foreach (anal->plugins, iter, _plugin) {
+		RAnalPlugin *plugin = (RAnalPlugin*)_plugin;
+		if (!strcmp (plugin->name, anal->cpu)) {
+			return plugin->preludes (anal);
+		}
+	}
+	return NULL;
+}
+
 static RAnalPlugin r_anal_plugin_ghidra = {
 	KV(.name, "r2ghidra"),
 	KV(.desc, "SLEIGH Disassembler from Ghidra"),
@@ -2131,7 +2145,7 @@ static RAnalPlugin r_anal_plugin_ghidra = {
 	KV(.fini, &sanal_fini),
 	KV(.archinfo, &archinfo),
 	KV(.anal_mask, nullptr),
-	KV(.preludes, nullptr),
+	KV(.preludes, anal_preludes),
 	KV(.op, &sleigh_op),
 	KV(.cmd_ext, nullptr),
 	KV(.set_reg_profile, nullptr),
