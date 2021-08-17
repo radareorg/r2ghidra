@@ -1547,7 +1547,7 @@ static int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int
 						}
 						else
 						{
-							anal_op->type = R_ANAL_OP_TYPE_IRJMP;
+							anal_op->type = R_ANAL_OP_TYPE_RJMP;
 							anal_op->reg = reg;
 						}
 					}
@@ -1611,20 +1611,23 @@ static int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int
 					anal_op->fail = ins.getFallThrough().getOffset();
 					break;
 
-				case FlowType::COMPUTED_CALL_TERMINATOR: anal_op->eob = true;
-				case FlowType::COMPUTED_CALL:
+				case FlowType::COMPUTED_CALL_TERMINATOR:
+					anal_op->eob = true;
+				case FlowType::COMPUTED_CALL: // for some reason ghidra's computed calls are actually jmps :facepalm:
 				{
 					char *reg = getIndirectReg(ins, isRefed);
 					if(reg)
 					{
 						if(isRefed)
 						{
-							anal_op->type = R_ANAL_OP_TYPE_IRCALL;
+							anal_op->type = R_ANAL_OP_TYPE_RJMP;
+							anal_op->eob = true;
 							anal_op->ireg = reg;
 						}
 						else
 						{
-							anal_op->type = R_ANAL_OP_TYPE_IRCALL;
+							anal_op->type = R_ANAL_OP_TYPE_IRJMP;
+							anal_op->eob = true;
 							anal_op->reg = reg;
 						}
 					}
