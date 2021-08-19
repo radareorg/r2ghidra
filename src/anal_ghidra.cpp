@@ -2125,9 +2125,12 @@ static RList *anal_preludes(RAnal *anal) {
 	int bits = anal->bits;
 	void *_plugin;
 	// reuse r2 preludes
+	if (!anal->cpu) {
+		return NULL;
+	}
 	r_list_foreach (anal->plugins, iter, _plugin) {
 		RAnalPlugin *plugin = (RAnalPlugin*)_plugin;
-		if (!strcmp (plugin->name, anal->cpu)) {
+		if (plugin->name && !strcmp (plugin->name, anal->cpu)) {
 			return plugin->preludes (anal);
 		}
 	}
