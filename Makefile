@@ -45,11 +45,12 @@ clean:
 	$(MAKE) -C src clean
 	rm -f config.mk
 
+DD=$(DESTDIR)/$(shell r2 -H R2_LIBR_PLUGINS)
 install:
 	mkdir -p $(DESTDIR)/$(BINDIR)
 	cp -f src/sleighc $(DESTDIR)/$(BINDIR)
-	$(MAKE) -C src install R2_USER_PLUGINS=$(DESTDIR)/$(shell r2 -H R2_LIBR_PLUGINS)
-	$(MAKE) -C src sleigh-install D=$(DESTDIR)/$(DATADIR)/r2ghidra/sleigh
+	$(MAKE) -C src install R2_USER_PLUGINS=$(DD) # $(DESTDIR)/$(shell r2 -H R2_LIBR_PLUGINS)
+	$(MAKE) -C src sleigh-install D=$(DD)/r2ghidra_sleigh # $(DESTDIR)/$(DATADIR)/r2ghidra/sleigh
 
 uninstall:
 	$(MAKE) -C src uninstall R2_USER_PLUGINS=$(DESTDIR)/$(shell r2 -H R2_LIBR_PLUGINS)
