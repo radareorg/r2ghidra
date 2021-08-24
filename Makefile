@@ -73,15 +73,18 @@ user-uninstall:
 gclean:
 	rm -rf ghidra-native ghidra/ghidra/Ghidra
 
-ghidra-native/.patched:
+ghidra-native:
 	git clone https://github.com/radareorg/ghidra-native
 	cd ghidra-native && git reset --hard $(GHIDRA_NATIVE_COMMIT)
+
+ghidra-native/.patched: ghidra-native
 	$(MAKE) -C ghidra-native patch
 	touch ghidra-native/.patched
-	# mkdir -p ghidra/ghidra/Ghidra/Features/Decompiler/src/decompile/cpp
-	# cp -rf ghidra-native/src/decompiler/* ghidra/ghidra/Ghidra/Features/Decompiler/src/decompile/cpp
-	# mkdir -p ghidra/ghidra/Ghidra/Processors
-	# cp -rf ghidra-native/src/Processors/* ghidra/ghidra/Ghidra/Processors/
+
+# mkdir -p ghidra/ghidra/Ghidra/Features/Decompiler/src/decompile/cpp
+# cp -rf ghidra-native/src/decompiler/* ghidra/ghidra/Ghidra/Features/Decompiler/src/decompile/cpp
+# mkdir -p ghidra/ghidra/Ghidra/Processors
+# cp -rf ghidra-native/src/Processors/* ghidra/ghidra/Ghidra/Processors/
 
 mrproper: clean
 	git submodule deinit --all -f

@@ -460,6 +460,15 @@ std::string SleighAsm::getSleighHome(RConfig *cfg)
 		r_mem_free((void *)path);
 		return res;
 	}
+	path = r_str_home(R2_PREFIX "/lib/radare2/" R2_VERSION "/r2ghidra_sleigh");
+	if(r_file_is_directory(path))
+	{
+		if(cfg)
+			r_config_set(cfg, varname, path);
+		std::string res(path);
+		r_mem_free((void *)path);
+		return res;
+	}
 	else
 		throw LowlevelError("No Sleigh Home found!");
 }
