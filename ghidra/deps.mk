@@ -1,8 +1,10 @@
 # hardcoded for now
 USE_BISON=0
 
-GHIDRA_HOME=../ghidra/ghidra/
-GHIDRA_DECOMPILER=$(GHIDRA_HOME)/Ghidra/Features/Decompiler/src/decompile/cpp
+# GHIDRA_HOME=../ghidra/ghidra/
+# GHIDRA_DECOMPILER=$(GHIDRA_HOME)/Ghidra/Features/Decompiler/src/decompile/cpp
+GHIDRA_HOME=../ghidra-native
+GHIDRA_DECOMPILER=$(GHIDRA_HOME)/src/decompiler
 
 G_DECOMPILER=space.cc float.cc address.cc pcoderaw.cc
 G_DECOMPILER+=translate.cc opcodes.cc globalcontext.cc
@@ -106,27 +108,27 @@ SLEIGHTC_OBJS=$(GHIDRA_DECOMPILER)/slgh_compile.o $(GHIDRA_DECOMPILER)/slghscan.
 sleighc: $(SLEIGHTC_OBJS) $(GHIDRA_OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o sleighc $(SLEIGHTC_OBJS) $(GHIDRA_OBJS)
 
-GHIDRA_SLEIGH_SLASPECS=$(GHIDRA_HOME)/Ghidra/Processors/*.slaspec
-GHIDRA_SLEIGH_FILES=$(GHIDRA_HOME)/Ghidra/Processors/*.cspec
-GHIDRA_SLEIGH_FILES+=$(GHIDRA_HOME)/Ghidra/Processors/*.ldefs
-GHIDRA_SLEIGH_FILES+=$(GHIDRA_HOME)/Ghidra/Processors/*.pspec
+GHIDRA_SLEIGH_HOME=$(GHIDRA_HOME)/src/Processors
+GHIDRA_SLEIGH_SLASPECS=$(GHIDRA_SLEIGH_HOME)/*.slaspec
+GHIDRA_SLEIGH_FILES=$(GHIDRA_SLEIGH_HOME)/*.cspec
+GHIDRA_SLEIGH_FILES+=$(GHIDRA_SLEIGH_HOME)/*.ldefs
+GHIDRA_SLEIGH_FILES+=$(GHIDRA_SLEIGH_HOME)/*.pspec
 
 ../ghidra-processors.txt:
 	cp -f ../ghidra-processors.txt.default ../ghidra-processors.txt
 
 sleigh-build: sleighc ../ghidra-processors.txt
-	for a in DATA $(shell cat ../ghidra-processors.txt) ; do ./sleighc -a $(GHIDRA_HOME)/Ghidra/Processors/$$a ; done
+	for a in DATA $(shell cat ../ghidra-processors.txt) ; do ./sleighc -a $(GHIDRA_SLEIGH_HOME)/$$a ; done
 
-GHIDRA_PROCS=$(GHIDRA_HOME)/Ghidra/Processors/*/*/*
+GHIDRA_PROCS=$(GHIDRA_SLEIGH_HOME)/*/*/*
 
-S=$(GHIDRA_HOME)/Ghidra/Processors
-D=$(R2_USER_PLUGINS)/r2ghidra_sleigh
+D=$(DESTDIR)/$(R2_USER_PLUGINS)/r2ghidra_sleigh
 
 sleigh-install:
 	mkdir -p $(D)
 	for a in DATA $(shell cat ../ghidra-processors.txt) ; do \
 		for b in cspec ldefs pspec sla ; do \
-			cp -f $(S)/$$a/*/*/*.$$b "$(D)"; \
+			cp -f $(GHIDRA_SLEIGH_HOME)/$$a/*/*/*.$$b "$(D)"; \
 		done ;\
 	done
 
