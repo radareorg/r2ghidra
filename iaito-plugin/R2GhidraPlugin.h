@@ -5,13 +5,13 @@
 
 #include <QObject>
 #include <QtPlugin>
-#include <plugins/CutterPlugin.h>
+#include <plugins/IaitoPlugin.h>
 
-class R2GhidraPlugin : public QObject, CutterPlugin
+class R2GhidraPlugin : public QObject, IaitoPlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.radare.cutter.plugins.r2ghidra")
-    Q_INTERFACES(CutterPlugin)
+    Q_PLUGIN_METADATA(IID "org.radare.iaito.plugins.r2ghidra")
+    Q_INTERFACES(IaitoPlugin)
 
 public:
     void setupPlugin() override;
@@ -25,4 +25,4 @@ public:
 };
 
 
-#endif // CUTTERSAMPLEPLUGIN_H
+#endif // IAITOSAMPLEPLUGIN_H
