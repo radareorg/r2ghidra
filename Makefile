@@ -15,6 +15,10 @@ endif
 c:
 	make -C src -j4
 
+purge: clean
+	$(MAKE) uninstall
+	$(MAKE) user-uninstall
+
 ghidra-processors.txt:
 	cp -f ghidra-processors.txt.default ghidra-processors.txt
 
