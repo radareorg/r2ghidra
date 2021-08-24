@@ -137,6 +137,12 @@ jobs:
         unzip r2.zip
         mv radare2-${R2V}-w64 radare2
         pwd
+    - name: batmake
+      shell: cmd
+      run: |
+        preconfigure
+        configure
+        make
     - name: make
       shell: cmd
       run: |
