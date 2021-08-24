@@ -5,7 +5,7 @@ CROSSARCH=x64
 PWD=$(shell pwd)
 PACKAGE_DIR?=${PWD}
 
-DOCKCROSS=$(PWD)/../dockcross
+DOCKCROSS=$(PWD)/../docker/dockcross
 R2PLUGDIR=/usr/lib/radare2/$(VERSION)
 
 all: root

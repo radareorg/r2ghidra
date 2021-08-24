@@ -25,7 +25,7 @@ jobs:
     - name: Building r2ghidra with acr
       run: git submodule update --init ; ./configure ; make -j4 ; make user-install
     - name: Packaging r2ghidra for Debian
-      run: make -C scripts/debian
+      run: make -C dist/debian
     - name: Testing r2ghidra oneliner
       run: r2 -qc 'af;pdg' /bin/ls || exit 0
     - name: Testing r2ghidra
@@ -33,9 +33,9 @@ jobs:
     - name: Pub
       uses: actions/upload-artifact@v2
       with:
-        # path: radare2/dist/debian/*/*.deb r2ghidra/scripts/debian/*.deb
+        # path: radare2/dist/debian/*/*.deb r2ghidra/dist/debian/*.deb
         name: r2ghidra-${{env.R2V}}_amd64.deb
-        path: scripts/debian/*.deb
+        path: dist/debian/*.deb
 
   linux-asan:
     if: ${{ false }}  # disable for now
@@ -76,7 +76,7 @@ jobs:
     - name: Building r2ghidra with cmake
       run: git submodule update --init ; make ghidra/ghidra/Ghidra ; mkdir build && cd build && cmake .. && make -j4 && sudo make install
     - name: Packaging r2ghidra for Debian
-      run: make -C scripts/debian
+      run: make -C dist/debian
     - name: Testing r2ghidra oneliner
       run: r2 -qc 'af;pdg' /bin/ls || exit 0
     #- name: Testing r2ghidra
@@ -85,8 +85,8 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: r2ghidra-${{env.R2V}}_amd64_cmake.deb
-        path: radare2/dist/debian/*/*.deb scripts/debian/*.deb
-        # path: scripts/debian/*.deb
+        path: radare2/dist/debian/*/*.deb dist/debian/*.deb
+        # path: dist/debian/*.deb
 
   macos-acr:
     # The type of runner that the job will run on

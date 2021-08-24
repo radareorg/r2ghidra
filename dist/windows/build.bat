@@ -1,0 +1,4 @@
+cd ..\..
+preconfigure
+configure
+make
