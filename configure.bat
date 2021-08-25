@@ -1,3 +1,4 @@
-mkdir destdir build
-cd build
+mkdir build
+pushd build
 cmake -GNinja ..
+popd

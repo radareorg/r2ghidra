@@ -24,7 +24,7 @@ jobs:
       run: ( git clone --depth=1 https://github.com/radareorg/radare2 && cd radare2 && sys/install.sh /usr )
     - name: Building r2ghidra with acr
       run: ./preconfigure && ./configure && make -j4 ; make user-install
-    - name: Testing r2ghidra oneliner
+    - name: Testing r2ghidra oneliner on home setup
       run: r2 -qc 'af;pdg' /bin/ls || exit 0
     - name: System-wide installation
       run: make user-uninstall && sudo make install
