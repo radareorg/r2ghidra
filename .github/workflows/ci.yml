@@ -72,8 +72,8 @@ jobs:
       uses: actions/checkout@v2
     - name: Downloading Radare2 Debian packages
       run: |
-        python -m wget https://github.com/radareorg/radare2/releases/download/${R2V}/radare2_${R2V}_amd64.deb -o r2.deb
-        python -m wget https://github.com/radareorg/radare2/releases/download/${R2V}/radare2-dev_${R2V}_amd64.deb -o r2-dev.deb
+        wget -O r2.deb     https://github.com/radareorg/radare2/releases/download/${R2V}/radare2_${R2V}_amd64.deb
+        wget -O r2-dev.deb https://github.com/radareorg/radare2/releases/download/${R2V}/radare2-dev_${R2V}_amd64.deb
     - name: Installing Radare2
       run: sudo dpkg -i r2.deb r2-dev.deb
     - name: Building r2ghidra with meson
@@ -125,23 +125,27 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Cloning Repo
+    - name: Cloning Radare2 git repository
       run: git clone --depth=1 https://github.com/radareorg/radare2
-    - name: Packaging Radare2 for macOS
+    - name: Building Radare2 pkg for macOS
       run: make -C radare2/dist/macos
     - name: Install radare2 Package
       run: sudo installer -pkg radare2/dist/macos/*.pkg -target /
-    - name: Building r2ghidra
-      run: git submodule update --init ; ./configure ; make -j4 ; make user-install
+    - name: Building r2ghidra with acr
+      run: ./preconfigure && ./configure && make -j4 && make user-install
     - name: Packaging r2ghidra
-      run: make install DESTDIR=/tmp/r2ghidra ; cd /tmp/r2ghidra ; tar czvf ../r2ghidra-macos-${{env.R2V}}.tar.gz *
+      run: |
+        make -C dist/macos
+        make install DESTDIR=/tmp/r2ghidra && cd /tmp/r2ghidra && tar czvf ../r2ghidra-macos-${{env.R2V}}.tar.gz *
     - name: Testing r2ghidra
-      run: r2 -qc 'af;pdg' /bin/ls
+      run: |
+        r2 -qc 'af;pdg' /bin/ls | tee a.txt
+        grep iVar a.txt
     - name: Pub
       uses: actions/upload-artifact@v2
       with:
         name: r2ghidra-${{env.R2V}}-macos.tar.gz
-        path: radare2/dist/macos/*.pkg src/*.dylib /tmp/r2ghidra-macos-${{env.R2V}}.tar.gz
+        path: radare2/dist/macos/*.pkg src/*.dylib /tmp/r2ghidra-macos-${{env.R2V}}.tar.gz dist/macos/*.zip
 
   w64:
     runs-on: windows-latest
