@@ -1,5 +1,5 @@
 echo Building R2Ghidra Plugins
-cmake -B build --build
+cmake --build build
 
 echo Copying Plugins
 mkdir destdir

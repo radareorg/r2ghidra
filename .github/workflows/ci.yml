@@ -56,7 +56,7 @@ jobs:
     #  run: ( git clone --depth=1 https://github.com/radareorg/radare2 && cd radare2 && sys/sanitize.sh --install /usr )
       run: ( git clone --depth=1 https://github.com/radareorg/radare2 && cd radare2 && sys/install.sh --install )
     - name: Building r2ghidra with acr
-      run: git submodule update --init ; ./configure ; make asan ; make -C src sleigh-build; make user-install
+      run: ./preconfigure && ./configure && make asan && make -C src sleigh-build && make user-install
     - name: Testing r2ghidra oneliner
       run: r2 -qc 'af;pdg' /bin/ls || exit 0
 
@@ -105,7 +105,7 @@ jobs:
     - name: Installing Radare2
       run: sudo dpkg -i radare2/dist/debian/*/*.deb
     - name: Building r2ghidra with cmake
-      run: git submodule update --init ; make ghidra-native ; mkdir build && cd build && cmake .. && make -j4 && sudo make install
+      run: ./preconfigure && cmake -B build && make -C build -j4 && sudo make -C build install
     #- name: Packaging r2ghidra for Debian
     #  run: make -C dist/debian
     - name: Testing r2ghidra oneliner
