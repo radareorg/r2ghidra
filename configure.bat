@@ -1,4 +1,1 @@
-mkdir build
-pushd build
-cmake -GNinja ..
-popd
+cmake -B build -GNinja
