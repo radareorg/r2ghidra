@@ -1,4 +1,8 @@
-echo Building R2Ghidra Plugins
+if EXIST build (
+	echo Building R2Ghidra Plugins
+) else (
+	configure.bat
+)
 cmake --build build
 
 echo Copying Plugins

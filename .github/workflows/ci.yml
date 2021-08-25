@@ -180,9 +180,9 @@ jobs:
     - name: batmake
       shell: cmd
       run: |
-        preconfigure
-        configure
-        make
+        preconfigure.bat
+        configure.bat
+        make.bat
     - name: make
       shell: cmd
       run: |
