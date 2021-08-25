@@ -12,7 +12,7 @@ if [ $? != 0 ]; then
 	( cd r2 && sys/debian.sh ) # make -C r2/dist/debian
 	sudo dpkg -i r2/dist/debian/*/*.deb
 fi
-[ -z "${DESTDIR}" ] && DESTDIR="/work/scripts/debian/root"
+[ -z "${DESTDIR}" ] && DESTDIR="/work/dist/debian/root"
 VERSION=`r2 -qv`
 [ -z "${VERSION}" ] && VERSION=`r2/configure -qV`
 RV=${VERSION}
