@@ -77,7 +77,7 @@ jobs:
     - name: Installing Radare2
       run: sudo dpkg -i r2.deb r2-dev.deb
     - name: Installing "The Meson Ninja"
-      run: pip install ninja meson
+      run: pip install ninja meson && ninja --version && meson --version
     - name: Building r2ghidra with meson
       run: ./preconfigure && meson b && ninja -C b && sudo ninja -C b install
     - name: Testing r2ghidra oneliner
