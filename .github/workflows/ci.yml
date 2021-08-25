@@ -23,14 +23,18 @@ jobs:
     - name: Installing radare2
       run: ( git clone --depth=1 https://github.com/radareorg/radare2 && cd radare2 && sys/install.sh /usr )
     - name: Building r2ghidra with acr
-      run: git submodule update --init ; ./configure ; make -j4 ; make user-install
-    - name: Packaging r2ghidra for Debian
-      run: make -C dist/debian
+      run: ./preconfigure && ./configure && make -j4 ; make user-install
     - name: Testing r2ghidra oneliner
       run: r2 -qc 'af;pdg' /bin/ls || exit 0
-    - name: Testing r2ghidra
+    - name: System-wide installation
+      run: make user-uninstall && sudo make install
+    - name: Testing r2ghidra oneliner on system wide install
+      run: r2 -qc 'af;pdg' /bin/ls || exit 0
+    - name: Packaging r2ghidra for Debian using Dockcross
+      run: make -C dist/debian
+    - name: Running Testsuite
       run: make -C test || exit 0
-    - name: Pub
+    - name: Uploading Artifacts
       uses: actions/upload-artifact@v2
       with:
         # path: radare2/dist/debian/*/*.deb r2ghidra/dist/debian/*.deb
@@ -56,6 +60,31 @@ jobs:
     - name: Testing r2ghidra oneliner
       run: r2 -qc 'af;pdg' /bin/ls || exit 0
 
+  linux-meson:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Downloading Radare2 Debian packages
+      run: |
+        python -m wget https://github.com/radareorg/radare2/releases/download/${R2V}/radare2_${R2V}_amd64.deb -o r2.deb
+        python -m wget https://github.com/radareorg/radare2/releases/download/${R2V}/radare2-dev_${R2V}_amd64.deb -o r2-dev.deb
+    - name: Installing Radare2
+      run: sudo dpkg -i r2.deb r2-dev.deb
+    - name: Building r2ghidra with meson
+      run: ./preconfigure && meson b && ninja -C b && sudo ninja -C b install
+    - name: Testing r2ghidra oneliner
+      run: |
+        r2 -H
+        r2 -L
+        R2_DEBUG=1 r2 -qc 'af;pdg' /bin/ls | tee a.txt
+        grep r2 -qc 'af;pdg' /bin/ls | tee a.txt
+
   linux-cmake:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -75,18 +104,18 @@ jobs:
       run: sudo dpkg -i radare2/dist/debian/*/*.deb
     - name: Building r2ghidra with cmake
       run: git submodule update --init ; make ghidra-native ; mkdir build && cd build && cmake .. && make -j4 && sudo make install
-    - name: Packaging r2ghidra for Debian
-      run: make -C dist/debian
+    #- name: Packaging r2ghidra for Debian
+    #  run: make -C dist/debian
     - name: Testing r2ghidra oneliner
       run: r2 -qc 'af;pdg' /bin/ls || exit 0
     #- name: Testing r2ghidra
     #  run: make -C test || exit 0
-    - name: Pub
-      uses: actions/upload-artifact@v2
-      with:
-        name: r2ghidra-${{env.R2V}}_amd64_cmake.deb
-        path: radare2/dist/debian/*/*.deb dist/debian/*.deb
-        # path: dist/debian/*.deb
+    #- name: Pub
+    #  uses: actions/upload-artifact@v2
+    #  with:
+    #    name: r2ghidra-${{env.R2V}}_amd64_cmake.deb
+    #    path: radare2/dist/debian/*/*.deb dist/debian/*.deb
+    #    # path: dist/debian/*.deb
 
   macos-acr:
     # The type of runner that the job will run on
