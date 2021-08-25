@@ -149,7 +149,8 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: r2ghidra-${{env.R2V}}-macos.tar.gz
-        path: radare2/dist/macos/*.pkg src/*.dylib /tmp/r2ghidra-macos-${{env.R2V}}.tar.gz dist/macos/*.zip
+        path: dist/macos/*.zip
+        #path: radare2/dist/macos/*.pkg src/*.dylib /tmp/r2ghidra-macos-${{env.R2V}}.tar.gz dist/macos/*.zip
 
   w64:
     runs-on: windows-latest
