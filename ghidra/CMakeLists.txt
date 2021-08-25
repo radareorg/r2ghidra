@@ -125,7 +125,7 @@ set(SLEIGH_COMPILER_SOURCE_FLEX
 		slghscan.l)
 
 # set(DECOMPILER_SOURCE_DIR ghidra/Ghidra/Features/Decompiler/src/decompile/cpp)
-set(DECOMPILER_SOURCE_DIR ghidra-native/src/decompiler)
+set(DECOMPILER_SOURCE_DIR ../ghidra-native/src/decompiler)
 
 ################################################################################
 
@@ -226,10 +226,10 @@ target_include_directories(sleighc PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/flex")
 set(CMAKE_CXX_FLAGS "-ULoadImage")
 
 if(BUILD_SLASPECS)
-	file(GLOB_RECURSE SLASPEC_FILES "ghidra-native/src/Processors/*.slaspec")
-	file(GLOB_RECURSE CPEC_FILES "ghidra-native/src/Processors/*.cspec")
-	file(GLOB_RECURSE LDEFS_FILES "ghidra-native/src/Processors/*.ldefs")
-	file(GLOB_RECURSE PSPEC_FILES "ghidra-native/src/Processors/*.pspec")
+	file(GLOB_RECURSE SLASPEC_FILES "../ghidra-native/src/Processors/*.slaspec")
+	file(GLOB_RECURSE CPEC_FILES "../ghidra-native/src/Processors/*.cspec")
+	file(GLOB_RECURSE LDEFS_FILES "../ghidra-native/src/Processors/*.ldefs")
+	file(GLOB_RECURSE PSPEC_FILES "../ghidra-native/src/Processors/*.pspec")
 	set(SLAFILES "")
 	set(SLEIGH_BASE "${CMAKE_CURRENT_BINARY_DIR}/sleigh")
 	file(MAKE_DIRECTORY "${SLEIGH_BASE}")
