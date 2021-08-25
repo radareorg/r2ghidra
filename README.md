@@ -29,6 +29,8 @@ r2ghidra is known to work on the following operating systems:
 
 ## Usage
 
+To decompile a function, first type `af` to analize it and then `pdg` to invoke r2ghidra:
+
 ```
 [0x100001060]> pdg?
 Usage: pdg  # Native Ghidra decompiler plugin
@@ -43,7 +45,7 @@ Usage: pdg  # Native Ghidra decompiler plugin
 | pdga          # Switch to RAsm and RAnal plugins driven by SLEIGH from Ghidra
 | pdg*          # Decompiled code is returned to r2 as comment
 Environment:
-| %SLEIGHHOME   # Path to ghidra build root directory
+| %SLEIGHHOME   # Path to ghidra build root directory (same as r2ghidra.sleighhome)
 ```
 
 The following config vars (for the `e` command) can be used to adjust r2ghidra's behavior:
@@ -81,24 +83,45 @@ Take note of the  `R2_USER_PLUGINS` path that is displayed. If this path does no
 Now, go to the [r2ghidra latest releases](https://github.com/radareorg/r2ghidra/releases) and download the Windows binary package, which contains 3 dll files. Copy these dll files to the R2_USER_PLUGINS directory.
 You should now be able to do `pdg` while in radare2 to invoke the r2ghidra decompile command.
 
-## Building with ACR/Make
+## Building
+
+r2ghidra can be built with `meson`, `cmake` or `acr`. All the 3 build systems are maintained in sync and aims to provide to the packagers and users the choice to use whatever fits better for their needs.
+
+### Building with ACR/Make
 
 The procedure is like the standard autoconf:
 
 ```
+$ ./preconfigure   # optional, but useful for offline-packagers, as its downloads the external repos
 $ ./configure
 $ make
 $ make install  # or make user-install
 ```
 At the moment there is no way to select which processors to support, so it builds them all and takes a lot of time to compile the sleighfiles.
 
-## Building with CMake
+
+### Windows
+
+To compile r2ghidra on windows you need Visual Studio and git installed:
+
+```cmd
+preconfigure   # find VS installation, sets path and download external code
+configure      # prepare the build
+make           # compile and zip the result
+```
+or
+
+```
+dist\windows\build
+```
+
+### Building with CMake
 
 First, make sure the submodule contained within this repository is fetched and up to date:
 
 ```
 git submodule update --init
-make ghidra/ghidra/Ghidra
+make ghidra-native/.patched
 ```
 
 Then, the radare2 plugin can be built and installed as follows:
@@ -107,14 +130,14 @@ Then, the radare2 plugin can be built and installed as follows:
 mkdir build && cd build
 cmake -DCMAKE_INSTALL_PREFIX=~/.local ..
 make
-make install
+make install DESTDIR=/tmp/r2ghidra-prefix
 ```
 
 Here, set the `CMAKE_INSTALL_PREFIX` to a location where radare2 can load the plugin from.
 
 ## Iaito plugin
 
-r2ghidra works with iaito without needing to build this plugin, but it is still an option for advanced users as it provides the ability to work directly using the API instead of processing.
+Iaito can use r2ghidra without the need for a iaito-specific plugin. But the performance may be better when using the native plugin in contrast to the json-parsing generic solution.
 
 The install step is necessary for the plugin to work because it includes installing the necessary Sleigh files.
 

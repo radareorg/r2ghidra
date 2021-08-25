@@ -18,7 +18,7 @@ all: root
 
 root:
 	cd ../.. && $(DOCKCROSS) --image dockcross/linux-$(CROSSARCH) \
-	bash -c 'DESTDIR=/work/scripts/debian/root sh scripts/build.sh'
+	bash -c 'DESTDIR=/work/scripts/debian/root sh dist/debian/build.sh'
 
 purge: clean
 	rm -rf root

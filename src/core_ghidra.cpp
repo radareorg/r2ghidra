@@ -111,7 +111,7 @@ static void PrintUsage(const RCore *const core)
 		CMD_PREFIX"a", "", "# Switch to RAsm and RAnal plugins driven by SLEIGH from Ghidra",
 		CMD_PREFIX"*",  "", "# Decompiled code is returned to r2 as comment",
 		"Environment:", "", "",
-		"%SLEIGHHOME" , "", "# Path to ghidra build root directory",
+		"%SLEIGHHOME" , "", "# Path to ghidra sleigh directory (same as r2ghidra.sleighhome)",
 		NULL
 	};
 
