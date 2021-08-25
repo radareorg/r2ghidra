@@ -74,7 +74,7 @@ jobs:
     - name: Installing Radare2
       run: sudo dpkg -i radare2/dist/debian/*/*.deb
     - name: Building r2ghidra with cmake
-      run: git submodule update --init ; make ghidra/ghidra/Ghidra ; mkdir build && cd build && cmake .. && make -j4 && sudo make install
+      run: git submodule update --init ; make ghidra-native ; mkdir build && cd build && cmake .. && make -j4 && sudo make install
     - name: Packaging r2ghidra for Debian
       run: make -C dist/debian
     - name: Testing r2ghidra oneliner
@@ -151,7 +151,7 @@ jobs:
         set PATH=%CD%\radare2\bin;%PATH%
         set ARCH=x64
         git submodule update --init
-        make ghidra/ghidra/Ghidra
+        make ghidra-native
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
         mkdir destdir build
         cd build

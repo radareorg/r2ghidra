@@ -4,7 +4,7 @@ DESTDIR?=
 GHIDRA_NATIVE_COMMIT=7c76f1f9544f7064c3d7deb73a4eaa5b844aea2d
 
 ifeq ($(shell test -f config.mk && echo $$?),0)
-all: ghidra-native/.patched ghidra-processors.txt
+all: ghidra-native ghidra-processors.txt
 	$(MAKE) -C src
 	$(MAKE) -C src sleigh-build
 else
@@ -22,7 +22,7 @@ purge: clean
 ghidra-processors.txt:
 	cp -f ghidra-processors.txt.default ghidra-processors.txt
 
-asan: ghidra/ghidra/Ghidra ghidra-processors.txt
+asan: ghidra-native ghidra-processors.txt
 	#touch ghidra/ghidra/Ghidra/Features/Decompiler/src/decompile/cpp/*.cc src/*.cpp
 	touch src/*.cpp
 	CFLAGS="-fsanitize=address -g" $(MAKE) -C src -j
@@ -76,15 +76,8 @@ gclean:
 ghidra-native:
 	git clone https://github.com/radareorg/ghidra-native
 	cd ghidra-native && git reset --hard $(GHIDRA_NATIVE_COMMIT)
-
-ghidra-native/.patched: ghidra-native
 	$(MAKE) -C ghidra-native patch
 	touch ghidra-native/.patched
-
-# mkdir -p ghidra/ghidra/Ghidra/Features/Decompiler/src/decompile/cpp
-# cp -rf ghidra-native/src/decompiler/* ghidra/ghidra/Ghidra/Features/Decompiler/src/decompile/cpp
-# mkdir -p ghidra/ghidra/Ghidra/Processors
-# cp -rf ghidra-native/src/Processors/* ghidra/ghidra/Ghidra/Processors/
 
 mrproper: clean
 	git submodule deinit --all -f
