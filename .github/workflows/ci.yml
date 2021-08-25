@@ -87,9 +87,9 @@ jobs:
         r2 -H
         r2 -L
         R2_DEBUG=1 r2 -qc 'af;pdg' /bin/ls | tee a.txt
-        grep r2 -qc 'af;pdg' /bin/ls | tee a.txt
+        grep entry0 a.txt
 
-  linux-cmake:
+  linux-cmake-ok:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     strategy:
@@ -123,7 +123,7 @@ jobs:
     #    path: radare2/dist/debian/*/*.deb dist/debian/*.deb
     #    # path: dist/debian/*.deb
 
-  macos-acr:
+  macos-acr-ok:
     # The type of runner that the job will run on
     runs-on: macos-latest
 
