@@ -77,7 +77,6 @@ ghidra-native:
 	git clone https://github.com/radareorg/ghidra-native
 	cd ghidra-native && git reset --hard $(GHIDRA_NATIVE_COMMIT)
 	$(MAKE) -C ghidra-native patch
-	touch ghidra-native/.patched
 
 mrproper: clean
 	git submodule deinit --all -f

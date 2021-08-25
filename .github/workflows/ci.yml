@@ -76,6 +76,8 @@ jobs:
         wget -O r2-dev.deb https://github.com/radareorg/radare2/releases/download/${R2V}/radare2-dev_${R2V}_amd64.deb
     - name: Installing Radare2
       run: sudo dpkg -i r2.deb r2-dev.deb
+    - name: Installing "The Meson Ninja"
+      run: pip install ninja meson
     - name: Building r2ghidra with meson
       run: ./preconfigure && meson b && ninja -C b && sudo ninja -C b install
     - name: Testing r2ghidra oneliner
