@@ -113,7 +113,7 @@ jobs:
     - name: Testing r2ghidra
       run: |
         r2 -qc 'af;pdg' /bin/ls | tee a.txt
-        grep iVar a.txt
+        grep entry0 a.txt
     #- name: Testing r2ghidra
     #  run: make -C test || exit 0
     #- name: Pub
