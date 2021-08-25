@@ -110,8 +110,10 @@ jobs:
       run: ./preconfigure && cmake -DCMAKE_INSTALL_PREFIX=/usr -B build && make -C build -j4 && sudo make -C build install
     #- name: Packaging r2ghidra for Debian
     #  run: make -C dist/debian
-    - name: Testing r2ghidra oneliner
-      run: r2 -qc 'af;pdg' /bin/ls || exit 0
+    - name: Testing r2ghidra
+      run: |
+        r2 -qc 'af;pdg' /bin/ls | tee a.txt
+        grep iVar a.txt
     #- name: Testing r2ghidra
     #  run: make -C test || exit 0
     #- name: Pub
