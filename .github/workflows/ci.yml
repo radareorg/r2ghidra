@@ -23,14 +23,18 @@ jobs:
     - name: Installing radare2
       run: ( git clone --depth=1 https://github.com/radareorg/radare2 && cd radare2 && sys/install.sh /usr )
     - name: Building r2ghidra with acr
-      run: git submodule update --init ; ./configure ; make -j4 ; make user-install
-    - name: Packaging r2ghidra for Debian
-      run: make -C dist/debian
-    - name: Testing r2ghidra oneliner
+      run: ./preconfigure && ./configure && make -j4 ; make user-install
+    - name: Testing r2ghidra oneliner on home setup
       run: r2 -qc 'af;pdg' /bin/ls || exit 0
-    - name: Testing r2ghidra
+    - name: System-wide installation
+      run: make user-uninstall && sudo make install
+    - name: Testing r2ghidra oneliner on system wide install
+      run: r2 -qc 'af;pdg' /bin/ls || exit 0
+    - name: Packaging r2ghidra for Debian using Dockcross
+      run: make -C dist/debian
+    - name: Running Testsuite
       run: make -C test || exit 0
-    - name: Pub
+    - name: Uploading Artifacts
       uses: actions/upload-artifact@v2
       with:
         # path: radare2/dist/debian/*/*.deb r2ghidra/dist/debian/*.deb
@@ -52,11 +56,42 @@ jobs:
     #  run: ( git clone --depth=1 https://github.com/radareorg/radare2 && cd radare2 && sys/sanitize.sh --install /usr )
       run: ( git clone --depth=1 https://github.com/radareorg/radare2 && cd radare2 && sys/install.sh --install )
     - name: Building r2ghidra with acr
-      run: git submodule update --init ; ./configure ; make asan ; make -C src sleigh-build; make user-install
+      run: ./preconfigure && ./configure && make asan && make -C src sleigh-build && make user-install
     - name: Testing r2ghidra oneliner
       run: r2 -qc 'af;pdg' /bin/ls || exit 0
 
-  linux-cmake:
+  linux-meson:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Downloading Radare2 Debian packages
+      run: |
+        wget -O r2.deb     https://github.com/radareorg/radare2/releases/download/${R2V}/radare2_${R2V}_amd64.deb
+        wget -O r2-dev.deb https://github.com/radareorg/radare2/releases/download/${R2V}/radare2-dev_${R2V}_amd64.deb
+    - name: Installing Radare2
+      run: sudo dpkg -i r2.deb r2-dev.deb
+    - name: Installing User's Meson Ninja
+      run: pip install ninja meson && ninja --version && meson --version
+    - name: Installing System's Meson Ninja
+      run: sudo pip install ninja meson && sudo ninja --version && sudo meson --version
+    - name: Building r2ghidra with meson
+      run: ./preconfigure && meson b && ninja -C b && sudo ninja -C b install
+    - name: Cannot test meson builds, because those cant be installed yet
+      run: echo nada
+#    - name: Testing r2ghidra oneliner
+#      run: |
+#        r2 -H
+#        r2 -L
+#        R2_DEBUG=1 r2 -qc 'af;pdg' /bin/ls | tee a.txt
+#        grep entry0 a.txt
+
+  linux-cmake-ok:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     strategy:
@@ -74,21 +109,23 @@ jobs:
     - name: Installing Radare2
       run: sudo dpkg -i radare2/dist/debian/*/*.deb
     - name: Building r2ghidra with cmake
-      run: git submodule update --init ; make ghidra-native ; mkdir build && cd build && cmake .. && make -j4 && sudo make install
-    - name: Packaging r2ghidra for Debian
-      run: make -C dist/debian
-    - name: Testing r2ghidra oneliner
-      run: r2 -qc 'af;pdg' /bin/ls || exit 0
+      run: ./preconfigure && cmake -DCMAKE_INSTALL_PREFIX=/usr -B build && make -C build -j4 && sudo make -C build install
+    #- name: Packaging r2ghidra for Debian
+    #  run: make -C dist/debian
+    - name: Testing r2ghidra
+      run: |
+        r2 -qc 'af;pdg' /bin/ls | tee a.txt
+        grep entry0 a.txt
     #- name: Testing r2ghidra
     #  run: make -C test || exit 0
-    - name: Pub
-      uses: actions/upload-artifact@v2
-      with:
-        name: r2ghidra-${{env.R2V}}_amd64_cmake.deb
-        path: radare2/dist/debian/*/*.deb dist/debian/*.deb
-        # path: dist/debian/*.deb
+    #- name: Pub
+    #  uses: actions/upload-artifact@v2
+    #  with:
+    #    name: r2ghidra-${{env.R2V}}_amd64_cmake.deb
+    #    path: radare2/dist/debian/*/*.deb dist/debian/*.deb
+    #    # path: dist/debian/*.deb
 
-  macos-acr:
+  macos-acr-ok:
     # The type of runner that the job will run on
     runs-on: macos-latest
 
@@ -96,23 +133,28 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Cloning Repo
+    - name: Cloning Radare2 git repository
       run: git clone --depth=1 https://github.com/radareorg/radare2
-    - name: Packaging Radare2 for macOS
+    - name: Building Radare2 pkg for macOS
       run: make -C radare2/dist/macos
     - name: Install radare2 Package
       run: sudo installer -pkg radare2/dist/macos/*.pkg -target /
-    - name: Building r2ghidra
-      run: git submodule update --init ; ./configure ; make -j4 ; make user-install
+    - name: Building r2ghidra with acr
+      run: ./preconfigure && ./configure && make -j4 && make user-install
     - name: Packaging r2ghidra
-      run: make install DESTDIR=/tmp/r2ghidra ; cd /tmp/r2ghidra ; tar czvf ../r2ghidra-macos-${{env.R2V}}.tar.gz *
+      run: |
+        make -C dist/macos
+        make install DESTDIR=/tmp/r2ghidra && cd /tmp/r2ghidra && tar czvf ../r2ghidra-macos-${{env.R2V}}.tar.gz *
     - name: Testing r2ghidra
-      run: r2 -qc 'af;pdg' /bin/ls
+      run: |
+        r2 -qc 'af;pdg' /bin/ls | tee a.txt
+        grep iVar a.txt
     - name: Pub
       uses: actions/upload-artifact@v2
       with:
         name: r2ghidra-${{env.R2V}}-macos.tar.gz
-        path: radare2/dist/macos/*.pkg src/*.dylib /tmp/r2ghidra-macos-${{env.R2V}}.tar.gz
+        path: dist/macos/*.zip
+        #path: radare2/dist/macos/*.pkg src/*.dylib /tmp/r2ghidra-macos-${{env.R2V}}.tar.gz dist/macos/*.zip
 
   w64:
     runs-on: windows-latest
@@ -140,9 +182,9 @@ jobs:
     - name: batmake
       shell: cmd
       run: |
-        preconfigure
-        configure
-        make
+        call preconfigure.bat
+        call configure.bat
+        call make.bat
     - name: make
       shell: cmd
       run: |

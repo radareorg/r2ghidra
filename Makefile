@@ -1,7 +1,7 @@
 -include config.mk
 DESTDIR?=
 
-GHIDRA_NATIVE_COMMIT=bf9d647f3c044e2dff1208e858b3c1c8490d58d0
+GHIDRA_NATIVE_COMMIT=0.1.0
 
 ifeq ($(shell test -f config.mk && echo $$?),0)
 all: ghidra-native ghidra-processors.txt
@@ -75,9 +75,8 @@ gclean:
 
 ghidra-native:
 	git clone https://github.com/radareorg/ghidra-native
-	cd ghidra-native && git reset --hard $(GHIDRA_NATIVE_COMMIT)
+	cd ghidra-native && git checkout $(GHIDRA_NATIVE_COMMIT)
 	$(MAKE) -C ghidra-native patch
-	touch ghidra-native/.patched
 
 mrproper: clean
 	git submodule deinit --all -f

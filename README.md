@@ -12,10 +12,13 @@ This project was presented at r2con 2019 as part of the Cutter talk: [https://yo
 ## Installing
 
 An r2pm package is available that can easily be installed like:
+
 ```
 r2pm update
 r2pm -ci r2ghidra
 ```
+
+By default r2pm will install stuff in your home, you can use `-g` to use the system wide installation.
 
 ## Portability
 
@@ -120,8 +123,7 @@ dist\windows\build
 First, make sure the submodule contained within this repository is fetched and up to date:
 
 ```
-git submodule update --init
-make ghidra-native/.patched
+./preconfigure  # or just 'preconfigure' on Windows to fetch ghidra-native and pugixml dependencies
 ```
 
 Then, the radare2 plugin can be built and installed as follows:
