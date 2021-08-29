@@ -3,10 +3,22 @@ all: plugins
 -include ../config.mk
 include ../ghidra/deps.mk
 
+R2GHIDRA_SRCS= R2Architecture.cpp
+R2GHIDRA_SRCS+=R2LoadImage.cpp
+R2GHIDRA_SRCS+=R2Scope.cpp
+R2GHIDRA_SRCS+=R2TypeFactory.cpp
+R2GHIDRA_SRCS+=R2CommentDatabase.cpp
+R2GHIDRA_SRCS+=CodeXMLParse.cpp
+R2GHIDRA_SRCS+=ArchMap.cpp
+R2GHIDRA_SRCS+=R2PrintC.cpp
+R2GHIDRA_SRCS+=RCoreMutex.cpp
+# R2GHIDRA_SRCS= ArchMap.cpp CodeXMLParse.cpp R2Architecture.cpp R2CommentDatabase.cpp R2LoadImage.cpp
+#R2GHIDRA_SRCS+= R2PrintC.cpp R2Scope.cpp R2TypeFactory.cpp RCoreMutex.cpp SleighAnalValue.cpp SleighAsm.cpp
+#R2GHIDRA_SRCS+= SleighInstruction.cpp
 
-R2GHIDRA_SRCS= ArchMap.cpp CodeXMLParse.cpp R2Architecture.cpp R2CommentDatabase.cpp R2LoadImage.cpp
-R2GHIDRA_SRCS+= R2PrintC.cpp R2Scope.cpp R2TypeFactory.cpp RCoreMutex.cpp SleighAnalValue.cpp SleighAsm.cpp
-R2GHIDRA_SRCS+= SleighInstruction.cpp
+# R2GHIDRA_SRCS= ArchMap.cpp CodeXMLParse.cpp R2Architecture.cpp R2CommentDatabase.cpp R2LoadImage.cpp
+# R2GHIDRA_SRCS+= R2PrintC.cpp R2Scope.cpp R2TypeFactory.cpp RCoreMutex.cpp SleighAnalValue.cpp SleighAsm.cpp
+# R2GHIDRA_SRCS+= SleighInstruction.cpp
 R2G_PLUG_SRCS= anal_ghidra.cpp asm_ghidra.cpp core_ghidra.cpp
 
 PUGIXML_HOME=../third-party/pugixml/src/
@@ -44,6 +56,7 @@ CFLAGS+=-Duintp="unsigned long long"
 endif
 
 CXXFLAGS+=-std=c++11
+# CXXFLAGS+=-g
 CXXFLAGS+=$(CFLAGS)
 
 R2_LIBEXT=$(shell r2 -H R2_LIBEXT)
@@ -61,6 +74,9 @@ deps=$(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(R2G_PLUGIN_OBJS) $(PUGIXML_OBJS)
 
 $(R2G_CORE_PLUGIN): $(deps)
 	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) core_ghidra.o
+
+# soname should be used for some oss
+# $(CXX) -shared -Wl,-soname,core_ghidra.so $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) core_ghidra.o
 
 $(R2G_ASM_PLUGIN): $(deps)
 	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) asm_ghidra.o
