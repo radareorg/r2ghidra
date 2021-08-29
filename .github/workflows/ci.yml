@@ -10,7 +10,7 @@ on:
   pull_request:
 
 jobs:
-  linux-acr:
+  linux-acr-ok:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     strategy:
@@ -25,11 +25,15 @@ jobs:
     - name: Building r2ghidra with acr
       run: ./preconfigure && ./configure && make -j4 ; make user-install
     - name: Testing r2ghidra oneliner on home setup
-      run: r2 -qc 'af;pdg' /bin/ls || exit 0
+      run: |
+        r2 -qc 'af;pdg' /bin/ls | tee a.txt
+        grep entry0 a.txt
     - name: System-wide installation
       run: make user-uninstall && sudo make install
     - name: Testing r2ghidra oneliner on system wide install
-      run: r2 -qc 'af;pdg' /bin/ls || exit 0
+      run: |
+        r2 -qc 'af;pdg' /bin/ls | tee a.txt
+        grep entry0 a.txt
     - name: Packaging r2ghidra for Debian using Dockcross
       run: make -C dist/debian
     - name: Running Testsuite
@@ -58,7 +62,9 @@ jobs:
     - name: Building r2ghidra with acr
       run: ./preconfigure && ./configure && make asan && make -C src sleigh-build && make user-install
     - name: Testing r2ghidra oneliner
-      run: r2 -qc 'af;pdg' /bin/ls || exit 0
+      run: |
+        r2 -qc 'af;pdg' /bin/ls | tee a.txt
+        grep entry0 a.txt
 
   linux-meson:
     # The type of runner that the job will run on
