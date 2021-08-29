@@ -12,13 +12,15 @@ R2GHIDRA_SRCS+=CodeXMLParse.cpp
 R2GHIDRA_SRCS+=ArchMap.cpp
 R2GHIDRA_SRCS+=R2PrintC.cpp
 R2GHIDRA_SRCS+=RCoreMutex.cpp
-# R2GHIDRA_SRCS= ArchMap.cpp CodeXMLParse.cpp R2Architecture.cpp R2CommentDatabase.cpp R2LoadImage.cpp
-#R2GHIDRA_SRCS+= R2PrintC.cpp R2Scope.cpp R2TypeFactory.cpp RCoreMutex.cpp SleighAnalValue.cpp SleighAsm.cpp
-#R2GHIDRA_SRCS+= SleighInstruction.cpp
+
+R2GHIDRA_SRCS+=SleighAnalValue.cpp
+R2GHIDRA_SRCS+=SleighAsm.cpp
+R2GHIDRA_SRCS+=SleighInstruction.cpp
 
 # R2GHIDRA_SRCS= ArchMap.cpp CodeXMLParse.cpp R2Architecture.cpp R2CommentDatabase.cpp R2LoadImage.cpp
 # R2GHIDRA_SRCS+= R2PrintC.cpp R2Scope.cpp R2TypeFactory.cpp RCoreMutex.cpp SleighAnalValue.cpp SleighAsm.cpp
 # R2GHIDRA_SRCS+= SleighInstruction.cpp
+
 R2G_PLUG_SRCS= anal_ghidra.cpp asm_ghidra.cpp core_ghidra.cpp
 
 PUGIXML_HOME=../third-party/pugixml/src/
