@@ -160,10 +160,8 @@ jobs:
       uses: actions/checkout@v2
     - name: Cloning Radare2 git repository
       run: git clone --depth=1 https://github.com/radareorg/radare2
-    - name: Building Radare2 pkg for macOS
-      run: make -C radare2/dist/macos
-    - name: Install radare2 Package
-      run: sudo installer -pkg radare2/dist/macos/*.pkg -target /
+    - name: Building and installing Radare2
+      run: sys/install.sh
     - name: Building r2ghidra with cmake
       run: ./preconfigure && cmake -DCMAKE_INSTALL_PREFIX=/usr -B build && make -C build -j4 && sudo make -C build install
     - name: Testing r2ghidra
