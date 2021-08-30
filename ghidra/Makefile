@@ -22,9 +22,6 @@ user-uninstall:
 uninstall:
 	$(MAKE) sleigh-uninstall D="$(DD)"
 
-user-install user-uninstall:
-	$(MAKE) $<
-
 ghidra-native:
 	git clone https://github.com/radareorg/ghidra-native
 	cd ghidra-native && git checkout $(GHIDRA_NATIVE_COMMIT)

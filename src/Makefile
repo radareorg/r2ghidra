@@ -102,4 +102,4 @@ uninstall:
 	rm -f $(DESTDIR)/$(BINDIR)/sleighc
 
 user-install user-uninstall:
-	$(MAKE) $< PLUGDIR=$(R2_USER_PLUGINS) BINDIR=$(
+	$(MAKE) $< PLUGDIR=$(R2_USER_PLUGINS) BINDIR=$(shell r2pm -H R2PM_BINDIR)

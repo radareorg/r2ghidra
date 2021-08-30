@@ -47,8 +47,8 @@ clean:
 	rm -f config.mk
 
 install uninstall user-install user-uninstall:
-	$(MAKE) -C src $<
-	$(MAKE) -C ghidra $<
+	$(MAKE) -C src $@
+	$(MAKE) -C ghidra $@
 
 ghidra-native:
 	git clone https://github.com/radareorg/ghidra-native
