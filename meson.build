@@ -1,10 +1,10 @@
 project(
   'r2ghidra',
   'cpp',
-  license : 'LGPL3',
-  meson_version : '>=0.50.1',
-  version : '5.4.0',
-  default_options : ['c_std=c11', 'cpp_std=c++11']
+license : 'LGPL3',
+meson_version : '>=0.50.1',
+version : '5.4.1',
+default_options : ['c_std=c11', 'cpp_std=c++11']
 )
 
 pugixml_sources = [
