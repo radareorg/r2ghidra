@@ -43,19 +43,6 @@ CFLAGS+=-w
 CFLAGS+=-fPIC
 CFLAGS+=-I$(GHIDRA_DECOMPILER)
 CFLAGS+=-I.
-ifeq ($(shell uname),Unsupported)
-CFLAGS+=-DHOST_ENDIAN=1
-CFLAGS+=-Dint1=char
-CFLAGS+=-Dint2=short
-CFLAGS+=-Duint1=unsigned" char"
-CFLAGS+=-Duint2=unsigned" short"
-CFLAGS+=-Dint4=int
-CFLAGS+=-Duint4=unsigned" long long"
-CFLAGS+=-Dint8="long long"
-CFLAGS+=-Duint8="unsigned long long"
-CFLAGS+=-Duintm="unsigned long long"
-CFLAGS+=-Duintp="unsigned long long"
-endif
 
 CXXFLAGS+=-std=c++11
 # CXXFLAGS+=-g

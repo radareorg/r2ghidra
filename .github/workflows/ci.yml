@@ -109,7 +109,7 @@ jobs:
     - name: Installing Radare2
       run: sudo dpkg -i radare2/dist/debian/*/*.deb
     - name: Building r2ghidra with cmake
-      run: ./preconfigure && cmake -DCMAKE_INSTALL_PREFIX=/usr -B build && make -C build -j4 && sudo make -C build install
+      run: ./preconfigure && cmake -DCMAKE_INSTALL_PREFIX=/usr -B b && make -C b -j4 && sudo make -C b install
     #- name: Packaging r2ghidra for Debian
     #  run: make -C dist/debian
     - name: Testing r2ghidra
@@ -118,12 +118,6 @@ jobs:
         grep entry0 a.txt
     #- name: Testing r2ghidra
     #  run: make -C test || exit 0
-    #- name: Pub
-    #  uses: actions/upload-artifact@v2
-    #  with:
-    #    name: r2ghidra-${{env.R2V}}_amd64_cmake.deb
-    #    path: radare2/dist/debian/*/*.deb dist/debian/*.deb
-    #    # path: dist/debian/*.deb
 
   macos-acr-ok:
     # The type of runner that the job will run on
@@ -155,6 +149,27 @@ jobs:
         name: r2ghidra-${{env.R2V}}-macos.tar.gz
         path: dist/macos/*.zip
         #path: radare2/dist/macos/*.pkg src/*.dylib /tmp/r2ghidra-macos-${{env.R2V}}.tar.gz dist/macos/*.zip
+
+  macos-cmake-ok:
+    # The type of runner that the job will run on
+    runs-on: macos-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Cloning Radare2 git repository
+      run: git clone --depth=1 https://github.com/radareorg/radare2
+    - name: Building Radare2 pkg for macOS
+      run: make -C radare2/dist/macos
+    - name: Install radare2 Package
+      run: sudo installer -pkg radare2/dist/macos/*.pkg -target /
+    - name: Building r2ghidra with cmake
+      run: ./preconfigure && cmake -DCMAKE_INSTALL_PREFIX=/usr -B build && make -C build -j4 && sudo make -C build install
+    - name: Testing r2ghidra
+      run: |
+        r2 -qc 'af;pdg' /bin/ls | tee a.txt
+        grep iVar a.txt
 
   w64:
     runs-on: windows-latest

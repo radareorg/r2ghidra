@@ -868,6 +868,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 
 		if (is_float && arg->size != 8)
 			ss << "," << arg->size << ",SWAP,F2D";
+		return true;
 	};
 	
 	auto push_stack = [&esil_stack](PcodeOperand *arg = nullptr) {
