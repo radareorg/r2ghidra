@@ -101,5 +101,8 @@ uninstall:
 	rm -f $(PLUGDIR)/*ghidra*.$(R2_LIBEXT)
 	rm -f $(DESTDIR)/$(BINDIR)/sleighc
 
-user-install user-uninstall:
-	$(MAKE) $< PLUGDIR=$(R2_USER_PLUGINS) BINDIR=$(shell r2pm -H R2PM_BINDIR)
+user-install:
+	$(MAKE) install PLUGDIR=$(R2_USER_PLUGINS) BINDIR=$(shell r2pm -H R2PM_BINDIR)
+
+user-uninstall:
+	$(MAKE) uninstall PLUGDIR=$(R2_USER_PLUGINS) BINDIR=$(shell r2pm -H R2PM_BINDIR)
