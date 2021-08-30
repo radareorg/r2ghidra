@@ -219,7 +219,6 @@ private:
 
 	void initInner(RIO *io, std::string sleigh_id);
 	void initRegMapping(void);
-	std::string getSleighHome(RConfig *cfg);
 	void collectSpecfiles(void);
 	void scanSleigh(const string &rootpath);
 	void resolveArch(const string &archid);
@@ -229,6 +228,7 @@ private:
 	void loadLanguageDescription(const string &specfile);
 
 public:
+	static std::string getSleighHome(RConfig *cfg);
 	R2Sleigh trans;
 	std::string sleigh_id;
 	int alignment = 1;

@@ -3,6 +3,7 @@
 #include "R2Architecture.h"
 #include "CodeXMLParse.h"
 #include "ArchMap.h"
+#include "SleighAsm.h"
 #include "r2ghidra.h"
 
 // Windows clash
@@ -563,38 +564,23 @@ bool SleighHomeConfig(void */* user */, void *data)
 	auto node = reinterpret_cast<RConfigNode *>(data);
 	SleighArchitecture::shutdown();
 	SleighArchitecture::specpaths = FileManage();
-	if(node->value && *node->value)
+	if (R_STR_ISNOTEMPTY (node->value)) {
 		SleighArchitecture::scanForSleighDirectories(node->value);
+	}
 	return true;
 }
 
 static void SetInitialSleighHome(RConfig *cfg)
 {
-	// user-set, for example from .radare2rc
 	if(!cfg_var_sleighhome.GetString(cfg).empty())
 		return;
-
-	// SLEIGHHOME env
-	const char *sleighhomepath = getenv("SLEIGHHOME");
-	if(sleighhomepath && *sleighhomepath)
-	{
-		cfg_var_sleighhome.Set(cfg, sleighhomepath);
+	try {
+		std::string path = SleighAsm::getSleighHome(cfg);
+		cfg_var_sleighhome.Set(cfg, path.c_str());
 		return;
+	} catch (LowlevelError &err) {
+		// eprintf ("Cannot find detfaault paz%c", 10);
 	}
-#ifdef R2GHIDRA_SLEIGHHOME_DEFAULT
-	if(r_file_is_directory(R2GHIDRA_SLEIGHHOME_DEFAULT))
-	{
-		cfg_var_sleighhome.Set(cfg, R2GHIDRA_SLEIGHHOME_DEFAULT);
-		return;
-	}
-#endif
-	// r2pm-installed ghidra
-	char *homepath = r_str_home(".local/share/radare2/r2pm/git/ghidra");
-	if(homepath && r_file_is_directory(homepath))
-	{
-		cfg_var_sleighhome.Set(cfg, homepath);
-	}
-	r_mem_free (homepath);
 }
 
 static int r2ghidra_init(void *user, const char *cmd)

@@ -291,7 +291,6 @@ void SleighAsm::resolveArch(const string &archid)
 			break;
 		}
 	}
-
 	if(languageindex == -1)
 		throw LowlevelError("No sleigh specification for " + baseid + " from " + archid);
 }
@@ -414,27 +413,30 @@ RConfig *SleighAsm::getConfig(RAnal *a)
 std::string SleighAsm::getSleighHome(RConfig *cfg)
 {
 	const char varname[] = "r2ghidra.sleighhome";
-	const char *path = nullptr;
+	char *path = nullptr;
 
 	// user-set, for example from .radare2rc
 	if(cfg && r_config_node_get(cfg, varname))
 	{
-		path = r_config_get(cfg, varname);
-		if(path && *path)
-			return path;
+		const char *val = r_config_get(cfg, varname);
+		if (R_STR_ISNOTEMPTY (val)) {
+			return std::string(val);
+		}
 	}
 
 	// SLEIGHHOME env
-	path = getenv("SLEIGHHOME");
-	if(path && *path)
-	{
-		if(cfg)
-			r_config_set(cfg, varname, path);
-		return path;
+	char *ev = r_sys_getenv ("SLEIGHHOME");
+	if (R_STR_ISNOTEMPTY (ev)) {
+		if (cfg) {
+			r_config_set (cfg, varname, ev);
+		}
+		std::string res(ev);
+		free (ev);
+		return res;
 	}
 
 #ifdef R2GHIDRA_SLEIGHHOME_DEFAULT
-	if(r_file_is_directory(R2GHIDRA_SLEIGHHOME_DEFAULT))
+	if (r_file_is_directory(R2GHIDRA_SLEIGHHOME_DEFAULT))
 	{
 		if(cfg)
 			r_config_set(cfg, varname, R2GHIDRA_SLEIGHHOME_DEFAULT);
@@ -460,7 +462,7 @@ std::string SleighAsm::getSleighHome(RConfig *cfg)
 		r_mem_free((void *)path);
 		return res;
 	}
-	path = r_str_home(R2_PREFIX "/lib/radare2/" R2_VERSION "/r2ghidra_sleigh");
+	path = strdup (R2_PREFIX "/lib/radare2/" R2_VERSION "/r2ghidra_sleigh");
 	if(r_file_is_directory(path))
 	{
 		if(cfg)
@@ -468,9 +470,10 @@ std::string SleighAsm::getSleighHome(RConfig *cfg)
 		std::string res(path);
 		r_mem_free((void *)path);
 		return res;
-	}
-	else
+	} else {
+		free (path);
 		throw LowlevelError("No Sleigh Home found!");
+	}
 }
 
 int SleighAsm::disassemble(RAsmOp *op, unsigned long long offset)
