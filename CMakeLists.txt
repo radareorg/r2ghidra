@@ -64,12 +64,12 @@ set(CORE_SOURCE
 		src/R2PrintC.cpp
 		src/RCoreMutex.h
 		src/RCoreMutex.cpp
+		src/SleighAsm.h
+		src/SleighAsm.cpp
 		src/r2ghidra.h)
 
 if(BUILD_SLEIGH_PLUGIN)
 set(ASM_SOURCE
-		src/SleighAsm.h
-		src/SleighAsm.cpp
 		src/SleighInstruction.h
 		src/SleighInstruction.cpp
 		src/asm_ghidra.cpp
