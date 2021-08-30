@@ -11,12 +11,9 @@ on:
 
 jobs:
   linux-acr-ok:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -25,15 +22,11 @@ jobs:
     - name: Building r2ghidra with acr
       run: ./preconfigure && ./configure && make -j4 ; make user-install
     - name: Testing r2ghidra oneliner on home setup
-      run: |
-        r2 -qc 'af;pdg' /bin/ls | tee a.txt
-        grep entry0 a.txt
+      run: r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
     - name: System-wide installation
       run: make user-uninstall && sudo make install
     - name: Testing r2ghidra oneliner on system wide install
-      run: |
-        r2 -qc 'af;pdg' /bin/ls | tee a.txt
-        grep entry0 a.txt
+      run: r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
     - name: Packaging r2ghidra for Debian using Dockcross
       run: make -C dist/debian
     - name: Running Testsuite
@@ -67,12 +60,9 @@ jobs:
         grep entry0 a.txt
 
   linux-meson:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -98,12 +88,9 @@ jobs:
 #        grep entry0 a.txt
 
   linux-cmake-ok:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -118,12 +105,8 @@ jobs:
       run: ./preconfigure && cmake -DCMAKE_INSTALL_PREFIX=/usr -B b && make -C b -j4 && sudo make -C b install
     #- name: Packaging r2ghidra for Debian
     #  run: make -C dist/debian
-    - name: Testing r2ghidra
-      run: |
-        r2 -qc 'af;pdg' /bin/ls | tee a.txt
-        grep entry0 a.txt
-    #- name: Testing r2ghidra
-    #  run: make -C test || exit 0
+    - name: Testing r2ghidra oneliner
+      run: r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
 
   macos-acr-ok:
     # The type of runner that the job will run on
@@ -157,23 +140,16 @@ jobs:
         #path: radare2/dist/macos/*.pkg src/*.dylib /tmp/r2ghidra-macos-${{env.R2V}}.tar.gz dist/macos/*.zip
 
   macos-cmake-ok:
-    # The type of runner that the job will run on
     runs-on: macos-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Cloning Radare2 git repository
-      run: git clone --depth=1 https://github.com/radareorg/radare2
-    - name: Building and installing Radare2
-      run: sys/install.sh
+    - name: Installing radare2
+      run: git clone --depth=1 https://github.com/radareorg/radare2 && radare2/sys/install.sh
     - name: Building r2ghidra with cmake
       run: ./preconfigure && cmake -DCMAKE_INSTALL_PREFIX=/usr -B build && make -C build -j4 && sudo make -C build install
     - name: Testing r2ghidra
-      run: |
-        r2 -qc 'af;pdg' /bin/ls | tee a.txt
-        grep iVar a.txt
+      run: r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep iVar a.txt
 
   w64:
     runs-on: windows-latest
