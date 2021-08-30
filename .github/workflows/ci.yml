@@ -147,7 +147,7 @@ jobs:
     - name: Installing radare2
       run: git clone --depth=1 https://github.com/radareorg/radare2 && radare2/sys/install.sh
     - name: Building r2ghidra with cmake
-      run: ./preconfigure && cmake -DCMAKE_INSTALL_PREFIX=/usr -B build && sudo make -C build -j4 && sudo make -C build install
+      run: ./preconfigure && sudo cmake -DCMAKE_INSTALL_PREFIX=/usr -B build && sudo make -C build -j4 && sudo make -C build install
     - name: Testing r2ghidra
       run: r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep iVar a.txt
 
