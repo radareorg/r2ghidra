@@ -66,26 +66,20 @@ set(CORE_SOURCE
 		src/RCoreMutex.cpp
 		src/SleighAsm.h
 		src/SleighAsm.cpp
+		src/SleighInstruction.h
+		src/SleighInstruction.cpp
+		src/ArchMap.h
+		src/ArchMap.cpp
 		src/r2ghidra.h)
 
 if(BUILD_SLEIGH_PLUGIN)
 set(ASM_SOURCE
-		src/SleighInstruction.h
-		src/SleighInstruction.cpp
-		src/asm_ghidra.cpp
-		src/ArchMap.h
-		src/ArchMap.cpp)
+		src/asm_ghidra.cpp)
 
 set(ANAL_SOURCE
-		src/SleighAsm.h
-		src/SleighAsm.cpp
-		src/SleighInstruction.h
-		src/SleighInstruction.cpp
 		src/SleighAnalValue.h
 		src/SleighAnalValue.cpp
-		src/anal_ghidra.cpp
-		src/ArchMap.h
-		src/ArchMap.cpp)
+		src/anal_ghidra.cpp)
 endif()
 
 find_package(Radare2 REQUIRED)
