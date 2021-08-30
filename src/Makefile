@@ -89,9 +89,5 @@ $(R2G_ANAL_PLUGIN): $(deps)
 %.o: %.cpp
 	$(CXX) -fPIC $(CXXFLAGS) $(R2_CFLAGS) -c $<
 
-install:
-	mkdir -p $(R2_USER_PLUGINS)
-	cp -f *.$(R2_LIBEXT) $(R2_USER_PLUGINS)
-
-uninstall:
-	rm -f $(R2_USER_PLUGINS)/*ghidra*.$(R2_LIBEXT)
+install uninstall user-install user-uninstall:
+	$(MAKE) -C .. $<
