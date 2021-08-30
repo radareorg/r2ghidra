@@ -89,5 +89,17 @@ $(R2G_ANAL_PLUGIN): $(deps)
 %.o: %.cpp
 	$(CXX) -fPIC $(CXXFLAGS) $(R2_CFLAGS) -c $<
 
-install uninstall user-install user-uninstall:
-	$(MAKE) -C .. $<
+PLUGDIR?=$(R2_LIBR_PLUGINS)
+
+install:
+	mkdir -p $(DESTDIR)$(BINDIR)
+	cp -f sleighc $(DESTDIR)$(BINDIR)
+	mkdir -p $(DESTDIR)$(PLUGDIR)
+	cp -f *.$(R2_LIBEXT) $(DESTDIR)$(PLUGDIR)
+
+uninstall:
+	rm -f $(PLUGDIR)/*ghidra*.$(R2_LIBEXT)
+	rm -f $(DESTDIR)/$(BINDIR)/sleighc
+
+user-install user-uninstall:
+	$(MAKE) $< PLUGDIR=$(R2_USER_PLUGINS) BINDIR=$(

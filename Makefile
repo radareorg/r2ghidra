@@ -6,7 +6,7 @@ GHIDRA_NATIVE_COMMIT=0.1.0
 ifeq ($(shell test -f config.mk && echo $$?),0)
 all: ghidra-native ghidra-processors.txt
 	$(MAKE) -C src
-	$(MAKE) -C src sleigh-build
+	$(MAKE) -C ghidra
 else
 all:
 	@echo Run ./configure
@@ -43,35 +43,12 @@ help:
 
 clean:
 	$(MAKE) -C src clean
+	$(MAKE) -C ghidra clean
 	rm -f config.mk
 
-DD=$(DESTDIR)/$(shell r2 -H R2_LIBR_PLUGINS)
-install:
-	mkdir -p $(DESTDIR)/$(BINDIR)
-	cp -f src/sleighc $(DESTDIR)/$(BINDIR)
-	$(MAKE) -C src install R2_USER_PLUGINS=$(DD) # $(DESTDIR)/$(shell r2 -H R2_LIBR_PLUGINS)
-	$(MAKE) -C src sleigh-install D=$(DD)/r2ghidra_sleigh # $(DESTDIR)/$(DATADIR)/r2ghidra/sleigh
-
-uninstall:
-	$(MAKE) -C src uninstall R2_USER_PLUGINS=$(DESTDIR)/$(shell r2 -H R2_LIBR_PLUGINS)
-	$(MAKE) -C src sleigh-uninstall D=$(DESTDIR)/$(DATADIR)/r2ghidra/sleigh
-	rm -f $(DESTDIR)/$(BINDIR)/sleighc
-
-HOMEBIN=$(shell r2 -H R2_RDATAHOME)/prefix/bin
-
-user-install:
-	mkdir -p $(HOMEBIN)
-	cp -f src/sleighc $(HOMEBIN)
-	$(MAKE) -C src install
-	$(MAKE) -C src sleigh-install
-
-user-uninstall:
-	$(MAKE) -C src uninstall
-	$(MAKE) -C src sleigh-uninstall
-	rm -f $(DESTDIR)/$(BINDIR)/sleighc
-
-gclean:
-	rm -rf ghidra-native ghidra/ghidra/Ghidra
+install uninstall user-install user-uninstall:
+	$(MAKE) -C src $<
+	$(MAKE) -C ghidra $<
 
 ghidra-native:
 	git clone https://github.com/radareorg/ghidra-native
