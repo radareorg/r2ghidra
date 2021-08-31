@@ -11,16 +11,18 @@ R2PLUGDIR=/usr/lib/radare2/$(VERSION)
 all: root
 	$(MAKE) build
 
-local:
+local: data
 	$(MAKE) -C ../.. install DESTDIR=$(PWD)/root
 	$(MAKE) build
 
-build:
+data $(shell pwd)/data:
 	sudo rm -rf control data
 	${MAKE} clean
 	rm -f data
 	mkdir -p data
 	cp -rf root/* data
+
+build: data
 	${MAKE} control
 	${MAKE} deb
 
