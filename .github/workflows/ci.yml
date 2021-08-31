@@ -141,6 +141,7 @@ jobs:
 
   macos-cmake-ok:
     runs-on: macos-latest
+    if: ${{ false }}  # disable for now
     steps:
     - name: Checkout
       uses: actions/checkout@v2
