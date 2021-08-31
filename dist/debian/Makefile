@@ -9,8 +9,16 @@ DOCKCROSS=$(PWD)/../docker/dockcross
 R2PLUGDIR=/usr/lib/radare2/$(VERSION)
 
 all: root
+	$(MAKE) build
+
+local:
+	$(MAKE) -C ../.. install DESTDIR=$(PWD)/root
+	$(MAKE) build
+
+build:
 	sudo rm -rf control data
 	${MAKE} clean
+	rm -f data
 	mkdir -p data
 	cp -rf root/* data
 	${MAKE} control
