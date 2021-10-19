@@ -3,23 +3,28 @@
 #include "R2TypeFactory.h"
 #include "R2Architecture.h"
 
-#include <r_parse.h>
 #include <r_core.h>
 
+#define R2G_USE_CTYPE 0
+#if R2G_USE_CTYPE
+#include <r_parse.h>
+#endif
 #include "R2Utils.h"
 
 R2TypeFactory::R2TypeFactory(R2Architecture *arch)
 	: TypeFactory(arch),
 	arch(arch)
 {
+#if R2G_USE_CTYPE
 	ctype = r_parse_ctype_new();
 	if(!ctype)
 		throw LowlevelError("Failed to create RParseCType");
+#endif
 }
 
 R2TypeFactory::~R2TypeFactory()
 {
-	r_parse_ctype_free(ctype);
+//	r_parse_ctype_free(ctype);
 }
 
 
@@ -186,6 +191,7 @@ Datatype *R2TypeFactory::findById(const string &n, uint8 id)
 
 Datatype *R2TypeFactory::fromCString(const string &str, string *error, std::set<std::string> *stackTypes)
 {
+#if R2G_USE_CTYPE
 	char *error_cstr = nullptr;
 	RParseCTypeType *type = r_parse_ctype_parse(ctype, str.c_str(), &error_cstr);
 	if(error)
@@ -196,8 +202,11 @@ Datatype *R2TypeFactory::fromCString(const string &str, string *error, std::set<
 	Datatype *r = fromCType(type, error, stackTypes);
 	r_parse_ctype_type_free(type);
 	return r;
+#endif
+	return nullptr;
 }
 
+#if 0
 Datatype *R2TypeFactory::fromCType(const RParseCTypeType *ctype, string *error, std::set<std::string> *stackTypes)
 {
 	switch(ctype->kind)
@@ -250,3 +259,4 @@ Datatype *R2TypeFactory::fromCType(const RParseCTypeType *ctype, string *error, 
 	}
 	return nullptr;
 }
+#endif

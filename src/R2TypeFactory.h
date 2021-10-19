@@ -32,7 +32,7 @@ class R2TypeFactory : public TypeFactory
 		~R2TypeFactory() override;
 
 		Datatype *fromCString(const string &str, string *error = nullptr, std::set<std::string> *stackTypes = nullptr);
-		Datatype *fromCType(const RParseCTypeType *ctype, string *error = nullptr, std::set<std::string> *stackTypes = nullptr);
+		// Datatype *fromCType(const RParseCTypeType *ctype, string *error = nullptr, std::set<std::string> *stackTypes = nullptr);
 };
 
 #endif //R2GHIDRA_R2TYPEFACTORY_H
