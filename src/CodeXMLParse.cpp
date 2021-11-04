@@ -297,7 +297,8 @@ static void ParseNode(pugi::xml_node node, ParseCodeXMLContext *ctx, std::ostrea
 	for(auto &annotation : annotations)
 	{
 		annotation.end = stream.tellp();
-		r_codemeta_add_item (code, &annotation);
+		RCodeMetaItem *item = r_codemeta_item_clone (&annotation);
+		r_codemeta_add_item (code, item);
 	}
 #ifdef TEST_UNKNOWN_NODES
 	if(close_test)
