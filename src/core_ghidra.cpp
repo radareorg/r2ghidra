@@ -500,6 +500,7 @@ static void EnablePlugin(RCore *core)
 	r_config_set(core->config, "r2ghidra.lang", id.c_str());
 	r_config_set(core->config, "asm.cpu", id.c_str());
 	r_config_set(core->config, "asm.arch", "r2ghidra");
+	r_config_set(core->config, "anal.arch", "r2ghidra");
 }
 
 static void _cmd(RCore *core, const char *input)
