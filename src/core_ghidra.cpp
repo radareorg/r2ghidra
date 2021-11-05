@@ -109,7 +109,8 @@ static void PrintUsage(const RCore *const core)
 		CMD_PREFIX"s",  "", "# Display loaded Sleigh Languages",
 		CMD_PREFIX"ss", "", "# Display automatically matched Sleigh Language ID",
 		CMD_PREFIX"sd", " N", "# Disassemble N instructions with Sleigh and print pcode",
-		CMD_PREFIX"a", "", "# Switch to RAsm and RAnal plugins driven by SLEIGH from Ghidra",
+		CMD_PREFIX"p", "", "# Switch to RAsm and RAnal plugins driven by SLEIGH from Ghidra",
+		CMD_PREFIX"a", "", "# Side by side two column disasm and decompilation",
 		CMD_PREFIX"*",  "", "# Decompiled code is returned to r2 as comment",
 		"Environment:", "", "",
 		"%SLEIGHHOME" , "", "# Path to ghidra sleigh directory (same as r2ghidra.sleighhome)",
@@ -119,7 +120,7 @@ static void PrintUsage(const RCore *const core)
 	r_cons_cmd_help(help, core->print->flags & R_PRINT_FLAGS_COLOR);
 }
 
-enum class DecompileMode { DEFAULT, XML, DEBUG_XML, OFFSET, STATEMENTS, JSON };
+enum class DecompileMode { DEFAULT, XML, DEBUG_XML, OFFSET, STATEMENTS, DISASM, JSON };
 
 static void ApplyPrintCConfig(RConfig *cfg, PrintC *print_c)
 {
@@ -201,6 +202,7 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 		case DecompileMode::DEFAULT:
 		case DecompileMode::JSON:
 		case DecompileMode::OFFSET:
+		case DecompileMode::DISASM:
 		case DecompileMode::STATEMENTS:
 			arch.print->setXML(true);
 			break;
@@ -220,6 +222,7 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 		case DecompileMode::JSON:
 		case DecompileMode::OFFSET:
 		case DecompileMode::STATEMENTS:
+		case DecompileMode::DISASM:
 			arch.print->docFunction(func);
 			if(mode != DecompileMode::XML)
 			{
@@ -273,6 +276,13 @@ static void DecompileCmd(RCore *core, DecompileMode mode)
 		Decompile(core, core->offset, mode, out_stream, &code);
 		switch(mode)
 		{
+			case DecompileMode::DISASM:
+			{
+				RVector *offsets = r_codemeta_line_offsets(code);
+				r_codemeta_print_disasm (code, offsets, core->anal);
+				r_vector_free(offsets);
+			}
+			break;
 			case DecompileMode::OFFSET:
 			{
 				RVector *offsets = r_codemeta_line_offsets(code);
@@ -540,6 +550,9 @@ static void _cmd(RCore *core, const char *input)
 			}
 			break;
 		case 'a': // "pdga"
+			DecompileCmd(core, DecompileMode::DISASM);
+			break;
+		case 'p': // "pdgp"
 			EnablePlugin(core);
 			break;
 		default:
