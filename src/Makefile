@@ -67,6 +67,10 @@ $(R2G_CORE_PLUGIN): $(deps)
 # soname should be used for some oss
 # $(CXX) -shared -Wl,-soname,core_ghidra.so $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) core_ghidra.o
 
+asan:
+	CFLAGS="-fsanitize=address -g" $(MAKE) -j
+	make user-install
+
 $(R2G_ASM_PLUGIN): $(deps)
 	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) asm_ghidra.o
 
