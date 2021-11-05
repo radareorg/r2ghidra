@@ -416,11 +416,10 @@ std::string SleighAsm::getSleighHome(RConfig *cfg)
 	char *path = nullptr;
 
 	// user-set, for example from .radare2rc
-	if(cfg && r_config_node_get(cfg, varname))
-	{
+	if (cfg != nullptr) {
 		const char *val = r_config_get(cfg, varname);
 		if (R_STR_ISNOTEMPTY (val)) {
-			return std::string(val);
+			return std::string (val);
 		}
 	}
 
