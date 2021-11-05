@@ -168,10 +168,12 @@ void R2Architecture::buildTypegrp(DocumentStorage &store)
 	types->setCoreType("float", 4, TYPE_FLOAT, false);
 	types->setCoreType("double", 8, TYPE_FLOAT, false);
 	types->setCoreType("float16", 16 ,TYPE_FLOAT, false);
-	types->setCoreType("undefined", 1, TYPE_UNKNOWN, false);
-	types->setCoreType("undefined2", 2, TYPE_UNKNOWN, false);
-	types->setCoreType("undefined4", 4, TYPE_UNKNOWN, false);
-	types->setCoreType("undefined8", 8, TYPE_UNKNOWN, false);
+
+	types->setCoreType("uchar", 1, TYPE_UNKNOWN, false);
+	types->setCoreType("ushort", 2, TYPE_UNKNOWN, false);
+	types->setCoreType("uint", 4, TYPE_UNKNOWN, false);
+	types->setCoreType("ulong", 8, TYPE_UNKNOWN, false);
+
 	types->setCoreType("code", 1, TYPE_CODE, false);
 	types->setCoreType("wchar", 2, TYPE_INT, true);
 	types->setCoreType("char", 1, TYPE_INT, true);

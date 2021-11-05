@@ -178,15 +178,14 @@ Datatype *R2TypeFactory::queryR2(const string &n, std::set<std::string> &stackTy
 Datatype *R2TypeFactory::findById(const string &n, uint8 id, std::set<std::string> &stackTypes)
 {
 	Datatype *r = TypeFactory::findById(n, id);
-	if(r)
-		return r;
-	return queryR2(n, stackTypes);
+	return (r != nullptr)? r: queryR2(n, stackTypes);
 }
 
 Datatype *R2TypeFactory::findById(const string &n, uint8 id)
 {
 	std::set<std::string> stackTypes; // to detect recursion
 	return findById(n, id, stackTypes);
+	// this recurses somehow :D XXX this->fromCString(n.c_str(), nullptr, nullptr);
 }
 
 Datatype *R2TypeFactory::fromCString(const string &str, string *error, std::set<std::string> *stackTypes)
@@ -202,8 +201,10 @@ Datatype *R2TypeFactory::fromCString(const string &str, string *error, std::set<
 	Datatype *r = fromCType(type, error, stackTypes);
 	r_parse_ctype_type_free(type);
 	return r;
+#else
+	Datatype *r = stackTypes ? findByName(str.c_str(), *stackTypes) : findByName(str.c_str());
+	return r;
 #endif
-	return nullptr;
 }
 
 #if 0

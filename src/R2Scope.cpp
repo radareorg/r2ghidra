@@ -412,7 +412,7 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const
 	childAddr(returnsymElement, "addr", returnAddr);
 
 	child(returnsymElement, "typeref", {
-			{ "name", "undefined" }
+			{ "name", "uint" }
 	});
 
 	child(&doc, "addr", {
