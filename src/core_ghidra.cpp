@@ -278,9 +278,15 @@ static void DecompileCmd(RCore *core, DecompileMode mode)
 		{
 			case DecompileMode::DISASM:
 			{
+#if ((R2_VERSION_MAJOR == 5 && R2_VERSION_MINOR == 4 && R2_VERSION_MINOR > 3) || (R2_VERSION_MAJOR > 5))
 				RVector *offsets = r_codemeta_line_offsets(code);
 				r_codemeta_print_disasm (code, offsets, core->anal);
 				r_vector_free(offsets);
+#else
+				RVector *offsets = r_codemeta_line_offsets(code);
+				r_codemeta_print(code, offsets);
+				r_vector_free(offsets);
+#endif
 			}
 			break;
 			case DecompileMode::OFFSET:
