@@ -13,8 +13,7 @@
 #include <list>
 
 template<typename K, typename V>
-class LRUCache
-{
+class LRUCache {
 private:
 	std::list<std::pair<K, V>> item_list;
 	std::unordered_map<K, decltype(item_list.begin())> item_map;
@@ -23,10 +22,8 @@ private:
 	// So disable this cache for now.
 	const size_t cache_size = 32;
 
-	void clean()
-	{
-		while(item_map.size() > cache_size)
-		{
+	void clean() {
+		while (item_map.size() > cache_size) {
 			auto last_it = item_list.back();
 			delete last_it.second;
 			item_map.erase(last_it.first);
@@ -39,19 +36,17 @@ public:
 
 	~LRUCache() { clear(); }
 
-	void clear()
-	{
-		for(auto iter = item_list.begin(); iter != item_list.end(); ++iter)
+	void clear() {
+		for (auto iter = item_list.begin(); iter != item_list.end(); iter++) {
 			delete iter->second;
+		}
 		item_list.clear();
 		item_map.clear();
 	}
 
-	void put(const K &key, const V &val)
-	{
+	void put(const K &key, const V &val) {
 		auto it = item_map.find(key);
-		if(it != item_map.end())
-		{
+		if (it != item_map.end()) {
 			item_list.erase(it->second);
 			item_map.erase(it);
 		}
@@ -62,16 +57,14 @@ public:
 
 	bool has(const K &key) { return item_map.find(key) != item_map.end(); };
 
-	V get(const K &key)
-	{
+	V get(const K &key) {
 		auto it = item_map.find(key);
 		item_list.splice(item_list.begin(), item_list, it->second);
 		return it->second->second;
 	};
 };
 
-enum FlowType
-{
+enum FlowType {
 	INVALID,
 	FLOW,
 	FALL_THROUGH,
@@ -96,39 +89,38 @@ enum FlowType
 	CALLOTHER_OVERRIDE_JUMP,
 };
 
-static bool flowTypeHasFallthrough(FlowType t)
-{
-	switch(t)
-	{
-		case FlowType::INVALID:
-		case FlowType::FLOW:
-		case FlowType::FALL_THROUGH:
-		case FlowType::CONDITIONAL_JUMP:
-		case FlowType::UNCONDITIONAL_CALL:
-		case FlowType::CONDITIONAL_CALL:
-		case FlowType::CONDITIONAL_TERMINATOR:
-		case FlowType::COMPUTED_CALL:
-		case FlowType::CONDITIONAL_COMPUTED_CALL:
-		case FlowType::CONDITIONAL_COMPUTED_JUMP:
-		case FlowType::CALL_OVERRIDE_UNCONDITIONAL:
-		case FlowType::CALLOTHER_OVERRIDE_CALL: return true;
-
-		default: return false;
+static bool flowTypeHasFallthrough(FlowType t) {
+	switch (t) {
+	case FlowType::INVALID:
+	case FlowType::FLOW:
+	case FlowType::FALL_THROUGH:
+	case FlowType::CONDITIONAL_JUMP:
+	case FlowType::UNCONDITIONAL_CALL:
+	case FlowType::CONDITIONAL_CALL:
+	case FlowType::CONDITIONAL_TERMINATOR:
+	case FlowType::COMPUTED_CALL:
+	case FlowType::CONDITIONAL_COMPUTED_CALL:
+	case FlowType::CONDITIONAL_COMPUTED_JUMP:
+	case FlowType::CALL_OVERRIDE_UNCONDITIONAL:
+	case FlowType::CALLOTHER_OVERRIDE_CALL: return true;
+	default: return false;
 	}
 }
 
-static uint4 hashConstructState(ConstructState *cs, uint4 hashCode)
-{
-	if(cs->ct == nullptr)
+static uint4 hashConstructState(ConstructState *cs, uint4 hashCode) {
+	if (cs->ct == nullptr) {
 		return hashCode;
+	}
 
 	uint4 id = cs->ct->getId();
 	hashCode = crc_update(hashCode, id >> 8);
 	hashCode = crc_update(hashCode, id);
 
-	for(ConstructState *p: cs->resolve)
-		if(p != nullptr)
+	for (ConstructState *p: cs->resolve) {
+		if (p != nullptr) {
 			hashCode = hashConstructState(p, hashCode);
+		}
+	}
 
 	return hashCode;
 }
@@ -138,8 +130,7 @@ static uint4 hashConstructState(ConstructState *cs, uint4 hashCode)
  * Supports walking the tree of an entire SleighInstructionPrototype or just a single ConstructTpl
  *
  */
-class OpTplWalker
-{
+class OpTplWalker {
 private:
 	ConstructState *point = nullptr;          // The current node being visited
 	const vector<OpTpl *> *oparray = nullptr; // current array of ops being traversed
@@ -148,28 +139,26 @@ private:
 	int maxsize;                              // Maximum number of directives for this point
 	int sectionnum;
 
-	void setupPoint()
-	{
+	void setupPoint() {
 		maxsize = 0;
 		oparray = nullptr;
 		Constructor *ct = point->ct;
-		if(ct == nullptr)
+		if (ct == nullptr) {
 			return;
+		}
 		const ConstructTpl *tpl;
-		if(sectionnum < 0)
-		{
+		if (sectionnum < 0) {
 			tpl = ct->getTempl();
-			if(tpl == nullptr)
+			if (tpl == nullptr) {
 				return;
-		}
-		else
+			}
+		} else {
 			tpl = ct->getNamedTempl(sectionnum);
-		if(tpl == nullptr)
-		{ // Empty named section implies straight list of build directives
-			maxsize = ct->getNumOperands();
 		}
-		else
-		{
+		if (tpl == nullptr) {
+			// Empty named section implies straight list of build directives
+			maxsize = ct->getNumOperands();
+		} else {
 			oparray = &tpl->getOpvec();
 			maxsize = oparray->size();
 		}
@@ -181,8 +170,7 @@ public:
 	 * @param root is the root ConstructState of the tree
 	 * @param sectionnum is the named section to traverse (or -1 for main section)
 	 */
-	OpTplWalker(ConstructState *root, int sectionnum): point(root), sectionnum(sectionnum)
-	{
+	OpTplWalker(ConstructState *root, int sectionnum): point(root), sectionnum(sectionnum) {
 		// NOTE: breadcrumb array size limits depth of parse
 		depth = 0;
 		breadcrumb[0] = 0;
@@ -193,20 +181,21 @@ public:
 	 * Constructor for walking a single template
 	 * @param tpl
 	 */
-	OpTplWalker(ConstructTpl *tpl)
-	{
+	OpTplWalker(ConstructTpl *tpl) {
 		depth = 0;
 		breadcrumb[0] = 0;
 		oparray = &tpl->getOpvec();
 		maxsize = oparray->size();
 	}
 
-	ConstructState *getState() { return point; }
+	ConstructState *getState() {
+		return point;
+	}
 
-	bool isState()
-	{
-		if(point != nullptr)
+	bool isState() {
+		if (point != nullptr) {
 			return true;
+		}
 		return (maxsize > 0);
 	}
 
@@ -215,8 +204,7 @@ public:
 	 * Constructor and ContructTpl Use popBuild to backtrack
 	 * @param buildnum is the operand number of the BUILD directive to follow
 	 */
-	void pushBuild(int buildnum)
-	{
+	void pushBuild(int buildnum) {
 		point = point->resolve[buildnum];
 		depth += 1;
 		breadcrumb[depth] = 0;
@@ -226,49 +214,44 @@ public:
 	/**
 	 * Move to the parent of the current node
 	 */
-	void popBuild()
-	{
-		if(point == nullptr)
-		{
+	void popBuild() {
+		if (point == nullptr) {
 			maxsize = 0;
 			oparray = nullptr;
 			return;
 		}
 		point = point->parent;
 		depth -= 1;
-		if(point != nullptr)
+		if (point != nullptr) {
 			setupPoint();
-		else
-		{
+		} else {
 			maxsize = 0;
 			oparray = nullptr;
 		}
 	}
 
-	int nextOpTpl(OpTpl *(&lastop))
-	{
+	int nextOpTpl(OpTpl *(&lastop)) {
 		int curind = breadcrumb[depth]++;
-		if(curind >= maxsize)
+		if (curind >= maxsize) {
 			return -1;
-		if(oparray == nullptr)
+		}
+		if (oparray == nullptr) {
 			// Plus one to avoid overlay when zero appear, which means return truly lastop
 			return curind + 1; // Virtual build directive
+		}
 		OpTpl *op = (*oparray)[curind];
-		if(op->getOpcode() != OpCode::CPUI_MULTIEQUAL)
-		{ // if NOT a build directive
+		if (op->getOpcode() != OpCode::CPUI_MULTIEQUAL) { // if NOT a build directive
 			lastop = op;
 			return 0; // return ordinary OpTpl
 		}
-		curind = (int)op->getIn(0)
-		             ->getOffset()
-		             .getReal(); // Get the operand index from the build directive
+		// Get the operand index from the build directive
+		curind = (int)op->getIn(0)->getOffset().getReal();
 		return curind + 1;
 	}
 };
 
 class SleighInstructionPrototype;
-class SleighParserContext : public ParserContext
-{
+class SleighParserContext : public ParserContext {
 private:
 	SleighInstructionPrototype *prototype = nullptr;
 
@@ -280,8 +263,7 @@ public:
 
 class SleighInstruction;
 class SleighInstructionPrototype;
-class R2Sleigh : public Sleigh
-{
+class R2Sleigh : public Sleigh {
 	// To export protected member functions to SleighInstructionPrototype
 	friend SleighInstructionPrototype;
 
@@ -317,8 +299,7 @@ public:
 	}
 };
 
-struct SleighInstruction
-{
+struct SleighInstruction {
 	Address baseaddr;
 	SleighInstructionPrototype *proto = nullptr;
 
@@ -332,16 +313,14 @@ struct SleighInstruction
 	VarnodeData getIndirectInvar();
 };
 
-class SleighInstructionPrototype
-{
+class SleighInstructionPrototype {
 	/* Compared to Java version of SleighInstructionPrototype,
 	 * Java choose to resolve all the constructors involved in instruction in ctor
 	 * and cache all SleighInstructionPrototype.
 	 * C++ choose to cache all constructors in Sleigh's contextcache.
 	 */
 private:
-	enum FlowFlags
-	{
+	enum FlowFlags {
 		FLOW_RETURN = 0x01,
 		FLOW_CALL_INDIRECT = 0x02,
 		FLOW_BRANCH_INDIRECT = 0x04,
@@ -353,16 +332,13 @@ private:
 		FLOW_LABEL = 0x100,
 	};
 
-	struct FlowRecord
-	{
-		ConstructState *addressnode =
-		    nullptr;         // Constructor state containing destination address of flow
+	struct FlowRecord {
+		ConstructState *addressnode = nullptr; // Constructor state containing destination address of flow
 		OpTpl *op = nullptr; // The pcode template producing the flow
 		FlowFlags flowFlags = FlowFlags(0); // flags associated with this flow
 	};
 
-	struct FlowSummary
-	{
+	struct FlowSummary {
 		int delay = 0;
 		bool hasCrossBuilds = false;
 		std::vector<FlowRecord *> flowState;
@@ -403,10 +379,10 @@ public:
 	void cacheTreeInfo(); // It could be renamed to parse(), but keep original name to ease update
 	VarnodeData getIndirectInvar(SleighInstruction *ins);
 
-	SleighInstructionPrototype(R2Sleigh *s, SleighInstruction *i): sleigh(s), inst(i)
-	{
-		if(sleigh == nullptr)
-			throw LowlevelError("Null pointer in SleighInstructionPrototype ctor");
+	SleighInstructionPrototype(R2Sleigh *s, SleighInstruction *i): sleigh(s), inst(i) {
+		if (sleigh == nullptr) {
+			throw LowlevelError ("Null pointer in SleighInstructionPrototype ctor");
+		}
 
 		rootState.parent = nullptr; // rootState = new ConstructState(null);
 		rootState.ct = nullptr;
@@ -423,45 +399,40 @@ public:
 		length = rootState.length;
 	}
 
-	~SleighInstructionPrototype()
-	{
+	~SleighInstructionPrototype() {
 		flowStateListNamed.push_back(flowStateList);
-		for(auto outer = flowStateListNamed.begin(); outer != flowStateListNamed.end(); outer++)
-			for(auto inner = outer->begin(); inner != outer->end(); inner++)
+		for (auto outer = flowStateListNamed.begin(); outer != flowStateListNamed.end(); outer++) {
+			for (auto inner = outer->begin(); inner != outer->end(); inner++) {
 				delete *inner;
-
-		clearRootState(&rootState);
+			}
+		}
+		clearRootState (&rootState);
 	}
 
-	void clearRootState(ConstructState *curr)
-	{
+	void clearRootState(ConstructState *curr) {
 		// Classic DFS
-		if(curr)
-		{
-			for(auto iter = curr->resolve.begin(); iter != curr->resolve.end(); ++iter)
-			{
-				if(*iter)
+		if (curr) {
+			for (auto iter = curr->resolve.begin(); iter != curr->resolve.end(); iter++) {
+				if (*iter) {
 					clearRootState(*iter);
+				}
 				delete *iter;
 			}
 		}
 	}
 };
 
-class SleighParserWalker : public ParserWalkerChange
-{
+class SleighParserWalker : public ParserWalkerChange {
 public:
 	SleighParserWalker(ParserContext *c): ParserWalkerChange(c) {}
 
-	void subTreeState(ConstructState *subtree)
-	{
+	void subTreeState(ConstructState *subtree) {
 		point = subtree;
 		depth = 0;
 		breadcrumb[0] = 0;
 	}
 
-	void allocateOperand(int4 i)
-	{
+	void allocateOperand(int4 i) {
 		ConstructState *opstate = new ConstructState;
 		opstate->ct = nullptr;
 		opstate->parent = point;

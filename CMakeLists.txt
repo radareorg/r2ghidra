@@ -108,6 +108,7 @@ else()
 	string (REPLACE ";" " " LD_RPATH_STR "$ORIGIN")
 endif()
 
+# XXX this doesnt build on windows
 if(BUILD_SLEIGH_PLUGIN)
 add_library(asm_ghidra SHARED ${ASM_SOURCE})
 target_link_libraries(asm_ghidra core_ghidra)

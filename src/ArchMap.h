@@ -1,4 +1,4 @@
-/* radare - LGPL - Copyright 2019 - thestr4ng3r */
+/* r2ghidra - LGPL - Copyright 2019 - thestr4ng3r */
 
 #ifndef R2GHIDRA_ARCHMAP_H
 #define R2GHIDRA_ARCHMAP_H
@@ -20,6 +20,7 @@ std::string SleighIdFromCore(RCore *core);
  * Match sleigh id from sleigh-plugin specific settings (asm.cpu)
  */
 std::string SleighIdFromSleighAsmConfig(const char *cpu, int bits, bool bigendian, const vector<LanguageDescription> &langs);
+// XXX use proper name
 int ai(RCore *core, std::string cpu, int query);
 
 #endif

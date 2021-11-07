@@ -12,117 +12,114 @@
 #include "R2Utils.h"
 
 R2TypeFactory::R2TypeFactory(R2Architecture *arch)
-	: TypeFactory(arch),
-	arch(arch)
-{
+	: TypeFactory (arch),
+	arch (arch) {
 #if R2G_USE_CTYPE
-	ctype = r_parse_ctype_new();
-	if(!ctype)
-		throw LowlevelError("Failed to create RParseCType");
+	ctype = r_parse_ctype_new ();
+	if (!ctype) {
+		throw LowlevelError ("Failed to create RParseCType");
+	}
 #endif
 }
 
-R2TypeFactory::~R2TypeFactory()
-{
+R2TypeFactory::~R2TypeFactory() {
 //	r_parse_ctype_free(ctype);
 }
 
 
-std::vector<std::string> splitSdbArray(const std::string& str)
-{
-	std::stringstream ss(str);
+std::vector<std::string> splitSdbArray(const std::string& str) {
+	std::stringstream ss (str);
 	std::string token;
 	std::vector<std::string> r;
-	while(std::getline(ss, token, SDB_RS))
-		r.push_back(token);
+	while (std::getline (ss, token, SDB_RS)) {
+		r.push_back (token);
+	}
 	return r;
 }
 
-Datatype *R2TypeFactory::queryR2Struct(const string &n, std::set<std::string> &stackTypes)
-{
-	RCoreLock core(arch->getCore());
+Datatype *R2TypeFactory::queryR2Struct(const string &n, std::set<std::string> &stackTypes) {
+	RCoreLock core(arch->getCore ());
 
 	Sdb *sdb = core->anal->sdb_types;
 
 	// TODO: We REALLY need an API for this in r2
 
-	const char *members = sdb_const_get(sdb, ("struct." + n).c_str(), nullptr);
-	if(!members)
+	const char *members = sdb_const_get (sdb, ("struct." + n).c_str (), nullptr);
+	if (!members) {
 		return nullptr;
-
+	}
 	std::vector<TypeField> fields;
-	try
-	{
+	try {
 		TypeStruct *r = getTypeStruct(n);
 		std::stringstream membersStream(members);
 		std::string memberName;
-		while(std::getline(membersStream, memberName, SDB_RS))
-		{
+		while(std::getline(membersStream, memberName, SDB_RS)) {
 			const char *memberContents = sdb_const_get(sdb, ("struct." + n + "." + memberName).c_str(), nullptr);
-			if(!memberContents)
-				continue;
-			auto memberTokens = splitSdbArray(memberContents);
-			if(memberTokens.size() < 3)
-				continue;
-			auto memberTypeName = memberTokens[0];
-			for(size_t i=1; i<memberTokens.size() - 2; i++)
-				memberTypeName += "," + memberTokens[i];
-			int4 offset = std::stoi(memberTokens[memberTokens.size() - 2]);
-			int4 elements = std::stoi(memberTokens[memberTokens.size() - 1]);
-			Datatype *memberType = fromCString(memberTypeName, nullptr, &stackTypes);
-			if(!memberType)
-			{
-				arch->addWarning("Failed to match type " + memberTypeName + " of member " + memberName + " in struct " + n);
+			if (!memberContents) {
 				continue;
 			}
-
-			if(elements > 0)
-				memberType = getTypeArray(elements, memberType);
-
-			fields.push_back({
+			auto memberTokens = splitSdbArray (memberContents);
+			if (memberTokens.size() < 3) {
+				continue;
+			}
+			auto memberTypeName = memberTokens[0];
+			for (size_t i = 1; i < memberTokens.size () - 2; i++) {
+				memberTypeName += "," + memberTokens[i];
+			}
+			int4 offset = std::stoi (memberTokens[memberTokens.size () - 2]);
+			int4 elements = std::stoi (memberTokens[memberTokens.size () - 1]);
+			Datatype *memberType = fromCString (memberTypeName, nullptr, &stackTypes);
+			if (!memberType) {
+				arch->addWarning ("Failed to match type " + memberTypeName + " of member " + memberName + " in struct " + n);
+				continue;
+			}
+			if (elements > 0) {
+				memberType = getTypeArray (elements, memberType);
+			}
+			fields.push_back ({
 				offset,
 				memberName,
 				memberType
 			});
 		}
 
-		if (fields.empty()) {
-			arch->addWarning("Struct " + n + " has no fields.");
+		if (fields.empty ()) {
+			arch->addWarning ("Struct " + n + " has no fields.");
 			return nullptr;
 		}
-		setFields(fields, r, 0, 0);
+		setFields (fields, r, 0, 0);
 		return r;
-	}
-	catch(std::invalid_argument &e)
-	{
-		arch->addWarning("Failed to load struct " + n + " from sdb.");
+	} catch (std::invalid_argument &e) {
+		arch->addWarning ("Failed to load struct " + n + " from sdb.");
 		return nullptr;
 	}
 }
 
-Datatype *R2TypeFactory::queryR2Enum(const string &n)
-{
-	RCoreLock core(arch->getCore());
-	RList *members = r_type_get_enum(core->anal->sdb_types, n.c_str());
-	if(!members)
+Datatype *R2TypeFactory::queryR2Enum(const string &n) {
+	RCoreLock core (arch->getCore ());
+	RList *members = r_type_get_enum (core->anal->sdb_types, n.c_str ());
+	if (!members) {
 		return nullptr;
+	}
 
 	std::vector<std::string> namelist;
 	std::vector<uintb> vallist;
 	std::vector<bool> assignlist;
 
-	r_list_foreach_cpp<RTypeEnum>(members, [&](RTypeEnum *member) {
-		if(!member->name || !member->val)
+	r_list_foreach_cpp <RTypeEnum>(members, [&](RTypeEnum *member) {
+		if (!member->name || !member->val) {
 			return;
-		uintb val = std::stoull(member->val, nullptr, 0);
-		namelist.push_back(member->name);
-		vallist.push_back(val);
-		assignlist.push_back(true); // all enum values from r2 have explicit values
+		}
+		uintb val = std::stoull (member->val, nullptr, 0);
+		namelist.push_back (member->name);
+		vallist.push_back (val);
+		assignlist.push_back (true); // all enum values from r2 have explicit values
 	});
 	r_list_free (members);
 
-	if(namelist.empty())
+	if (namelist.empty()) {
 		return nullptr;
+	}
 	try {
 		auto enumType = getTypeEnum(n);
 		setEnumValues(namelist, vallist, assignlist, enumType);
@@ -133,77 +130,70 @@ Datatype *R2TypeFactory::queryR2Enum(const string &n)
 	}
 }
 
-Datatype *R2TypeFactory::queryR2Typedef(const string &n, std::set<std::string> &stackTypes)
-{
+Datatype *R2TypeFactory::queryR2Typedef(const string &n, std::set<std::string> &stackTypes) {
 	RCoreLock core(arch->getCore());
 	Sdb *sdb = core->anal->sdb_types;
-	const char *target = sdb_const_get(sdb, ("typedef." + n).c_str(), nullptr);
+	const char *target = sdb_const_get (sdb, ("typedef." + n).c_str (), nullptr);
 	if(!target) {
 		return nullptr;
 	}
-	Datatype *resolved = fromCString(target, nullptr, &stackTypes);
-	if(!resolved) {
+	Datatype *resolved = fromCString (target, nullptr, &stackTypes);
+	if (!resolved) {
 		return nullptr;
 	}
-	Datatype *typedefd = resolved->clone();
-	setName(typedefd, n); // this removes the old name from the nametree
-	setName(resolved, resolved->getName()); // add the old name back
+	Datatype *typedefd = resolved->clone ();
+	setName (typedefd, n); // this removes the old name from the nametree
+	setName (resolved, resolved->getName()); // add the old name back
 	return typedefd;
 }
 
-Datatype *R2TypeFactory::queryR2(const string &n, std::set<std::string> &stackTypes)
-{
-	if(stackTypes.find(n) != stackTypes.end())
-	{
+Datatype *R2TypeFactory::queryR2(const string &n, std::set<std::string> &stackTypes) {
+	if (stackTypes.find (n) != stackTypes.end ()) {
 		arch->addWarning("Recursion detected while creating type " + n);
 		return nullptr;
 	}
-	stackTypes.insert(n);
+	stackTypes.insert (n);
 
-	RCoreLock core(arch->getCore());
-	int kind = r_type_kind(core->anal->sdb_types, n.c_str());
-	switch(kind)
-	{
-		case R_TYPE_STRUCT:
-			return queryR2Struct(n, stackTypes);
-		case R_TYPE_ENUM:
-			return queryR2Enum(n);
-		case R_TYPE_TYPEDEF:
-			return queryR2Typedef(n, stackTypes);
-		default:
-			return nullptr;
+	RCoreLock core (arch->getCore ());
+	int kind = r_type_kind (core->anal->sdb_types, n.c_str ());
+	switch (kind) {
+	case R_TYPE_STRUCT:
+		return queryR2Struct(n, stackTypes);
+	case R_TYPE_ENUM:
+		return queryR2Enum(n);
+	case R_TYPE_TYPEDEF:
+		return queryR2Typedef(n, stackTypes);
+	default:
+		return nullptr;
 	}
 }
 
-Datatype *R2TypeFactory::findById(const string &n, uint8 id, std::set<std::string> &stackTypes)
-{
-	Datatype *r = TypeFactory::findById(n, id);
-	return (r != nullptr)? r: queryR2(n, stackTypes);
+Datatype *R2TypeFactory::findById(const string &n, uint8 id, std::set<std::string> &stackTypes) {
+	Datatype *r = TypeFactory::findById (n, id);
+	return (r != nullptr)? r: queryR2 (n, stackTypes);
 }
 
-Datatype *R2TypeFactory::findById(const string &n, uint8 id)
-{
+Datatype *R2TypeFactory::findById(const string &n, uint8 id) {
 	std::set<std::string> stackTypes; // to detect recursion
 	return findById(n, id, stackTypes);
 	// this recurses somehow :D XXX this->fromCString(n.c_str(), nullptr, nullptr);
 }
 
-Datatype *R2TypeFactory::fromCString(const string &str, string *error, std::set<std::string> *stackTypes)
-{
+Datatype *R2TypeFactory::fromCString(const string &str, string *error, std::set<std::string> *stackTypes) {
 #if R2G_USE_CTYPE
 	char *error_cstr = nullptr;
-	RParseCTypeType *type = r_parse_ctype_parse(ctype, str.c_str(), &error_cstr);
-	if(error)
+	RParseCTypeType *type = r_parse_ctype_parse (ctype, str.c_str (), &error_cstr);
+	if (error) {
 		*error = error_cstr ? error_cstr : "";
-	if(!type)
-		return nullptr;
-
-	Datatype *r = fromCType(type, error, stackTypes);
-	r_parse_ctype_type_free(type);
-	return r;
+	}
+	if (type) {
+		Datatype *r = fromCType (type, error, stackTypes);
+		r_parse_ctype_type_free (type);
+		return r;
+	}
+	return nullptr;
 #else
-	Datatype *r = stackTypes ? findByName(str.c_str(), *stackTypes) : findByName(str.c_str());
-	return r;
+	return stackTypes ? findByName (str.c_str(), *stackTypes) : findByName (str.c_str ());
 #endif
 }
 
