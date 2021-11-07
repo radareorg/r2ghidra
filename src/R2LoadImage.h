@@ -14,17 +14,16 @@
 
 class RCoreMutex;
 
-class R2LoadImage : public LoadImage
-{
-	private:
-		RCoreMutex *const coreMutex;
+class R2LoadImage : public LoadImage {
+private:
+	RCoreMutex *const coreMutex;
 
-	public:
-		explicit R2LoadImage(RCoreMutex *coreMutex);
+public:
+	explicit R2LoadImage(RCoreMutex *coreMutex);
 
-		void loadFill(uint1 *ptr, int4 size, const Address &addr) override;
-		string getArchType() const override;
-		void adjustVma(long adjust) override;
+	void loadFill(uint1 *ptr, int4 size, const Address &addr) override;
+	string getArchType() const override;
+	void adjustVma(long adjust) override;
 };
 
 #endif //R2GHIDRA_R2LOADIMAGE_H

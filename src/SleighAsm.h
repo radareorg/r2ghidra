@@ -1,4 +1,4 @@
-/* radare - LGPL - Copyright 2020 - FXTi */
+/* r2ghidra - LGPL - Copyright 2020-2021 - FXTi */
 
 #ifndef R2GHIDRA_SLEIGHASM_H
 #define R2GHIDRA_SLEIGHASM_H
@@ -11,30 +11,28 @@
 #include "sleigh_arch.hh"
 #include "SleighInstruction.h"
 
-class AsmLoadImage : public LoadImage
-{
+class AsmLoadImage : public LoadImage {
 private:
 	RIO *io = nullptr;
 
 public:
 	AsmLoadImage(RIO *io): LoadImage("radare2_program"), io(io) {}
-	virtual void loadFill(uint1 *ptr, int4 size, const Address &addr)
-	{
-		r_io_read_at(io, addr.getOffset(), ptr, size);
+	virtual void loadFill(uint1 *ptr, int4 size, const Address &addr) {
+		r_io_read_at (io, addr.getOffset(), ptr, size);
 	}
-	virtual string getArchType(void) const { return "radare2"; }
-	virtual void adjustVma(long adjust)
-	{
-		throw LowlevelError("Cannot adjust radare2 virtual memory");
+	virtual string getArchType(void) const {
+		return "radare2";
+	}
+	virtual void adjustVma(long adjust) {
+		throw LowlevelError ("Cannot adjust radare2 virtual memory");
 	}
 };
 
 class SleighAsm;
-class AssemblySlg : public AssemblyEmit
-{
+
+class AssemblySlg : public AssemblyEmit {
 private:
 	SleighAsm *sasm = nullptr;
-
 public:
 	char *str = nullptr;
 
@@ -42,76 +40,63 @@ public:
 
 	void dump(const Address &addr, const string &mnem, const string &body) override;
 
-	~AssemblySlg()
-	{
-		if(str)
-			r_mem_free(str);
+	~AssemblySlg() {
+		free (str);
 	}
 };
 
-struct PcodeOperand
-{
+struct PcodeOperand {
 	PcodeOperand(uintb offset, uint4 size): type(RAM), offset(offset), size(size) {}
 	PcodeOperand(uintb number): type(CONSTANT), number(number), size(0) {}
 	PcodeOperand(const std::string &name, uint4 size): type(REGISTER), name(name), size(size) {}
-	virtual ~PcodeOperand()
-	{
-		if(type == REGISTER)
+	virtual ~PcodeOperand() {
+		if (type == REGISTER) {
 			name.~string();
+		}
 	}
 
-	union
-	{
+	union {
 		std::string name;
 		uintb offset;
 		uintb number;
 	};
 	uint4 size;
 
-	enum
-	{
+	enum {
 		REGISTER,
 		RAM,
 		CONSTANT,
 		UNIQUE
 	} type;
 
-	PcodeOperand(const PcodeOperand &rhs)
-	{
+	PcodeOperand(const PcodeOperand &rhs) {
 		type = rhs.type;
 		size = rhs.size;
 
-		switch(type)
-		{
-			case REGISTER: name = rhs.name; break;
-			case UNIQUE: /* Same as RAM */
-			case RAM: offset = rhs.offset; break;
-			case CONSTANT: number = rhs.number; break;
-			default: throw LowlevelError("Unexpected type of PcodeOperand found in operator==.");
+		switch (type) {
+		case REGISTER: name = rhs.name; break;
+		case UNIQUE: /* Same as RAM */
+		case RAM: offset = rhs.offset; break;
+		case CONSTANT: number = rhs.number; break;
+		default: throw LowlevelError("Unexpected type of PcodeOperand found in operator==.");
 		}
 	}
 
-	bool operator==(const PcodeOperand &rhs) const
-	{
-		if(type != rhs.type)
+	bool operator==(const PcodeOperand &rhs) const {
+		if (type != rhs.type) {
 			return false;
-
-		switch(type)
-		{
-			case REGISTER: return name == rhs.name;
-			case UNIQUE: /* Same as RAM */
-			case RAM: return offset == rhs.offset && size == rhs.size;
-			case CONSTANT: return number == rhs.number;
-			default: throw LowlevelError("Unexpected type of PcodeOperand found in operator==.");
+		}
+		switch (type) {
+		case REGISTER: return name == rhs.name;
+		case UNIQUE: /* Same as RAM */
+		case RAM: return offset == rhs.offset && size == rhs.size;
+		case CONSTANT: return number == rhs.number;
+		default: throw LowlevelError("Unexpected type of PcodeOperand found in operator==.");
 		}
 	}
-
 	bool is_unique() const { return type == UNIQUE; }
-
 	bool is_const() const { return type == CONSTANT; }
-
 	bool is_ram() const { return type == RAM; }
-
 	bool is_reg() const { return type == REGISTER; }
 };
 
@@ -119,8 +104,7 @@ ostream &operator<<(ostream &s, const PcodeOperand &arg);
 
 typedef OpCode PcodeOpType;
 
-struct Pcodeop
-{
+struct Pcodeop {
 	PcodeOpType type;
 
 	PcodeOperand *output = nullptr;
@@ -129,32 +113,31 @@ struct Pcodeop
 	/* input2 for STORE will use output to save memory space */
 
 	Pcodeop(PcodeOpType opc, PcodeOperand *in0, PcodeOperand *in1, PcodeOperand *out):
-	    type(opc), input0(in0), input1(in1), output(out)
-	{
+	    type(opc), input0(in0), input1(in1), output(out) {
 	}
 
-	void fini()
-	{
-		if(output)
+	void fini() {
+		if (output) {
 			delete output;
-		if(input0)
+		}
+		if (input0) {
 			delete input0;
-		if(input1)
+		}
+		if (input1) {
 			delete input1;
+		}
 	}
 };
 
 ostream &operator<<(ostream &s, const Pcodeop &op);
 
-struct UniquePcodeOperand: public PcodeOperand
-{
+struct UniquePcodeOperand: public PcodeOperand {
 	const Pcodeop *def = nullptr;
 	UniquePcodeOperand(const PcodeOperand *from): PcodeOperand(*from) {}
 	~UniquePcodeOperand() = default;
 };
 
-class PcodeSlg : public PcodeEmit
-{
+class PcodeSlg : public PcodeEmit {
 private:
 	SleighAsm *sanal = nullptr;
 
@@ -165,41 +148,35 @@ public:
 
 	PcodeSlg(SleighAsm *s): sanal(s) {}
 
-	void dump(const Address &addr, OpCode opc, VarnodeData *outvar, VarnodeData *vars,
-	          int4 isize) override
-	{
+	void dump(const Address &addr, OpCode opc, VarnodeData *outvar, VarnodeData *vars, int4 isize) override {
 		PcodeOperand *out = nullptr, *in0 = nullptr, *in1 = nullptr;
 
-		if(opc == CPUI_CALLOTHER)
+		if (opc == CPUI_CALLOTHER) {
 			isize = isize > 2? 2: isize;
-
-		switch(isize)
-		{
-			case 3: out = parse_vardata(vars[2]); // Only for STORE
-			case 2: in1 = parse_vardata(vars[1]);
-			case 1: in0 = parse_vardata(vars[0]);
-			case 0: break;
-			default: throw LowlevelError("Unexpexted isize in PcodeSlg::dump()");
+		}
+		switch (isize) {
+		case 3: out = parse_vardata (vars[2]); // Only for STORE
+		case 2: in1 = parse_vardata (vars[1]);
+		case 1: in0 = parse_vardata (vars[0]);
+		case 0: break;
+		default: throw LowlevelError ("Unexpexted isize in PcodeSlg::dump()");
 		}
 
-		if(outvar)
-			out = parse_vardata(*outvar);
-
-		pcodes.push_back(Pcodeop(opc, in0, in1, out));
+		if (outvar) {
+			out = parse_vardata (*outvar);
+		}
+		pcodes.push_back (Pcodeop(opc, in0, in1, out));
 	}
 
-	~PcodeSlg()
-	{
-		while(!pcodes.empty())
-		{
+	~PcodeSlg() {
+		while (!pcodes.empty()) {
 			pcodes.back().fini();
 			pcodes.pop_back();
 		}
 	}
 };
 
-struct R2Reg
-{
+struct R2Reg {
 	std::string name;
 	ut64 size;
 	ut64 offset;
@@ -207,8 +184,7 @@ struct R2Reg
 
 class R2Sleigh;
 
-class SleighAsm
-{
+class SleighAsm {
 private:
 	AsmLoadImage loader;
 	ContextInternal context;
