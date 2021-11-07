@@ -278,7 +278,7 @@ static void DecompileCmd(RCore *core, DecompileMode mode)
 		{
 			case DecompileMode::DISASM:
 			{
-#if ((R2_VERSION_MAJOR == 5 && R2_VERSION_MINOR == 4 && R2_VERSION_MINOR > 3) || (R2_VERSION_MAJOR > 5))
+#if R2_VERSION_NUMBER >= 50403
 				RVector *offsets = r_codemeta_line_offsets(code);
 				r_codemeta_print_disasm (code, offsets, core->anal);
 				r_vector_free(offsets);
@@ -652,7 +652,7 @@ R_API RLibStruct radare_plugin = {
 	/* .data = */ &r_core_plugin_ghidra,
 	/* .version = */ R2_VERSION,
 	/* .free = */ nullptr
-#if R2_VERSION_MAJOR >= 4 && R2_VERSION_MINOR >= 2
+#if R2_VERSION_NUMBER >= 40200
 	, "r2ghidra"
 #endif
 };
