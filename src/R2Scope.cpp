@@ -466,15 +466,15 @@ Symbol *R2Scope::registerFlag(RFlagItem *flag) const {
 }
 
 Symbol *R2Scope::queryR2Absolute(ut64 addr, bool contain) const {
-	RCoreLock core(arch->getCore());
+	RCoreLock core (arch->getCore ());
 
 	RAnalFunction *fcn = r_anal_get_function_at(core->anal, addr);
 #if 1
 	// This can cause functions to be registered twice (hello-arm test)
 	if (!fcn && contain) {
-		RList *fcns = r_anal_get_functions_in(core->anal, addr);
-		if (!r_list_empty(fcns)) {
-			fcn = reinterpret_cast<RAnalFunction *>(r_list_first(fcns));
+		RList *fcns = r_anal_get_functions_in (core->anal, addr);
+		if (!r_list_empty (fcns)) {
+			fcn = reinterpret_cast<RAnalFunction *>(r_list_first (fcns));
 		}
 		r_list_free (fcns);
 	}
@@ -491,19 +491,18 @@ Symbol *R2Scope::queryR2Absolute(ut64 addr, bool contain) const {
 		void *pos;
 		r_list_foreach (flags, iter, pos) {
 			auto flag = reinterpret_cast<RFlagItem *>(pos);
-			if (flag->space && flag->space->name && !strcmp(flag->space->name, R_FLAGS_FS_SECTIONS)) {
+			if (flag->space && flag->space->name && !strcmp (flag->space->name, R_FLAGS_FS_SECTIONS)) {
 				continue;
 			}
-			return registerFlag(flag);
+			return registerFlag (flag);
 		}
 	}
 	return nullptr;
 }
 
-
 Symbol *R2Scope::queryR2(const Address &addr, bool contain) const {
 	if (addr.getSpace() == arch->getDefaultCodeSpace() || addr.getSpace() == arch->getDefaultDataSpace()) {
-		return queryR2Absolute(addr.getOffset(), contain);
+		return queryR2Absolute (addr.getOffset(), contain);
 	}
 	return nullptr;
 }
@@ -521,7 +520,7 @@ LabSymbol *R2Scope::queryR2FunctionLabel(const Address &addr) const {
 	const char *label = r_anal_function_get_label_at (fcn, addr.getOffset());
 #endif
 	if (label) {
-		return cache->addCodeLabel(addr, label);
+		return cache->addCodeLabel (addr, label);
 	}
 	return nullptr;
 }
@@ -542,20 +541,18 @@ SymbolEntry *R2Scope::findAddr(const Address &addr, const Address &usepoint) con
 }
 
 SymbolEntry *R2Scope::findContainer(const Address &addr, int4 size, const Address &usepoint) const {
-	SymbolEntry *entry = cache->findClosestFit(addr, size, usepoint);
-
+	SymbolEntry *entry = cache->findClosestFit (addr, size, usepoint);
 	if (!entry) {
-		Symbol *sym = queryR2(addr, true);
-		entry = sym ? sym->getMapEntry(addr) : nullptr;
+		Symbol *sym = queryR2 (addr, true);
+		entry = sym ? sym->getMapEntry (addr) : nullptr;
 	}
-
 	if (entry) {
 		// Entry contains addr, does it contain addr+size
 		uintb last = entry->getAddr().getOffset() + entry->getSize() - 1;
-		if (last < addr.getOffset() + size - 1)
+		if (last < addr.getOffset() + size - 1) {
 			return nullptr;
+		}
 	}
-
 	return entry;
 }
 
