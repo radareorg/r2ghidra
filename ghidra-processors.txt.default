@@ -1,7 +1,17 @@
+6502
+8051
+Atmel
 AARCH64
 ARM
+Dalvik
 MIPS
+MCS96
+PowerPC
+tricore
+SuperH
+TI_MSP430
 RISCV
+JVM
 Sparc
 V850
 Z80
