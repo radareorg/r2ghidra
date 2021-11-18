@@ -91,7 +91,7 @@ static const std::map<std::string, ArchMapper> arch_map = {
 	{ "hppa", { "pa-risc" } },
 	{ "toy", { "Toy" } },
 	{ "ppc", { "PowerPC" } },
-	{ "8051", { "8051" } },
+	{ "8051", { "8051", "default", 16, true }},
 	{ "6805", { "6805" } },
 	{ "cr16", { "CR16C" } },
 	{ "mcs96", { "MCS96", "default", 16 } },
