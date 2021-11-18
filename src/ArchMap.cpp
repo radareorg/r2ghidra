@@ -82,9 +82,7 @@ static const std::map<std::string, ArchMapper> arch_map = {
 	{ "mips", { "MIPS", "default",
 		bits_mapper_default, big_endian_mapper_default, 4, 4
 	}},
-	{ "dalvik", { "Dalvik", "default",
-		bits_mapper_default, big_endian_mapper_default, 2, 10
-	}},
+	{ "dalvik", { "Dalvik", "default", 32, false, 2, 10 }},
 	{ "tricore", { "tricore", "default", 32, true } },
 	{ "6502", { "6502", "default", 16 } },
 	{ "java", { "JVM", "default", bits_mapper_default, true } },
