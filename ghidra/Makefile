@@ -10,7 +10,7 @@ DD=$(DESTDIR)/$(R2_LIBR_PLUGINS)/r2ghidra_sleigh
 DH=$(DESTDIR)/$(R2_USER_PLUGINS)/r2ghidra_sleigh
 D?=$(DH)
 
-install uninstall:
+install:
 	$(MAKE) sleigh-install D="$(DD)"
 
 user-install:
