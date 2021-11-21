@@ -72,6 +72,7 @@ ghidra_decompiler_sources = [
   'ghidra-native/src/decompiler/graph.cc',
   'ghidra-native/src/decompiler/heritage.cc',
   'ghidra-native/src/decompiler/ifacedecomp.cc',
+  'ghidra-native/src/decompiler/testfunction.cc',
   'ghidra-native/src/decompiler/ifaceterm.cc',
   'ghidra-native/src/decompiler/inject_ghidra.cc',
   'ghidra-native/src/decompiler/inject_sleigh.cc',
