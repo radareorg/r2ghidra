@@ -109,12 +109,12 @@ done
 : ${INSTALL_PROGRAM_STRIP:=${INSTALL} -m 755 -s}
 : ${INSTALL_MAN:=${INSTALL} -m 444}
 : ${INSTALL_LIB:=${INSTALL} -m 755 -c}
- PKGNAME='r2ghidra' ; VERSION='5.5.0' ; VERSION_MAJOR=5; VERSION_MINOR=5; VERSION_PATCH=0; VERSION_NUMBER=50500; CONTACT_MAIL="pancake@nopcode.org" ; CONTACT_NAME="pancake" ; CONTACT="pancake <pancake@nopcode.org>" ;
+ PKGNAME='r2ghidra' ; VERSION='5.5.2' ; VERSION_MAJOR=5; VERSION_MINOR=5; VERSION_PATCH=2; VERSION_NUMBER=50502; CONTACT_MAIL="pancake@nopcode.org" ; CONTACT_NAME="pancake" ; CONTACT="pancake <pancake@nopcode.org>" ;
 }
 
 show_usage() {
 cat <<EOF2
-'configure' configures r2ghidra-5.5.0 to adapt to many kinds of systems.
+'configure' configures r2ghidra-5.5.2 to adapt to many kinds of systems.
 
 Usage: ./configure [OPTION]... [VAR=VALUE]...
 
@@ -186,10 +186,10 @@ ocho() {
 
 show_version() {
 if [ "$QUIET" = 1 ]; then
-	echo "5.5.0"
+	echo "5.5.2"
 	exit 0
 fi
-echo "r2ghidra-5.5.0 configuration script done with acr v1.9.8.
+echo "r2ghidra-5.5.2 configuration script done with acr v1.9.8.
 The 'Free Software Foundation' message is only for autodetection.
 Originally written by pancake <nopcode.org>."
 exit 0
@@ -218,7 +218,7 @@ case $flag in
 	show_version ; ;;
 -r|--r|--report)
 echo "PKGNAME:   r2ghidra"
-echo "VERSION:   5.5.0"
+echo "VERSION:   5.5.2"
 echo "LANGS:     c++"
 echo "PKG-CONFIG:  r_core r_asm r_anal"
 	exit 0
@@ -384,7 +384,7 @@ if [ -n "${PKGCONFIG}" ]; then
 	ocho ${PKGCONFIG}
 else
 	echo "Cannot find pkg-config or pkgconf in PATH" >&2
-	exit 1 ocho no; fi
+	exit 1 ; ocho no; fi
 if [ -z "${PKGCONFIG}" ]; then pkg-config --version >/dev/null 2>&1 ; if [ 0 = 0 ]; then PKGCONFIG=pkg-config ; else PKGCONFIG=pkgconf ; fi; fi
 type ${PKGCONFIG} > /dev/null 2>&1 || echo "ERROR: Cannot find valid PKGCONFIG, pkg-config or pkgconf in PATH"
 echo 'Using PKGCONFIG: '${PKGCONFIG}
