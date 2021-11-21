@@ -169,7 +169,8 @@ Datatype *R2TypeFactory::queryR2(const string &n, std::set<std::string> &stackTy
 }
 
 Datatype *R2TypeFactory::findById(const string &n, uint8 id, std::set<std::string> &stackTypes) {
-	Datatype *r = TypeFactory::findById (n, id);
+	// Datatype *r = TypeFactory::findById (n, id);
+	Datatype *r = findById(n, id, stackTypes);
 	return (r != nullptr)? r: queryR2 (n, stackTypes);
 }
 
