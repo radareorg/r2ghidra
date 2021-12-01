@@ -728,8 +728,8 @@ static void anal_type(RAnal *anal, RAnalOp *anal_op, PcodeSlg &pcode_slg, Assemb
 	return;
 }
 
-static char *getIndirectReg(SleighInstruction &ins, bool &isRefed) {
-	VarnodeData data = ins.getIndirectInvar();
+static char *getIndirectReg(SleighInstruction *ins, bool &isRefed) {
+	VarnodeData data = ins->getIndirectInvar();
 	isRefed = data.size & 0x80000000;
 	if (isRefed) {
 		data.size &= ~0x80000000;
@@ -1400,8 +1400,11 @@ static int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int
 			return anal_op->size;
 		}
 
-		SleighInstruction &ins = *sanal->trans.getInstruction(caddr);
-		FlowType ftype = ins.getFlowType();
+		SleighInstruction *ins = sanal->trans.getInstruction(caddr);
+		if (ins == nullptr) {
+			return -1;
+		}
+		FlowType ftype = ins->getFlowType();
 		bool isRefed = false;
 
 		// std::cerr << caddr << " " << ins.printFlowType(ftype) << std::endl;
@@ -1414,13 +1417,13 @@ static int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int
 				break;
 			case FlowType::CONDITIONAL_TERMINATOR:
 				anal_op->type = R_ANAL_OP_TYPE_CRET;
-				anal_op->fail = ins.getFallThrough().getOffset();
+				anal_op->fail = ins->getFallThrough().getOffset();
 				anal_op->eob = true;
 				break;
 			case FlowType::JUMP_TERMINATOR: anal_op->eob = true;
 			case FlowType::UNCONDITIONAL_JUMP:
 				anal_op->type = R_ANAL_OP_TYPE_JMP;
-				anal_op->jump = ins.getFlows().begin()->getOffset();
+				anal_op->jump = ins->getFlows().begin()->getOffset();
 				break;
 			case FlowType::COMPUTED_JUMP:
 			{
@@ -1452,19 +1455,19 @@ static int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int
 				} else {
 					anal_op->type = R_ANAL_OP_TYPE_UCJMP;
 				}
-				anal_op->fail = ins.getFallThrough().getOffset();
+				anal_op->fail = ins->getFallThrough().getOffset();
 				break;
 			}
 			case FlowType::CONDITIONAL_JUMP:
 				anal_op->type = R_ANAL_OP_TYPE_CJMP;
-				anal_op->jump = ins.getFlows().begin()->getOffset();
-				anal_op->fail = ins.getFallThrough().getOffset();
+				anal_op->jump = ins->getFlows().begin()->getOffset();
+				anal_op->fail = ins->getFallThrough().getOffset();
 				break;
 			case FlowType::CALL_TERMINATOR: anal_op->eob = true;
 			case FlowType::UNCONDITIONAL_CALL:
 				anal_op->type = R_ANAL_OP_TYPE_CALL;
-				anal_op->jump = ins.getFlows().begin()->getOffset();
-				anal_op->fail = ins.getFallThrough().getOffset();
+				anal_op->jump = ins->getFlows().begin()->getOffset();
+				anal_op->fail = ins->getFallThrough().getOffset();
 				break;
 			case FlowType::CONDITIONAL_COMPUTED_CALL:
 			{
@@ -1477,13 +1480,13 @@ static int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int
 					}
 				}
 				anal_op->type = R_ANAL_OP_TYPE_UCCALL;
-				anal_op->fail = ins.getFallThrough().getOffset();
+				anal_op->fail = ins->getFallThrough().getOffset();
 				break;
 			}
 			case FlowType::CONDITIONAL_CALL:
 				anal_op->type |= R_ANAL_OP_TYPE_CCALL;
-				anal_op->jump = ins.getFlows().begin()->getOffset();
-				anal_op->fail = ins.getFallThrough().getOffset();
+				anal_op->jump = ins->getFlows().begin()->getOffset();
+				anal_op->fail = ins->getFallThrough().getOffset();
 				break;
 			case FlowType::COMPUTED_CALL_TERMINATOR:
 				anal_op->eob = true;
@@ -1504,7 +1507,7 @@ static int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int
 				} else {
 					anal_op->type = R_ANAL_OP_TYPE_ICALL;
 				}
-				anal_op->fail = ins.getFallThrough ().getOffset();
+				anal_op->fail = ins->getFallThrough ().getOffset();
 				break;
 			}
 			default:
