@@ -3,12 +3,12 @@ set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH True)
 
 project(r2ghidra)
 
-set(RADARE2_INSTALL_PLUGDIR "lib/radare2/last" CACHE STRING "Directory to install radare2 plugin into")
-set(CUTTER_INSTALL_PLUGDIR "share/RadareOrg/Cutter/plugins/native" CACHE STRING "Directory to install Cutter plugin into")
+set(RADARE2_INSTALL_PLUGDIR "share/radare2/plugins" CACHE STRING "Directory to install radare2 plugin into")
+set(IAITO_INSTALL_PLUGDIR "share/radareorg/iaito/plugins/native" CACHE STRING "Directory to install iaito plugin into")
 
-set(CUTTER_SOURCE_DIR CUTTER_SOURCE_DIR-NOTFOUND CACHE STRING "Root directory of Cutter source")
+set(IAITO_SOURCE_DIR IAITO_SOURCE_DIR-NOTFOUND CACHE STRING "Root directory of iaito source")
 
-option(BUILD_CUTTER_PLUGIN "Build r2ghidra plugin for Cutter" OFF)
+option(BUILD_IAITO_PLUGIN "Build r2ghidra plugin for iaito" OFF)
 option(BUILD_DECOMPILE_EXECUTABLE "Build \"decompile\" executable as used by Ghidra (not needed for r2)" OFF)
 option(BUILD_DECOMPILE_CLI_EXECUTABLE "Build REPL decompiler (not needed for r2)" OFF)
 option(BUILD_SLASPECS "Build Sleigh specs for architectures from Ghidra" ON)
@@ -97,8 +97,8 @@ set_target_properties(core_ghidra PROPERTIES
 		PREFIX "")
 
 
-if(BUILD_CUTTER_PLUGIN)
-	add_subdirectory(cutter-plugin)
+if(BUILD_IAITO_PLUGIN)
+	add_subdirectory(iaito-plugin)
 endif()
 
 
