@@ -424,22 +424,23 @@ std::string SleighAsm::getSleighHome(RConfig *cfg) {
 
 int SleighAsm::disassemble(RAsmOp *op, unsigned long long offset) {
 	AssemblySlg assem (this);
-	Address addr(trans.getDefaultCodeSpace(), offset);
+	Address addr(trans.getDefaultCodeSpace (), offset);
 	int length = 0;
 	try {
-		length = trans.printAssembly(assem, addr);
+		length = trans.printAssembly (assem, addr);
 		char *d = strdup (assem.str);
 		r_str_case (d, false);
-		r_strbuf_set(&op->buf_asm, d);
+		r_strbuf_set (&op->buf_asm, d);
 		free (d);
-		/*
+#if 0
 		auto *ins = trans.getInstruction(addr);
 		stringstream ss;
 		ss << assem.str << " " << ins->printFlowType(ins->getFlowType());
-		for (auto p: ins->getFlows())
+		for (auto p: ins->getFlows()) {
 		    ss << " " << p;
+		}
 		r_strbuf_set(&op->buf_asm, ss.str().c_str ());
-		*/
+#endif
 	} catch (BadDataError &err) {
 		/* Meet unknown data -> invalid opcode */
 		r_strbuf_set(&op->buf_asm, "invalid");
