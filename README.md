@@ -20,6 +20,19 @@ r2pm -ci r2ghidra
 
 By default r2pm will install stuff in your home, you can use `-g` to use the system wide installation.
 
+## Dependencies
+
+To build and install r2ghidra you need the following software installed in your system:
+
+* radare2 (preferibly from git, for distro builds ensure the `-dev` package is also installed)
+* pkg-config - that's how build system find libraries and include files to compile stuff
+* make / cmake / meson - pick the build system you like! all of them are maintained and working
+* msvc/g++/clang++ - basically a C++ compiler
+* git/patch - needed to clone ghidra-native and build stuff
+
+If the build fails, please carefully read the error message and act accordingly, r2pm should
+handle the `PKG_CONFIG_PATH` automatically for you in any case.
+
 ## Portability
 
 r2ghidra is known to work on the following operating systems:
