@@ -61,21 +61,28 @@ plugins: $(R2G_CORE_PLUGIN) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
 
 deps=$(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(R2G_PLUGIN_OBJS) $(PUGIXML_OBJS)
 
-$(R2G_CORE_PLUGIN): $(deps)
-	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) core_ghidra.o
-
-# soname should be used for some oss
-# $(CXX) -shared -Wl,-soname,core_ghidra.so $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) core_ghidra.o
-
 asan:
 	CFLAGS="-fsanitize=address -g" $(MAKE) -j
 	make user-install
 
+$(R2G_CORE_PLUGIN): $(deps)
+	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) core_ghidra.o
+	$(MAKE) sign
+
 $(R2G_ASM_PLUGIN): $(deps)
 	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) asm_ghidra.o
+	$(MAKE) sign
 
 $(R2G_ANAL_PLUGIN): $(deps)
 	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) anal_ghidra.o
+	$(MAKE) sign
+
+ifneq (,$(wildcard /usr/bin/codesign))
+sign macsign:
+	codesign -f -s - *.dylib
+else
+sign macsign:
+endif
 
 %.o: %.cpp
 	$(CXX) -fPIC $(CXXFLAGS) $(R2_CFLAGS) -c $<
