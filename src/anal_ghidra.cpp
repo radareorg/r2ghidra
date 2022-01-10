@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2020-2021 - pancake, FXTi */
+/* r2ghidra - LGPL - Copyright 2020-2022 - pancake, FXTi */
 
 #include <r_lib.h>
 #include <r_anal.h>
@@ -1978,6 +1978,9 @@ static RAnalPlugin r_anal_plugin_ghidra = {
 	KV (.anal_mask, nullptr),
 	KV (.preludes, anal_preludes),
 	KV (.op, &sleigh_op),
+#if R2_VERSION_NUMBER >= 50505
+	KV (.opasm, nullptr),
+#endif
 	KV (.cmd_ext, nullptr),
 	KV (.set_reg_profile, nullptr),
 	KV (.get_reg_profile, &get_reg_profile),
