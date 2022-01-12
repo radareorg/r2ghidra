@@ -79,7 +79,7 @@ $(R2G_ANAL_PLUGIN): $(deps)
 
 ifneq (,$(wildcard /usr/bin/codesign))
 sign macsign:
-	codesign -f -s - *.dylib
+	-codesign -f -s - *.dylib
 else
 sign macsign:
 endif
