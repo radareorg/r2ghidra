@@ -24,7 +24,7 @@ static char *slid(const char *cpu, int bits, int be) {
 
 static int archinfo(RAnal *anal, int query) {
 	// This is to check if RCore plugin set cpu properly.
-	r_return_val_if_fail (anal && anal->cpu, -1);
+	r_return_val_if_fail (anal, -1);
 	if (R_STR_ISEMPTY (anal->cpu)) {
 		return -1;
 	}
