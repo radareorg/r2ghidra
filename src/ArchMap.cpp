@@ -87,6 +87,7 @@ static const std::map<std::string, ArchMapper> arch_map = {
 	{ "6502", { "6502", "default", 16 } },
 	{ "java", { "JVM", "default", bits_mapper_default, true } },
 	{ "hppa", { "pa-risc" } },
+	{ "riscv", { "RISCV" } },
 	{ "toy", { "Toy" } },
 	{ "ppc", { "PowerPC" } },
 	{ "8051", { "8051", "default", 16, true }},
