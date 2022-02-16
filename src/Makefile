@@ -56,6 +56,7 @@ R2G_ANAL_PLUGIN=anal_ghidra.$(R2_LIBEXT)
 clean:
 	rm -f *.o $(PUGIXML_HOME)/*.o
 	rm -f *.o $(GHIDRA_DECOMPILER)/*.o
+	rm -f $(R2G_CORE_PLUGIN) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
 
 plugins: $(R2G_CORE_PLUGIN) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
 
@@ -63,7 +64,7 @@ deps=$(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(R2G_PLUGIN_OBJS) $(PUGIXML_OBJS)
 
 asan:
 	CFLAGS="-fsanitize=address -g" $(MAKE) -j
-	make user-install
+	$(MAKE) user-install
 
 $(R2G_CORE_PLUGIN): $(deps)
 	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) core_ghidra.o
