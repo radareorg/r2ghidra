@@ -3,7 +3,7 @@ all: sleigh-build
 clean:
 	rm -rf ../ghidra-native ghidra/Ghidra
 
-include ../config.mk
+-include ../config.mk
 include deps.mk
 
 DD=$(DESTDIR)/$(R2_LIBR_PLUGINS)/r2ghidra_sleigh
