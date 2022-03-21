@@ -158,11 +158,11 @@ Datatype *R2TypeFactory::queryR2(const string &n, std::set<std::string> &stackTy
 	int kind = r_type_kind (core->anal->sdb_types, n.c_str ());
 	switch (kind) {
 	case R_TYPE_STRUCT:
-		return queryR2Struct(n, stackTypes);
+		return queryR2Struct (n, stackTypes);
 	case R_TYPE_ENUM:
-		return queryR2Enum(n);
+		return queryR2Enum (n);
 	case R_TYPE_TYPEDEF:
-		return queryR2Typedef(n, stackTypes);
+		return queryR2Typedef (n, stackTypes);
 	default:
 		return nullptr;
 	}
@@ -170,13 +170,13 @@ Datatype *R2TypeFactory::queryR2(const string &n, std::set<std::string> &stackTy
 
 Datatype *R2TypeFactory::findById(const string &n, uint8 id, std::set<std::string> &stackTypes) {
 	// Datatype *r = TypeFactory::findById (n, id);
-	Datatype *r = findById(n, id, stackTypes);
+	Datatype *r = findById (n, id, stackTypes);
 	return (r != nullptr)? r: queryR2 (n, stackTypes);
 }
 
 Datatype *R2TypeFactory::findById(const string &n, uint8 id) {
 	std::set<std::string> stackTypes; // to detect recursion
-	return findById(n, id, stackTypes);
+	return findById (n, id, stackTypes);
 	// this recurses somehow :D XXX this->fromCString(n.c_str(), nullptr, nullptr);
 }
 
