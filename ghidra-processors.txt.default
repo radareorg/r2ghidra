@@ -6,6 +6,7 @@ ARM
 MIPS
 MCS96
 PowerPC
+hexagon
 tricore
 SuperH
 TI_MSP430
