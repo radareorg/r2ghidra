@@ -27,8 +27,12 @@ template<> class Mapper<std::string> : public BaseMapper<std::string> {
 		Mapper<std::string>(const char *constant) : BaseMapper([constant](RCore *core) { return constant; }) {}
 };
 
-static const Mapper<bool> big_endian_mapper_default = std::function<bool(RCore *)>([](RCore *core) { return r_config_get_i(core->config, "cfg.bigendian") != 0; });
-static const Mapper<ut64> bits_mapper_default = std::function<ut64(RCore *)>([](RCore *core) { return r_config_get_i(core->config, "asm.bits"); });
+static const Mapper<bool> big_endian_mapper_default = std::function<bool(RCore *)>([](RCore *core) {
+	return r_config_get_b (core->config, "cfg.bigendian");
+});
+static const Mapper<ut64> bits_mapper_default = std::function<ut64(RCore *)>([](RCore *core) {
+	return (ut64)r_config_get_i (core->config, "asm.bits");
+});
 
 class ArchMapper {
 	private:
@@ -170,17 +174,18 @@ static const std::map<std::string, ArchMapper> arch_map = {
 static const std::map<std::string, std::string> compiler_map = {
 	{ "elf", "gcc" },
 	{ "pe", "windows" },
-	{ "mach0", "gcc" }
+	{ "mach0", "clang" }
 };
 
 std::string CompilerFromCore(RCore *core) {
 	RBinInfo *info = r_bin_get_info(core->bin);
-	if (!info || !info->rclass)
-		return std::string();
-
-	auto comp_it = compiler_map.find(info->rclass);
-	if(comp_it == compiler_map.end())
-		return std::string();
+	if (!info || !info->rclass) {
+		return std::string ();
+	}
+	auto comp_it = compiler_map.find (info->rclass);
+	if (comp_it == compiler_map.end ()) {
+		return std::string ();
+	}
 
 	return comp_it->second;
 }
@@ -189,19 +194,24 @@ std::string SleighIdFromCore(RCore *core) {
 	SleighArchitecture::collectSpecFiles(std::cerr);
 	auto langs = SleighArchitecture::getLanguageDescriptions();
 	const char *arch = r_config_get(core->config, "asm.arch");
-	if(!strcmp(arch, "r2ghidra"))
+	if (!strcmp(arch, "r2ghidra")) {
 		return SleighIdFromSleighAsmConfig(core->rasm->cpu, core->rasm->bits, core->rasm->big_endian, langs);
+	}
 	auto arch_it = arch_map.find(arch);
-	if(arch_it == arch_map.end())
+	if (arch_it == arch_map.end()) {
 		throw LowlevelError("Could not match asm.arch " + std::string(arch) + " to sleigh arch.");
+	}
 	return arch_it->second.Map(core);
 }
 
 std::string StrToLower(std::string s) {
-    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){ return std::tolower(c); });
-    return s;
+	std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){ return std::tolower(c); });
+	return s;
 }
 
+#if 1
+// XXX this function is never called or referenced, but if its not defined complains
+// XXX with this error: "Ghidra Decompiler Error: No print languages registered"
 int ai(RCore *core, std::string cpu, int query) {
 	size_t pos = cpu.find(":");
 	std::string cpuname = (pos != string::npos)
@@ -218,11 +228,11 @@ int ai(RCore *core, std::string cpu, int query) {
 		return am->minopsz;
 	case R_ANAL_ARCHINFO_MAX_OP_SIZE:
 		return am->maxopsz;
-	// case R_ANAL_ARCHINFO_ALIGN:
-	//	return proc.align;
+	// case R_ANAL_ARCHINFO_ALIGN: return am->align; // proc.align;
 	}
 	return 1;
 }
+#endif
 
 std::string SleighIdFromSleighAsmConfig(const char *cpu, int bits, bool bigendian, const vector<LanguageDescription> &langs) {
 	const char *colon = strchr (cpu, ':');

@@ -21,6 +21,6 @@ std::string SleighIdFromCore(RCore *core);
  */
 std::string SleighIdFromSleighAsmConfig(const char *cpu, int bits, bool bigendian, const vector<LanguageDescription> &langs);
 // XXX use proper name
-int ai(RCore *core, std::string cpu, int query);
+// int ai(RCore *core, std::string cpu, int query);
 
 #endif

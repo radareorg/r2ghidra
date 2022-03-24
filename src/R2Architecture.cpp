@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2019-2021 - thestr4ng3r, pancake */
+/* r2ghidra - LGPL - Copyright 2019-2022 - thestr4ng3r, pancake */
 
 #include "R2LoadImage.h"
 #include "R2Scope.h"
@@ -142,7 +142,6 @@ Scope *R2Architecture::buildDatabase(DocumentStorage &store) {
 void R2Architecture::buildTypegrp(DocumentStorage &store) {
 	r2TypeFactory_ = new R2TypeFactory (this);
 	types = r2TypeFactory_;
-
 }
 
 void R2Architecture::buildCommentDB(DocumentStorage &store) {
