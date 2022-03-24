@@ -25,13 +25,14 @@ R2TypeFactory::R2TypeFactory(R2Architecture *arch) : TypeFactory (arch), arch (a
 	setCoreType ("uint16_t", 2, TYPE_UINT, false);
 	setCoreType ("uint32_t", 4, TYPE_UINT, false);
 	setCoreType ("uint64_t", 8, TYPE_UINT, false);
-	setCoreType ("char", 1, TYPE_INT, true);
 	setCoreType ("int8_t", 1, TYPE_INT, false);
 	setCoreType ("int16_t", 2, TYPE_INT, false);
 	setCoreType ("int32_t", 4, TYPE_INT, false);
 	setCoreType ("int64_t", 8, TYPE_INT, false);
-	setCoreType ("float", 4, TYPE_FLOAT, false);
 	setCoreType ("double", 8, TYPE_FLOAT, false);
+	setCoreType ("float", 4, TYPE_FLOAT, false);
+	setCoreType ("float8", 8, TYPE_FLOAT, false);
+	setCoreType ("float10", 10, TYPE_FLOAT, false);
 	setCoreType ("float16", 16 ,TYPE_FLOAT, false);
 
 	setCoreType ("uchar", 1, TYPE_UNKNOWN, false);
@@ -40,6 +41,7 @@ R2TypeFactory::R2TypeFactory(R2Architecture *arch) : TypeFactory (arch), arch (a
 	setCoreType ("ulong", 8, TYPE_UNKNOWN, false);
 
 	setCoreType ("code", 1, TYPE_CODE, false);
+	setCoreType ("char", 1, TYPE_INT, true);
 	setCoreType ("wchar", 2, TYPE_INT, true);
 	setCoreType ("char", 1, TYPE_INT, true);
 	setCoreType ("char16_t", 2, TYPE_INT, true);
