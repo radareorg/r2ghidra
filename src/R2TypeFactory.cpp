@@ -219,10 +219,16 @@ Datatype *R2TypeFactory::fromCString(const string &str, string *error, std::set<
 		r_parse_ctype_type_free (type);
 		return r;
 	}
-	return nullptr;
 #else
-	return stackTypes ? findByName (str.c_str(), *stackTypes) : findByName (str.c_str ());
+#if 0
+	Datatype *t = stackTypes ? findByName (str.c_str(), *stackTypes) : findByName (str.c_str ());
+	if (t == nullptr) {
+		return findByName("ulong");
+	}
+	return t;
 #endif
+#endif
+	return nullptr;
 }
 
 #if 0

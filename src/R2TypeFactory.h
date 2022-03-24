@@ -5,15 +5,17 @@
 
 #include <type.hh>
 
+/*
 typedef struct r_parse_ctype_t RParseCType;
 typedef struct r_parse_ctype_type_t RParseCTypeType;
+*/
 
 class R2Architecture;
 
 class R2TypeFactory : public TypeFactory {
 private:
 	R2Architecture *arch;
-	RParseCType *ctype;
+	// RParseCType *ctype;
 
 	Datatype *queryR2Struct(const string &n, std::set<std::string> &stackTypes);
 	Datatype *queryR2Enum(const string &n);
