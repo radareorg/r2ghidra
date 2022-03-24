@@ -20,7 +20,7 @@ std::string SleighIdFromCore(RCore *core);
  * Match sleigh id from sleigh-plugin specific settings (asm.cpu)
  */
 std::string SleighIdFromSleighAsmConfig(const char *cpu, int bits, bool bigendian, const vector<LanguageDescription> &langs);
-// XXX use proper name
-// int ai(RCore *core, std::string cpu, int query);
+// XXX find a better name, this is used from SleigAsm/asm plugin
+int ai(RCore *core, std::string cpu, int query);
 
 #endif
