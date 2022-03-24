@@ -351,7 +351,7 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 			}
 			auto mapsymElement = child(symbollistElement, "mapsym");
 			auto symbolElement = child(mapsymElement, "symbol", {
-					{ "name", "placeholder_" + to_string(i) },
+					{ "name", "noname_" + to_string(i) },
 					{ "typelock", "true" },
 					{ "namelock", "true" },
 					{ "readonly", "false" },
