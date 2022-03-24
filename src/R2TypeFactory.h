@@ -21,17 +21,18 @@ private:
 	Datatype *queryR2(const string &n, std::set<std::string> &stackTypes);
 
 protected:
-	Datatype *findById(const string &n, uint8 id, std::set<std::string> &stackTypes);
-	Datatype *findById(const string &n, uint8 id); //  override;
+	Datatype *findById(const string &n, uint8 id, int4 sz, std::set<std::string> &stackTypes);
+	Datatype *findById(const string &n, uint8 id, int4 sz) override;
 	using TypeFactory::findByName;
-	Datatype *findByName(const string &n, std::set<std::string> &stackTypes) { return findById(n, 0, stackTypes); }
+	Datatype *findByName(const string &n, std::set<std::string> &stackTypes) { return findById(n, 0, 0, stackTypes); }
 
 public:
+	using StackTypes = std::set<std::string>;
 	R2TypeFactory(R2Architecture *arch);
 	~R2TypeFactory() override;
 
 	Datatype *fromCString(const string &str, string *error = nullptr, std::set<std::string> *stackTypes = nullptr);
-//		Datatype *fromCType(const RParseCTypeType *ctype, string *error = nullptr, std::set<std::string> *stackTypes = nullptr);
+//	Datatype *fromCType(const RParseCTypeType *ctype, string *error = nullptr, std::set<std::string> *stackTypes = nullptr);
 };
 
 #endif //R2GHIDRA_R2TYPEFACTORY_H

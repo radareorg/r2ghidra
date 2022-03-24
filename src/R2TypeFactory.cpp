@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2019-2021 - thestr4ng3r, pancake */
+/* r2ghidra - LGPL - Copyright 2019-2022 - thestr4ng3r, pancake */
 
 #include "R2TypeFactory.h"
 #include "R2Architecture.h"
@@ -39,11 +39,9 @@ std::vector<std::string> splitSdbArray(const std::string& str) {
 
 Datatype *R2TypeFactory::queryR2Struct(const string &n, std::set<std::string> &stackTypes) {
 	RCoreLock core(arch->getCore ());
-
 	Sdb *sdb = core->anal->sdb_types;
 
 	// TODO: We REALLY need an API for this in r2
-
 	const char *members = sdb_const_get (sdb, ("struct." + n).c_str (), nullptr);
 	if (!members) {
 		return nullptr;
@@ -168,16 +166,20 @@ Datatype *R2TypeFactory::queryR2(const string &n, std::set<std::string> &stackTy
 	}
 }
 
-Datatype *R2TypeFactory::findById(const string &n, uint8 id, std::set<std::string> &stackTypes) {
-	// Datatype *r = TypeFactory::findById (n, id);
-	Datatype *r = findById (n, id, stackTypes);
+Datatype *R2TypeFactory::findById(const string &n, uint8 id, int4 sz, std::set<std::string> &stackTypes) {
+	// resolve basic types
+	Datatype *r = TypeFactory::findById (n, id, sz);
+	if (r != nullptr) {
+		return r;
+	}
+	r = queryR2 (n, stackTypes);
 	return (r != nullptr)? r: queryR2 (n, stackTypes);
 }
 
-Datatype *R2TypeFactory::findById(const string &n, uint8 id) {
+// overriden call
+Datatype *R2TypeFactory::findById(const string &n, uint8 id, int4 sz) {
 	std::set<std::string> stackTypes; // to detect recursion
-	return findById (n, id, stackTypes);
-	// this recurses somehow :D XXX this->fromCString(n.c_str(), nullptr, nullptr);
+	return findById (n, id, sz, stackTypes);
 }
 
 Datatype *R2TypeFactory::fromCString(const string &str, string *error, std::set<std::string> *stackTypes) {

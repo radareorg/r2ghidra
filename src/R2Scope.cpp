@@ -468,7 +468,7 @@ Symbol *R2Scope::registerFlag(RFlagItem *flag) const {
 Symbol *R2Scope::queryR2Absolute(ut64 addr, bool contain) const {
 	RCoreLock core (arch->getCore ());
 
-	RAnalFunction *fcn = r_anal_get_function_at(core->anal, addr);
+	RAnalFunction *fcn = r_anal_get_function_at (core->anal, addr);
 #if 1
 	// This can cause functions to be registered twice (hello-arm test)
 	if (!fcn && contain) {
@@ -596,7 +596,7 @@ LabSymbol *R2Scope::findCodeLabel(const Address &addr) const {
 	// (returning a symbol other than a code label)
 	SymbolEntry *entry = cache->findAddr (addr, Address());
 	if (entry) {
-		return queryR2FunctionLabel(addr);
+		return queryR2FunctionLabel (addr);
 	}
 	return nullptr;
 }

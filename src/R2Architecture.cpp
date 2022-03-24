@@ -16,16 +16,16 @@
 
 // maps radare2 calling conventions to decompiler proto models
 static const std::map<std::string, std::string> cc_map = {
-		{ "cdecl", "__cdecl" },
-		{ "fastcall", "__fastcall" },
-		{ "ms", "__fastcall" },
-		{ "stdcall", "__stdcall" },
-		{ "cdecl-thiscall-ms", "__thiscall" },
-		{ "sh32", "__stdcall" },
-		{ "amd64", "__stdcall" },
-		{ "arm64", "__cdecl" },
-		{ "arm32", "__stdcall" },
-		{ "arm16", "__stdcall" } /* not actually __stdcall */
+	{ "cdecl", "__cdecl" },
+	{ "fastcall", "__fastcall" },
+	{ "ms", "__fastcall" },
+	{ "stdcall", "__stdcall" },
+	{ "cdecl-thiscall-ms", "__thiscall" },
+	{ "sh32", "__stdcall" },
+	{ "amd64", "__stdcall" },
+	{ "arm64", "__cdecl" },
+	{ "arm32", "__stdcall" },
+	{ "arm16", "__stdcall" } /* not actually __stdcall */
 };
 
 std::string FilenameFromCore(RCore *core) {
