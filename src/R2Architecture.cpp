@@ -140,35 +140,9 @@ Scope *R2Architecture::buildDatabase(DocumentStorage &store) {
 }
 
 void R2Architecture::buildTypegrp(DocumentStorage &store) {
-	types = r2TypeFactory = new R2TypeFactory (this);
+	r2TypeFactory_ = new R2TypeFactory (this);
+	types = r2TypeFactory_;
 
-	// TODO: load from r2?
-	types->setCoreType ("void", 1, TYPE_VOID, false);
-	types->setCoreType ("bool", 1, TYPE_BOOL, false);
-	types->setCoreType ("uint8_t", 1, TYPE_UINT, false);
-	types->setCoreType ("uint16_t", 2, TYPE_UINT, false);
-	types->setCoreType ("uint32_t", 4, TYPE_UINT, false);
-	types->setCoreType ("uint64_t", 8, TYPE_UINT, false);
-	types->setCoreType ("char", 1, TYPE_INT, true);
-	types->setCoreType ("int8_t", 1, TYPE_INT, false);
-	types->setCoreType ("int16_t", 2, TYPE_INT, false);
-	types->setCoreType ("int32_t", 4, TYPE_INT, false);
-	types->setCoreType ("int64_t", 8, TYPE_INT, false);
-	types->setCoreType ("float", 4, TYPE_FLOAT, false);
-	types->setCoreType ("double", 8, TYPE_FLOAT, false);
-	types->setCoreType ("float16", 16 ,TYPE_FLOAT, false);
-
-	types->setCoreType ("uchar", 1, TYPE_UNKNOWN, false);
-	types->setCoreType ("ushort", 2, TYPE_UNKNOWN, false);
-	types->setCoreType ("uint", 4, TYPE_UNKNOWN, false);
-	types->setCoreType ("ulong", 8, TYPE_UNKNOWN, false);
-
-	types->setCoreType ("code", 1, TYPE_CODE, false);
-	types->setCoreType ("wchar", 2, TYPE_INT, true);
-	types->setCoreType ("char", 1, TYPE_INT, true);
-	types->setCoreType ("char16_t", 2, TYPE_INT, true);
-	types->setCoreType ("char32_t", 4, TYPE_INT, true);
-	types->cacheCoreTypes ();
 }
 
 void R2Architecture::buildCommentDB(DocumentStorage &store) {

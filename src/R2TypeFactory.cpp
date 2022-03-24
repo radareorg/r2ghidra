@@ -11,15 +11,40 @@
 #endif
 #include "R2Utils.h"
 
-R2TypeFactory::R2TypeFactory(R2Architecture *arch)
-	: TypeFactory (arch),
-	arch (arch) {
+R2TypeFactory::R2TypeFactory(R2Architecture *arch) : TypeFactory (arch), arch (arch) {
 #if R2G_USE_CTYPE
 	ctype = r_parse_ctype_new ();
 	if (!ctype) {
 		throw LowlevelError ("Failed to create RParseCType");
 	}
 #endif
+	// TODO: load from r2?
+	setCoreType ("void", 1, TYPE_VOID, false);
+	setCoreType ("bool", 1, TYPE_BOOL, false);
+	setCoreType ("uint8_t", 1, TYPE_UINT, false);
+	setCoreType ("uint16_t", 2, TYPE_UINT, false);
+	setCoreType ("uint32_t", 4, TYPE_UINT, false);
+	setCoreType ("uint64_t", 8, TYPE_UINT, false);
+	setCoreType ("char", 1, TYPE_INT, true);
+	setCoreType ("int8_t", 1, TYPE_INT, false);
+	setCoreType ("int16_t", 2, TYPE_INT, false);
+	setCoreType ("int32_t", 4, TYPE_INT, false);
+	setCoreType ("int64_t", 8, TYPE_INT, false);
+	setCoreType ("float", 4, TYPE_FLOAT, false);
+	setCoreType ("double", 8, TYPE_FLOAT, false);
+	setCoreType ("float16", 16 ,TYPE_FLOAT, false);
+
+	setCoreType ("uchar", 1, TYPE_UNKNOWN, false);
+	setCoreType ("ushort", 2, TYPE_UNKNOWN, false);
+	setCoreType ("uint", 4, TYPE_UNKNOWN, false);
+	setCoreType ("ulong", 8, TYPE_UNKNOWN, false);
+
+	setCoreType ("code", 1, TYPE_CODE, false);
+	setCoreType ("wchar", 2, TYPE_INT, true);
+	setCoreType ("char", 1, TYPE_INT, true);
+	setCoreType ("char16_t", 2, TYPE_INT, true);
+	setCoreType ("char32_t", 4, TYPE_INT, true);
+	cacheCoreTypes ();
 }
 
 R2TypeFactory::~R2TypeFactory() {

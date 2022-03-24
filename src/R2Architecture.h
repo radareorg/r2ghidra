@@ -15,7 +15,7 @@ class R2Architecture : public SleighArchitecture {
 private:
 	RCoreMutex coreMutex;
 
-	R2TypeFactory *r2TypeFactory = nullptr;
+	R2TypeFactory *r2TypeFactory_ = nullptr;
 	std::map<std::string, VarnodeData> registers;
 	std::vector<std::string> warnings;
 
@@ -28,7 +28,7 @@ public:
 
 	RCoreMutex *getCore() { return &coreMutex; }
 
-	R2TypeFactory *getTypeFactory() const { return r2TypeFactory; }
+	R2TypeFactory *getTypeFactory() const { return r2TypeFactory_; }
 
 	ProtoModel *protoModelFromR2CC(const char *cc);
 	Address registerAddressFromR2Reg(const char *regname);
