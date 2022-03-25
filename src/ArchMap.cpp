@@ -171,37 +171,278 @@ static const std::map<std::string, ArchMapper> arch_map = {
 	}}
 };
 
-static const std::map<std::string, std::string> compiler_map = {
-	{ "elf", "gcc" },
-	{ "pe", "windows" },
-	{ "mach0", "clang" }
+#if 0
+Supported compiler profiles. r2 should have a configuration option for that:
+
+For X86:
+* default
+* clang
+* gcc
+* Borland C++
+* Visual Studio
+* Delphi
+
+```
+# list all arch.compiler from ghidra
+$ cd ghidra-native
+$ git grep 'compiler name=' | grep ldefs| cut -d '"' -f 1,2 |cut -d '/' -f 6- |sed -e 's,",.,' | cut -d . -f1,3|sort -u
+
+6502.default
+68000.default
+6805.default
+8048.default
+8051.Archimedes
+8051.default
+8085.default
+AARCH64.Visual Studio
+AARCH64.default
+ARM.Visual Studio
+ARM.default
+AppleSilicon.default
+CP1600.default
+CR16.default
+Dalvik.default
+HC05.default
+HC08.default
+HCS08.default
+HCS12.default
+JVM.default
+MCS96.default
+PIC24.default
+STM8.default
+SparcV9.default
+SuperH4.Visual Studio
+SuperH4.default
+TI_MSP430.default
+V850.default
+avr32a.default
+avr8.gcc
+avr8.iarV1
+avr8.imgCraftV8
+hexagon.default
+m8c.default
+mips.Visual Studio
+mips.default
+mips.n32
+mips.o32
+mips.o64
+old/v01stuff/toy.default
+pa-risc.default
+pic12c5xx.default
+pic16.default
+pic16c5x.default
+pic17c7xx.default
+pic18.default
+ppc.Mac OS X
+ppc.Visual Studio
+ppc.default
+riscv.gcc
+superh.default
+toy.default
+toy.posStack
+tricore.default
+x86.Borland C++
+x86.Delphi
+x86.Visual Studio
+x86.clang
+x86.default
+x86.gcc
+z80.default
+
+
+# list all compiler support from ghidra
+
+$ git grep compiler' name=' | cut -d '"' -f 2|sort -u
+Archimedes
+Borland C++
+Delphi
+Mac OS X
+Sleigh-PowerPC 32-bit
+Visual Studio
+clang
+default
+gcc
+iarV1
+imgCraftV8
+n32
+o32
+o64
+pointer16
+pointer32
+pointer64
+posStack
+```
+#endif
+const char *ghidraCompilers[] = {
+	"6502.default",
+	"68000.default",
+	"6805.default",
+	"8048.default",
+	"8051.Archimedes",
+	"8051.default",
+	"8085.default",
+	"AARCH64.Visual Studio",
+	"AARCH64.default",
+	"ARM.Visual Studio",
+	"ARM.default",
+	"AppleSilicon.default",
+	"CP1600.default",
+	"CR16.default",
+	"Dalvik.default",
+	"HC05.default",
+	"HC08.default",
+	"HCS08.default",
+	"HCS12.default",
+	"JVM.default",
+	"MCS96.default",
+	"PIC24.default",
+	"STM8.default",
+	"SparcV9.default",
+	"SuperH4.Visual Studio",
+	"SuperH4.default",
+	"TI_MSP430.default",
+	"V850.default",
+	"avr32a.default",
+	"avr8.gcc",
+	"avr8.iarV1",
+	"avr8.imgCraftV8",
+	"hexagon.default",
+	"m8c.default",
+	"mips.Visual Studio",
+	"mips.default",
+	"mips.n32",
+	"mips.o32",
+	"mips.o64",
+	"old/v01stuff/toy.default",
+	"pa-risc.default",
+	"pic12c5xx.default",
+	"pic16.default",
+	"pic16c5x.default",
+	"pic17c7xx.default",
+	"pic18.default",
+	"ppc.Mac OS X",
+	"ppc.Visual Studio",
+	"ppc.default",
+	"riscv.gcc",
+	"superh.default",
+	"toy.default",
+	"toy.posStack",
+	"tricore.default",
+	"x86.Borland C++",
+	"x86.Delphi",
+	"x86.Visual Studio",
+	"x86.clang",
+	"x86.default",
+	"x86.gcc",
+	"z80.default",
+	NULL
 };
 
+static const std::map<std::string, std::string> compiler_alias = {
+	{ "vs", "Visual Studio" },
+	{ "mach0", "Mac OS X" },
+};
+
+static const std::map<std::string, std::string> compiler_map = {
+	{ "elf", "gcc" },
+	{ "pe", "Visual Studio" },
+	// { "mach0", "clang" },
+	{ "mach0", "clang" },
+};
+
+std::string findGhidraCompiler(RCore *core, const char *bin_compiler) {
+	const char *arch = r_config_get (core->config, "asm.arch");
+	if (R_STR_ISEMPTY (arch)) {
+		return std::string("default");
+	}
+	if (!strcmp (arch, "r2ghidra")) {
+		arch = r_config_get (core->config, "asm.cpu");
+	}
+	
+	char *a = strdup (arch);
+	// take arch name by splitting by the dot.
+	char *dot = strchr (a, '.');
+	if (dot) {
+		*dot = 0;
+	}
+	char *b = r_str_newf ("%s.", a);
+	const char *uc = bin_compiler; // r_config_get (core->config, "r2ghidra.compiler");
+	if (!strcmp (uc, "?")) {
+		for (int i = 0; ghidraCompilers[i]; i++) {
+			if (r_str_startswith (ghidraCompilers[i], b)) {
+				const char *c = ghidraCompilers[i] + strlen (b);
+				r_cons_printf ("%s\n", c);
+			}
+		}
+		free (b);
+		return std::string("default");
+	}
+	if (R_STR_ISEMPTY (bin_compiler) || !strcmp (uc, "default")) {
+		bin_compiler = uc;
+	}
+	const char *goodcompiler = NULL;
+	for (int i = 0; ghidraCompilers[i]; i++) {
+		if (r_str_startswith (ghidraCompilers[i], b)) {
+			const char *c = ghidraCompilers[i] + strlen (b);
+			goodcompiler = c;
+			if (R_STR_ISEMPTY (bin_compiler) || !r_str_casecmp (c, bin_compiler)) {
+				break;
+			}
+			//eprintf ("-> %s\n", c);
+		}
+	}
+	free (b);
+	free (a);
+	if (goodcompiler != NULL) {
+		return std::string(goodcompiler);
+	}
+	if (r_str_startswith (arch, "x86")) {
+		return std::string("gcc");
+	}
+	return std::string("default");
+/*
+		if (!r_str_startswith (arch, "x86")) {
+			"x86.Borland C++",
+			"x86.Delphi",
+			"x86.Visual Studio",
+			"x86.clang",
+			"x86.default",
+			"x86.gcc",
+			"z80.default",
+		}
+*/
+}
+
 std::string CompilerFromCore(RCore *core) {
-	RBinInfo *info = r_bin_get_info(core->bin);
+	RBinInfo *info = r_bin_get_info (core->bin);
 	if (!info || !info->rclass) {
 		return std::string ();
+	}
+	if (R_STR_ISNOTEMPTY (info->compiler)) {
+		auto gcompiler = findGhidraCompiler(core, info->compiler);
+		return std::string(info->compiler);
 	}
 	auto comp_it = compiler_map.find (info->rclass);
 	if (comp_it == compiler_map.end ()) {
 		return std::string ();
 	}
-
 	return comp_it->second;
 }
 
 std::string SleighIdFromCore(RCore *core) {
 	SleighArchitecture::collectSpecFiles(std::cerr);
 	auto langs = SleighArchitecture::getLanguageDescriptions();
+	auto cc = CompilerFromCore(core);
+	eprintf ("%s%c", cc.c_str(), 10);
 	const char *arch = r_config_get(core->config, "asm.arch");
-	if (!strcmp(arch, "r2ghidra")) {
-		return SleighIdFromSleighAsmConfig(core->rasm->cpu, core->rasm->bits, core->rasm->big_endian, langs);
+	if (!strcmp (arch, "r2ghidra")) {
+		return SleighIdFromSleighAsmConfig (core->rasm->cpu, core->rasm->bits, core->rasm->big_endian, langs);
 	}
-	auto arch_it = arch_map.find(arch);
-	if (arch_it == arch_map.end()) {
-		throw LowlevelError("Could not match asm.arch " + std::string(arch) + " to sleigh arch.");
+	auto arch_it = arch_map.find (arch);
+	if (arch_it == arch_map.end ()) {
+		throw LowlevelError ("Could not match asm.arch " + std::string(arch) + " to sleigh arch.");
 	}
-	return arch_it->second.Map(core);
+	return arch_it->second.Map (core);
 }
 
 std::string StrToLower(std::string s) {
