@@ -208,10 +208,13 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 		r_list_foreach_cpp<RAnalVar>(vars, [&](RAnalVar *var) {
 			std::string typeError;
 			Datatype *type = var->type ? arch->getTypeFactory()->fromCString(var->type, &typeError) : nullptr;
-			if (!type)
-			{
+			if (!type) {
 				arch->addWarning("Failed to match type " + to_string(var->type) + " for variable " + to_string(var->name) + " to Decompiler type: " + typeError);
+#if R2_VERSION_NUMBER >= 50609
+				type = arch->types->getBase(core->anal->config->bits / 8, TYPE_UNKNOWN);
+#else
 				type = arch->types->getBase(core->anal->bits / 8, TYPE_UNKNOWN);
+#endif
 				if (!type)
 					return;
 			}

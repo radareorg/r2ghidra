@@ -13,7 +13,7 @@
 // XXX dont use globals
 static SleighAsm *sanal = nullptr;
 
-static char *slid(const char *cpu, int bits, int be) {
+static char *slid(const char *cpu, int bits, bool be) {
 	if (!strchr (cpu, ':')) {
 		auto langs = SleighArchitecture::getLanguageDescriptions();
 		std::string res = SleighIdFromSleighAsmConfig(cpu, bits, be, langs);
@@ -22,22 +22,43 @@ static char *slid(const char *cpu, int bits, int be) {
 	return strdup (cpu);
 }
 
+static char *slid_arch(RAnal *anal) {
+#if R2_VERSION_NUMBER >= 50609
+	const char *cp = anal->config->cpu;
+	int bi = anal->config->bits;
+	bool be = anal->config->big_endian;
+#else
+	const char *cp = anal->cpu;
+	int bi = anal->bits;
+	bool be = anal->big_endian;
+#endif
+	if (R_STR_ISEMPTY (cp)) {
+		return nullptr;
+	}
+	char *cpu = slid (cp, bi, be);
+	try {
+		sanal->init (cpu, bi, be, anal? anal->iob.io: nullptr, SleighAsm::getConfig (anal));
+	} catch (const LowlevelError &e) {
+		R_FREE (cpu);
+		std::cerr << "SleightInit " << e.explain << std::endl;
+		return nullptr;
+	}
+	return cpu;
+}
+
 static int archinfo(RAnal *anal, int query) {
 	// This is to check if RCore plugin set cpu properly.
 	r_return_val_if_fail (anal, -1);
+#if R2_VERSION_NUMBER >= 50609
+	if (R_STR_ISEMPTY (anal->config->cpu)) {
+		return -1;
+	}
+#else
 	if (R_STR_ISEMPTY (anal->cpu)) {
 		return -1;
 	}
-
-	char *arch = slid (anal->cpu, anal->bits, anal->big_endian);
-	try {
-		sanal->init(arch, anal->bits, anal->big_endian, anal? anal->iob.io : nullptr, SleighAsm::getConfig (anal));
-		R_FREE (arch);
-	} catch (const LowlevelError &e) {
-		R_FREE (arch);
-		std::cerr << "SleightInit " << e.explain << std::endl;
-		return -1;
-	}
+#endif
+	char *arch = slid_arch (anal);
 	switch (query) {
 	case R_ANAL_ARCHINFO_MAX_OP_SIZE:
 		return sanal->maxopsz;
@@ -1347,23 +1368,16 @@ static bool anal_type_NOP(const std::vector<Pcodeop> &Pcodes)
 #endif
 
 static int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int len, RAnalOpMask mask) {
-	if (R_STR_ISEMPTY (a->cpu)) {
+	char *arch = slid_arch (a);
+	if (!arch) {
 		return -1;
 	}
-#if 0
-	char *arch = slid (anal->cpu, anal->bits, anal->big_endian);
 	try {
-		sanal->init(arch, anal->bits, anal->big_endian, anal? anal->iob.io : nullptr, SleighAsm::getConfig (anal));
-		R_FREE (arch);
-	} catch (const LowlevelError &e) {
-		R_FREE (arch);
-		std::cerr << "SleightInit " << e.explain << std::endl;
-		return -1;
-	}
-#endif
-	char *arch = slid (a->cpu, a->bits, a->big_endian);
-	try {
+#if R2_VERSION_NUMBER >= 50609
+		sanal->init(arch, a->config->bits, a->config->big_endian, a? a->iob.io : nullptr, SleighAsm::getConfig(a));
+#else
 		sanal->init(arch, a->bits, a->big_endian, a? a->iob.io : nullptr, SleighAsm::getConfig(a));
+#endif
 		R_FREE (arch);
 
 		AssemblySlg assem(sanal);
@@ -1765,19 +1779,20 @@ static std::string regtype_name(const char *cpu, const std::string &regname) {
 }
 
 static char *get_reg_profile(RAnal *anal) {
-	r_return_val_if_fail (anal && anal->cpu, nullptr);
-	if (R_STR_ISEMPTY (anal->cpu)) {
+	r_return_val_if_fail (anal, nullptr);
+#if R2_VERSION_NUMBER >= 50609
+	const char *cpu = anal->config->cpu;
+#else
+	const char *cpu = anal->cpu;
+#endif
+	if (R_STR_ISEMPTY (cpu)) {
 		return nullptr;
 	}
-	char *cpu = slid (anal->cpu, anal->bits, anal->big_endian);
-	try {
-		sanal->init (cpu, anal->bits, anal->big_endian, anal? anal->iob.io: nullptr, SleighAsm::getConfig (anal));
-	} catch (const LowlevelError &e) {
-		R_FREE (cpu);
-		std::cerr << "SleightInit " << e.explain << std::endl;
+	char *sa = slid_arch (anal);
+	if (!sa) {
 		return nullptr;
 	}
-	R_FREE (cpu);
+	free (sa);
 
 	auto reg_list = sanal->getRegs();
 	std::stringstream buf;
@@ -1785,7 +1800,7 @@ static char *get_reg_profile(RAnal *anal) {
 	for (auto p = reg_list.begin(); p != reg_list.end(); p++) {
 		const std::string &group = sanal->reg_group[p->name];
 		const std::string &regname = sanal->reg_mapping[p->name];
-		const std::string &regtype = regtype_name (anal->cpu, regname);
+		const std::string &regtype = regtype_name (cpu, regname);
 		if (group.empty()) {
 			buf << regtype << "\t" << regname << "\t." << p->size * 8 << "\t"
 				    << p->offset << "\t" << "0\n";
@@ -1947,15 +1962,19 @@ static int sanal_fini(void *p) {
 
 static RList *anal_preludes(RAnal *anal) {
 	RListIter *iter;
-	int bits = anal->bits;
 	void *_plugin;
+#if R2_VERSION_NUMBER >= 50609
+	const char *cpu = anal->config->cpu;
+#else
+	const char *cpu = anal->cpu;
+#endif
 	// reuse r2 preludes
-	if (!anal->cpu) {
+	if (R_STR_ISEMPTY (cpu)) {
 		return NULL;
 	}
 	r_list_foreach (anal->plugins, iter, _plugin) {
 		RAnalPlugin *plugin = (RAnalPlugin*)_plugin;
-		if (plugin->name && !strcmp (plugin->name, anal->cpu)) {
+		if (plugin->name && !strcmp (plugin->name, cpu)) {
 			return plugin->preludes (anal);
 		}
 	}

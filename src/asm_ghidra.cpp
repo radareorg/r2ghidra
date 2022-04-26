@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2020-2021 - FXTi, pancake */
+/* r2ghidra - LGPL - Copyright 2020-2022 - FXTi, pancake */
 
 #include <r_lib.h>
 #include <r_asm.h>
@@ -10,10 +10,19 @@ static RIO *rio = nullptr;
 //#define DEBUG_EXCEPTIONS
 
 static int disassemble(RAsm *a, RAsmOp *op, const ut8 *buf, int len) {
+	r_return_val_if_fail (a, 0);
 	int r = 0;
-
-	if (!a->cpu) {
-		return r;
+	if (!op || !buf) {
+		return 0;
+	}
+	op->size = 0;
+#if R2_VERSION_NUMBER >= 50609
+	const char *cpu = a->config->cpu;
+#else
+	const char *cpu = a->cpu;
+#endif
+	if (R_STR_ISEMPTY (cpu)) {
+		return 0;
 	}
 #ifndef DEBUG_EXCEPTIONS
 	try {
@@ -37,7 +46,11 @@ static int disassemble(RAsm *a, RAsmOp *op, const ut8 *buf, int len) {
 			sasm = new SleighAsm ();
 		}
 		RIO *io = bin? bin->iob.io : rio;
-		sasm->init (a->cpu, a->bits, a->big_endian, io, SleighAsm::getConfig(a));
+#if R2_VERSION_NUMBER >= 50609
+		sasm->init (cpu, a->config->bits, a->config->big_endian, io, SleighAsm::getConfig(a));
+#else
+		sasm->init (cpu, a->bits, a->big_endian, io, SleighAsm::getConfig(a));
+#endif
 		sasm->check (bin? a->pc : 0, buf, len);
 		r = sasm->disassemble (op, bin? a->pc : 0);
 #ifndef DEBUG_EXCEPTIONS

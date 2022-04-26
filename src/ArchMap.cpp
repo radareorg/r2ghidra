@@ -195,7 +195,12 @@ std::string SleighIdFromCore(RCore *core) {
 	auto langs = SleighArchitecture::getLanguageDescriptions();
 	const char *arch = r_config_get(core->config, "asm.arch");
 	if (!strcmp(arch, "r2ghidra")) {
+#if R2_VERSION_NUMBER >= 50609
+		RArchConfig *ac = core->rasm->config;
+		return SleighIdFromSleighAsmConfig(ac->cpu, ac->bits, ac->big_endian, langs);
+#else
 		return SleighIdFromSleighAsmConfig(core->rasm->cpu, core->rasm->bits, core->rasm->big_endian, langs);
+#endif
 	}
 	auto arch_it = arch_map.find(arch);
 	if (arch_it == arch_map.end()) {
