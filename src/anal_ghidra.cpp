@@ -1988,6 +1988,9 @@ static RAnalPlugin r_anal_plugin_ghidra = {
 	KV (.arch, "sleigh"),
 	KV (.author, "FXTi"),
 	KV (.version, nullptr),
+#if R2_VERSION_NUMBER >= 50609
+	KV (.endian, R_SYS_ENDIAN_LITTLE | R_SYS_ENDIAN_BIG),
+#endif
 	KV (.bits, 0),
 	KV (.esil, true),
 	KV (.fileformat_type, 0),
