@@ -417,9 +417,10 @@ std::string SleighAsm::getSleighHome(RConfig *cfg) {
 		free ((void *)path);
 		return res;
 	} else {
+		eprintf ("Cannot find the sleigh home at '%s'.\n", path);
+		eprintf ("Run `r2pm -ci r2ghidra-sleigh` to fix this.");
 		free (path);
-		eprintf ("Cannot find the sleigh home at '%s'\n", path);
-		throw LowlevelError ("Run `r2pm -ci r2ghidra-sleigh` to fix this");
+		throw LowlevelError ("Missing r2ghidra_sleigh");
 	}
 }
 

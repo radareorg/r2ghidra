@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2019-2021 - thestr4ng3r */
+/* r2ghidra - LGPL - Copyright 2019-2022 - thestr4ng3r */
 
 #include "R2Architecture.h"
 #include "CodeXMLParse.h"

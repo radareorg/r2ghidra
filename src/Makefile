@@ -94,6 +94,7 @@ install:
 	mkdir -p $(DESTDIR)$(BINDIR)
 	cp -f sleighc $(DESTDIR)$(BINDIR)
 	mkdir -p $(DESTDIR)$(PLUGDIR)
+	for a in *.$(R2_LIBEXT) ; do rm -f "$(DESTDIR)/$(PLUGDIR)/$$a" ; done
 	cp -f *.$(R2_LIBEXT) $(DESTDIR)$(PLUGDIR)
 
 uninstall:
