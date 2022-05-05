@@ -1,6 +1,5 @@
 all: plugins
 
-
 -include ../config.mk
 include ../ghidra/deps.mk
 
@@ -63,6 +62,7 @@ clean:
 	rm -f $(R2G_CORE_PLUGIN) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
 
 plugins: $(R2G_CORE_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
+	$(MAKE) sign
 
 deps=$(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(R2G_PLUGIN_OBJS) $(PUGIXML_OBJS)
 
@@ -72,11 +72,9 @@ asan:
 
 $(R2G_CORE_PLUGIN): $(deps)
 	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) core_ghidra.o
-	$(MAKE) sign
 
 $(R2G_ANAL_PLUGIN): $(deps)
 	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) anal_ghidra.o
-	$(MAKE) sign
 
 ifneq (,$(wildcard /usr/bin/codesign))
 sign macsign:
