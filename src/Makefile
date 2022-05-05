@@ -1,5 +1,6 @@
 all: plugins
 
+
 -include ../config.mk
 include ../ghidra/deps.mk
 

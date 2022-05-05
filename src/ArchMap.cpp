@@ -68,7 +68,7 @@ class ArchMapper {
 		}
 };
 
-#define BITS (r_config_get_i(core->config, "asm.bits"))
+#define BITS (core? r_config_get_i(core->config, "asm.bits"): R_SYS_BITS)
 #define CUSTOM_BASEID(lambda) std::function<std::string(RCore *)>([]lambda)
 #define CUSTOM_FLAVOR(lambda) std::function<std::string(RCore *)>([]lambda)
 #define CUSTOM_BITS(lambda) std::function<ut64(RCore *)>([]lambda)
@@ -178,6 +178,9 @@ static const std::map<std::string, std::string> compiler_map = {
 };
 
 std::string CompilerFromCore(RCore *core) {
+	if (!core) {
+		return "gcc";
+	}
 	RBinInfo *info = r_bin_get_info(core->bin);
 	if (!info || !info->rclass) {
 		return std::string ();
@@ -191,22 +194,25 @@ std::string CompilerFromCore(RCore *core) {
 }
 
 std::string SleighIdFromCore(RCore *core) {
+	if (!core) {
+		return "gcc";
+	}
 	SleighArchitecture::collectSpecFiles(std::cerr);
 	auto langs = SleighArchitecture::getLanguageDescriptions();
-	const char *arch = r_config_get(core->config, "asm.arch");
-	if (!strcmp(arch, "r2ghidra")) {
+	const char *arch = core->rasm->config->arch; // r_config_get (core->config, "asm.arch");
+	if (!strcmp (arch, "r2ghidra")) {
 #if R2_VERSION_NUMBER >= 50609
 		RArchConfig *ac = core->rasm->config;
-		return SleighIdFromSleighAsmConfig(ac->cpu, ac->bits, ac->big_endian, langs);
+		return SleighIdFromSleighAsmConfig (ac->cpu, ac->bits, ac->big_endian, langs);
 #else
-		return SleighIdFromSleighAsmConfig(core->rasm->cpu, core->rasm->bits, core->rasm->big_endian, langs);
+		return SleighIdFromSleighAsmConfig (core->rasm->cpu, core->rasm->bits, core->rasm->big_endian, langs);
 #endif
 	}
-	auto arch_it = arch_map.find(arch);
-	if (arch_it == arch_map.end()) {
-		throw LowlevelError("Could not match asm.arch " + std::string(arch) + " to sleigh arch.");
+	auto arch_it = arch_map.find (arch);
+	if (arch_it == arch_map.end ()) {
+		throw LowlevelError ("Could not match asm.arch " + std::string(arch) + " to sleigh arch.");
 	}
-	return arch_it->second.Map(core);
+	return arch_it->second.Map (core);
 }
 
 std::string StrToLower(std::string s) {
@@ -245,6 +251,11 @@ std::string SleighIdFromSleighAsmConfig(const char *cpu, int bits, bool bigendia
 		// complete id specified
 		return cpu;
 	}
+	auto arch_it = arch_map.find(cpu);
+	if (arch_it != arch_map.end()) {
+		return arch_it->second.Map (nullptr);
+	}
+	const ArchMapper *am = &arch_it->second;
 	// short form if possible
 	std::string low_cpu = StrToLower (cpu);
 	for (const auto &lang : langs) {
