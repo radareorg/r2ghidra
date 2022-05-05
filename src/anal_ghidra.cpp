@@ -1619,6 +1619,7 @@ static const char *r_reg_type_arr[] = {
 	"SPR", "SPR_UNNAMED", "Alt", "NEON",   "FLAGS", "Flags",
 	"AVX", "MMX",         "ST",  "FPU",    "DEBUG", "VSX", nullptr
 };
+
 static const char *r_reg_string_arr[] = {
 	"gpr", "drx", "drx", "drx", "drx", "drx",
 	"drx", "gpr", "gpr", "gpr", "flg", "flg",
@@ -1986,10 +1987,11 @@ static RAnalPlugin r_anal_plugin_ghidra = {
 	KV (.desc, "SLEIGH Disassembler from Ghidra"),
 	KV (.license, "GPL3"),
 	KV (.arch, "sleigh"),
-	KV (.author, "FXTi"),
+	KV (.author, "FXTi, pancake"),
 	KV (.version, nullptr),
 #if R2_VERSION_NUMBER >= 50609
 	KV (.endian, R_SYS_ENDIAN_LITTLE | R_SYS_ENDIAN_BIG),
+	KV (.cpus, "6502,6805,8051,arm,avr,cr16,dalvik,hppa,java,m68k,m8c,mips,mcs96,msp430,pic24,ppc,sh,sparc,stm8,tricore,toy,v850,x86,z80"),
 #endif
 	KV (.bits, 0),
 	KV (.esil, true),

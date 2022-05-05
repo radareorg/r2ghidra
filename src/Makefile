@@ -21,7 +21,8 @@ R2GHIDRA_SRCS+=SleighInstruction.cpp
 # R2GHIDRA_SRCS+= R2PrintC.cpp R2Scope.cpp R2TypeFactory.cpp RCoreMutex.cpp SleighAnalValue.cpp SleighAsm.cpp
 # R2GHIDRA_SRCS+= SleighInstruction.cpp
 
-R2G_PLUG_SRCS= anal_ghidra.cpp asm_ghidra.cpp core_ghidra.cpp
+# R2G_PLUG_SRCS= anal_ghidra.cpp asm_ghidra.cpp core_ghidra.cpp
+R2G_PLUG_SRCS= anal_ghidra.cpp core_ghidra.cpp
 
 PUGIXML_HOME=../third-party/pugixml/src/
 PUGIXML_CFLAGS=-I$(PUGIXML_HOME)
@@ -50,7 +51,7 @@ CXXFLAGS+=$(CFLAGS)
 
 R2_LIBEXT=$(shell r2 -H R2_LIBEXT)
 R2G_CORE_PLUGIN=core_ghidra.$(R2_LIBEXT)
-R2G_ASM_PLUGIN=asm_ghidra.$(R2_LIBEXT)
+# R2G_ASM_PLUGIN=asm_ghidra.$(R2_LIBEXT)
 R2G_ANAL_PLUGIN=anal_ghidra.$(R2_LIBEXT)
 
 clean:
@@ -58,7 +59,7 @@ clean:
 	rm -f *.o $(GHIDRA_DECOMPILER)/*.o
 	rm -f $(R2G_CORE_PLUGIN) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
 
-plugins: $(R2G_CORE_PLUGIN) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
+plugins: $(R2G_CORE_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
 
 deps=$(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(R2G_PLUGIN_OBJS) $(PUGIXML_OBJS)
 
@@ -70,9 +71,9 @@ $(R2G_CORE_PLUGIN): $(deps)
 	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) core_ghidra.o
 	$(MAKE) sign
 
-$(R2G_ASM_PLUGIN): $(deps)
-	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) asm_ghidra.o
-	$(MAKE) sign
+#$(R2G_ASM_PLUGIN): $(deps)
+#	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) asm_ghidra.o
+#	$(MAKE) sign
 
 $(R2G_ANAL_PLUGIN): $(deps)
 	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) anal_ghidra.o

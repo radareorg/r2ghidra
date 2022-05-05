@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2019-2022 - thestr4ng3r */
+/* r2ghidra - LGPL - Copyright 2019-2022 - thestr4ng3r, pancake */
 
 #include "R2Architecture.h"
 #include "CodeXMLParse.h"
@@ -571,7 +571,7 @@ RCorePlugin r_core_plugin_ghidra = {
 	/* .name = */ "r2ghidra",
 	/* .desc = */ "Ghidra decompiler with pdg command",
 	/* .license = */ "GPL3",
-	/* .author = */ "thestr4ng3r, maintainer: pancake",
+	/* .author = */ "thestr4ng3r, pancake",
 	/* .version = */ nullptr,
 	/*.call = */ r2ghidra_cmd,
 	/*.init = */ r2ghidra_init,

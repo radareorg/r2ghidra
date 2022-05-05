@@ -12,7 +12,6 @@ option(BUILD_IAITO_PLUGIN "Build r2ghidra plugin for iaito" OFF)
 option(BUILD_DECOMPILE_EXECUTABLE "Build \"decompile\" executable as used by Ghidra (not needed for r2)" OFF)
 option(BUILD_DECOMPILE_CLI_EXECUTABLE "Build REPL decompiler (not needed for r2)" OFF)
 option(BUILD_SLASPECS "Build Sleigh specs for architectures from Ghidra" ON)
-option(BUILD_SLEIGH_PLUGIN "Build asm and anal plugin to use sleigh as a disassembler in r2" ON)
 option(GENERATE_PARSERS "Re-generate all parsers with Bison/Flex instead of using pre-generated ones" OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -72,15 +71,10 @@ set(CORE_SOURCE
 		src/ArchMap.cpp
 		src/r2ghidra.h)
 
-if(BUILD_SLEIGH_PLUGIN)
-set(ASM_SOURCE
-		src/asm_ghidra.cpp)
-
 set(ANAL_SOURCE
 		src/SleighAnalValue.h
 		src/SleighAnalValue.cpp
 		src/anal_ghidra.cpp)
-endif()
 
 find_package(Radare2 REQUIRED)
 
@@ -108,16 +102,6 @@ else()
 	string (REPLACE ";" " " LD_RPATH_STR "$ORIGIN")
 endif()
 
-# XXX this doesnt build on windows
-if(BUILD_SLEIGH_PLUGIN)
-add_library(asm_ghidra SHARED ${ASM_SOURCE})
-target_link_libraries(asm_ghidra core_ghidra)
-set_target_properties(asm_ghidra PROPERTIES
-		OUTPUT_NAME asm_ghidra
-		BUILD_RPATH "${LD_RPATH_STR}"
-		INSTALL_RPATH "${LD_RPATH_STR}"
-		PREFIX "")
-
 add_library(anal_ghidra SHARED ${ANAL_SOURCE})
 target_link_libraries(anal_ghidra core_ghidra)
 set_target_properties(anal_ghidra PROPERTIES
@@ -125,18 +109,11 @@ set_target_properties(anal_ghidra PROPERTIES
 		BUILD_RPATH "${LD_RPATH_STR}"
 		INSTALL_RPATH "${LD_RPATH_STR}"
 		PREFIX "")
-endif()
 
 if(SLEIGHHOME_DEFAULT)
 	target_compile_definitions(core_ghidra PRIVATE "-DR2GHIDRA_SLEIGHHOME_DEFAULT=\"${SLEIGHHOME_DEFAULT}\"")
-	if(BUILD_SLEIGH_PLUGIN)
-	target_compile_definitions(asm_ghidra PRIVATE "-DR2GHIDRA_SLEIGHHOME_DEFAULT=\"${SLEIGHHOME_DEFAULT}\"")
 	target_compile_definitions(anal_ghidra PRIVATE "-DR2GHIDRA_SLEIGHHOME_DEFAULT=\"${SLEIGHHOME_DEFAULT}\"")
-	endif()
 endif()
 
 install(TARGETS core_ghidra DESTINATION "${RADARE2_INSTALL_PLUGDIR}")
-if(BUILD_SLEIGH_PLUGIN)
-install(TARGETS asm_ghidra DESTINATION "${RADARE2_INSTALL_PLUGDIR}")
 install(TARGETS anal_ghidra DESTINATION "${RADARE2_INSTALL_PLUGDIR}")
-endif()
