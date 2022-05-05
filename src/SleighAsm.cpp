@@ -12,8 +12,7 @@ void SleighAsm::init(const char *cpu, int bits, bool bigendian, RIO *io, RConfig
 		scanSleigh (getSleighHome (cfg));
 		collectSpecfiles ();
 	}
-
-	std::string new_sleigh_id = SleighIdFromSleighAsmConfig (cpu, bits, bigendian, description);
+	std::string new_sleigh_id = SleighIdFromSleighAsmConfig (nullptr, cpu, bits, bigendian, description);
 	if (!sleigh_id.empty() && sleigh_id == new_sleigh_id) {
 		return;
 	}

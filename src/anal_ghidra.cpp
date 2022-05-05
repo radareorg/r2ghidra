@@ -13,10 +13,10 @@
 // XXX dont use globals
 static SleighAsm *sanal = nullptr;
 
-static char *slid(const char *cpu, int bits, bool be) {
+static char *slid(RCore *core, const char *cpu, int bits, bool be) {
 	if (!strchr (cpu, ':')) {
 		auto langs = SleighArchitecture::getLanguageDescriptions();
-		std::string res = SleighIdFromSleighAsmConfig(cpu, bits, be, langs);
+		std::string res = SleighIdFromSleighAsmConfig(core, cpu, bits, be, langs);
 		return strdup (res.c_str());
 	}
 	return strdup (cpu);
@@ -35,7 +35,7 @@ static char *slid_arch(RAnal *anal) {
 	if (R_STR_ISEMPTY (cp)) {
 		return nullptr;
 	}
-	char *cpu = slid (cp, bi, be);
+	char *cpu = slid ((RCore*)anal->coreb.core, cp, bi, be);
 	try {
 		sanal->init (cpu, bi, be, anal? anal->iob.io: nullptr, SleighAsm::getConfig (anal));
 	} catch (const LowlevelError &e) {

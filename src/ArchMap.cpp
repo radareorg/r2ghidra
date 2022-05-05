@@ -28,10 +28,10 @@ template<> class Mapper<std::string> : public BaseMapper<std::string> {
 };
 
 static const Mapper<bool> big_endian_mapper_default = std::function<bool(RCore *)>([](RCore *core) {
-	return r_config_get_b (core->config, "cfg.bigendian");
+	return core? r_config_get_b (core->config, "cfg.bigendian"): false;
 });
 static const Mapper<ut64> bits_mapper_default = std::function<ut64(RCore *)>([](RCore *core) {
-	return (ut64)r_config_get_i (core->config, "asm.bits");
+	return core? (ut64)r_config_get_i (core->config, "asm.bits"): R_SYS_BITS;
 });
 
 class ArchMapper {
@@ -203,9 +203,9 @@ std::string SleighIdFromCore(RCore *core) {
 	if (!strcmp (arch, "r2ghidra")) {
 #if R2_VERSION_NUMBER >= 50609
 		RArchConfig *ac = core->rasm->config;
-		return SleighIdFromSleighAsmConfig (ac->cpu, ac->bits, ac->big_endian, langs);
+		return SleighIdFromSleighAsmConfig (core, ac->cpu, ac->bits, ac->big_endian, langs);
 #else
-		return SleighIdFromSleighAsmConfig (core->rasm->cpu, core->rasm->bits, core->rasm->big_endian, langs);
+		return SleighIdFromSleighAsmConfig (core, core->rasm->cpu, core->rasm->bits, core->rasm->big_endian, langs);
 #endif
 	}
 	auto arch_it = arch_map.find (arch);
@@ -245,7 +245,7 @@ int ai(RCore *core, std::string cpu, int query) {
 }
 #endif
 
-std::string SleighIdFromSleighAsmConfig(const char *cpu, int bits, bool bigendian, const vector<LanguageDescription> &langs) {
+std::string SleighIdFromSleighAsmConfig(RCore *core, const char *cpu, int bits, bool bigendian, const vector<LanguageDescription> &langs) {
 	const char *colon = strchr (cpu, ':');
 	if (colon != nullptr && colon[1] != '\0' && colon[1] != '\0') {
 		// complete id specified
@@ -253,7 +253,7 @@ std::string SleighIdFromSleighAsmConfig(const char *cpu, int bits, bool bigendia
 	}
 	auto arch_it = arch_map.find(cpu);
 	if (arch_it != arch_map.end()) {
-		return arch_it->second.Map (nullptr);
+		return arch_it->second.Map (core);
 	}
 	const ArchMapper *am = &arch_it->second;
 	// short form if possible
