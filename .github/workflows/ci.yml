@@ -102,9 +102,10 @@ jobs:
     - name: Building r2ghidra with cmake
       run: |
         ./preconfigure && cmake -DCMAKE_INSTALL_PREFIX=/usr -B b && make -C b -j4 && sudo make -C b install
-        ls -l /usr/lib/radare2/
+        ls -l /usr/lib/radare2/5.6.9/
+        ls -l /usr/lib/radare2/5.6.9/plugins
     - name: Testing r2ghidra oneliner
-      run: r2 -H;r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
+      run: r2 -H;r2 -l /usr/lib/radare2/last/plugins/core_ghidra.so -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
     - name: Pub
       uses: actions/upload-artifact@v2
       with:
