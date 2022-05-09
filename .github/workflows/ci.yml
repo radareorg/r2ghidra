@@ -89,8 +89,6 @@ jobs:
 
   linux-cmake-ok:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -102,11 +100,12 @@ jobs:
     - name: Installing Radare2
       run: sudo dpkg -i radare2/dist/debian/*/*.deb
     - name: Building r2ghidra with cmake
-      run: ./preconfigure && cmake -DCMAKE_INSTALL_PREFIX=/usr -B b && make -C b -j4 && sudo make -C b install
-    #- name: Packaging r2ghidra for Debian
-    #  run: make -C dist/debian
+      run: |
+        ./preconfigure && cmake -DCMAKE_INSTALL_PREFIX=/usr -B b && make -C b -j4 && sudo make -C b install
+        ls -l /usr/lib/radare2/5.6.9/
+        ls -l /usr/lib/radare2/5.6.9/plugins
     - name: Testing r2ghidra oneliner
-      run: r2 -H;r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
+      run: r2 -H;r2 -l /usr/lib/radare2/last/plugins/core_ghidra.so -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
     - name: Pub
       uses: actions/upload-artifact@v2
       with:
