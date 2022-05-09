@@ -25,3 +25,4 @@ if [ -n "$1" ]; then
 	echo "./configure $*"
 	./configure $*
 fi
+vim .github/workflows/ci.yml
