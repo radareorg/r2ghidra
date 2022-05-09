@@ -1,6 +1,6 @@
 set PKG_CONFIG_PATH=%CD%\radare2\lib\pkgconfig
 set PATH=%CD%\radare2\bin;%PATH%
-set ARCH=x64
+set VSARCH=x64
 git submodule update --init
 
 python -m wget https://github.com/radareorg/ghidra-native/releases/download/0.1.8/ghidra-native-0.1.8.zip
