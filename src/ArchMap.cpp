@@ -199,7 +199,7 @@ std::string SleighIdFromCore(RCore *core) {
 	}
 	SleighArchitecture::collectSpecFiles(std::cerr);
 	auto langs = SleighArchitecture::getLanguageDescriptions();
-	const char *arch = core->rasm->config->arch; // r_config_get (core->config, "asm.arch");
+	const char *arch = r_config_get (core->config, "asm.arch");
 	if (!strcmp (arch, "r2ghidra")) {
 #if R2_VERSION_NUMBER >= 50609
 		RArchConfig *ac = core->rasm->config;
