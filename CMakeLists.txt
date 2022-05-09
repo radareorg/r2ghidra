@@ -3,8 +3,8 @@ set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH True)
 
 project(r2ghidra)
 
-set(RADARE2_INSTALL_PLUGDIR "share/radare2/plugins" CACHE STRING "Directory to install radare2 plugin into")
-set(IAITO_INSTALL_PLUGDIR "share/radareorg/iaito/plugins/native" CACHE STRING "Directory to install iaito plugin into")
+set(RADARE2_INSTALL_PLUGDIR "lib/radare2/last/plugins" CACHE STRING "Directory to install radare2 plugin into")
+set(IAITO_INSTALL_PLUGDIR "lib/iaito/plugins/native" CACHE STRING "Directory to install iaito plugin into")
 
 set(IAITO_SOURCE_DIR IAITO_SOURCE_DIR-NOTFOUND CACHE STRING "Root directory of iaito source")
 

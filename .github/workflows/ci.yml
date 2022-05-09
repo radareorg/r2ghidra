@@ -106,7 +106,11 @@ jobs:
     #- name: Packaging r2ghidra for Debian
     #  run: make -C dist/debian
     - name: Testing r2ghidra oneliner
-      run: r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
+      run: r2 -H;r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
+    - name: Pub
+      uses: actions/upload-artifact@v2
+      with:
+        path: radare2/dist/debian/*/*.deb
 
   macos-acr-ok:
     # The type of runner that the job will run on
