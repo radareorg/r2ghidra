@@ -94,6 +94,9 @@ install:
 	mkdir -p $(DESTDIR)$(PLUGDIR)
 	for a in *.$(R2_LIBEXT) ; do rm -f "$(DESTDIR)/$(PLUGDIR)/$$a" ; done
 	cp -f *.$(R2_LIBEXT) $(DESTDIR)$(PLUGDIR)
+ifneq (,$(wildcard /usr/bin/codesign))
+	-codesign -f -s - $(DESTDIR)$(PLUGDIR)/*.$(R2_LIBEXT)
+endif
 
 uninstall:
 	rm -f $(PLUGDIR)/*ghidra*.$(R2_LIBEXT)

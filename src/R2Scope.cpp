@@ -88,11 +88,11 @@ static std::string to_string(const char *str) {
 FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	RCoreLock core (arch->getCore ());
 
-	const char *arch = r_config_get (core->config, "asm.arch");
-	if (arch != nullptr && !strcmp (arch, "r2ghidra")) {
-		arch = r_config_get (core->config, "asm.cpu");
+	const char *archName = r_config_get (core->config, "asm.arch");
+	if (archName != nullptr && !strcmp (archName, "r2ghidra")) {
+		archName = r_config_get (core->config, "asm.cpu");
 	}
-	const std::string r2Arch (arch);
+	const std::string r2Arch (archName);
 
 	// We use xml here, because the public interface for Functions
 	// doesn't let us set up the scope parenting as we need it :-(
@@ -207,6 +207,11 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	std::map<RAnalVar *, Datatype *> var_types;
 
 	ParamActive params (false);
+#if R2_VERSION_NUMBER >= 50609
+	const int default_size = core->anal->config->bits / 8;
+#else
+	const int default_size = core->anal->bits / 8;
+#endif
 
 	if (vars) {
 		r_list_foreach_cpp<RAnalVar>(vars, [&](RAnalVar *var) {
@@ -214,11 +219,7 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 			Datatype *type = var->type ? arch->getTypeFactory()->fromCString(var->type, &typeError) : nullptr;
 			if (!type) {
 				arch->addWarning("Failed to match type " + to_string(var->type) + " for variable " + to_string(var->name) + " to Decompiler type: " + typeError);
-#if R2_VERSION_NUMBER >= 50609
-				type = arch->types->getBase(core->anal->config->bits / 8, TYPE_UNKNOWN);
-#else
-				type = arch->types->getBase(core->anal->bits / 8, TYPE_UNKNOWN);
-#endif
+				type = arch->types->getBase(default_size, TYPE_UNKNOWN);
 				if (!type)
 					return;
 			}
