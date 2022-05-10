@@ -88,7 +88,11 @@ static std::string to_string(const char *str) {
 FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	RCoreLock core (arch->getCore ());
 
-	const std::string r2Arch (r_config_get (core->config, "asm.arch"));
+	const char *arch = r_config_get (core->config, "asm.arch");
+	if (arch != nullptr && !strcmp (arch, "r2ghidra")) {
+		arch = r_config_get (core->config, "asm.cpu");
+	}
+	const std::string r2Arch (arch);
 
 	// We use xml here, because the public interface for Functions
 	// doesn't let us set up the scope parenting as we need it :-(
@@ -140,17 +144,17 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	auto parentElement = child(scopeElement, "parent", {
 		{"id", hex (uniqueId)}
 	});
-	child(parentElement, "val");
-	child(scopeElement, "rangelist");
+	child (parentElement, "val");
+	child (scopeElement, "rangelist");
 
 	auto symbollistElement = child(scopeElement, "symbollist");
 
 	ProtoModel *proto = fcn->cc ? arch->protoModelFromR2CC(fcn->cc) : nullptr;
 	if (!proto) {
 		if (fcn->cc) {
-			arch->addWarning("Matching calling convention " + to_string(fcn->cc) + " of function " + to_string(fcn_name) + " failed, args may be inaccurate.");
+			arch->addWarning ("Matching calling convention " + to_string(fcn->cc) + " of function " + to_string(fcn_name) + " failed, args may be inaccurate.");
 		} else {
-			arch->addWarning("Function " + to_string(fcn_name) + " has no calling convention set, args may be inaccurate.");
+			arch->addWarning ("Function " + to_string(fcn_name) + " has no calling convention set, args may be inaccurate.");
 		}
 	}
 
@@ -160,8 +164,8 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	}
 
 	RangeList varRanges; // to check for overlaps
-	RList *vars = r_anal_var_all_list(core->anal, fcn);
-	auto stackSpace = arch->getStackSpace();
+	RList *vars = r_anal_var_all_list (core->anal, fcn);
+	auto stackSpace = arch->getStackSpace ();
 
 	auto addrForVar = [&](RAnalVar *var, bool warn_on_fail) {
 		switch (var->kind) {
