@@ -4,6 +4,7 @@
 #define R2GHIDRA_R2SCOPE_H
 
 #include <database.hh>
+#include <memory>
 
 #include <r_types.h>
 
