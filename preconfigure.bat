@@ -1,10 +1,15 @@
 set PKG_CONFIG_PATH=%CD%\radare2\lib\pkgconfig
 set PATH=%CD%\radare2\bin;%PATH%
 set VSARCH=x64
+
 git submodule update --init
 
 python -m wget https://github.com/radareorg/ghidra-native/releases/download/0.1.8/ghidra-native-0.1.8.zip
+
 unzip -q ghidra-native-0.1.8.zip
+if %ERRORLEVEL% NEQ 0 (
+	powershell "Expand-Archive -LiteralPath ghidra-native-0.1.8.zip -DestinationPath ."
+)
 ren ghidra-native-0.1.8 ghidra-native
 
 REM call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
