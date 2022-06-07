@@ -46,7 +46,7 @@ static char *slid_arch(RAnal *anal) {
 	return cpu;
 }
 
-static int archinfo(RAnal *anal, int query) {
+extern "C" int archinfo(RAnal *anal, int query) {
 	// This is to check if RCore plugin set cpu properly.
 	r_return_val_if_fail (anal, -1);
 #if R2_VERSION_NUMBER >= 50609
@@ -1367,7 +1367,7 @@ static bool anal_type_NOP(const std::vector<Pcodeop> &Pcodes)
 }
 #endif
 
-static int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int len, RAnalOpMask mask) {
+extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int len, RAnalOpMask mask) {
 	char *arch = slid_arch (a);
 	if (!arch) {
 		return -1;
@@ -1779,7 +1779,7 @@ static std::string regtype_name(const char *cpu, const std::string &regname) {
 	return "gpr";
 }
 
-static char *get_reg_profile(RAnal *anal) {
+extern "C" char *get_reg_profile(RAnal *anal) {
 	r_return_val_if_fail (anal, nullptr);
 #if R2_VERSION_NUMBER >= 50609
 	const char *cpu = anal->config->cpu;
@@ -1922,7 +1922,7 @@ static bool sleigh_esil_popcount(RAnalEsil *esil) {
 	return ret;
 }
 
-static int esil_sleigh_init(RAnalEsil *esil) {
+extern "C" int esil_sleigh_init(RAnalEsil *esil) {
 	if (!esil) {
 		return false;
 	}
@@ -1932,19 +1932,19 @@ static int esil_sleigh_init(RAnalEsil *esil) {
 	return true;
 }
 
-static int sanal_init(void *p) {
+extern "C" int sanal_init(void *p) {
 	if (sanal == nullptr) {
 		sanal = new SleighAsm ();
 	}
 	return true;
 }
 
-static int esil_sleigh_fini(RAnalEsil *esil) {
+extern "C" int esil_sleigh_fini(RAnalEsil *esil) {
 	//float_mem.clear();
 	return true;
 }
 
-static int sanal_fini(void *p) {
+extern "C" int sanal_fini(void *p) {
 	if (sanal) {
 		delete sanal;
 		sanal = nullptr;
@@ -1952,16 +1952,7 @@ static int sanal_fini(void *p) {
 	return true;
 }
 
-#if __WINDOWS__
-// this is not really a windows issue, but GCC/CLANG support
-// designed initializers as a C++ extension and its better
-// to not blindly fill structs
-#define KV(x, y) y
-#else
-#define KV(x, y) x = y
-#endif
-
-static RList *anal_preludes(RAnal *anal) {
+extern "C" RList *anal_preludes(RAnal *anal) {
 	RListIter *iter;
 	void *_plugin;
 #if R2_VERSION_NUMBER >= 50609
@@ -1981,59 +1972,3 @@ static RList *anal_preludes(RAnal *anal) {
 	}
 	return NULL;
 }
-
-static RAnalPlugin r_anal_plugin_ghidra = {
-	KV (.name, "r2ghidra"),
-	KV (.desc, "SLEIGH Disassembler from Ghidra"),
-	KV (.license, "GPL3"),
-	KV (.arch, "sleigh"),
-	KV (.author, "FXTi, pancake"),
-	KV (.version, nullptr),
-#if R2_VERSION_NUMBER >= 50609
-	KV (.endian, R_SYS_ENDIAN_LITTLE | R_SYS_ENDIAN_BIG),
-#endif
-	KV (.cpus, "6502,6805,8051,arm,avr,cr16,dalvik,hppa,java,m68k,m8c,mips,mcs96,msp430,pic24,ppc,sh,sparc,stm8,tricore,toy,v850,x86,z80"),
-	KV (.bits, 0),
-	KV (.esil, true),
-	KV (.fileformat_type, 0),
-	KV (.init, &sanal_init),
-	KV (.fini, &sanal_fini),
-	KV (.archinfo, &archinfo),
-	KV (.anal_mask, nullptr),
-	KV (.preludes, anal_preludes),
-	KV (.op, &sleigh_op),
-#if R2_VERSION_NUMBER >= 50505
-	KV (.opasm, nullptr),
-#endif
-	KV (.cmd_ext, nullptr),
-	KV (.set_reg_profile, nullptr),
-	KV (.get_reg_profile, &get_reg_profile),
-	KV (.fingerprint_bb, nullptr),
-	KV (.fingerprint_fcn, nullptr),
-	KV (.diff_bb, nullptr),
-	KV (.diff_fcn, nullptr),
-	KV (.diff_eval, nullptr),
-	KV (.esil_init, esil_sleigh_init),
-	KV (.esil_post_loop, nullptr),
-	KV (.esil_trap, nullptr),
-	KV (.esil_fini, esil_sleigh_fini),
-#if R2_VERSION_NUMBER >= 50609
-	KV (.mnemonics, nullptr),
-#endif
-};
-
-#ifndef CORELIB
-#ifdef __cplusplus
-extern "C" {
-#endif
-R_API RLibStruct radare_plugin = {
-	KV (.type, R_LIB_TYPE_ANAL),
-	KV (.data, &r_anal_plugin_ghidra),
-	KV (.version, R2_VERSION),
-	KV (.free, nullptr),
-	KV (.pkgname, "r2ghidra")
-};
-#ifdef __cplusplus
-}
-#endif
-#endif

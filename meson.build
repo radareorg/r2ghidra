@@ -1,6 +1,6 @@
 project(
   'r2ghidra',
-  'cpp',
+  ['c', 'cpp'],
 license : 'LGPL3',
 meson_version : '>=0.50.1',
 version : '5.7.0',
@@ -137,12 +137,14 @@ r2ghidra_core_sources = [
   r2ghidra_sources,
   pugixml_sources,
   ghidra_decompiler_sources,
+  'src/core_ghidra_plugin.c',
   'src/core_ghidra.cpp'
 ]
 r2ghidra_anal_sources = [
   r2ghidra_sources,
   pugixml_sources,
   ghidra_decompiler_sources,
+  'src/anal_ghidra_plugin.c',
   'src/anal_ghidra.cpp',
 ]
 
