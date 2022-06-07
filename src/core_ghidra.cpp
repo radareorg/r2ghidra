@@ -510,7 +510,7 @@ static void _cmd(RCore *core, const char *input) {
 	}
 }
 
-static int r2ghidra_cmd(void *user, const char *input) {
+extern "C" int r2ghidra_core_cmd(void *user, const char *input) {
 	RCore *core = (RCore *) user;
 	if (r_str_startswith (input, "pdg")) {
 		_cmd (core, input + 3);
@@ -542,7 +542,7 @@ static void SetInitialSleighHome(RConfig *cfg) {
 	}
 }
 
-static int r2ghidra_init(void *user, const char *cmd) {
+extern "C" int r2ghidra_core_init(void *user, const char *cmd) {
 	std::lock_guard<std::recursive_mutex> lock(decompiler_mutex);
 	startDecompilerLibrary (nullptr);
 
@@ -561,34 +561,8 @@ static int r2ghidra_init(void *user, const char *cmd) {
 	return true;
 }
 
-static int r2ghidra_fini(void *user, const char *cmd) {
+extern "C" int r2ghidra_core_fini(void *user, const char *cmd) {
 	std::lock_guard<std::recursive_mutex> lock (decompiler_mutex);
 	shutdownDecompilerLibrary ();
 	return true;
 }
-
-RCorePlugin r_core_plugin_ghidra = {
-	/* .name = */ "r2ghidra",
-	/* .desc = */ "Ghidra decompiler with pdg command",
-	/* .license = */ "GPL3",
-	/* .author = */ "thestr4ng3r, pancake",
-	/* .version = */ nullptr,
-	/*.call = */ r2ghidra_cmd,
-	/*.init = */ r2ghidra_init,
-	/*.fini = */ r2ghidra_fini
-};
-
-#ifndef CORELIB
-#ifdef __cplusplus
-extern "C"
-#endif
-R_API RLibStruct radare_plugin = {
-	/* .type = */ R_LIB_TYPE_CORE,
-	/* .data = */ &r_core_plugin_ghidra,
-	/* .version = */ R2_VERSION,
-	/* .free = */ nullptr
-#if R2_VERSION_NUMBER >= 40200
-	, "r2ghidra"
-#endif
-};
-#endif

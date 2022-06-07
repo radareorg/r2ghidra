@@ -22,6 +22,7 @@ R2GHIDRA_SRCS+=SleighInstruction.cpp
 # R2GHIDRA_SRCS+= SleighInstruction.cpp
 
 R2G_PLUG_SRCS= anal_ghidra.cpp core_ghidra.cpp
+R2G_PLUG_SRCS+= anal_ghidra_plugin.o core_ghidra_plugin.o
 
 PUGIXML_HOME=../third-party/pugixml/src/
 PUGIXML_CFLAGS=-I$(PUGIXML_HOME)
@@ -49,12 +50,18 @@ CFLAGS+=-I.
 CXXFLAGS+=-g
 
 CXXFLAGS+=-std=c++11
+CFLAGS+=$(R2_CFLAGS)
+
 CXXFLAGS+=$(CFLAGS)
 
 R2_LIBEXT=$(shell r2 -H R2_LIBEXT)
 R2G_CORE_PLUGIN=core_ghidra.$(R2_LIBEXT)
 R2G_ASM_PLUGIN=asm_ghidra.$(R2_LIBEXT)
 R2G_ANAL_PLUGIN=anal_ghidra.$(R2_LIBEXT)
+
+ifeq ($(R2_LIBEXT),)
+Cannot run r2
+endif
 
 clean:
 	rm -f *.o $(PUGIXML_HOME)/*.o
@@ -71,10 +78,12 @@ asan:
 	$(MAKE) user-install
 
 $(R2G_CORE_PLUGIN): $(deps)
-	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) core_ghidra.o
+	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) \
+		$(GHIDRA_OBJS) $(PUGIXML_OBJS) core_ghidra.o core_ghidra_plugin.o
 
 $(R2G_ANAL_PLUGIN): $(deps)
-	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) anal_ghidra.o
+	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) \
+		$(GHIDRA_OBJS) $(PUGIXML_OBJS) anal_ghidra.o anal_ghidra_plugin.o
 
 ifneq (,$(wildcard /usr/bin/codesign))
 sign macsign:

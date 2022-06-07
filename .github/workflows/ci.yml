@@ -22,11 +22,11 @@ jobs:
     - name: Building r2ghidra with acr
       run: ./preconfigure && ./configure --prefix=/usr && make -j4 ; make user-install
     - name: Testing r2ghidra oneliner on home setup
-      run: r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
+      run: R2_DEBUG=1 r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
     - name: System-wide installation
       run: make user-uninstall && sudo make install
     - name: Testing r2ghidra oneliner on system wide install
-      run: r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
+      run: R2_DEBUG=1 r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
     - name: Packaging r2ghidra for Debian using Dockcross
       run: make -C dist/debian
     - name: Running Testsuite
