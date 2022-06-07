@@ -26,8 +26,8 @@ To build and install r2ghidra you need the following software installed in your 
 
 * radare2 (preferibly from git, for distro builds ensure the `-dev` package is also installed)
 * pkg-config - that's how build system find libraries and include files to compile stuff
-* make / cmake / meson - pick the build system you like! all of them are maintained and working
-* msvc/g++/clang++ - basically a C++ compiler
+* acr/make or meson/ninja - pick the build system you like! all of them are maintained and working
+* msvc/g++/clang++ - basically a C++ compiler (and a C compiler)
 * git/patch - needed to clone ghidra-native and build stuff
 
 If the build fails, please carefully read the error message and act accordingly, r2pm should
@@ -85,25 +85,29 @@ Here, `r2ghidra.sleighhome` must point to a directory containing the `*.sla`, `*
 the architectures that should supported by the decompiler. This is however set up automatically when using
 the r2pm package or installing as shown below.
 
-## Building for Windows
+## Installation
+
+Most users will just use `r2pm -ci r2ghidra` to build or update the plugin for the version of r2
+
+### Windows Binary installation
 
 First, make sure you have the latest version of radare2 for Windows, which can be found as a binary package [in the releases](https://github.com/radareorg/radare2/releases).
 
-Then run the following command from the radare2/bin/ directory:
+Then run the following command from the radare2/bin/ directory to find out the `R2_USER_PLUGINS` path:
 
 ```
 $ r2 -hh
 ```
 
-Take note of the  `R2_USER_PLUGINS` path that is displayed. If this path does not actually exist on your system, create it.
-Now, go to the [r2ghidra latest releases](https://github.com/radareorg/r2ghidra/releases) and download the Windows binary package, which contains 3 dll files. Copy these dll files to the R2_USER_PLUGINS directory.
+Now, download the [latest r2ghidra release](https://github.com/radareorg/r2ghidra/releases) for Windows and copy the `dll file in the `R2_USER_PLUGINS` directory.
+
 You should now be able to do `pdg` while in radare2 to invoke the r2ghidra decompile command.
 
 ## Building
 
-r2ghidra can be built with `meson`, `cmake` or `acr`. All the 3 build systems are maintained in sync and aims to provide to the packagers and users the choice to use whatever fits better for their needs.
+r2ghidra can be built with `meson/ninja` and `acr/make`. Both build systems are maintained, feel free to pick the one you feel more comfortable with.
 
-### Building with ACR/Make
+### ACR/Make
 
 The procedure is like the standard autoconf:
 
@@ -115,6 +119,14 @@ $ make install  # or make user-install
 ```
 At the moment there is no way to select which processors to support, so it builds them all and takes a lot of time to compile the sleighfiles.
 
+### Meson/Ninja
+
+Also works with `muon/samu` and that's the preferred way to build r2ghidra on Windows.
+
+```
+meson b
+ninja -C b
+```
 
 ### Windows
 
@@ -122,62 +134,10 @@ To compile r2ghidra on windows you need Visual Studio and git installed:
 
 ```cmd
 preconfigure   # find VS installation, sets path and download external code
-configure      # prepare the build
-make           # compile and zip the result
-```
-or
-
-```
-dist\windows\build
-```
-
-### Building with CMake
-
-First, make sure the submodule contained within this repository is fetched and up to date:
-
-```
-./preconfigure  # or just 'preconfigure' on Windows to fetch ghidra-native and pugixml dependencies
-```
-
-Then, the radare2 plugin can be built and installed as follows:
-
-```
-mkdir build && cd build
-cmake -DCMAKE_INSTALL_PREFIX=~/.local ..
-make
-make install DESTDIR=/tmp/r2ghidra-prefix
-```
-
-Here, set the `CMAKE_INSTALL_PREFIX` to a location where radare2 can load the plugin from.
-
-## Iaito plugin
-
-Iaito can use r2ghidra without the need for a iaito-specific plugin. But the performance may be better when using the native plugin in contrast to the json-parsing generic solution.
-
-The install step is necessary for the plugin to work because it includes installing the necessary Sleigh files.
-
-To also build the Cutter plugin, pass `-DBUILD_IAITO_PLUGIN=ON -DIAITO_SOURCE_DIR=/path/to/cutter/source` to cmake, for example like this:
-```
-$ git clone https://github.com/radareorg/iaito
-$ mkdir build && cd build
-$ cmake -DBUILD_IAITO_PLUGIN=ON -DIAITO_SOURCE_DIR=/my/path/cutter -DCMAKE_INSTALL_PREFIX=~/.local ..
-/my/path/r2ghidra/build> make && make install
+configure      # prepare the build (run meson)
+make           # compile and zip the result (run ninja)
 ```
 
 ## License
 
-Please note that this plugin is available under the **LGPLv3**, which
-is more strict than Ghidra's license!
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+See `LICENSE.md` for more details. but it's basically **LGPLv3**.

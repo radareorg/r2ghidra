@@ -5,7 +5,6 @@ if EXIST w (
 )
 
 ninja -C w
-REM cmake --build build
 
 echo Copying Plugins
 mkdir destdir
