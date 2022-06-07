@@ -87,30 +87,6 @@ jobs:
 #        R2_DEBUG=1 r2 -qc 'af;pdg' /bin/ls | tee a.txt
 #        grep entry0 a.txt
 
-#  linux-cmake-ok:
-#    runs-on: ubuntu-latest
-#    steps:
-#    - name: Checkout
-#      uses: actions/checkout@v2
-#    - name: Cloning Repo
-#      run: git clone --depth=1 https://github.com/radareorg/radare2
-#    - name: Packaging Radare2 for Debian
-#      # run: make -C radare2/dist/debian
-#      run: ( cd radare2 && sys/debian.sh )
-#    - name: Installing Radare2
-#      run: sudo dpkg -i radare2/dist/debian/*/*.deb
-#    - name: Building r2ghidra with cmake
-#      run: |
-#        ./preconfigure && cmake -DCMAKE_INSTALL_PREFIX=/usr -B b && make -C b -j4 && sudo make -C b install
-#        ls -l /usr/lib/radare2/5.6.9/
-#        ls -l /usr/lib/radare2/5.6.9/plugins
-#    - name: Testing r2ghidra oneliner
-#      run: r2 -H;r2 -l /usr/lib/radare2/last/plugins/core_ghidra.so -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
-#    - name: Pub
-#      uses: actions/upload-artifact@v2
-#      with:
-#        path: radare2/dist/debian/*/*.deb
-
   macos-acr-ok:
     # The type of runner that the job will run on
     runs-on: macos-latest
@@ -141,19 +117,6 @@ jobs:
         name: r2ghidra-${{env.R2V}}-macos.tar.gz
         path: dist/macos/*.zip
         #path: radare2/dist/macos/*.pkg src/*.dylib /tmp/r2ghidra-macos-${{env.R2V}}.tar.gz dist/macos/*.zip
-
-#  macos-cmake-ok:
-#    runs-on: macos-latest
-#    if: ${{ false }}  # disable for now
-#    steps:
-#    - name: Checkout
-#      uses: actions/checkout@v2
-#    - name: Installing radare2
-#      run: git clone --depth=1 https://github.com/radareorg/radare2 && radare2/sys/install.sh
-#    - name: Building r2ghidra with cmake
-#      run: ./preconfigure && sudo cmake -DCMAKE_INSTALL_PREFIX=/usr -B build && sudo make -C build -j4 && sudo make -C build install
-#    - name: Testing r2ghidra
-#      run: r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep iVar a.txt
 
   w64:
     runs-on: windows-latest
@@ -188,23 +151,6 @@ jobs:
         copy w\*.dll destdir
         cd destdir
         zip -r ..\r2ghidra-w64.zip *
-#    - name: make
-#      shell: cmd
-#      run: |
-#        cd
-#        set PKG_CONFIG_PATH=%CD%\radare2\lib\pkgconfig
-#        set PATH=%CD%\radare2\bin;%PATH%
-#        set ARCH=x64
-#        git submodule update --init
-#        make ghidra-native
-#        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
-#        mkdir destdir build
-#        cd build
-#        cmake -GNinja ..
-#        cmake --build .
-#        copy *.dll ..\destdir
-#        cd ..\destdir
-#        zip -r ..\r2ghidra-w64.zip *
     - uses: actions/upload-artifact@v2
       with:
         name: r2ghidra-${{env.R2V}}-w64.zip
