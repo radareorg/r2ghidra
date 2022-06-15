@@ -147,7 +147,7 @@ static const std::map<std::string, ArchMapper> arch_map = {
 		CUSTOM_BITS ((RCore *core) {
 			return BITS == 64 ? 64 : 32;
 		}),
-		false, 2, 4
+		big_endian_mapper_default, 2, 4
 	}},
 	{ "avr", {
 		CUSTOM_BASEID ((RCore *core) {
