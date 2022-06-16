@@ -33,12 +33,12 @@ incdirs = [
   'ghidra-native/src/decompiler/',
 ]
 
-if meson.get_compiler('cpp').get_id() == 'msvc'
+cpp = meson.get_compiler('cpp')
+if cpp.get_id() == 'msvc'
   incdirs += [
     'radare2/include/libr',
     'radare2/include/libr/sdb',
   ]
-  cpp = meson.get_compiler('cpp')
   add_global_arguments('-D_WINDOWS', language:'cpp')
   r2libdir = [
     meson.current_source_dir() + '\\radare2\\lib',
