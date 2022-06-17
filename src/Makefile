@@ -103,6 +103,7 @@ install:
 	mkdir -p $(DESTDIR)$(PLUGDIR)
 	for a in *.$(R2_LIBEXT) ; do rm -f "$(DESTDIR)/$(PLUGDIR)/$$a" ; done
 	cp -f *.$(R2_LIBEXT) $(DESTDIR)$(PLUGDIR)
+	rm -f $(DESTDIR)$(PLUGDIR)/asm*ghidra*.$(R2_LIBEXT)
 ifneq (,$(wildcard /usr/bin/codesign))
 	-codesign -f -s - $(DESTDIR)$(PLUGDIR)/*.$(R2_LIBEXT)
 endif
@@ -112,6 +113,7 @@ uninstall:
 	rm -f $(DESTDIR)/$(BINDIR)/sleighc
 
 user-install:
+	rm -f $(PLUGDIR)/asm*ghidra*.$(R2_LIBEXT)
 	$(MAKE) install PLUGDIR=$(R2_USER_PLUGINS) BINDIR=$(shell r2pm -H R2PM_BINDIR)
 
 user-uninstall:
