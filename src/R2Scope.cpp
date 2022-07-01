@@ -326,7 +326,7 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 				{ "name", var->name },
 				{ "typelock", typelock ? "true" : "false" },
 				{ "namelock", "true" },
-				{ "readonly", "false" },
+				{ "readonly", "true" },
 				{ "cat", var->isarg ? "0" : "-1" }
 			});
 

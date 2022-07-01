@@ -129,7 +129,7 @@ void R2Architecture::buildAction(DocumentStorage &store) {
 void R2Architecture::buildLoader(DocumentStorage &store) {
 	RCoreLock core (getCore ());
 	collectSpecFiles (*errorstream);
-	loader = new R2LoadImage (getCore ());
+	loader = new R2LoadImage (getCore (), this);
 }
 
 Scope *R2Architecture::buildDatabase(DocumentStorage &store) {

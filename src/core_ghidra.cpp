@@ -144,6 +144,7 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	R2Architecture arch (core, cfg_var_sleighid.GetString(core->config));
 	DocumentStorage store = DocumentStorage ();
 	arch.max_implied_ref = cfg_var_maximplref.GetInt (core->config);
+	arch.readonlypropagate = true;
 	arch.setRawPtr (cfg_var_rawptr.GetBool (core->config));
 	arch.init (store);
 
