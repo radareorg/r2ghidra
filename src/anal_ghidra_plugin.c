@@ -18,7 +18,7 @@ static RAnalPlugin r_anal_plugin_ghidra = {
 	.license = "GPL3",
 	.arch = "sleigh",
 	.author = "FXTi, pancake",
-	.version = "5.7.0",
+	.version = R2_VERSION,
 #if R2_VERSION_NUMBER >= 50609
 	.endian = R_SYS_ENDIAN_LITTLE | R_SYS_ENDIAN_BIG,
 #endif
