@@ -55,4 +55,11 @@ ghidra-native:
 mrproper: clean
 	git submodule deinit --all -f
 
-.PHONY: mrproper clean install uninstall all
+r2ghidra_sleigh.zip dist:
+	rm -rf tmp && mkdir -p tmp
+	$(MAKE) -C ghidra user-install DH=$(shell pwd)/tmp/r2ghidra_sleigh-$(VERSION)
+	cd tmp && zip -r ../r2ghidra_sleigh-$(VERSION).zip *
+	rm -rf tmp
+
+
+.PHONY: mrproper clean install uninstall all dist

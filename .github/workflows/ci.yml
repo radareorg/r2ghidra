@@ -37,6 +37,14 @@ jobs:
         # path: radare2/dist/debian/*/*.deb r2ghidra/dist/debian/*.deb
         name: r2ghidra-${{env.R2V}}_amd64.deb
         path: dist/debian/*.deb
+    - name: Precompiling the sleigh
+      run: make dist
+    - name: Uploading Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        # path: radare2/dist/debian/*/*.deb r2ghidra/dist/debian/*.deb
+        name: r2ghidra_sleigh-${{env.R2V}}.zip
+        path: r2ghidra_sleigh-${{env.R2V}}.zip
 
   linux-asan:
     if: ${{ false }}  # disable for now

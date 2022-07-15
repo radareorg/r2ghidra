@@ -25,4 +25,4 @@ if [ -n "$1" ]; then
 	echo "./configure $*"
 	./configure $*
 fi
-vim .github/workflows/ci.yml
+sed -i -e "s,R2V:.*,R2V: $V" .github/workflows/ci.yml
