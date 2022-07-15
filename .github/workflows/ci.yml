@@ -109,8 +109,8 @@ jobs:
         make install DESTDIR=/tmp/r2ghidra && cd /tmp/r2ghidra && tar czvf ../r2ghidra-macos-${{env.R2V}}.tar.gz *
     - name: Testing r2ghidra
       run: |
-        r2 -qc 'af;pdg' /bin/ls | tee a.txt
-        grep iVar a.txt
+        r2 -qc 'af;pdg' test/bins/rec | tee a.txt
+        grep csu_init a.txt
     - name: Pub
       uses: actions/upload-artifact@v2
       with:
