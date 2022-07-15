@@ -126,6 +126,42 @@ jobs:
         path: dist/macos/*.zip
         #path: radare2/dist/macos/*.pkg src/*.dylib /tmp/r2ghidra-macos-${{env.R2V}}.tar.gz dist/macos/*.zip
 
+  macos-acr-m1:
+    # The type of runner that the job will run on
+    runs-on: macos-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Cloning Radare2 git repository
+      run: git clone --depth=1 https://github.com/radareorg/radare2
+    - name: Building Radare2 pkg for macOS
+      run: make -C radare2/dist/macos
+    - name: Install radare2 Package
+      run: sudo installer -pkg radare2/dist/macos/*.pkg -target /
+    - name: Building r2ghidra with acr
+      env:
+        ARCHFLAGS: '-arch arm64'
+        CC: 'gcc -arch arm64'
+        CXXFLAGS: '-arch arm64'
+        CFLAGS: '-arch arm64'
+      run: ./preconfigure && ./configure && make -j4 && make user-install
+    - name: Packaging r2ghidra
+      run: |
+        make -C dist/macos
+        make install DESTDIR=/tmp/r2ghidra && cd /tmp/r2ghidra && tar czvf ../r2ghidra-macos-${{env.R2V}}.tar.gz *
+    - name: Testing r2ghidra
+      run: |
+        r2 -qc 'af;pdg' test/bins/rec | tee a.txt
+        grep csu_init a.txt
+    - name: Pub
+      uses: actions/upload-artifact@v2
+      with:
+        name: r2ghidra-${{env.R2V}}-macos-m1.tar.gz
+        path: dist/macos/*.zip
+        #path: radare2/dist/macos/*.pkg src/*.dylib /tmp/r2ghidra-macos-${{env.R2V}}.tar.gz dist/macos/*.zip
+
   w64:
     runs-on: windows-latest
     steps:
