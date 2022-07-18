@@ -1,7 +1,8 @@
-/* r2ghidra - LGPL - Copyright 2019-2021 - thestr4ng3r, pancake */
+/* r2ghidra - LGPL - Copyright 2019-2022 - thestr4ng3r, pancake */
 
 #include "ArchMap.h"
 #include <error.hh>
+#include "R2Architecture.h"
 #include <map>
 #include <functional>
 
@@ -197,8 +198,17 @@ std::string SleighIdFromCore(RCore *core) {
 	if (!core) {
 		return "gcc";
 	}
-	SleighArchitecture::collectSpecFiles(std::cerr);
-	auto langs = SleighArchitecture::getLanguageDescriptions();
+#if 1
+	R2Architecture::collectSpecFiles (std::cerr);
+	auto langs = R2Architecture::getLanguageDescriptions ();
+#else
+	SleighArchitecture::collectSpecFiles (std::cerr);
+	auto langs = SleighArchitecture::getLanguageDescriptions ();
+#endif
+	if (langs.empty ()) {
+		R_LOG_ERROR ("No languages available, make sure r2ghidra.sleighhome is set properly");
+		return "gcc";
+	}
 	const char *arch = r_config_get (core->config, "asm.arch");
 	if (!strcmp (arch, "r2ghidra")) {
 #if R2_VERSION_NUMBER >= 50609

@@ -38,6 +38,10 @@ std::string FilenameFromCore(RCore *core) {
 R2Architecture::R2Architecture(RCore *core, const std::string &sleigh_id)
 	: SleighArchitecture (FilenameFromCore (core), sleigh_id.empty () ? SleighIdFromCore (core) : sleigh_id, &cout),
 	coreMutex (core) {
+#if 0
+		collectSpecFiles(std::cerr);		///< Gather specification files in normal locations
+		auto langs = getLanguageDescriptions ();
+#endif
 }
 
 ProtoModel *R2Architecture::protoModelFromR2CC(const char *cc) {

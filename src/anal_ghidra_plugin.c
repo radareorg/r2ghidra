@@ -12,7 +12,7 @@ extern int esil_sleigh_fini(RAnalEsil *esil);
 extern int esil_sleigh_init(RAnalEsil *esil);
 extern RList *anal_preludes(RAnal *anal);
 
-static RAnalPlugin r_anal_plugin_ghidra = {
+RAnalPlugin r_anal_plugin_ghidra = {
 	.name = "r2ghidra",
 	.desc = "SLEIGH Disassembler from Ghidra",
 	.license = "GPL3",
@@ -39,6 +39,8 @@ static RAnalPlugin r_anal_plugin_ghidra = {
 #endif
 };
 
+#if 0
+
 #ifndef CORELIB
 R_API RLibStruct radare_plugin = {
 	.type = R_LIB_TYPE_ANAL,
@@ -46,4 +48,6 @@ R_API RLibStruct radare_plugin = {
 	.version = R2_VERSION,
 	.pkgname = "r2ghidra"
 };
+#endif
+
 #endif

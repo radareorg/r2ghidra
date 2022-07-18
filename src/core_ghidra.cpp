@@ -5,6 +5,7 @@
 #include "ArchMap.h"
 #include "SleighAsm.h"
 #include "r2ghidra.h"
+#include "r_anal.h"
 
 // Windows clash
 #ifdef restrict
@@ -175,7 +176,7 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 #endif
 	arch.getCore()->sleepEnd ();
 	if (res < 0) {
-		eprintf ("break\n");
+		R_LOG_WARN ("break");
 	}
 #if 0
 	else {
@@ -312,7 +313,7 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 				pj_free (pj);
 			}
 		} else {
-			eprintf ("%s\n", s.c_str ());
+			R_LOG_WARN ("%s", s.c_str ());
 		}
 	}
 #endif
@@ -423,19 +424,30 @@ static void Disassemble(RCore *core, ut64 ops) {
 		} catch (const BadDataError &error) {
 			std::stringstream ss;
 			addr.printRaw (ss);
-			r_cons_printf ("%s: invalid\n", ss.str ().c_str ());
+			R_LOG_ERROR ("%s: invalid", ss.str ().c_str ());
 			addr = addr + trans->getAlignment();
 		}
 	}
 }
 
-static void ListSleighLangs() {
-	DecompilerLock lock;
+static void SetInitialSleighHome(RConfig *cfg) {
+	if (!cfg_var_sleighhome.GetString (cfg).empty()) {
+		return;
+	}
+	try {
+		std::string path = SleighAsm::getSleighHome (cfg);
+		cfg_var_sleighhome.Set (cfg, path.c_str ());
+	} catch (LowlevelError &err) {
+		// eprintf ("Cannot find detfaault paz%c", 10);
+	}
+}
 
-	SleighArchitecture::collectSpecFiles (std::cerr);
-	auto langs = SleighArchitecture::getLanguageDescriptions ();
+static void ListSleighLangs(RCore *core) {
+	DecompilerLock lock;
+	R2Architecture::collectSpecFiles (std::cerr);
+	auto langs = R2Architecture::getLanguageDescriptions ();
 	if (langs.empty()) {
-		r_cons_printf ("No languages available, make sure %s is set correctly!\n", cfg_var_sleighhome.GetName ());
+		R_LOG_ERROR ("No languages available, make sure %s is set correctly!", cfg_var_sleighhome.GetName ());
 		return;
 	}
 	std::vector<std::string> ids;
@@ -454,7 +466,7 @@ static void PrintAutoSleighLang(RCore *core) {
 		auto id = SleighIdFromCore (core);
 		r_cons_printf ("%s\n", id.c_str ());
 	} catch (LowlevelError &e) {
-		eprintf ("%s\n", e.explain.c_str ());
+		R_LOG_WARN ("%s", e.explain.c_str ());
 	}
 }
 
@@ -495,7 +507,7 @@ static void _cmd(RCore *core, const char *input) {
 			Disassemble (core, r_num_math (core->num, input + 2));
 			break;
 		default:
-			ListSleighLangs ();
+			ListSleighLangs (core);
 			break;
 		}
 		break;
@@ -531,24 +543,14 @@ bool SleighHomeConfig(void */* user */, void *data) {
 	return true;
 }
 
-static void SetInitialSleighHome(RConfig *cfg) {
-	if (!cfg_var_sleighhome.GetString (cfg).empty()) {
-		return;
-	}
-	try {
-		std::string path = SleighAsm::getSleighHome (cfg);
-		cfg_var_sleighhome.Set (cfg, path.c_str ());
-	} catch (LowlevelError &err) {
-		// eprintf ("Cannot find detfaault paz%c", 10);
-	}
-}
-
+extern "C" RAnalPlugin r_anal_plugin_ghidra;
 extern "C" int r2ghidra_core_init(void *user, const char *cmd) {
 	std::lock_guard<std::recursive_mutex> lock(decompiler_mutex);
 	startDecompilerLibrary (nullptr);
 
 	auto *rcmd = reinterpret_cast<RCmd *>(user);
 	auto *core = reinterpret_cast<RCore *>(rcmd->data);
+	r_anal_add (core->anal, &r_anal_plugin_ghidra);
 	RConfig *cfg = core->config;
 	r_config_lock (cfg, false);
 	for (const auto var : ConfigVar::GetAll ()) {

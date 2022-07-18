@@ -345,7 +345,7 @@ void SleighAsm::collectSpecfiles(void) {
 	std::vector<std::string>::iterator iter;
 	specpaths.matchList(testspecs, ".ldefs", true);
 	for (iter = testspecs.begin(); iter != testspecs.end (); iter++) {
-		loadLanguageDescription(*iter);
+		loadLanguageDescription (*iter);
 	}
 }
 
@@ -385,14 +385,14 @@ std::string SleighAsm::getSleighHome(RConfig *cfg) {
 	}
 
 #ifdef R2GHIDRA_SLEIGHHOME_DEFAULT
-	if (r_file_is_directory(R2GHIDRA_SLEIGHHOME_DEFAULT)) {
+	if (r_file_is_directory (R2GHIDRA_SLEIGHHOME_DEFAULT)) {
 		if (cfg) {
 			r_config_set (cfg, varname, R2GHIDRA_SLEIGHHOME_DEFAULT);
 		}
 		return R2GHIDRA_SLEIGHHOME_DEFAULT;
 	}
 #endif
-	path = r_str_home(".local/lib/radare2/last/r2ghidra_sleigh");
+	path = r_str_home (".local/lib/radare2/last/r2ghidra_sleigh");
 	if (r_file_is_directory (path)) {
 		if (cfg) {
 			r_config_set (cfg, varname, path);
@@ -420,8 +420,7 @@ std::string SleighAsm::getSleighHome(RConfig *cfg) {
 		free ((void *)path);
 		return res;
 	} else {
-		eprintf ("Cannot find the sleigh home at '%s'.\n", path);
-		eprintf ("Run `r2pm -ci r2ghidra-sleigh` to fix this.");
+		R_LOG_ERROR ("Cannot find the sleigh home at '%s'. Fix it with `r2pm -ci r2ghidra-sleigh`", path);
 		free (path);
 		throw LowlevelError ("Missing r2ghidra_sleigh");
 	}

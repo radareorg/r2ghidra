@@ -68,7 +68,7 @@ clean:
 	rm -f *.o $(GHIDRA_DECOMPILER)/*.o
 	rm -f $(R2G_CORE_PLUGIN) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
 
-plugins: $(R2G_CORE_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
+plugins: $(R2G_CORE_PLUGIN) sleighc
 	$(MAKE) sign
 
 deps=$(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(R2G_PLUGIN_OBJS) $(PUGIXML_OBJS)
@@ -79,7 +79,7 @@ asan:
 
 $(R2G_CORE_PLUGIN): $(deps)
 	$(CXX) -shared -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) core_ghidra.o \
-		core_ghidra_plugin.o $(R2_LDFLAGS) $(CXXFLAGS)
+		anal_ghidra.o core_ghidra_plugin.o anal_ghidra_plugin.o $(R2_LDFLAGS) $(CXXFLAGS)
 
 $(R2G_ANAL_PLUGIN): $(deps)
 	$(CXX) -shared $(GHIDRA_OBJS) $(PUGIXML_OBJS) anal_ghidra.o anal_ghidra_plugin.o \
@@ -104,6 +104,7 @@ install:
 	for a in *.$(R2_LIBEXT) ; do rm -f "$(DESTDIR)/$(PLUGDIR)/$$a" ; done
 	cp -f *.$(R2_LIBEXT) $(DESTDIR)$(PLUGDIR)
 	rm -f $(DESTDIR)$(PLUGDIR)/asm*ghidra*.$(R2_LIBEXT)
+	rm -f $(DESTDIR)$(PLUGDIR)/anal*ghidra*.$(R2_LIBEXT)
 ifneq (,$(wildcard /usr/bin/codesign))
 	-codesign -f -s - $(DESTDIR)$(PLUGDIR)/*.$(R2_LIBEXT)
 endif
@@ -114,6 +115,7 @@ uninstall:
 
 user-install:
 	rm -f $(PLUGDIR)/asm*ghidra*.$(R2_LIBEXT)
+	rm -f $(PLUGDIR)/anal*ghidra*.$(R2_LIBEXT)
 	$(MAKE) install PLUGDIR=$(R2_USER_PLUGINS) BINDIR=$(shell r2pm -H R2PM_BINDIR)
 
 user-uninstall:
