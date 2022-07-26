@@ -12,8 +12,7 @@ void SleighAsm::init(const char *cpu, int bits, bool bigendian, RIO *io, RConfig
 		scanSleigh (getSleighHome (cfg));
 		collectSpecfiles ();
 	}
-
-	std::string new_sleigh_id = SleighIdFromSleighAsmConfig (cpu, bits, bigendian, description);
+	std::string new_sleigh_id = SleighIdFromSleighAsmConfig (nullptr, cpu, bits, bigendian, description);
 	if (!sleigh_id.empty() && sleigh_id == new_sleigh_id) {
 		return;
 	}
@@ -32,7 +31,11 @@ void SleighAsm::initInner(RIO *io, std::string sleigh_id) {
 	parseProcConfig (docstorage);
 	parseCompConfig (docstorage);
 	alignment = trans.getAlignment ();
+#if R2_VERSION_NUMBER >= 50609
+	RCore *core = (RCore *)io->coreb.core;
+#else
 	RCore *core = (RCore *)io->corebind.core;
+#endif
 	minopsz = ai (core, sleigh_id, R_ANAL_ARCHINFO_MIN_OP_SIZE);
 	maxopsz = ai (core, sleigh_id, R_ANAL_ARCHINFO_MAX_OP_SIZE);
 	trans.clearCache ();
@@ -342,7 +345,7 @@ void SleighAsm::collectSpecfiles(void) {
 	std::vector<std::string>::iterator iter;
 	specpaths.matchList(testspecs, ".ldefs", true);
 	for (iter = testspecs.begin(); iter != testspecs.end (); iter++) {
-		loadLanguageDescription(*iter);
+		loadLanguageDescription (*iter);
 	}
 }
 
@@ -382,14 +385,14 @@ std::string SleighAsm::getSleighHome(RConfig *cfg) {
 	}
 
 #ifdef R2GHIDRA_SLEIGHHOME_DEFAULT
-	if (r_file_is_directory(R2GHIDRA_SLEIGHHOME_DEFAULT)) {
+	if (r_file_is_directory (R2GHIDRA_SLEIGHHOME_DEFAULT)) {
 		if (cfg) {
 			r_config_set (cfg, varname, R2GHIDRA_SLEIGHHOME_DEFAULT);
 		}
 		return R2GHIDRA_SLEIGHHOME_DEFAULT;
 	}
 #endif
-	path = r_str_home(".local/lib/radare2/last/r2ghidra_sleigh");
+	path = r_str_home (".local/lib/radare2/last/r2ghidra_sleigh");
 	if (r_file_is_directory (path)) {
 		if (cfg) {
 			r_config_set (cfg, varname, path);
@@ -417,8 +420,9 @@ std::string SleighAsm::getSleighHome(RConfig *cfg) {
 		free ((void *)path);
 		return res;
 	} else {
+		R_LOG_ERROR ("Cannot find the sleigh home at '%s'. Fix it with `r2pm -ci r2ghidra-sleigh`", path);
 		free (path);
-		throw LowlevelError ("No Sleigh Home found!");
+		throw LowlevelError ("Missing r2ghidra_sleigh");
 	}
 }
 

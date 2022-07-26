@@ -1,7 +1,8 @@
-/* r2ghidra - LGPL - Copyright 2019-2021 - thestr4ng3r, pancake */
+/* r2ghidra - LGPL - Copyright 2019-2022 - thestr4ng3r, pancake */
 
 #include "ArchMap.h"
 #include <error.hh>
+#include "R2Architecture.h"
 #include <map>
 #include <functional>
 
@@ -28,10 +29,10 @@ template<> class Mapper<std::string> : public BaseMapper<std::string> {
 };
 
 static const Mapper<bool> big_endian_mapper_default = std::function<bool(RCore *)>([](RCore *core) {
-	return r_config_get_b (core->config, "cfg.bigendian");
+	return core? r_config_get_b (core->config, "cfg.bigendian"): false;
 });
 static const Mapper<ut64> bits_mapper_default = std::function<ut64(RCore *)>([](RCore *core) {
-	return (ut64)r_config_get_i (core->config, "asm.bits");
+	return core? (ut64)r_config_get_i (core->config, "asm.bits"): R_SYS_BITS;
 });
 
 class ArchMapper {
@@ -68,7 +69,7 @@ class ArchMapper {
 		}
 };
 
-#define BITS (r_config_get_i(core->config, "asm.bits"))
+#define BITS (core? r_config_get_i(core->config, "asm.bits"): R_SYS_BITS)
 #define CUSTOM_BASEID(lambda) std::function<std::string(RCore *)>([]lambda)
 #define CUSTOM_FLAVOR(lambda) std::function<std::string(RCore *)>([]lambda)
 #define CUSTOM_BITS(lambda) std::function<ut64(RCore *)>([]lambda)
@@ -147,7 +148,7 @@ static const std::map<std::string, ArchMapper> arch_map = {
 		CUSTOM_BITS ((RCore *core) {
 			return BITS == 64 ? 64 : 32;
 		}),
-		false, 2, 4
+		big_endian_mapper_default, 2, 4
 	}},
 	{ "avr", {
 		CUSTOM_BASEID ((RCore *core) {
@@ -414,7 +415,10 @@ std::string findGhidraCompiler(RCore *core, const char *bin_compiler) {
 }
 
 std::string CompilerFromCore(RCore *core) {
-	RBinInfo *info = r_bin_get_info (core->bin);
+	if (!core) {
+		return "gcc";
+	}
+	RBinInfo *info = r_bin_get_info(core->bin);
 	if (!info || !info->rclass) {
 		return std::string ();
 	}
@@ -430,13 +434,28 @@ std::string CompilerFromCore(RCore *core) {
 }
 
 std::string SleighIdFromCore(RCore *core) {
-	SleighArchitecture::collectSpecFiles(std::cerr);
-	auto langs = SleighArchitecture::getLanguageDescriptions();
-	auto cc = CompilerFromCore(core);
-	eprintf ("%s%c", cc.c_str(), 10);
-	const char *arch = r_config_get(core->config, "asm.arch");
+	if (!core) {
+		return "gcc";
+	}
+#if 1
+	R2Architecture::collectSpecFiles (std::cerr);
+	auto langs = R2Architecture::getLanguageDescriptions ();
+#else
+	SleighArchitecture::collectSpecFiles (std::cerr);
+	auto langs = SleighArchitecture::getLanguageDescriptions ();
+#endif
+	if (langs.empty ()) {
+		R_LOG_ERROR ("No languages available, make sure r2ghidra.sleighhome is set properly");
+		return "gcc";
+	}
+	const char *arch = r_config_get (core->config, "asm.arch");
 	if (!strcmp (arch, "r2ghidra")) {
-		return SleighIdFromSleighAsmConfig (core->rasm->cpu, core->rasm->bits, core->rasm->big_endian, langs);
+#if R2_VERSION_NUMBER >= 50609
+		RArchConfig *ac = core->rasm->config;
+		return SleighIdFromSleighAsmConfig (core, ac->cpu, ac->bits, ac->big_endian, langs);
+#else
+		return SleighIdFromSleighAsmConfig (core, core->rasm->cpu, core->rasm->bits, core->rasm->big_endian, langs);
+#endif
 	}
 	auto arch_it = arch_map.find (arch);
 	if (arch_it == arch_map.end ()) {
@@ -475,12 +494,17 @@ int ai(RCore *core, std::string cpu, int query) {
 }
 #endif
 
-std::string SleighIdFromSleighAsmConfig(const char *cpu, int bits, bool bigendian, const vector<LanguageDescription> &langs) {
+std::string SleighIdFromSleighAsmConfig(RCore *core, const char *cpu, int bits, bool bigendian, const vector<LanguageDescription> &langs) {
 	const char *colon = strchr (cpu, ':');
 	if (colon != nullptr && colon[1] != '\0' && colon[1] != '\0') {
 		// complete id specified
 		return cpu;
 	}
+	auto arch_it = arch_map.find(cpu);
+	if (arch_it != arch_map.end()) {
+		return arch_it->second.Map (core);
+	}
+	const ArchMapper *am = &arch_it->second;
 	// short form if possible
 	std::string low_cpu = StrToLower (cpu);
 	for (const auto &lang : langs) {

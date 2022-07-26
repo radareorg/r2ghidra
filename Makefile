@@ -1,7 +1,7 @@
 -include config.mk
 DESTDIR?=
 
-GHIDRA_NATIVE_COMMIT=0.1.8
+GHIDRA_NATIVE_COMMIT=0.2.2
 
 ifeq ($(shell test -f config.mk && echo $$?),0)
 all: ghidra-native ghidra-processors.txt
@@ -55,4 +55,11 @@ ghidra-native:
 mrproper: clean
 	git submodule deinit --all -f
 
-.PHONY: mrproper clean install uninstall all
+r2ghidra_sleigh.zip dist:
+	rm -rf tmp && mkdir -p tmp
+	$(MAKE) -C ghidra user-install DH=$(shell pwd)/tmp/r2ghidra_sleigh-$(VERSION)
+	cd tmp && zip -r ../r2ghidra_sleigh-$(VERSION).zip *
+	rm -rf tmp
+
+
+.PHONY: mrproper clean install uninstall all dist

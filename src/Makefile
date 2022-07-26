@@ -21,7 +21,8 @@ R2GHIDRA_SRCS+=SleighInstruction.cpp
 # R2GHIDRA_SRCS+= R2PrintC.cpp R2Scope.cpp R2TypeFactory.cpp RCoreMutex.cpp SleighAnalValue.cpp SleighAsm.cpp
 # R2GHIDRA_SRCS+= SleighInstruction.cpp
 
-R2G_PLUG_SRCS= anal_ghidra.cpp asm_ghidra.cpp core_ghidra.cpp
+R2G_PLUG_SRCS= anal_ghidra.cpp core_ghidra.cpp
+R2G_PLUG_SRCS+= anal_ghidra_plugin.o core_ghidra_plugin.o
 
 PUGIXML_HOME=../third-party/pugixml/src/
 PUGIXML_CFLAGS=-I$(PUGIXML_HOME)
@@ -41,11 +42,16 @@ R2G_PLUGIN_OBJS=$(subst .cpp,.o,$(R2G_PLUG_SRCS))
 CFLAGS+=-DR2GHIDRA_SLEIGHHOME_DEFAULT=\"$(R2_USER_PLUGINS)/r2ghidra_sleigh\"
 CFLAGS+=-w
 CFLAGS+=-fPIC
+CFLAGS+=-Wshadow
 CFLAGS+=-I$(GHIDRA_DECOMPILER)
 CFLAGS+=-I.
 
+# CFLAGS+=-g
+CXXFLAGS+=-g
+
 CXXFLAGS+=-std=c++11
-# CXXFLAGS+=-g
+CFLAGS+=$(R2_CFLAGS)
+
 CXXFLAGS+=$(CFLAGS)
 
 R2_LIBEXT=$(shell r2 -H R2_LIBEXT)
@@ -53,12 +59,17 @@ R2G_CORE_PLUGIN=core_ghidra.$(R2_LIBEXT)
 R2G_ASM_PLUGIN=asm_ghidra.$(R2_LIBEXT)
 R2G_ANAL_PLUGIN=anal_ghidra.$(R2_LIBEXT)
 
+ifeq ($(R2_LIBEXT),)
+Cannot run r2
+endif
+
 clean:
 	rm -f *.o $(PUGIXML_HOME)/*.o
 	rm -f *.o $(GHIDRA_DECOMPILER)/*.o
 	rm -f $(R2G_CORE_PLUGIN) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
 
-plugins: $(R2G_CORE_PLUGIN) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
+plugins: $(R2G_CORE_PLUGIN) sleighc
+	$(MAKE) sign
 
 deps=$(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(R2G_PLUGIN_OBJS) $(PUGIXML_OBJS)
 
@@ -67,16 +78,12 @@ asan:
 	$(MAKE) user-install
 
 $(R2G_CORE_PLUGIN): $(deps)
-	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) core_ghidra.o
-	$(MAKE) sign
-
-$(R2G_ASM_PLUGIN): $(deps)
-	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) asm_ghidra.o
-	$(MAKE) sign
+	$(CXX) -shared -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) core_ghidra.o \
+		anal_ghidra.o core_ghidra_plugin.o anal_ghidra_plugin.o $(R2_LDFLAGS) $(CXXFLAGS)
 
 $(R2G_ANAL_PLUGIN): $(deps)
-	$(CXX) -shared $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) anal_ghidra.o
-	$(MAKE) sign
+	$(CXX) -shared $(GHIDRA_OBJS) $(PUGIXML_OBJS) anal_ghidra.o anal_ghidra_plugin.o \
+		$(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS)
 
 ifneq (,$(wildcard /usr/bin/codesign))
 sign macsign:
@@ -94,13 +101,21 @@ install:
 	mkdir -p $(DESTDIR)$(BINDIR)
 	cp -f sleighc $(DESTDIR)$(BINDIR)
 	mkdir -p $(DESTDIR)$(PLUGDIR)
+	for a in *.$(R2_LIBEXT) ; do rm -f "$(DESTDIR)/$(PLUGDIR)/$$a" ; done
 	cp -f *.$(R2_LIBEXT) $(DESTDIR)$(PLUGDIR)
+	rm -f $(DESTDIR)$(PLUGDIR)/asm*ghidra*.$(R2_LIBEXT)
+	rm -f $(DESTDIR)$(PLUGDIR)/anal*ghidra*.$(R2_LIBEXT)
+ifneq (,$(wildcard /usr/bin/codesign))
+	-codesign -f -s - $(DESTDIR)$(PLUGDIR)/*.$(R2_LIBEXT)
+endif
 
 uninstall:
 	rm -f $(PLUGDIR)/*ghidra*.$(R2_LIBEXT)
 	rm -f $(DESTDIR)/$(BINDIR)/sleighc
 
 user-install:
+	rm -f $(PLUGDIR)/asm*ghidra*.$(R2_LIBEXT)
+	rm -f $(PLUGDIR)/anal*ghidra*.$(R2_LIBEXT)
 	$(MAKE) install PLUGDIR=$(R2_USER_PLUGINS) BINDIR=$(shell r2pm -H R2PM_BINDIR)
 
 user-uninstall:

@@ -38,6 +38,10 @@ std::string FilenameFromCore(RCore *core) {
 R2Architecture::R2Architecture(RCore *core, const std::string &sleigh_id)
 	: SleighArchitecture (FilenameFromCore (core), sleigh_id.empty () ? SleighIdFromCore (core) : sleigh_id, &cout),
 	coreMutex (core) {
+#if 0
+		collectSpecFiles(std::cerr);		///< Gather specification files in normal locations
+		auto langs = getLanguageDescriptions ();
+#endif
 }
 
 ProtoModel *R2Architecture::protoModelFromR2CC(const char *cc) {
@@ -129,7 +133,7 @@ void R2Architecture::buildAction(DocumentStorage &store) {
 void R2Architecture::buildLoader(DocumentStorage &store) {
 	RCoreLock core (getCore ());
 	collectSpecFiles (*errorstream);
-	loader = new R2LoadImage (getCore ());
+	loader = new R2LoadImage (getCore (), this);
 }
 
 Scope *R2Architecture::buildDatabase(DocumentStorage &store) {

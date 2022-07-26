@@ -1,13 +1,14 @@
-if EXIST build (
+if EXIST w (
 	echo Building R2Ghidra Plugins
 ) else (
 	configure.bat
 )
-cmake --build build
+
+ninja -C w
 
 echo Copying Plugins
 mkdir destdir
-copy build\*.dll destdir
+copy w\*.dll destdir
 
 echo Copying Sleigh Files
 mkdir destdir\r2ghidra_sleigh

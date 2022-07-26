@@ -1,9 +1,9 @@
 project(
   'r2ghidra',
-  'cpp',
+  ['c', 'cpp'],
 license : 'LGPL3',
 meson_version : '>=0.50.1',
-version : '5.6.2',
+version : '5.7.4',
 default_options : ['c_std=c11', 'cpp_std=c++11']
 )
 
@@ -26,7 +26,40 @@ r2ghidra_sources = [
   'src/SleighInstruction.cpp',
 ]
 
-r_core = dependency('r_core')
+
+incdirs = [
+  'src',
+  'third-party/pugixml/src/',
+  'ghidra-native/src/decompiler/',
+]
+
+cpp = meson.get_compiler('cpp')
+if cpp.get_id() == 'msvc'
+  incdirs += [
+    'radare2/include/libr',
+    'radare2/include/libr/sdb',
+  ]
+  add_global_arguments('-D_WINDOWS', language:'cpp')
+  r2libdir = [
+    meson.current_source_dir() + '\\radare2\\lib',
+    'C:\\radare2\\lib'
+  ]
+  r_core = [
+    cpp.find_library('r_core', dirs: r2libdir),
+    cpp.find_library('r_io', dirs: r2libdir),
+    cpp.find_library('r_bin', dirs: r2libdir),
+    cpp.find_library('r_cons', dirs: r2libdir),
+    cpp.find_library('r_flag', dirs: r2libdir),
+    cpp.find_library('r_reg', dirs: r2libdir),
+    cpp.find_library('r_util', dirs: r2libdir),
+    cpp.find_library('r_anal', dirs: r2libdir),
+    cpp.find_library('r_config', dirs: r2libdir),
+  ]
+else
+  r_core = dependency('r_core')
+endif
+
+r2ghidra_incdirs = include_directories(incdirs)
 
 ghidra_decompiler_sources = [
   'ghidra-native/src/decompiler/action.cc',
@@ -137,19 +170,10 @@ r2ghidra_core_sources = [
   r2ghidra_sources,
   pugixml_sources,
   ghidra_decompiler_sources,
-  'src/core_ghidra.cpp'
-]
-r2ghidra_asm_sources = [
-  r2ghidra_sources,
-  pugixml_sources,
-  ghidra_decompiler_sources,
-  'src/asm_ghidra.cpp',
-]
-r2ghidra_anal_sources = [
-  r2ghidra_sources,
-  pugixml_sources,
-  ghidra_decompiler_sources,
+  'src/anal_ghidra_plugin.c',
   'src/anal_ghidra.cpp',
+  'src/core_ghidra_plugin.c',
+  'src/core_ghidra.cpp'
 ]
 
 sleighc_sources = [
@@ -161,28 +185,8 @@ sleighc_sources = [
   ghidra_decompiler_sources,
 ]
 
-r2ghidra_incdirs = [
-  'src',
-  'third-party/pugixml/src/',
-  'ghidra-native/src/decompiler/',
-]
-
 r2ghidra_core_plugin = library('core_r2ghidra',
   r2ghidra_core_sources,
-  dependencies: [r_core],
-  override_options : ['c_std=c11', 'cpp_std=c++11'],
-  include_directories: r2ghidra_incdirs
-)
-
-r2ghidra_asm_plugin = library('asm_r2ghidra',
-  r2ghidra_asm_sources,
-  dependencies: [r_core],
-  override_options : ['c_std=c11', 'cpp_std=c++11'],
-  include_directories: r2ghidra_incdirs
-)
-
-r2ghidra_anal_plugin = library('anal_r2ghidra',
-  r2ghidra_anal_sources,
   dependencies: [r_core],
   override_options : ['c_std=c11', 'cpp_std=c++11'],
   include_directories: r2ghidra_incdirs
