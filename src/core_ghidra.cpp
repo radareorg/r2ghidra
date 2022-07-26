@@ -51,7 +51,9 @@ public:
 
 std::vector<const ConfigVar *> ConfigVar::vars_all;
 
+std::string findGhidraCompiler(RCore *core, const char *bin_compiler);
 bool SleighHomeConfig(void *user, void *data);
+bool ConfigCompiler(void *user, void *data);
 
 static const ConfigVar cfg_var_sleighhome   ("sleighhome",  "",         "SLEIGHHOME", SleighHomeConfig);
 static const ConfigVar cfg_var_sleighid     ("lang",        "",         "Custom Sleigh ID to override auto-detection (e.g. x86:LE:32:default)");
@@ -69,6 +71,7 @@ static const ConfigVar cfg_var_verbose      ("verbose",     "false",    "Show ve
 static const ConfigVar cfg_var_casts        ("casts",       "false",    "Show type casts where needed");
 static const ConfigVar cfg_var_ropropagate  ("roprop",      "1",        "Propagate read-only constants (0,1,2,3,4)");
 static const ConfigVar cfg_var_timeout      ("timeout",     "0",        "Run decompilation in a separate process and kill it after a specific time");
+static const ConfigVar cfg_var_compiler     ("compiler",    "default",  "Select compiler for calling conventions", ConfigCompiler);
 
 
 static std::recursive_mutex decompiler_mutex;
@@ -579,6 +582,24 @@ extern "C" int r2ghidra_core_cmd(void *user, const char *input) {
 		return true;
 	}
 	return false;
+}
+
+bool ConfigCompiler(void *user, void *data) {
+	RCore *core = (RCore *) user;
+	std::lock_guard<std::recursive_mutex> lock(decompiler_mutex);
+	auto node = reinterpret_cast<RConfigNode *>(data);
+	if (!strcmp (node->value, "?")) {
+		auto c = findGhidraCompiler (core, node->value);
+		// eprintf ("list compilers%c", 10);
+		return false;
+	} else {
+		auto c = findGhidraCompiler (core, node->value);
+		free (node->value);
+		node->value = strdup (c.c_str());
+		// eprintf ("%s%c", c.c_str(), 10);
+		// print c.c_str()
+	}
+	return true;
 }
 
 bool SleighHomeConfig(void */* user */, void *data) {
