@@ -16,5 +16,5 @@ copy ghidra-native\src\Processors\*.* destdir\r2ghidra_sleigh
 
 echo Ziping it Up
 pushd destdir
-zip -r ..\r2ghidra-w64.zip *
+python -m zipfile -c ..\r2ghidra-w64.zip *
 popd
