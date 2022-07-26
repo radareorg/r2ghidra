@@ -66,6 +66,7 @@ static const ConfigVar cfg_var_maximplref   ("maximplref",  "2",        "Maximum
 static const ConfigVar cfg_var_rawptr       ("rawptr",      "true",     "Show unknown globals as raw addresses instead of variables");
 static const ConfigVar cfg_var_verbose      ("verbose",     "false",    "Show verbose warning messages while decompiling");
 static const ConfigVar cfg_var_casts        ("casts",       "false",    "Show type casts where needed");
+static const ConfigVar cfg_var_ropropagate  ("roprop",      "true",     "Propagate read-only constants");
 
 
 
@@ -142,10 +143,10 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	if (!function) {
 		throw LowlevelError ("No function at this offset");
 	}
-	R2Architecture arch (core, cfg_var_sleighid.GetString(core->config));
+	R2Architecture arch (core, cfg_var_sleighid.GetString (core->config));
 	DocumentStorage store = DocumentStorage ();
 	arch.max_implied_ref = cfg_var_maximplref.GetInt (core->config);
-	arch.readonlypropagate = true;
+	arch.readonlypropagate = cfg_var_ropropagate.GetBool (core->config);
 	arch.setRawPtr (cfg_var_rawptr.GetBool (core->config));
 	arch.init (store);
 
