@@ -154,11 +154,7 @@ jobs:
         call preconfigure.bat
         call configure.bat
         call make.bat
-        mkdir destdir
-        copy w\*.dll destdir
-        cd destdir
-        python -m zipfile -c ..\r2ghidra-w64.zip *
     - uses: actions/upload-artifact@v2
       with:
         name: r2ghidra-${{env.R2V}}-w64.zip
-        path: r2ghidra-w64.zip
+        path: destdir/r2ghidra-w64.zip

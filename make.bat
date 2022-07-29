@@ -1,20 +1,21 @@
 if EXIST w (
-	echo Building R2Ghidra Plugins
+	echo Building R2Ghidra Plugin
 ) else (
 	configure.bat
 )
 
 ninja -C w
 
-echo Copying Plugins
+echo Copying Plugin
 mkdir destdir
 copy w\*.dll destdir
 
-echo Copying Sleigh Files
-mkdir destdir\r2ghidra_sleigh
-copy ghidra-native\src\Processors\*.* destdir\r2ghidra_sleigh
+REM echo Copying Sleigh Files
+REM mkdir destdir\r2ghidra_sleigh
+REM copy ghidra-native\src\Processors\*.* destdir\r2ghidra_sleigh
 
 echo Ziping it Up
-pushd destdir
-python -m zipfile -c ..\r2ghidra-w64.zip *
-popd
+cd destdir
+python -m zipfile -c r2ghidra-w64.zip core_r2ghidra.dll
+dir
+cd ..
