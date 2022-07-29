@@ -28,6 +28,7 @@ void R2LoadImage::getReadonly(RangeList &list) const {
 	// this is used by the ropropagate code which follows
 	// pointers and replaces them with strings or flags
 	// in the decompilation. NULL is not considered.
+eprintf ("JEJEJ A %p\n", addr_space_manager);
 	auto space = addr_space_manager->getDefaultCodeSpace();
-	list.insertRange(space, 1, UT64_MAX);
+	list.insertRange(space, 0x1000, UT64_MAX);
 }
