@@ -57,11 +57,8 @@ ProtoModel *R2Architecture::protoModelFromR2CC(const char *cc) {
 }
 
 static std::string lowercase(std::string str) {
-	std::transform (str.begin (), str.end (), str.begin (), [](int c){
-		if (c >= 'A' && c <= 'Z') {
-			return c - ('A' - 'a');
-		}
-		return c;
+	std::transform (str.begin (), str.end (), str.begin (), [](int c) {
+		return tolower (c);
 	});
 	return str;
 }
