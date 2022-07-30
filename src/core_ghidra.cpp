@@ -23,6 +23,7 @@
 
 #undef DEBUG_EXCEPTIONS
 
+
 typedef bool (*ConfigVarCb)(void *user, void *data);
 
 struct ConfigVar {
@@ -67,7 +68,7 @@ static const ConfigVar cfg_var_rawptr       ("rawptr",      "true",     "Show un
 static const ConfigVar cfg_var_verbose      ("verbose",     "false",    "Show verbose warning messages while decompiling");
 static const ConfigVar cfg_var_casts        ("casts",       "false",    "Show type casts where needed");
 static const ConfigVar cfg_var_ropropagate  ("roprop",      "true",     "Propagate read-only constants");
-
+static const ConfigVar cfg_var_timeout      ("timeout",     "0",        "Run decompilation in a separate process and kill it after a specific time");
 
 
 static std::recursive_mutex decompiler_mutex;
@@ -479,7 +480,7 @@ static void EnablePlugin(RCore *core) {
 	r_config_set (core->config, "anal.arch", "r2ghidra");
 }
 
-static void _cmd(RCore *core, const char *input) {
+static void runcmd(RCore *core, const char *input) {
 	switch (*input) {
 	case 'd': // "pdgd"
 		DecompileCmd (core, DecompileMode::DEBUG_XML);
@@ -521,6 +522,59 @@ static void _cmd(RCore *core, const char *input) {
 	default:
 		PrintUsage (core);
 		break;
+	}
+}
+
+static void _cmd(RCore *core, const char *input) {
+	int timeout = r_config_get_i (core->config, "r2ghidra.timeout");
+	if (timeout > 0) {
+#if __UNIX__
+		// TODO: note that first execution is slower than the rest. and forking loses the cache
+		int fds[2];
+		if (pipe (fds) != 0) {
+			R_LOG_ERROR ("Cannot pipe");
+			return;
+		}
+		pid_t pid = r_sys_fork ();
+		if (pid < 0) {
+			R_LOG_ERROR ("Cannot fork");
+			return;
+		}
+		if (pid == 0) {
+			runcmd (core, input);
+			r_cons_flush ();
+			fflush(stdout);
+			write (fds[1], "\x12", 1);
+			exit (0);
+		} else {
+			fd_set rfds;
+			struct timeval tv;
+			tv.tv_sec = timeout / 1000;
+			tv.tv_usec = (timeout - (tv.tv_sec * 1000)) * 1000;
+			FD_ZERO (&rfds);
+			FD_SET (fds[0], &rfds);
+			if (select (fds[0] + 1, &rfds, NULL, NULL, &tv) > 0) {
+				char ch = 0;
+				int rr = read (fds[0], &ch, 1);
+				if (rr > 0 && ch == 0x12) {
+					// eprintf ("Completed\n");
+					// return;
+				}
+			} else {
+				eprintf ("Timeout\n");
+				kill (pid, 9);
+			}
+			fflush (stderr);
+			fflush (stdout);
+		}
+		close (fds[0]);
+		close (fds[1]);
+#else
+		R_LOG_WARN ("r2ghidra.timeout is not supported outside UNIX systems.");
+		runcmd (core, input);
+#endif
+	} else {
+		runcmd (core, input);
 	}
 }
 
