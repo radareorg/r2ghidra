@@ -1,7 +1,7 @@
 name: ci
 
 env:
-  R2V: 5.7.2
+  R2V: 5.7.4
 
 on:
   push:
@@ -158,3 +158,70 @@ jobs:
       with:
         name: r2ghidra-${{env.R2V}}-w64.zip
         path: destdir/r2ghidra-w64.zip
+
+  check_release:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    outputs:
+      is_release: ${{ steps.release.outputs.is }}
+      tag_name: ${{ steps.release.outputs.tag }}
+    needs:
+      - linux-acr-ok
+      - macos-acr-x64
+      - w64
+  release:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && needs.check_release.outputs.is_release == 'yes' }}
+    needs:
+      - check_release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Download all git history and tags
+      - name: Extract r2g version
+        run: echo "##[set-output name=branch;]$( ./configure -qV )"
+        id: r2gv
+      - name: Prepare release notes
+        run: ./sys/release-notes.sh | tee ./RELEASE_NOTES.md
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: dist/artifacts
+      - name: Create GitHub release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.check_release.outputs.tag_name }}
+          release_name: ${{ env.R2V }}
+          body_path: ./RELEASE_NOTES.md
+          draft: false
+          prerelease: false
+      - name: Upload asset for Linux
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/artifacts/linux-acr-ok/r2ghidra/r2ghidra_${{ steps.r2gv.outputs.branch }}_amd64.deb
+          asset_name: r2ghidra_${{ steps.r2gv.outputs.branch }}_amd64.deb
+          asset_content_type: application/vnd.debian.binary-package
+      - name: Upload asset for macOS
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/artifacts/macos-acr-ok/r2ghidra/r2ghidra_${{ steps.r2gv.outputs.branch }}_macos.tar.gz
+          asset_name: r2ghidra_${{ steps.r2gv.outputs.branch }}_macos.tar.gz
+          asset_content_type: application/tar+gzip
+      - name: Upload asset for Windows (w64)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/artifacts/w64/r2ghidra-${{ steps.r2gv.outputs.branch }}-w64.zip
+          asset_name: r2ghidra-${{ steps.r2gv.outputs.branch }}-w64.zip
+          asset_content_type: application/zip
