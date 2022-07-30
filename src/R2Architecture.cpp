@@ -39,8 +39,8 @@ R2Architecture::R2Architecture(RCore *core, const std::string &sleigh_id)
 	: SleighArchitecture (FilenameFromCore (core), sleigh_id.empty () ? SleighIdFromCore (core) : sleigh_id, &cout),
 	coreMutex (core) {
 #if 0
-		collectSpecFiles(std::cerr);		///< Gather specification files in normal locations
-		auto langs = getLanguageDescriptions ();
+	collectSpecFiles(std::cerr);		///< Gather specification files in normal locations
+	auto langs = getLanguageDescriptions ();
 #endif
 }
 
@@ -69,7 +69,7 @@ void R2Architecture::loadRegisters(const Translate *translate) {
 		return;
 	}
 	std::map<VarnodeData, std::string> regs;
-	translate->getAllRegisters(regs);
+	translate->getAllRegisters (regs);
 	for (const auto &reg : regs) {
 		registers[reg.second] = reg.first;
 		auto lower = lowercase(reg.second);
