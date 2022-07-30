@@ -51,17 +51,16 @@ To decompile a function, first type `af` to analize it and then `pdg` to invoke 
 [0x100001060]> pdg?
 Usage: pdg  # Native Ghidra decompiler plugin
 | pdg           # Decompile current function with the Ghidra decompiler
+| pdg*          # Decompiled code is returned to r2 as comment
+| pdga          # Side by side two column disasm and decompilation
 | pdgd          # Dump the debug XML Dump
-| pdgx          # Dump the XML of the current decompiled function
 | pdgj          # Dump the current decompiled function as JSON
 | pdgo          # Decompile current function side by side with offsets
+| pdgp          # Switch to RAsm and RAnal plugins driven by SLEIGH from Ghidra
 | pdgs          # Display loaded Sleigh Languages
-| pdgss         # Display automatically matched Sleigh Language ID
 | pdgsd N       # Disassemble N instructions with Sleigh and print pcode
-| pdga          # Switch to RAsm and RAnal plugins driven by SLEIGH from Ghidra
-| pdg*          # Decompiled code is returned to r2 as comment
-Environment:
-| %SLEIGHHOME   # Path to ghidra build root directory (same as r2ghidra.sleighhome)
+| pdgss         # Display automatically matched Sleigh Language ID
+| pdgx          # Dump the XML of the current decompiled function
 ```
 
 The following config vars (for the `e` command) can be used to adjust r2ghidra's behavior:
@@ -74,10 +73,10 @@ The following config vars (for the `e` command) can be used to adjust r2ghidra's
        r2ghidra.lang: Custom Sleigh ID to override auto-detection (e.g. x86:LE:32:default)
     r2ghidra.linelen: Max line length
  r2ghidra.maximplref: Maximum number of references to an expression before showing an explicit variable.
-   r2ghidra.nl.brace: Newline before opening '{'
-    r2ghidra.nl.else: Newline before else
      r2ghidra.rawptr: Show unknown globals as raw addresses instead of variables
+     r2ghidra.roprop: Propagate read-only constants
  r2ghidra.sleighhome: SLEIGHHOME
+    r2ghidra.timeout: Run decompilation in a separate process and kill it after a specific time
     r2ghidra.verbose: Show verbose warning messages while decompiling
 ```
 
