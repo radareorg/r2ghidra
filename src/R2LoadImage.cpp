@@ -87,7 +87,7 @@ void R2LoadImage::getReadonly(RangeList &list) const {
 							hasdata = true;
 						} else {
 							if (hasdata) {
-								eprintf ("0 append %llx %llx because of 0x%llx\n", base, basefin, *((ut64*)(data +i)));
+								// eprintf ("0 append %llx %llx because of 0x%llx\n", base, basefin, *((ut64*)(data +i)));
 								list.insertRange(space, base, basefin); // begin, end);
 								hasdata = false;
 								base = basefin;
@@ -96,7 +96,7 @@ void R2LoadImage::getReadonly(RangeList &list) const {
 					}
 					free (buf);
 					if (hasdata) {
-						eprintf ("1 append %llx %llx\n", base, basefin);
+						// eprintf ("1 append %llx %llx\n", base, basefin);
 						list.insertRange(space, base, basefin);
 					}
 				});
