@@ -3,6 +3,7 @@
 #include "ArchMap.h"
 #include <error.hh>
 #include "R2Architecture.h"
+#include "R2Utils.h"
 #include <map>
 #include <functional>
 
@@ -225,19 +226,9 @@ std::string SleighIdFromCore(RCore *core) {
 	return arch_it->second.Map (core);
 }
 
-std::string StrToLower(std::string s) {
-	std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){ return std::tolower(c); });
-	return s;
-}
-
-#if 1
-// XXX this function is never called or referenced, but if its not defined complains
-// XXX with this error: "Ghidra Decompiler Error: No print languages registered"
 int ai(RCore *core, std::string cpu, int query) {
 	size_t pos = cpu.find(":");
-	std::string cpuname = (pos != string::npos)
-		? StrToLower(cpu.substr(0, pos))
-		: StrToLower(cpu);
+	std::string cpuname = tolower ((pos != string::npos)? cpu.substr(0, pos): cpu);
 	auto arch_it = arch_map.find(cpuname);
 	if (arch_it == arch_map.end()) {
 		return 1; // throw LowlevelError("Could not match asm.arch " + std::string(arch) + " to sleigh arch.");
@@ -253,7 +244,6 @@ int ai(RCore *core, std::string cpu, int query) {
 	}
 	return 1;
 }
-#endif
 
 std::string SleighIdFromSleighAsmConfig(RCore *core, const char *cpu, int bits, bool bigendian, const vector<LanguageDescription> &langs) {
 	const char *colon = strchr (cpu, ':');
@@ -267,10 +257,10 @@ std::string SleighIdFromSleighAsmConfig(RCore *core, const char *cpu, int bits, 
 	}
 	const ArchMapper *am = &arch_it->second;
 	// short form if possible
-	std::string low_cpu = StrToLower (cpu);
+	std::string low_cpu = tolower (cpu);
 	for (const auto &lang : langs) {
 		auto proc = lang.getProcessor();
-		if (StrToLower (proc) == low_cpu) {
+		if (tolower (proc) == low_cpu) {
 			return proc 
 				+ ":" + (bigendian ? "BE" : "LE")
 				+ ":" + to_string (bits)
