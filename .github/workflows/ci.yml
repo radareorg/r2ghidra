@@ -166,7 +166,7 @@ jobs:
       tag_name: ${{ steps.release.outputs.tag }}
     needs:
       - linux-acr-ok
-      - macos-acr-x64
+      - macos-acr-ok
       - w64
     runs-on: ubuntu-latest
     steps:
