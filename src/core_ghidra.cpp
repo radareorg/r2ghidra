@@ -67,7 +67,7 @@ static const ConfigVar cfg_var_maximplref   ("maximplref",  "2",        "Maximum
 static const ConfigVar cfg_var_rawptr       ("rawptr",      "true",     "Show unknown globals as raw addresses instead of variables");
 static const ConfigVar cfg_var_verbose      ("verbose",     "false",    "Show verbose warning messages while decompiling");
 static const ConfigVar cfg_var_casts        ("casts",       "false",    "Show type casts where needed");
-static const ConfigVar cfg_var_ropropagate  ("roprop",      "true",     "Propagate read-only constants");
+static const ConfigVar cfg_var_ropropagate  ("roprop",      "1",        "Propagate read-only constants (0,1,2,3,4)");
 static const ConfigVar cfg_var_timeout      ("timeout",     "0",        "Run decompilation in a separate process and kill it after a specific time");
 
 
