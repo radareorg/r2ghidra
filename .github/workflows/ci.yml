@@ -243,4 +243,3 @@ jobs:
           asset_path: dist/artifacts/linux-acr-ok/r2ghidra_sleigh-${{ steps.r2gv.outputs.branch }}.zip
           asset_name: r2ghidra_sleigh-${{ steps.r2gv.outputs.branch }}.zip
           asset_content_type: application/zip
-r2ghidra_sleigh-5.7.4.zip
