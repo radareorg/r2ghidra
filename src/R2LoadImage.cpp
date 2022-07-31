@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2019-2021 - pancake, thestr4ng3r */
+/* r2ghidra - LGPL - Copyright 2019-2022 - pancake, thestr4ng3r */
 
 #include "R2LoadImage.h"
 #include "R2Utils.h"
@@ -36,22 +36,17 @@ if (*p < 0x1000) {
 
 void R2LoadImage::getReadonly(RangeList &list) const {
 	RCoreLock core(coreMutex);
-	bool roprop = r_config_get_b (core->config, "r2ghidra.roprop");
+	int roprop = r_config_get_i (core->config, "r2ghidra.roprop");
 	// RCore *core = coreMutex->RCore();
 	// consider ANY address as resolable as a flag by r2
 	// this is used by the ropropagate code which follows
 	// pointers and replaces them with strings or flags
 	// in the decompilation. NULL is not considered.
-	if (roprop) {
-		bool fullro = r_config_get_b (core->config, "r2ghidra.roprop.full");
-		bool roptr = r_config_get_b (core->config, "r2ghidra.roprop.ptr");
+	if (roprop > 0) {
 		auto space = addr_space_manager->getDefaultCodeSpace ();
-		if (fullro) {
-			// full
-			list.insertRange(space, 0x1000, ST64_MAX - 1);
-		} else {
-			// roptr
-			if (roptr) {
+		switch (roprop) {
+		case 1:
+			{
 				// find ranges with pointers
 				RIOMapRef *mapref;
 				RListIter *iter;
@@ -88,7 +83,9 @@ void R2LoadImage::getReadonly(RangeList &list) const {
 						} else {
 							if (hasdata) {
 								// eprintf ("0 append %llx %llx because of 0x%llx\n", base, basefin, *((ut64*)(data +i)));
-								list.insertRange(space, base, basefin); // begin, end);
+								if (base > 0) {
+									list.insertRange(space, base, basefin); // begin, end);
+								}
 								hasdata = false;
 								base = basefin;
 							}
@@ -100,7 +97,10 @@ void R2LoadImage::getReadonly(RangeList &list) const {
 						list.insertRange(space, base, basefin);
 					}
 				});
-			} else {
+			}
+			break;
+		case 2:
+			{
 				// ro maps when r2ghidra.roprop.ptr is false and r2ghidra.roprop is true
 				RIOMapRef *mapref;
 				RListIter *iter;
@@ -116,6 +116,11 @@ void R2LoadImage::getReadonly(RangeList &list) const {
 					list.insertRange(space, begin, end);
 				});
 			}
+		case 3:
+		default:
+			// full
+			list.insertRange(space, 0x1000, ST64_MAX - 1);
+			break;
 		}
 	}
 }
