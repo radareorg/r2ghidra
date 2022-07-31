@@ -98,7 +98,7 @@ static void PrintUsage(const RCore *const core) {
 		"pdgj", "", "# Dump the current decompiled function as JSON",
 		"pdgo", "", "# Decompile current function side by side with offsets",
 		"pdgp", "", "# Switch to RAsm and RAnal plugins driven by SLEIGH from Ghidra",
-		"pdgs", "", "# Display loaded Sleigh Languages",
+		"pdgs", "", "# Display loaded Sleigh Languages (alias for pdgL)",
 		"pdgsd", " N", "# Disassemble N instructions with Sleigh and print pcode",
 		"pdgss", "", "# Display automatically matched Sleigh Language ID",
 		"pdgx", "", "# Dump the XML of the current decompiled function",
@@ -500,6 +500,7 @@ static void runcmd(RCore *core, const char *input) {
 	case '*': // "pdg*"
 		DecompileCmd (core, DecompileMode::STATEMENTS);
 		break;
+	case 'L': // "pdgL"
 	case 's': // "pdgs"
 		switch (input[1]) {
 		case 's': // "pdgss"

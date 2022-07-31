@@ -22,7 +22,7 @@ RAnalPlugin r_anal_plugin_ghidra = {
 #if R2_VERSION_NUMBER >= 50609
 	.endian = R_SYS_ENDIAN_LITTLE | R_SYS_ENDIAN_BIG,
 #endif
-	.cpus = "6502,6805,8051,arm,avr,cr16,dalvik,hppa,java,m68k,m8c,mips,mcs96,msp430,pic24,ppc,sh,sparc,stm8,tricore,toy,v850,x86,z80",
+	.cpus = "6502,6805,8051,arm,avr,cr16,dalvik,hppa,java,m68k,m8c,mips,mcs96,msp430,pic24,ppc,sh,sparc,stm8,tricore,toy,v850,wasm,x86,z80",
 	.bits = 0,
 	.esil = true,
 	.fileformat_type = 0,

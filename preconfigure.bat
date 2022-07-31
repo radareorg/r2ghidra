@@ -3,14 +3,15 @@ set PATH=%CD%\radare2\bin;%PATH%
 set VSARCH=x64
 
 git submodule update --init
+set GNV=0.2.4
 
-python -m wget https://github.com/radareorg/ghidra-native/releases/download/0.2.2/ghidra-native-0.2.2.zip
+python -m wget https://github.com/radareorg/ghidra-native/releases/download/%GNV%/ghidra-native-%GNV%.zip
 
-unzip -q ghidra-native-0.2.2.zip
+unzip -q ghidra-native-%GNV%.zip
 if %ERRORLEVEL% NEQ 0 (
-	powershell "Expand-Archive -LiteralPath ghidra-native-0.2.2.zip -DestinationPath ."
+	powershell "Expand-Archive -LiteralPath ghidra-native-%GNV%.zip -DestinationPath ."
 )
-ren ghidra-native-0.2.2 ghidra-native
+ren ghidra-native-%GNV% ghidra-native
 
 REM call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
 echo === Finding Visual Studio...

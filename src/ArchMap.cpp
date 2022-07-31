@@ -91,6 +91,7 @@ static const std::map<std::string, ArchMapper> arch_map = {
 	{ "dalvik", { "Dalvik", "default", 32, false, 2, 10 }},
 	{ "tricore", { "tricore", "default", 32, true } },
 	{ "hexagon", { "hexagon", "default", 32, false } },
+	{ "wasm", { "wasm", "default", 32 } },
 	{ "6502", { "6502", "default", 16 } },
 	{ "65c02", { "65c02", "default", 16 } },
 	{ "java", { "JVM", "default", bits_mapper_default, true } },
