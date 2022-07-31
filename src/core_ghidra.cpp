@@ -180,13 +180,6 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	if (res < 0) {
 		R_LOG_WARN ("break");
 	}
-#if 0
-	else {
-		eprintf("Decompilation complete\n");
-		if (res == 0)
-			eprintf("(no change)\n");
-	}
-#endif
 	if (cfg_var_verbose.GetBool (core->config)) {
 		for (const auto &warning : arch.getWarnings()) {
 			func->warningHeader("[r2ghidra] " + warning);
