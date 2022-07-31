@@ -234,3 +234,13 @@ jobs:
           asset_path: dist/artifacts/w64/r2ghidra-${{ steps.r2gv.outputs.branch }}-w64.zip
           asset_name: r2ghidra-${{ steps.r2gv.outputs.branch }}-w64.zip
           asset_content_type: application/zip
+      - name: Upload asset for Sleigh files
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/artifacts/linux-acr-ok/r2ghidra_sleigh-${{ steps.r2gv.outputs.branch }}.zip
+          asset_name: r2ghidra_sleigh-${{ steps.r2gv.outputs.branch }}.zip
+          asset_content_type: application/zip
+r2ghidra_sleigh-5.7.4.zip
