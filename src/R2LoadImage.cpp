@@ -24,24 +24,14 @@ void R2LoadImage::adjustVma(long adjust) {
 	throw LowlevelError("Cannot adjust radare2 virtual memory");
 }
 static bool isptr(ut64 *p) {
-	if (!*p) return true;
-/*
-if (*p < 0x1000) {
-	return false;
-}
-*/
+	//if (!*p) return false;
+	if (*p < 0x1000) { return false; }
 	return (*p != UT64_MAX);
-	// return (*p >= 0x100003a54 && *p < 0x10000fa54);
 }
 
 void R2LoadImage::getReadonly(RangeList &list) const {
 	RCoreLock core(coreMutex);
 	int roprop = r_config_get_i (core->config, "r2ghidra.roprop");
-	// RCore *core = coreMutex->RCore();
-	// consider ANY address as resolable as a flag by r2
-	// this is used by the ropropagate code which follows
-	// pointers and replaces them with strings or flags
-	// in the decompilation. NULL is not considered.
 	if (roprop > 0) {
 		auto space = addr_space_manager->getDefaultCodeSpace ();
 		switch (roprop) {
@@ -101,7 +91,6 @@ void R2LoadImage::getReadonly(RangeList &list) const {
 			break;
 		case 2:
 			{
-				// ro maps when r2ghidra.roprop.ptr is false and r2ghidra.roprop is true
 				RIOMapRef *mapref;
 				RListIter *iter;
 				RIO *io = core->io;
@@ -117,9 +106,10 @@ void R2LoadImage::getReadonly(RangeList &list) const {
 				});
 			}
 		case 3:
-		default:
-			// full
 			list.insertRange(space, 0x1000, ST64_MAX - 1);
+			break;
+		default:
+			list.insertRange(space, 0, UT64_MAX - 1);
 			break;
 		}
 	}
