@@ -66,6 +66,7 @@ Usage: pdg  # Native Ghidra decompiler plugin
 The following config vars (for the `e` command) can be used to adjust r2ghidra's behavior:
 
 ```
+[0x000275a7]> e?r2ghidra.
       r2ghidra.casts: Show type casts where needed
     r2ghidra.cmt.cpp: C++ comment style
  r2ghidra.cmt.indent: Comment indent
@@ -74,7 +75,7 @@ The following config vars (for the `e` command) can be used to adjust r2ghidra's
     r2ghidra.linelen: Max line length
  r2ghidra.maximplref: Maximum number of references to an expression before showing an explicit variable.
      r2ghidra.rawptr: Show unknown globals as raw addresses instead of variables
-     r2ghidra.roprop: Propagate read-only constants
+     r2ghidra.roprop: Propagate read-only constants (0,1,2,3,4)
  r2ghidra.sleighhome: SLEIGHHOME
     r2ghidra.timeout: Run decompilation in a separate process and kill it after a specific time
     r2ghidra.verbose: Show verbose warning messages while decompiling

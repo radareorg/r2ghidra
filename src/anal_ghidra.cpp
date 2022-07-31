@@ -1747,6 +1747,7 @@ static void append_hardcoded_regs(std::stringstream &buf, const std::string &arc
 	case ('D' | 'A' << 8 | 'T' << 16): // DATA
 	case ('z' | '8' << 8 | '4' << 16): // z8401x
 	case ('8' | '0' << 8 | '4' << 16): // 8048
+	case ('w' | 'a' << 8 | 's' << 16): // wasm
 	case ('M' | 'C' << 8 | 'S' << 16): // MCS96
 	case ('M' | 'a' << 8 | 'n' << 16): // Management
 		break;
