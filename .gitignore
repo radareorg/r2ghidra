@@ -8,3 +8,4 @@ ghidra/flex/
 .vscode
 .ccls-cache
 .gdb_history
+dist/artifacts

@@ -1,7 +1,6 @@
 name: ci
 
 env:
-  R2G: 5.7.6
   R2V: 5.7.4
 
 on:
@@ -19,7 +18,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Installing radare2
-      run: ( git clone --depth=1 https://github.com/radareorg/radare2 && cd radare2 && sys/install.sh /usr )
+      run: ( git clone --depth=1 --branch "${R2V}" https://github.com/radareorg/radare2 && cd radare2 && sys/install.sh /usr )
     - name: Building r2ghidra with acr
       run: ./preconfigure && ./configure --prefix=/usr && make -j4 ; make user-install
     - name: Testing r2ghidra oneliner on home setup
@@ -32,20 +31,19 @@ jobs:
       run: make -C dist/debian
     - name: Running Testsuite
       run: make -C test || exit 0
-    - name: Uploading Artifacts
-      uses: actions/upload-artifact@v2
+    - name: Uploading debs
+      uses: actions/upload-artifact@v3
       with:
         # path: radare2/dist/debian/*/*.deb r2ghidra/dist/debian/*.deb
-        name: r2ghidra-${{env.R2G}}_amd64.deb
+        name: linux-acr-ok
         path: dist/debian/*.deb
     - name: Precompiling the sleigh
       run: make dist
-    - name: Uploading Artifacts
-      uses: actions/upload-artifact@v2
+    - name: Uploading sleigh
+      uses: actions/upload-artifact@v3
       with:
-        # path: radare2/dist/debian/*/*.deb r2ghidra/dist/debian/*.deb
-        name: r2ghidra_sleigh-${{env.R2G}}.zip
-        path: r2ghidra_sleigh-${{env.R2G}}.zip
+        name: linux-acr-ok
+        path: r2ghidra_sleigh-*.zip
 
   linux-asan:
     if: ${{ false }}  # disable for now
@@ -59,8 +57,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Installing radare2
-    #  run: ( git clone --depth=1 https://github.com/radareorg/radare2 && cd radare2 && sys/sanitize.sh --install /usr )
-      run: ( git clone --depth=1 https://github.com/radareorg/radare2 && cd radare2 && sys/install.sh --install )
+    #  run: ( git clone --depth=1 --branch "${R2V}" https://github.com/radareorg/radare2 && cd radare2 && sys/sanitize.sh --install /usr )
+      run: ( git clone --depth=1 --branch "${R2V}" https://github.com/radareorg/radare2 && cd radare2 && sys/install.sh --install )
     - name: Building r2ghidra with acr
       run: ./preconfigure && ./configure && make asan && make -C src sleigh-build && make user-install
     - name: Testing r2ghidra oneliner
@@ -105,7 +103,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Cloning Radare2 git repository
-      run: git clone --depth=1 https://github.com/radareorg/radare2
+      run: git clone --depth=1 --branch "${R2V}" https://github.com/radareorg/radare2
     - name: Building Radare2 pkg for macOS
       run: make -C radare2/dist/macos
     - name: Install radare2 Package
@@ -115,17 +113,17 @@ jobs:
     - name: Packaging r2ghidra
       run: |
         make -C dist/macos
-        make install DESTDIR=/tmp/r2ghidra && cd /tmp/r2ghidra && tar czvf ../r2ghidra-macos-${{env.R2G}}.tar.gz *
+        make install DESTDIR=/tmp/r2ghidra && cd /tmp/r2ghidra && tar czvf ../r2ghidra-macos.tar.gz *
     - name: Testing r2ghidra
       run: |
         r2 -qc 'af;pdg' test/bins/rec | tee a.txt
         grep csu_init a.txt
-    - name: Pub
-      uses: actions/upload-artifact@v2
+    - name: Uploading artifacts
+      uses: actions/upload-artifact@v3
       with:
-        name: r2ghidra-${{env.R2G}}-macos.tar.gz
+        name: macos-acr-ok
         path: dist/macos/*.zip
-        #path: radare2/dist/macos/*.pkg src/*.dylib /tmp/r2ghidra-macos-${{env.R2V}}.tar.gz dist/macos/*.zip
+        #path: radare2/dist/macos/*.pkg src/*.dylib /tmp/r2ghidra-macos.tar.gz dist/macos/*.zip
 
   w64:
     runs-on: windows-latest
@@ -155,9 +153,9 @@ jobs:
         call preconfigure.bat
         call configure.bat
         call make.bat
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
-        name: r2ghidra-${{env.R2G}}-w64.zip
+        name: w64
         path: destdir/r2ghidra-w64.zip
 
   check_release:
@@ -214,7 +212,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/artifacts/r2ghidra_${{ steps.r2gv.outputs.branch }}_amd64.deb
+          asset_path: dist/artifacts/linux-acr-ok/r2ghidra_${{ steps.r2gv.outputs.branch }}_amd64.deb
           asset_name: r2ghidra_${{ steps.r2gv.outputs.branch }}_amd64.deb
           asset_content_type: application/vnd.debian.binary-package
       - name: Upload asset for macOS
@@ -223,16 +221,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/artifacts/r2ghidra_${{ steps.r2gv.outputs.branch }}_macos.tar.gz
-          asset_name: r2ghidra_${{ steps.r2gv.outputs.branch }}_macos.tar.gz
-          asset_content_type: application/tar+gzip
+          asset_path: dist/artifacts/macos-acr-ok/r2ghidra-${{ steps.r2gv.outputs.branch }}-macos.zip
+          asset_name: r2ghidra-${{ steps.r2gv.outputs.branch }}-macos.zip
+          asset_content_type: application/zip
       - name: Upload asset for Windows (w64)
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/artifacts/r2ghidra-${{ steps.r2gv.outputs.branch }}-w64.zip
+          asset_path: dist/artifacts/w64/r2ghidra-w64.zip
           asset_name: r2ghidra-${{ steps.r2gv.outputs.branch }}-w64.zip
           asset_content_type: application/zip
       - name: Upload asset for Sleigh files
@@ -241,6 +239,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/artifacts/r2ghidra_sleigh-${{ steps.r2gv.outputs.branch }}.zip
+          asset_path: dist/artifacts/linux-acr-ok/r2ghidra_sleigh-${{ steps.r2gv.outputs.branch }}.zip
           asset_name: r2ghidra_sleigh-${{ steps.r2gv.outputs.branch }}.zip
           asset_content_type: application/zip
