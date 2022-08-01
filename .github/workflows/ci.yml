@@ -19,7 +19,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Installing radare2
-      run: ( git clone --depth=1 https://github.com/radareorg/radare2 && cd radare2 && sys/install.sh /usr )
+      run: ( git clone --depth=1 --branch "${R2V}" https://github.com/radareorg/radare2 && cd radare2 && sys/install.sh /usr )
     - name: Building r2ghidra with acr
       run: ./preconfigure && ./configure --prefix=/usr && make -j4 ; make user-install
     - name: Testing r2ghidra oneliner on home setup
@@ -59,8 +59,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Installing radare2
-    #  run: ( git clone --depth=1 https://github.com/radareorg/radare2 && cd radare2 && sys/sanitize.sh --install /usr )
-      run: ( git clone --depth=1 https://github.com/radareorg/radare2 && cd radare2 && sys/install.sh --install )
+    #  run: ( git clone --depth=1 --branch "${R2V}" https://github.com/radareorg/radare2 && cd radare2 && sys/sanitize.sh --install /usr )
+      run: ( git clone --depth=1 --branch "${R2V}" https://github.com/radareorg/radare2 && cd radare2 && sys/install.sh --install )
     - name: Building r2ghidra with acr
       run: ./preconfigure && ./configure && make asan && make -C src sleigh-build && make user-install
     - name: Testing r2ghidra oneliner
@@ -105,7 +105,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Cloning Radare2 git repository
-      run: git clone --depth=1 https://github.com/radareorg/radare2
+      run: git clone --depth=1 --branch "${R2V}" https://github.com/radareorg/radare2
     - name: Building Radare2 pkg for macOS
       run: make -C radare2/dist/macos
     - name: Install radare2 Package
