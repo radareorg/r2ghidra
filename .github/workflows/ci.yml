@@ -1,6 +1,7 @@
 name: ci
 
 env:
+  R2G: 5.7.6
   R2V: 5.7.4
 
 on:
@@ -35,7 +36,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         # path: radare2/dist/debian/*/*.deb r2ghidra/dist/debian/*.deb
-        name: r2ghidra-${{env.R2V}}_amd64.deb
+        name: r2ghidra-${{env.R2G}}_amd64.deb
         path: dist/debian/*.deb
     - name: Precompiling the sleigh
       run: make dist
@@ -43,8 +44,8 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         # path: radare2/dist/debian/*/*.deb r2ghidra/dist/debian/*.deb
-        name: r2ghidra_sleigh-${{env.R2V}}.zip
-        path: r2ghidra_sleigh-${{env.R2V}}.zip
+        name: r2ghidra_sleigh-${{env.R2G}}.zip
+        path: r2ghidra_sleigh-${{env.R2G}}.zip
 
   linux-asan:
     if: ${{ false }}  # disable for now
@@ -114,7 +115,7 @@ jobs:
     - name: Packaging r2ghidra
       run: |
         make -C dist/macos
-        make install DESTDIR=/tmp/r2ghidra && cd /tmp/r2ghidra && tar czvf ../r2ghidra-macos-${{env.R2V}}.tar.gz *
+        make install DESTDIR=/tmp/r2ghidra && cd /tmp/r2ghidra && tar czvf ../r2ghidra-macos-${{env.R2G}}.tar.gz *
     - name: Testing r2ghidra
       run: |
         r2 -qc 'af;pdg' test/bins/rec | tee a.txt
@@ -122,7 +123,7 @@ jobs:
     - name: Pub
       uses: actions/upload-artifact@v2
       with:
-        name: r2ghidra-${{env.R2V}}-macos.tar.gz
+        name: r2ghidra-${{env.R2G}}-macos.tar.gz
         path: dist/macos/*.zip
         #path: radare2/dist/macos/*.pkg src/*.dylib /tmp/r2ghidra-macos-${{env.R2V}}.tar.gz dist/macos/*.zip
 
@@ -156,7 +157,7 @@ jobs:
         call make.bat
     - uses: actions/upload-artifact@v2
       with:
-        name: r2ghidra-${{env.R2V}}-w64.zip
+        name: r2ghidra-${{env.R2G}}-w64.zip
         path: destdir/r2ghidra-w64.zip
 
   check_release:
