@@ -214,7 +214,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/artifacts/linux-acr-ok/r2ghidra/r2ghidra_${{ steps.r2gv.outputs.branch }}_amd64.deb
+          asset_path: dist/artifacts/r2ghidra_${{ steps.r2gv.outputs.branch }}_amd64.deb
           asset_name: r2ghidra_${{ steps.r2gv.outputs.branch }}_amd64.deb
           asset_content_type: application/vnd.debian.binary-package
       - name: Upload asset for macOS
@@ -223,7 +223,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/artifacts/macos-acr-ok/r2ghidra/r2ghidra_${{ steps.r2gv.outputs.branch }}_macos.tar.gz
+          asset_path: dist/artifacts/r2ghidra_${{ steps.r2gv.outputs.branch }}_macos.tar.gz
           asset_name: r2ghidra_${{ steps.r2gv.outputs.branch }}_macos.tar.gz
           asset_content_type: application/tar+gzip
       - name: Upload asset for Windows (w64)
@@ -232,7 +232,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/artifacts/w64/r2ghidra-${{ steps.r2gv.outputs.branch }}-w64.zip
+          asset_path: dist/artifacts/r2ghidra-${{ steps.r2gv.outputs.branch }}-w64.zip
           asset_name: r2ghidra-${{ steps.r2gv.outputs.branch }}-w64.zip
           asset_content_type: application/zip
       - name: Upload asset for Sleigh files
@@ -241,6 +241,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/artifacts/linux-acr-ok/r2ghidra_sleigh-${{ steps.r2gv.outputs.branch }}.zip
+          asset_path: dist/artifacts/r2ghidra_sleigh-${{ steps.r2gv.outputs.branch }}.zip
           asset_name: r2ghidra_sleigh-${{ steps.r2gv.outputs.branch }}.zip
           asset_content_type: application/zip
