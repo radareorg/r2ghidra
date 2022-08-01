@@ -13,15 +13,15 @@ if [ $? != 0 ]; then
 	sudo dpkg -i r2/dist/debian/*/*.deb
 fi
 [ -z "${DESTDIR}" ] && DESTDIR="/work/dist/debian/root"
-VERSION=`r2 -qv`
-[ -z "${VERSION}" ] && VERSION=`r2/configure -qV`
-RV=${VERSION}
+
+RV=`r2 -qv`
+[ -z "${RV}" ] && RV=`r2/configure -qV`
 
 R2_LIBR_PLUGINS=`r2 -HR2_LIBR_PLUGINS`
-[ -z "${DESTDIR}" ] && DESTDIR=/
 [ -z "${R2_LIBR_PLUGINS}" ] && R2_LIBR_PLUGINS=/usr/lib/radare2/last
+
 export CFLAGS=-O2
-make R2_PLUGDIR=${R2_LIBR_PLUGINS} DESTDIR=${DESTDIR}
+make R2_LIBR_PLUGINS=${R2_LIBR_PLUGINS} DESTDIR=${DESTDIR}
 
 ./configure --prefix=/usr
 make -j4
