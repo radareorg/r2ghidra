@@ -1,5 +1,5 @@
 PACKAGE=r2ghidra
-VERSION=$(shell r2 -qv)
+VERSION=$(shell ../../configure -qV)
 ARCH=amd64
 DEPENDS=radare2
 REPLACES=r2ghidra-dec
