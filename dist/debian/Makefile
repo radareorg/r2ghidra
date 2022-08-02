@@ -6,7 +6,7 @@ PWD=$(shell pwd)
 PACKAGE_DIR?=${PWD}
 
 DOCKCROSS=$(PWD)/../docker/dockcross
-R2_LIBR_PLUGINS=/usr/lib/radare2/$(RV)
+R2PLUGDIR=$(shell r2 -H R2_LIBR_PLUGINS)
 
 all: root
 	$(MAKE) build

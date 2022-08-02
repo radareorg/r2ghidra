@@ -17,11 +17,11 @@ fi
 RV=`r2 -qv`
 [ -z "${RV}" ] && RV=`r2/configure -qV`
 
-R2_LIBR_PLUGINS=`r2 -HR2_LIBR_PLUGINS`
-[ -z "${R2_LIBR_PLUGINS}" ] && R2_LIBR_PLUGINS=/usr/lib/radare2/last
+R2_LIBR_PLUGINS=`r2 -H R2_LIBR_PLUGINS`
+[ -z "${R2_LIBR_PLUGINS}" ] && R2_LIBR_PLUGINS=/usr/lib/radare2
 
 export CFLAGS=-O2
-make R2_LIBR_PLUGINS=${R2_LIBR_PLUGINS} DESTDIR=${DESTDIR}
+make R2_PLUGDIR=${R2_LIBR_PLUGINS} DESTDIR=${DESTDIR}
 
 ./configure --prefix=/usr
 make -j4
