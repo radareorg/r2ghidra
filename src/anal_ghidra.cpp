@@ -1347,7 +1347,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 	}
 
 	// std::cerr << hex << anal_op->addr << " " << ss.str() << endl;
-	esilprintf (anal_op, ss.str()[0] == ','? ss.str().c_str() + 1: ss.str().c_str());
+	esilprintf (anal_op, "%s", ss.str()[0] == ','? ss.str().c_str() + 1: ss.str().c_str());
 }
 
 #if 0
