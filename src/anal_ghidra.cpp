@@ -1405,7 +1405,7 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 		}
 		if (pcode_slg.pcodes.empty()) { // NOP case
 			anal_op->type = R_ANAL_OP_TYPE_NOP;
-			esilprintf (anal_op, "");
+			esilprintf (anal_op, "%s", "");
 			return anal_op->size;
 		}
 
