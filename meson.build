@@ -33,6 +33,14 @@ incdirs = [
   'ghidra-native/src/decompiler/',
 ]
 
+res = run_command(['r2','-HR2_LIBR_PLUGINS'], capture:true)
+if res.returncode() == 0
+  r2_plugdir = res.stdout().strip()
+else
+  prefix = get_option('prefix')
+  r2_plugdir = prefix + '/lib/radare2/plugins'
+endif
+
 cpp = meson.get_compiler('cpp')
 if cpp.get_id() == 'msvc'
   incdirs += [
@@ -189,8 +197,11 @@ r2ghidra_core_plugin = library('core_r2ghidra',
   r2ghidra_core_sources,
   dependencies: [r_core],
   override_options : ['c_std=c11', 'cpp_std=c++11'],
-  include_directories: r2ghidra_incdirs
+  include_directories: r2ghidra_incdirs,
+  install: true,
+  install_dir: r2_plugdir
 )
+
 
 sleighc_exe = executable('sleighc', sleighc_sources,
   include_directories: r2ghidra_incdirs,
