@@ -61,5 +61,4 @@ r2ghidra_sleigh.zip dist:
 	cd tmp && zip -r ../r2ghidra_sleigh-$(VERSION).zip *
 	rm -rf tmp
 
-
 .PHONY: mrproper clean install uninstall all dist

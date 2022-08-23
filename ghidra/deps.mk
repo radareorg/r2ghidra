@@ -100,13 +100,13 @@ GHIDRA_LIBDECOMP_OBJS+=$(subst .cc,.o,$(GHIDRA_LIBDECOMP_SRCS))
 GHIDRA_SLEIGH_COMPILER_SRCS=slgh_compile.cc
 GHIDRA_SLEIGH_COMPILER_OBJS=$(subst .cc,.o,$(GHIDRA_SLEIGH_COMPILER_SRCS))
 
-sleigh: sleighc
+sleigh: r2ghidra-sleighc
 	$(SLEIGHC) $(SPECFILE) $(SLAFILE)
 
 SLEIGHTC_OBJS=$(GHIDRA_DECOMPILER)/slgh_compile.o $(GHIDRA_DECOMPILER)/slghscan.o $(GHIDRA_DECOMPILER)/slghparse.o
 
-sleighc: $(SLEIGHTC_OBJS) $(GHIDRA_OBJS)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o sleighc $(SLEIGHTC_OBJS) $(GHIDRA_OBJS)
+r2ghidra-sleighc: $(SLEIGHTC_OBJS) $(GHIDRA_OBJS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o r2ghidra-sleighc $(SLEIGHTC_OBJS) $(GHIDRA_OBJS)
 
 GHIDRA_SLEIGH_HOME=$(GHIDRA_HOME)/src/Processors
 GHIDRA_SLEIGH_SLASPECS=$(GHIDRA_SLEIGH_HOME)/*.slaspec
@@ -117,8 +117,8 @@ GHIDRA_SLEIGH_FILES+=$(GHIDRA_SLEIGH_HOME)/*.pspec
 ../ghidra-processors.txt:
 	cp -f ../ghidra-processors.txt.default ../ghidra-processors.txt
 
-sleigh-build: sleighc ../ghidra-processors.txt
-	for a in DATA $(shell cat ../ghidra-processors.txt) ; do ./sleighc -a $(GHIDRA_SLEIGH_HOME)/$$a ; done
+sleigh-build: r2ghidra-sleighc ../ghidra-processors.txt
+	for a in DATA $(shell cat ../ghidra-processors.txt) ; do ./r2ghidra-sleighc -a $(GHIDRA_SLEIGH_HOME)/$$a ; done
 
 GHIDRA_PROCS=$(GHIDRA_SLEIGH_HOME)/*/*/*
 
