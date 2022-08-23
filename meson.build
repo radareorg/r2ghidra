@@ -1,10 +1,10 @@
 project(
   'r2ghidra',
   ['c', 'cpp'],
-license : 'LGPL3',
-meson_version : '>=0.50.1',
-version : '5.7.6',
-default_options : ['c_std=c11', 'cpp_std=c++11']
+  license : 'LGPL3',
+  meson_version : '>=0.50.1',
+  version : '5.7.6',
+  default_options : ['c_std=c11', 'cpp_std=c++11']
 )
 
 pugixml_sources = [
@@ -25,7 +25,6 @@ r2ghidra_sources = [
   'src/SleighAsm.cpp',
   'src/SleighInstruction.cpp',
 ]
-
 
 incdirs = [
   'src',
@@ -202,9 +201,9 @@ r2ghidra_core_plugin = library('core_r2ghidra',
   install_dir: r2_plugdir
 )
 
-
 sleighc_exe = executable('sleighc', sleighc_sources,
   include_directories: r2ghidra_incdirs,
   override_options : ['c_std=c11', 'cpp_std=c++11'],
   dependencies: [r_core],
+  install: true
 )
