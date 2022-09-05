@@ -64,7 +64,11 @@ void R2LoadImage::getReadonly(RangeList &list) const {
 					ut64 basefin = begin;
 					ut8 *data = buf;
 					bool hasdata = false;
+#if R2_VERSION_NUMBER >= 50609
 					int inc = (core->rasm->config->bits == 64)? 8: 4;
+#else
+					int inc = (core->rasm->bits == 64)? 8: 4;
+#endif
 					for (int i = 0; i < fin; i += inc) {
 						basefin = begin + i;
 						if (isptr ((ut64 *)(data + i))) {
