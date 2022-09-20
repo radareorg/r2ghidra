@@ -190,7 +190,7 @@ void SleighAnalValue::mem(uint4 size) {
 	if (is_mem ()) {
 		return;
 	}
-	if(is_imm ()) {
+	if (is_imm ()) {
 		base = imm;
 		imm = 0;
 	}
