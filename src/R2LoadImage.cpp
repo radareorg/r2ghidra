@@ -36,6 +36,8 @@ void R2LoadImage::getReadonly(RangeList &list) const {
 		auto space = addr_space_manager->getDefaultCodeSpace ();
 		switch (roprop) {
 		case 1:
+			break;
+		case 2:
 			{
 				// find ranges with pointers
 				RIOMapRef *mapref;
@@ -93,7 +95,7 @@ void R2LoadImage::getReadonly(RangeList &list) const {
 				});
 			}
 			break;
-		case 2:
+		case 3:
 			{
 				RIOMapRef *mapref;
 				RListIter *iter;
@@ -109,7 +111,8 @@ void R2LoadImage::getReadonly(RangeList &list) const {
 					list.insertRange(space, begin, end);
 				});
 			}
-		case 3:
+			break;
+		case 4:
 			list.insertRange(space, 0x1000, ST64_MAX - 1);
 			break;
 		default:
