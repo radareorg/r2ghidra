@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2019-2021 - pancake */
+/* r2ghidra - LGPL - Copyright 2019-2022 - pancake */
 
 #include "CodeXMLParse.h"
 
@@ -6,9 +6,16 @@
 #undef LoadImage
 #endif
 
+#define TEST_UNKNOWN_NODES 0
+#define USE_RXML 0 /* only for r2-5.8 */
+
 #include <funcdata.hh>
 #include <r_util.h>
+#if USE_RXML
+#include <r_util/r_xml.h>
+#else
 #include <pugixml.hpp>
+#endif
 #include <sstream>
 #include <string>
 
@@ -50,7 +57,7 @@ void AnnotateOpref(ANNOTATOR_PARAMS) {
 		return;
 	}
 	auto opit = ctx->ops.find ((uintm)opref);
-	if(opit == ctx->ops.end ()) {
+	if (opit == ctx->ops.end ()) {
 		return;
 	}
 	auto op = opit->second;
@@ -79,11 +86,11 @@ void AnnotateFunctionName(ANNOTATOR_PARAMS) {
 			RCodeMetaItem offsetAnnotation = {};
 			offsetAnnotation.type = R_CODEMETA_TYPE_OFFSET;
 			offsetAnnotation.offset.offset = annotation.reference.offset;
-			out->push_back(offsetAnnotation);
+			out->push_back (offsetAnnotation);
 		}
 		return;
 	}
-	ut64 opref = attr.as_ullong(UT64_MAX);
+	ut64 opref = attr.as_ullong (UT64_MAX);
 	if (opref == UT64_MAX) {
 		return;
 	}
@@ -102,11 +109,13 @@ void AnnotateFunctionName(ANNOTATOR_PARAMS) {
 
 void AnnotateCommentOffset(ANNOTATOR_PARAMS) {
 	pugi::xml_attribute attr = node.attribute("off");
-	if(attr.empty())
+	if (attr.empty()) {
 		return;
+	}
 	ut64 off = attr.as_ullong(UT64_MAX);
-	if(off == UT64_MAX)
+	if (off == UT64_MAX) {
 		return;
+	}
 	out->emplace_back();
 	auto &annotation = out->back();
 	annotation = {};
@@ -118,16 +127,12 @@ void AnnotateCommentOffset(ANNOTATOR_PARAMS) {
  * Translate Ghidra's color annotations, which are essentially
  * loose token classes of the high level decompiled source code.
  **/
-void AnnotateColor(ANNOTATOR_PARAMS)
-{
+void AnnotateColor(ANNOTATOR_PARAMS) {
 	pugi::xml_attribute attr = node.attribute("color");
 	if (attr.empty ()) {
 		return;
 	}
 	std::string color = attr.as_string();
-	if (color == "") {
-		return;
-	}
 	RSyntaxHighlightType type;
 	if (color == "keyword") {
 		type = R_SYNTAX_HIGHLIGHT_TYPE_KEYWORD;
@@ -227,7 +232,6 @@ static const std::map<std::string, std::vector <void (*)(ANNOTATOR_PARAMS)> > an
 	{ "syntax", { AnnotateColor } }
 };
 
-//#define TEST_UNKNOWN_NODES
 
 /**
  * Ghidra returns an annotated AST of the decompiled high-level language code.
@@ -296,7 +300,7 @@ static void ParseNode(pugi::xml_node node, ParseCodeXMLContext *ctx, std::ostrea
 
 R_API RCodeMeta *ParseCodeXML(Funcdata *func, const char *xml) {
 	pugi::xml_document doc;
-	if(!doc.load_string(xml, pugi::parse_default | pugi::parse_ws_pcdata)) {
+	if(!doc.load_string (xml, pugi::parse_default | pugi::parse_ws_pcdata)) {
 		return nullptr;
 	}
 	std::stringstream ss;
@@ -304,11 +308,9 @@ R_API RCodeMeta *ParseCodeXML(Funcdata *func, const char *xml) {
 	if (!code) {
 		return nullptr;
 	}
-
-	ParseCodeXMLContext ctx(func);
-	ParseNode(doc.child("function"), &ctx, ss, code);
-
-	std::string str = ss.str();
-	code->code = strdup (str.c_str());
+	ParseCodeXMLContext ctx (func);
+	ParseNode (doc.child ("function"), &ctx, ss, code);
+	std::string str = ss.str ();
+	code->code = strdup (str.c_str ());
 	return code;
 }
