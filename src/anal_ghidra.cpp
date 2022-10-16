@@ -1639,7 +1639,12 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 			}
 #endif
 		}
-		if (mask & R_ANAL_OP_MASK_ESIL) {
+#if R2_VERSION_NUMBER >= 50709
+		if (mask & R_ARCH_OP_MASK_ESIL)
+#else
+		if (mask & R_ANAL_OP_MASK_ESIL)
+#endif
+		{
 			sleigh_esil (a, anal_op, addr, data, len, pcode_slg.pcodes);
 		}
 		return anal_op->size;
