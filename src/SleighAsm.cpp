@@ -411,6 +411,7 @@ std::string SleighAsm::getSleighHome(RConfig *cfg) {
 		free ((void *)path);
 		return res;
 	}
+	free ((void *)path);
 	path = strdup (R2_PREFIX "/lib/radare2/" R2_VERSION "/r2ghidra_sleigh");
 	if (r_file_is_directory (path)) {
 		if (cfg) {
