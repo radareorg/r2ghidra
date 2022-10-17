@@ -250,7 +250,7 @@ static void ParseNode(pugi::xml_node node, ParseCodeXMLContext *ctx, std::ostrea
 	}
 
 	std::vector<RCodeMetaItem> annotations;
-#ifdef TEST_UNKNOWN_NODES
+#if TEST_UNKNOWN_NODES
 	bool close_test = false;
 	static const std::set<std::string> boring_tags = { "syntax" };
 #endif
@@ -269,7 +269,7 @@ static void ParseNode(pugi::xml_node node, ParseCodeXMLContext *ctx, std::ostrea
 				annotation.start = stream.tellp();
 			}
 		}
-#ifdef TEST_UNKNOWN_NODES
+#if TEST_UNKNOWN_NODES
 		else if (boring_tags.find(node.name()) == boring_tags.end()) {
 			close_test = true;
 			stream << "<" << node.name();
@@ -291,7 +291,7 @@ static void ParseNode(pugi::xml_node node, ParseCodeXMLContext *ctx, std::ostrea
 		RCodeMetaItem *item = r_codemeta_item_clone (&annotation);
 		r_codemeta_add_item (code, item);
 	}
-#ifdef TEST_UNKNOWN_NODES
+#if TEST_UNKNOWN_NODES
 	if (close_test) {
 		stream << "</" << node.name() << ">";
 	}
