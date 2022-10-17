@@ -133,6 +133,9 @@ void AnnotateColor(ANNOTATOR_PARAMS) {
 		return;
 	}
 	std::string color = attr.as_string();
+	if (color == "") {
+		return;
+	}
 	RSyntaxHighlightType type;
 	if (color == "keyword") {
 		type = R_SYNTAX_HIGHLIGHT_TYPE_KEYWORD;
