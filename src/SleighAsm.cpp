@@ -392,23 +392,8 @@ std::string SleighAsm::getSleighHome(RConfig *cfg) {
 		return R2GHIDRA_SLEIGHHOME_DEFAULT;
 	}
 #endif
-	// XXX use xdg instead of hardcoded paths
 #if R2_VERSION_NUMBER >= 50709
-	path = r_file_home (".local/lib/radare2/last/r2ghidra_sleigh");
-#else
-	path = r_str_home (".local/lib/radare2/last/r2ghidra_sleigh");
-#endif
-	if (r_file_is_directory (path)) {
-		if (cfg) {
-			r_config_set (cfg, varname, path);
-		}
-		std::string res (path);
-		free ((void *)path);
-		return res;
-	}
-	// XXX use xdg instead of hardcoded paths
-#if R2_VERSION_NUMBER >= 50709
-	path = r_file_home (".local/share/radare2/r2pm/git/ghidra");
+	path = r_xdg_datadir ("radare2/r2pm/git/ghidra");
 #else
 	path = r_str_home (".local/share/radare2/r2pm/git/ghidra");
 #endif
