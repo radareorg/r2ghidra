@@ -367,7 +367,7 @@ std::string SleighAsm::getSleighHome(RConfig *cfg) {
 
 	// user-set, for example from .radare2rc
 	if (cfg != nullptr) {
-		const char *val = r_config_get(cfg, varname);
+		const char *val = r_config_get (cfg, varname);
 		if (R_STR_ISNOTEMPTY (val)) {
 			return std::string (val);
 		}
@@ -384,14 +384,6 @@ std::string SleighAsm::getSleighHome(RConfig *cfg) {
 		return res;
 	}
 
-#ifdef R2GHIDRA_SLEIGHHOME_DEFAULT
-	if (r_file_is_directory (R2GHIDRA_SLEIGHHOME_DEFAULT)) {
-		if (cfg) {
-			r_config_set (cfg, varname, R2GHIDRA_SLEIGHHOME_DEFAULT);
-		}
-		return R2GHIDRA_SLEIGHHOME_DEFAULT;
-	}
-#endif
 #if R2_VERSION_NUMBER >= 50709
 	path = r_xdg_datadir ("radare2/r2pm/git/ghidra");
 #else
@@ -415,6 +407,14 @@ std::string SleighAsm::getSleighHome(RConfig *cfg) {
 		free ((void *)path);
 		return res;
 	} else {
+#ifdef R2GHIDRA_SLEIGHHOME_DEFAULT
+		if (r_file_is_directory (R2GHIDRA_SLEIGHHOME_DEFAULT)) {
+			if (cfg) {
+				r_config_set (cfg, varname, R2GHIDRA_SLEIGHHOME_DEFAULT);
+			}
+			return R2GHIDRA_SLEIGHHOME_DEFAULT;
+		}
+#endif
 		R_LOG_ERROR ("Cannot find the sleigh home at '%s'. Fix it with `r2pm -ci r2ghidra-sleigh`", path);
 		free (path);
 		throw LowlevelError ("Missing r2ghidra_sleigh");
