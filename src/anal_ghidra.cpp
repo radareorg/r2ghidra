@@ -1675,7 +1675,7 @@ static const char *r_reg_type_arr[] = {
 static const char *r_reg_string_arr[] = {
 	"gpr", "drx", "drx", "drx", "drx", "drx",
 	"drx", "gpr", "gpr", "gpr", "flg", "flg",
-	"ymm", "mmx", "fpu", "fpu", "drx", "ymm", nullptr
+	"vec256", "vec64", "fpu", "fpu", "drx", "vec256", nullptr
 };
 
 static int get_reg_type(const std::string &name) {
@@ -1697,9 +1697,22 @@ static int get_reg_type(const std::string &name) {
 			case 'g' | 'p' << 8: return R_REG_TYPE_GPR;
 			case 'd' | 'r' << 8: return R_REG_TYPE_DRX;
 			case 'f' | 'p' << 8: return R_REG_TYPE_FPU;
+#if R2_VERSION_NUMBER < 50709
 			case 'm' | 'm' << 8: return R_REG_TYPE_MMX;
 			case 'x' | 'm' << 8: return R_REG_TYPE_XMM;
 			case 'y' | 'm' << 8: return R_REG_TYPE_YMM;
+#else
+			case 'v' | 'e' << 8:
+				switch (curr[3]) {
+				case '6':
+					return R_REG_TYPE_VEC64;
+				case '1':
+					return R_REG_TYPE_VEC128;
+				case '2':
+					return R_REG_TYPE_VEC256;
+				}
+				break;
+#endif
 			case 'f' | 'l' << 8: return R_REG_TYPE_FLG;
 			case 's' | 'e' << 8: return R_REG_TYPE_SEG;
 			}
