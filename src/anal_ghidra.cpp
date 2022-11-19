@@ -10,6 +10,17 @@
 #include "SleighAsm.h"
 #include "SleighAnalValue.h"
 
+#if R2_VERSION_NUMBER >= 50709
+#define RAnalEsil REsil
+#define r_anal_esil_get_parm r_esil_get_parm
+#define r_anal_esil_set_op r_esil_set_op
+#define r_anal_esil_pop r_esil_pop
+#define r_anal_esil_push r_esil_push
+#define r_anal_esil_get_parm_type r_esil_get_parm_type
+#define r_anal_esil_pushnum r_esil_pushnum
+#define R_ANAL_ESIL_PARM_REG R_ESIL_PARM_REG
+#define R_ANAL_ESIL_OP_TYPE_CUSTOM R_ESIL_OP_TYPE_CUSTOM
+#endif
 // XXX dont use globals
 static SleighAsm *sanal = nullptr;
 

@@ -2,6 +2,9 @@
 
 #include <r_lib.h>
 #include <r_anal.h>
+#if R2_VERSION_NUMBER >= 50709
+#define RAnalEsil REsil
+#endif
 
 extern int sanal_init(void *p);
 extern int sanal_fini(void *p);
