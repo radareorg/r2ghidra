@@ -219,7 +219,7 @@ public:
 	std::unordered_map<std::string, std::string> reg_mapping;
 	SleighAsm(): loader(nullptr), trans(nullptr, nullptr) {}
 	void init(const char *cpu, int bits, bool bigendian, RIO *io, RConfig *cfg);
-	int disassemble(RAsmOp *op, unsigned long long offset);
+	int disassemble(RAnalOp *op, unsigned long long offset);
 	int genOpcode(PcodeSlg &pcode_slg, Address &addr);
 	std::vector<R2Reg> getRegs(void);
 	static RConfig *getConfig(RAsm *a);

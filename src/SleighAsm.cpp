@@ -421,7 +421,7 @@ std::string SleighAsm::getSleighHome(RConfig *cfg) {
 	}
 }
 
-int SleighAsm::disassemble(RAsmOp *op, unsigned long long offset) {
+int SleighAsm::disassemble(RAnalOp *op, unsigned long long offset) {
 	AssemblySlg assem (this);
 	Address addr(trans.getDefaultCodeSpace (), offset);
 	int length = 0;
@@ -429,8 +429,8 @@ int SleighAsm::disassemble(RAsmOp *op, unsigned long long offset) {
 		length = trans.printAssembly (assem, addr);
 		char *d = strdup (assem.str);
 		r_str_case (d, false);
-		r_strbuf_set (&op->buf_asm, d);
-		free (d);
+		free (op->mnemonic);
+		op->mnemonic = d;
 #if 0
 		auto *ins = trans.getInstruction(addr);
 		stringstream ss;
@@ -442,11 +442,13 @@ int SleighAsm::disassemble(RAsmOp *op, unsigned long long offset) {
 #endif
 	} catch (BadDataError &err) {
 		/* Meet unknown data -> invalid opcode */
-		r_strbuf_set(&op->buf_asm, "invalid");
+		free (op->mnemonic);
+		op->mnemonic = strdup ("invalid");
 		length = alignment;
 	} catch (UnimplError &err) {
 		/* Meet unimplemented data -> invalid opcode */
-		r_strbuf_set(&op->buf_asm, "invalid");
+		free (op->mnemonic);
+		op->mnemonic = strdup ("invalid");
 		length = alignment;
 	}
 	return length;
