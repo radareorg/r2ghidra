@@ -150,7 +150,7 @@ static ut32 anal_type_MOV(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcode
 				if (in0.is_valid() && (in0.is_imm() || reg_set_has(reg_set, in0))) {
 					anal_op->type = this_type;
 #if R2_VERSION_NUMBER >= 50709
-#warning anal srcs/dsts is disabled from now on
+#pragma message("anal srcs/dsts is disabled from now on")
 #else
 					anal_op->src[0] = in0.dup ();
 					anal_op->dst = out.dup ();
@@ -170,7 +170,7 @@ static ut32 anal_type_MOV(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcode
 				out.mem(iter->output->size);
 				anal_op->type = this_type;
 #if R2_VERSION_NUMBER >= 50709
-#warning anal srcs/dsts is disabled from now on
+#pragma warning("anal srcs/dsts is disabled from now on")
 #else
 				anal_op->src[0] = in0.dup ();
 				anal_op->dst = out.dup ();
@@ -219,7 +219,7 @@ static ut32 anal_type_LOAD(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcod
 				if (in0.is_valid() && in0.is_mem()) {
 					anal_op->type = this_type;
 #if R2_VERSION_NUMBER >= 50709
-#warning anal srcs/dsts is disabled from now on
+#pragma warning("anal srcs/dsts is disabled from now on")
 #else
 					anal_op->src[0] = in0.dup ();
 					anal_op->dst = out.dup ();
@@ -263,7 +263,7 @@ static ut32 anal_type_STORE(RAnal *anal, RAnalOp *anal_op, const std::vector<Pco
 				out.mem(iter->output->size);
 				anal_op->type = this_type;
 #if R2_VERSION_NUMBER >= 50709
-#warning anal srcs/dsts is disabled from now on
+#pragma warning("anal srcs/dsts is disabled from now on")
 #else
 				anal_op->src[0] = in0.dup ();
 				anal_op->dst = out.dup ();
@@ -287,7 +287,7 @@ static ut32 anal_type_STORE(RAnal *anal, RAnalOp *anal_op, const std::vector<Pco
 				if (out.is_valid() && out.is_mem()) {
 					anal_op->type = this_type;
 #if R2_VERSION_NUMBER >= 50709
-#warning anal srcs/dsts is disabled from now on
+#pragma warning("anal srcs/dsts is disabled from now on")
 #else
 					anal_op->src[0] = in0.dup ();
 					anal_op->dst = out.dup ();
@@ -357,7 +357,7 @@ static ut32 anal_type_XPUSH(RAnal *anal, RAnalOp *anal_op, const std::vector<Pco
 					anal_op->type = R_ANAL_OP_TYPE_RPUSH;
 				}
 #if R2_VERSION_NUMBER >= 50709
-#warning anal srcs/dsts is disabled from now on
+#pragma warning("anal srcs/dsts is disabled from now on")
 #else
 				anal_op->src[0] = in.dup ();
 				anal_op->dst = out.dup ();
@@ -390,7 +390,7 @@ static ut32 anal_type_POP(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcode
 			if (in0.reg && !strcmp ("lp", in0.reg->name)) {
 				anal_op->type = R_ANAL_OP_TYPE_RET;
 #if R2_VERSION_NUMBER >= 50709
-#warning anal srcs/dsts is disabled from now on
+#pragma warning("anal srcs/dsts is disabled from now on")
 #else
 				anal_op->src[0] = in0.dup ();
 #endif
@@ -412,7 +412,7 @@ static ut32 anal_type_POP(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcode
 				anal_op->type = this_type;
 				anal_op->stackop = R_ANAL_STACK_INC;
 #if R2_VERSION_NUMBER >= 50709
-#warning anal srcs/dsts is disabled from now on
+#pragma warning("anal srcs/dsts is disabled from now on")
 #else
 				anal_op->dst = out.dup ();
 				anal_op->src[0] = in0.dup ();
@@ -479,7 +479,7 @@ static ut32 anal_type_XCMP(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcod
 			// anal_op->cond = R_ANAL_COND_EQ; Should I enable this? I think sub can judge equal and
 			// less or more.
 #if R2_VERSION_NUMBER >= 50709
-#warning anal srcs/dsts is disabled from now on
+#pragma warning("anal srcs/dsts is disabled from now on")
 #else
 			anal_op->src[0] = in0.dup ();
 			anal_op->src[1] = in1.dup ();
@@ -553,7 +553,7 @@ static ut32 anal_type_XXX(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcode
 					default: break;
 					}
 #if R2_VERSION_NUMBER >= 50709
-#warning anal srcs/dsts is disabled from now on
+#pragma warning("anal srcs/dsts is disabled from now on")
 #else
 					anal_op->src[0] = in0.dup ();
 					anal_op->src[1] = in1.dup ();
@@ -609,7 +609,7 @@ static ut32 anal_type_NOR(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcode
 					out = *p;
 					anal_op->type = this_type;
 #if R2_VERSION_NUMBER >= 50709
-#warning anal srcs/dsts is disabled from now on
+#pragma warning("anal srcs/dsts is disabled from now on")
 #else
 					anal_op->src[0] = in0.dup ();
 					anal_op->src[1] = in1.dup ();
@@ -648,7 +648,7 @@ static ut32 anal_type_NOT(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcode
 					out = *p;
 					anal_op->type = this_type;
 #if R2_VERSION_NUMBER >= 50709
-#warning anal srcs/dsts is disabled from now on
+#pragma warning("anal srcs/dsts is disabled from now on")
 #else
 					anal_op->src[0] = in0.dup ();
 					anal_op->dst = out.dup ();
@@ -685,7 +685,7 @@ static ut32 anal_type_XCHG(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcod
 		}
 		anal_op->type = this_type;
 #if R2_VERSION_NUMBER >= 50709
-#warning anal srcs/dsts is disabled from now on
+#pragma warning("anal srcs/dsts is disabled from now on");
 #else
 		anal_op->src[0] = SleighAnalValue::resolve_arg (anal, copy_vec[0]->input0).dup ();
 		anal_op->dst = SleighAnalValue::resolve_arg (anal, copy_vec[2]->output).dup ();
@@ -1625,7 +1625,7 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 				std::cerr << " val: " << anal_op->val << std::endl;
 			} else {
 #if R2_VERSION_NUMBER >= 50709
-#warning anal srcs/dsts is disabled from now on
+#pragma warning("anal srcs/dsts is disabled from now on")
 #else
 				if (anal_op->dst) {
 					std::cerr << " dst: ";
