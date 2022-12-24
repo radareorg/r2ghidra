@@ -28,7 +28,7 @@ jobs:
     - name: Testing r2ghidra oneliner on system wide install
       run: R2_DEBUG=1 r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
     - name: Packaging r2ghidra for Debian using Dockcross
-      run: fakeroot make -C dist/debian
+      run: make -C dist/debian
     - name: Running Testsuite
       run: make -C test || exit 0
     - name: Uploading debs
