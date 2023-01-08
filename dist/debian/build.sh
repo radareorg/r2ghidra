@@ -1,5 +1,12 @@
 #!/bin/sh
 
+type fakeroot > /dev/null 2>&1
+if [ $? = 0 ]; then
+FAKEROOT=fakeroot
+else
+FAKEROOT=sudo
+fi
+
 r2 -qv
 
 if [ $? != 0 ]; then
@@ -25,4 +32,5 @@ make R2_PLUGDIR=${R2_LIBR_PLUGINS} DESTDIR=${DESTDIR}
 
 ./configure --prefix=/usr
 make -j4
-sudo make install DESTDIR="${DESTDIR}"
+strip --strip-unneeded src/core_ghidra.so
+${FAKEROOT} make install DESTDIR="${DESTDIR}"
