@@ -91,11 +91,11 @@ ${PACKAGE_DIR}/build: ${PACKAGE_DIR}/debian-binary ${PACKAGE_DIR}/control \
 	rm -rf $@
 	mkdir $@
 	cp ${PACKAGE_DIR}/debian-binary $@/
-	cd ${PACKAGE_DIR}/control && tar czvf $@/control.tar.gz *
+	cd ${PACKAGE_DIR}/control && tar cJvf $@/control.tar.gz *
 	cd ${PACKAGE_DIR}/data && \
 		COPY_EXTENDED_ATTRIBUTES_DISABLE=true \
 		COPYFILE_DISABLE=true \
-		tar cpzvf $@/data.tar.gz *
+		tar cpJvf $@/data.tar.gz *
 
 # Convert GNU ar to BSD ar that debian requires.
 # Note: Order of files within ar archive is important!
