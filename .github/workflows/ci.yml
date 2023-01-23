@@ -45,6 +45,19 @@ jobs:
         name: linux-acr-ok
         path: r2ghidra_sleigh-*.zip
 
+  tarball:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Building tars
+      run: make -C dist/tarball
+    - name: Uploading balls
+      uses: actions/upload-artifact@v3
+      with:
+        name: tarball
+        path: dist/tarball/radare2-*
+
   linux-asan:
     if: ${{ false }}  # disable for now
     # The type of runner that the job will run on
@@ -224,6 +237,24 @@ jobs:
           asset_path: dist/artifacts/macos-acr-ok/r2ghidra-${{ steps.r2gv.outputs.branch }}-macos.zip
           asset_name: r2ghidra-${{ steps.r2gv.outputs.branch }}-macos.zip
           asset_content_type: application/zip
+      - name: Upload zip
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/artifacts/tarball/r2ghidra-${{ steps.r2gv.outputs.branch }}.zip
+          asset_name: r2ghidra-${{ steps.r2gv.outputs.branch }}.zip
+          asset_content_type: application/zip
+      - name: Upload tarball
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/artifacts/tarball/r2ghidra-${{ steps.r2gv.outputs.branch }}.tar.xz
+          asset_name: r2ghidra-${{ steps.r2gv.outputs.branch }}.tar.xz
+          asset_content_type: application/x-txz
       - name: Upload asset for Windows (w64)
         uses: actions/upload-release-asset@v1
         env:
