@@ -56,7 +56,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: tarball
-        path: dist/tarball/radare2-*
+        path: dist/tarball/r2ghidra-*
 
   linux-asan:
     if: ${{ false }}  # disable for now
