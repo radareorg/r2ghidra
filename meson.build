@@ -32,7 +32,7 @@ incdirs = [
   'ghidra-native/src/decompiler/',
 ]
 
-res = run_command(['r2','-HR2_LIBR_PLUGINS'], capture:true, check:false)
+res = run_command(['radare2','-HR2_LIBR_PLUGINS'], capture:true, check:false)
 if res.returncode() == 0
   r2_plugdir = res.stdout().strip()
 else
