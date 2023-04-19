@@ -1,8 +1,14 @@
 PACKAGE=r2ghidra
 VERSION=$(shell ../../configure -qV)
-ARCH=amd64
 DEPENDS=radare2
 REPLACES=r2ghidra-dec
 SECTION=user/shell
 PRIORITY=optional
 MAINTAINER=pancake <pancake@nopcode.org>
+# arch
+UNAMEM=$(shell uname -m)
+ifeq ($(UNAMEM),x86_64)
+ARCH=amd64
+else
+ARCH=aarch64
+endif
