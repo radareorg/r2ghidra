@@ -107,7 +107,7 @@ static const std::map<std::string, ArchMapper> arch_map = {
 	{ "pic24", { "PIC-24F", "default", 24 } },
 	{ "z80", { "z80", "default", 8 } },
 	{ "sparc", { "sparc" } },
-	{ "stm8", { "STM8" } },
+	{ "stm8", { "STM8", "default", 16, true } },
 	{ "sh", { "SuperH4" } },
 	{ "msp430", { "TI_MSP430" } },
 	{ "m68k", {

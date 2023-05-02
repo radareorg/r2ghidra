@@ -1826,9 +1826,11 @@ static void append_hardcoded_regs(std::stringstream &buf, const std::string &arc
 	case ('w' | 'a' << 8 | 's' << 16): // wasm
 	case ('M' | 'C' << 8 | 'S' << 16): // MCS96
 	case ('M' | 'a' << 8 | 'n' << 16): // Management
+	case ('S' | 'T' << 8 | 'M' << 16): // STM8
 		break;
 	default:
-		throw LowlevelError("append_hardcoded_regs: Impossible arch name.");
+		R_LOG_WARN ("This architecture is not fully supported. Expect things");
+		break;
 	}
 }
 
