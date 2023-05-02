@@ -1493,7 +1493,13 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 			case FlowType::JUMP_TERMINATOR: anal_op->eob = true;
 			case FlowType::UNCONDITIONAL_JUMP:
 				anal_op->type = R_ANAL_OP_TYPE_JMP;
-				anal_op->jump = ins->getFlows().begin()->getOffset();
+				{
+					auto flows = ins->getFlows();
+					if (flows.size() > 0) {
+						anal_op->jump = flows.begin()->getOffset();
+					}
+					anal_op->fail = UT64_MAX;
+				}
 				break;
 			case FlowType::COMPUTED_JUMP:
 			{

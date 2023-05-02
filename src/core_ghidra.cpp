@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2019-2022 - thestr4ng3r, pancake */
+/* r2ghidra - LGPL - Copyright 2019-2023 - thestr4ng3r, pancake */
 
 #include "R2Architecture.h"
 #include "CodeXMLParse.h"
@@ -592,6 +592,7 @@ bool SleighHomeConfig(void */* user */, void *data) {
 	return true;
 }
 
+// TODO: should be an arch plugin
 extern "C" RAnalPlugin r_anal_plugin_ghidra;
 extern "C" int r2ghidra_core_init(void *user, const char *cmd) {
 	std::lock_guard<std::recursive_mutex> lock(decompiler_mutex);
