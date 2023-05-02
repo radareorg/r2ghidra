@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2020-2022 - pancake, FXTi */
+/* r2ghidra - LGPL - Copyright 2020-2023 - pancake, FXTi */
 
 #include <r_lib.h>
 #include <r_anal.h>
@@ -904,50 +904,48 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 		case CPUI_INT_ZEXT:
 		case CPUI_INT_SEXT:
 		{
-			if (iter->input0 && iter->output)
-			{
+			if (iter->input0 && iter->output) {
 				ss << ",";
 				print_operand (iter->input0);
 
-				if (iter->type == CPUI_INT_SEXT)
-				{
+				if (iter->type == CPUI_INT_SEXT) {
 					ss << "," << iter->input0->size * 8 << ",SWAP,~";
 					ss << "," << iter->output->size * 8 << ",1,<<,1,SWAP,-,&";
 				}
 
-				if (iter->output->is_unique())
+				if (iter->output->is_unique()) {
 					push_stack(iter->output);
-				else
+				} else {
 					ss << "," << *iter->output << ",=";
-			}
-			else
+				}
+			} else {
 				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
+			}
 			break;
 		}
 
 		case CPUI_COPY:
 		{
-			if (iter->input0 && iter->output)
-			{
+			if (iter->input0 && iter->output) {
 				ss << ",";
 				print_operand (iter->input0);
 
-				if (iter->output->is_unique())
+				if (iter->output->is_unique()) {
 					push_stack(iter->output);
-				else if (iter->output->is_ram())
+				} else if (iter->output->is_ram()) {
 					ss << "," << *iter->output << ",=[" << iter->output->size << "]";
-				else
+				} else {
 					ss << "," << *iter->output << ",=";
-			}
-			else
+				}
+			} else {
 				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
+			}
 			break;
 		}
 
 		case CPUI_LOAD:
 		{
-			if (iter->input0 && iter->input1 && iter->output)
-			{
+			if (iter->input0 && iter->input1 && iter->output) {
 				ss << ",";
 				print_operand (iter->input1);
 
@@ -956,20 +954,20 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 					ss << "," << ((AddrSpace *)iter->input0->offset)->getWordSize() << ",*";
 				ss << ",[" << iter->output->size << "]";
 
-				if (iter->output->is_unique())
+				if (iter->output->is_unique()) {
 					push_stack(iter->output);
-				else
+				} else {
 					ss << "," << *iter->output << ",=";
-			}
-			else
+				}
+			} else {
 				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
+			}
 			break;
 		}
 
 		case CPUI_STORE:
 		{
-			if (iter->input0 && iter->input1 && iter->output)
-			{
+			if (iter->input0 && iter->input1 && iter->output) {
 				ss << ",";
 				print_operand (iter->output);
 
@@ -980,9 +978,9 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 				   ((AddrSpace *)iter->input0->offset)->getWordSize() != 1)
 					ss << "," << ((AddrSpace *)iter->input0->offset)->getWordSize() << ",*";
 				ss << ",=[" << iter->output->size << "]";
-			}
-			else
+			} else {
 				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
+			}
 			break;
 		}
 
@@ -1006,12 +1004,11 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 					ss << *iter->input0;
 
 				ss << "," << sanal->reg_mapping[sanal->pc_name] << ",=";
+			} else {
+				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
 			}
-			else
-				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
 			break;
 		}
-
 		case CPUI_CBRANCH:
 		{
 			if (iter->input0 && iter->input1) {
@@ -1020,17 +1017,19 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 
 				ss << ",?{";
 
-				if (iter->input0->is_const())
+				if (iter->input0->is_const ()) {
 					// throw LowlevelError("Sleigh_esil: const input case of BRANCH appear.");
 					// This means conditional jump in P-codes
 					goto branch_in_pcodes;
+				}
 				ss << ",";
-				if (!print_if_unique(iter->input0))
+				if (!print_if_unique (iter->input0)) {
 					ss << *iter->input0;
+				}
 
 				ss << "," << sanal->reg_mapping[sanal->pc_name] << ",=,}";
 			} else {
-				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
+				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
 			}
 			break;
 		case CPUI_PIECE:
@@ -1046,7 +1045,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 				else
 					ss << "," << *iter->output << ",=";
 			} else {
-				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
+				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
 			}
 			break;
 		}
@@ -1054,9 +1053,8 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 			if (iter->input0 && iter->input1 && iter->output) {
 				ss << ",";
 				print_operand (iter->input0);
-
-				if (!iter->input1->is_const())
-					throw LowlevelError("sleigh_esil: input1 is not consts in SUBPIECE.");
+				if (!iter->input1->is_const ())
+					throw LowlevelError ("sleigh_esil: input1 is not consts in SUBPIECE.");
 				ss << "," << iter->input1->number * 8 << ",SWAP,>>";
 
 				if (iter->output->size < iter->input0->size + iter->input1->number) {
@@ -1068,7 +1066,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 					ss << "," << *iter->output << ",=";
 				}
 			} else {
-				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
+				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
 			}
 			break;
 		case CPUI_FLOAT_EQUAL:
@@ -1107,7 +1105,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 				else
 					ss << "," << *iter->output << ",=";
 			} else {
-				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
+				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
 			}
 			break;
 		case CPUI_INT_LESS:
@@ -1145,7 +1143,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 					ss << "," << *iter->output << ",=";
 				}
 			} else {
-				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
+				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
 			}
 			break;
 		}
@@ -1209,7 +1207,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 				else
 					ss << "," << *iter->output << ",=";
 			} else {
-				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
+				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
 			}
 			break;
 		case CPUI_INT_CARRY:
@@ -1233,7 +1231,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 					ss << "," << *iter->output << ",=";
 				}
 			} else {
-				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
+				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
 			}
 			break;
 		case CPUI_INT_SCARRY:
@@ -1261,7 +1259,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 					ss << "," << *iter->output << ",=";
 				}
 			} else {
-				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
+				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
 			}
 			break;
 		case CPUI_INT_SBORROW:
@@ -1294,7 +1292,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 					ss << "," << *iter->output << ",=";
 				}
 			} else {
-				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
+				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
 			}
 			break;
 		case CPUI_BOOL_NEGATE:
@@ -1342,7 +1340,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 					ss << "," << iter->output->size << ",SWAP,D2F";
 				}
 				if (iter->output->is_unique()) {
-					push_stack(iter->output);
+					push_stack (iter->output);
 				} else {
 					ss << "," << *iter->output << ",=";
 				}
@@ -1360,7 +1358,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 		case CPUI_FLOAT_NEG:
 		case CPUI_FLOAT_FLOAT2FLOAT:
 			if (!iter->input0 || !iter->output) {
-				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
+				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
 			}
 			ss << ",";
 			print_operand (iter->input0, 0, true);
@@ -1368,8 +1366,8 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 			switch (iter->type) {
 			case CPUI_FLOAT_NAN: ss << ",NAN"; break;
 			case CPUI_FLOAT_TRUNC:
-					     ss << ",D2I,1," << iter->output->size * 8 << ",1,<<,-,&";
-					     break;
+				     ss << ",D2I,1," << iter->output->size * 8 << ",1,<<,-,&";
+				     break;
 			case CPUI_FLOAT_CEIL: ss << ",CEIL"; break;
 			case CPUI_FLOAT_FLOOR: ss << ",FLOOR"; break;
 			case CPUI_FLOAT_ROUND: ss << ",ROUND"; break;
@@ -1428,9 +1426,9 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 	}
 	try {
 #if R2_VERSION_NUMBER >= 50609
-		sanal->init(arch, a->config->bits, a->config->big_endian, a? a->iob.io : nullptr, SleighAsm::getConfig(a));
+		sanal->init (arch, a->config->bits, a->config->big_endian, a? a->iob.io : nullptr, SleighAsm::getConfig(a));
 #else
-		sanal->init(arch, a->bits, a->big_endian, a? a->iob.io : nullptr, SleighAsm::getConfig(a));
+		sanal->init (arch, a->bits, a->big_endian, a? a->iob.io : nullptr, SleighAsm::getConfig(a));
 #endif
 		R_FREE (arch);
 
@@ -1439,10 +1437,11 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 
 		if (1) { // mask & R_ANAL_OP_MASK_DISASM) {
 			try {
-				sanal->trans.printAssembly (assem, at);
+				int size = sanal->trans.printAssembly (assem, at);
+				anal_op->size = size;
 				anal_op->mnemonic = strdup (assem.str);
 				r_str_case (anal_op->mnemonic, false);
-			} catch (BadDataError &err) {
+			} catch (LowlevelError &err) {
 				anal_op->mnemonic = strdup ("error");
 			}
 		}
@@ -1453,7 +1452,15 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 
 		PcodeSlg pcode_slg (sanal);
 		sanal->check(addr, data, len);
-		anal_op->size = sanal->genOpcode(pcode_slg, at);
+		try {
+			anal_op->size = sanal->genOpcode (pcode_slg, at);
+		} catch (BadDataError &err) {
+			anal_op->mnemonic = strdup ("bad");
+		} catch (UnimplError &err) {
+			anal_op->mnemonic = strdup ("unimpl");
+		} catch (LowlevelError &err) {
+			// ignored
+		}
 		if ((anal_op->size < 1) || (sanal->trans.printAssembly(assem, at) < 1)) {
 			return anal_op->size; // When current place has no available code, return ILL.
 		}
