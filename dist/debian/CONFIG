@@ -10,5 +10,5 @@ UNAMEM=$(shell uname -m)
 ifeq ($(UNAMEM),x86_64)
 ARCH=amd64
 else
-ARCH=aarch64
+ARCH=arm64
 endif
