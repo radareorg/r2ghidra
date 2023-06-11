@@ -101,12 +101,21 @@ static inline bool reg_set_has(const std::unordered_set<std::string> &reg_set, c
 	if (!value.is_reg()) {
 		return false;
 	}
+#if R2_VERSION_NUMBER >= 50809
+	if (value.reg && reg_set.find (value.reg) != reg_set.end()) {
+		return true;
+	}
+	if (value.regdelta && reg_set.find (value.regdelta) != reg_set.end()) {
+		return true;
+	}
+#else
 	if (value.reg && reg_set.find (value.reg->name) != reg_set.end()) {
 		return true;
 	}
 	if (value.regdelta && reg_set.find (value.regdelta->name) != reg_set.end()) {
 		return true;
 	}
+#endif
 	return false;
 }
 
@@ -342,8 +351,14 @@ static ut32 anal_type_XPUSH(RAnal *anal, RAnalOp *anal_op, const std::vector<Pco
 			}
 			out.mem (iter->output->size);
 
+#if R2_VERSION_NUMBER >= 50809
+			if ((out.reg && sanal->reg_mapping[sanal->sp_name] == out.reg) ||
+			   (out.regdelta && sanal->reg_mapping[sanal->sp_name] == out.regdelta))
+#else
 			if ((out.reg && sanal->reg_mapping[sanal->sp_name] == out.reg->name) ||
-			   (out.regdelta && sanal->reg_mapping[sanal->sp_name] == out.regdelta->name)) {
+			   (out.regdelta && sanal->reg_mapping[sanal->sp_name] == out.regdelta->name))
+#endif
+			{
 				anal_op->type = R_ANAL_OP_TYPE_UPUSH;
 				anal_op->stackop = R_ANAL_STACK_INC;
 
@@ -387,7 +402,12 @@ static ut32 anal_type_POP(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcode
 				continue;
 			}
 			// dispose 0x0,  { lp }, [lp]
-			if (in0.reg && !strcmp ("lp", in0.reg->name)) {
+#if R2_VERSION_NUMBER >= 50809
+			if (in0.reg && !strcmp ("lp", in0.reg))
+#else
+			if (in0.reg && !strcmp ("lp", in0.reg->name))
+#endif
+			{
 				anal_op->type = R_ANAL_OP_TYPE_RET;
 #if R2_VERSION_NUMBER >= 50709
 #pragma warning("anal srcs/dsts is disabled from now on")
@@ -397,7 +417,12 @@ static ut32 anal_type_POP(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcode
 				return this_type;
 			}
 
-			if ((in0.reg && std::string("lr") == in0.reg->name) || (in0.regdelta && sanal->reg_mapping[sanal->sp_name] == in0.regdelta->name)) {
+#if R2_VERSION_NUMBER >= 50809
+			if ((in0.reg && std::string("lr") == in0.reg) || (in0.regdelta && sanal->reg_mapping[sanal->sp_name] == in0.regdelta))
+#else
+			if ((in0.reg && std::string("lr") == in0.reg->name) || (in0.regdelta && sanal->reg_mapping[sanal->sp_name] == in0.regdelta->name))
+#endif
+			{
 				if (iter->output) {
 					outs = SleighAnalValue::resolve_out (anal, iter, raw_ops.cend(), iter->output);
 				}

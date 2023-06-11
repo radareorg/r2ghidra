@@ -1,11 +1,12 @@
-/* r2ghidra - LGPL - Copyright 2020-2021 - FXTi, pancake */
+/* r2ghidra - LGPL - Copyright 2020-2023 - FXTi, pancake */
 
 #include "SleighAnalValue.h"
 
 RAnalValueType SleighAnalValue::type_from_values(const SleighAnalValue &in0, const SleighAnalValue &in1) {
 	if (in0.is_mem () || in1.is_mem ()) {
 		return R_ANAL_VAL_MEM;
-	} else if (in0.is_reg () || in1.is_reg ()) {
+	}
+	if (in0.is_reg () || in1.is_reg ()) {
 		return R_ANAL_VAL_REG;
 	}
 	return R_ANAL_VAL_IMM;
@@ -17,10 +18,14 @@ SleighAnalValue SleighAnalValue::resolve_arg(RAnal *anal, const PcodeOperand *ar
 	if (arg->is_const ()) {
 		res.type = R_ANAL_VAL_IMM;
 		res.imm = arg->number;
-	} else if(arg->is_reg()) {
+	} else if (arg->is_reg()) {
 		res.type = R_ANAL_VAL_REG;
+#if R2_VERSION_NUMBER >= 50809
+		res.reg = arg->name.c_str();
+#else
 		res.reg = r_reg_get(anal->reg, arg->name.c_str(), R_REG_TYPE_ALL);
-	} else if(arg->is_ram()) {
+#endif
+	} else if (arg->is_ram()) {
 		res.type = R_ANAL_VAL_MEM;
 		res.base = arg->offset;
 		res.memref = arg->size;
@@ -86,16 +91,16 @@ SleighAnalValue SleighAnalValue::resolve_arg(RAnal *anal, const PcodeOperand *ar
 			res.memref = inner_max(in0.memref, in1.memref);
 			if (res.is_imm()) {
 				res.imm = in0.imm * in1.imm;
-			} else if(in0.is_imm() && in1.is_mem()) {
+			} else if (in0.is_imm() && in1.is_mem()) {
 				res.mul = in0.imm;
 				res.delta = in1.base;
-			} else if(in0.is_mem() && in1.is_imm()) {
+			} else if (in0.is_mem() && in1.is_imm()) {
 				res.mul = in1.imm;
 				res.delta = in0.base;
-			} else if(in0.is_imm() && in1.is_reg()) {
+			} else if (in0.is_imm() && in1.is_reg()) {
 				res.mul = in0.imm;
 				res.regdelta = in1.reg;
-			} else if(in0.is_reg() && in1.is_imm()) {
+			} else if (in0.is_reg() && in1.is_imm()) {
 				res.mul = in1.imm;
 				res.regdelta = in0.reg;
 			} else {
@@ -154,29 +159,38 @@ std::vector<SleighAnalValue> SleighAnalValue::resolve_out(RAnal *anal,
 		res.push_back(tmp);
 	} else if (arg->is_reg()) {
 		tmp.type = R_ANAL_VAL_REG;
+#if R2_VERSION_NUMBER >= 50809
+		tmp.reg = arg->name.c_str();
+#else
 		tmp.reg = r_reg_get (anal->reg, arg->name.c_str(), R_REG_TYPE_ALL);
+#endif
 		res.push_back (tmp);
 	} else if (arg->is_ram()) {
 		tmp.type = R_ANAL_VAL_MEM;
 		tmp.base = arg->offset;
 		tmp.memref = arg->size;
-		res.push_back(tmp);
+		res.push_back (tmp);
 	} else {
 		for (auto iter = ++curr_op; iter != end_op; iter++) {
-			if(iter->type == CPUI_STORE) {
+			if (iter->type == CPUI_STORE) {
 				if (iter->output && *iter->output == *arg && iter->input1) {
-					tmp = resolve_arg(anal, iter->input1);
-					if (tmp.is_valid()) {
-						tmp.mem(iter->output->size);
-						res.push_back(tmp);
+					tmp = resolve_arg (anal, iter->input1);
+					if (tmp.is_valid ()) {
+						tmp.mem (iter->output->size);
+						res.push_back (tmp);
 					}
 				}
 			} else {
 				if ((iter->input0 && *iter->input0 == *arg) || (iter->input1 && *iter->input1 == *arg)) {
-					if (iter->output && iter->output->is_reg()) {
-						tmp = SleighAnalValue();
+					if (iter->output && iter->output->is_reg ()) {
+						tmp = SleighAnalValue ();
 						tmp.type = R_ANAL_VAL_REG;
+#if R2_VERSION_NUMBER >= 50809
+						// XXX this is leaking, we need to share a constant register
+						tmp.reg = iter->output->name.c_str();
+#else
 						tmp.reg = r_reg_get(anal->reg, iter->output->name.c_str(), R_REG_TYPE_ALL);
+#endif
 						res.push_back(tmp);
 					}
 				}
