@@ -132,7 +132,7 @@ jobs:
 #        R2_DEBUG=1 r2 -qc 'af;pdg' /bin/ls | tee a.txt
 #        grep entry0 a.txt
 
-  macos-acr-ok:
+  macos-pkg:
     # The type of runner that the job will run on
     runs-on: macos-latest
 
@@ -159,7 +159,7 @@ jobs:
     - name: Uploading artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: macos-acr-ok
+        name: macos-pkg
         path: dist/macos/*.zip
         #path: radare2/dist/macos/*.pkg src/*.dylib /tmp/r2ghidra-macos.tar.gz dist/macos/*.zip
 
@@ -202,8 +202,8 @@ jobs:
       is_release: ${{ steps.release.outputs.is }}
       tag_name: ${{ steps.release.outputs.tag }}
     needs:
-      - linux-acr-ok
-      - macos-acr-ok
+      - linux-deb
+      - macos-pkg
       - w64
     runs-on: ubuntu-latest
     steps:
@@ -259,7 +259,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/artifacts/macos-acr-ok/r2ghidra-${{ steps.r2gv.outputs.branch }}-macos.zip
+          asset_path: dist/artifacts/macos-pkg/r2ghidra-${{ steps.r2gv.outputs.branch }}-macos.zip
           asset_name: r2ghidra-${{ steps.r2gv.outputs.branch }}-macos.zip
           asset_content_type: application/zip
       - name: Upload zip
