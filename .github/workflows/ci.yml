@@ -10,15 +10,40 @@ on:
   pull_request:
 
 jobs:
-  linux-acr-ok:
+  r2git:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    - name: Installing radare2
-      run: ( git clone --depth=1 --branch "${R2V}" https://github.com/radareorg/radare2 && cd radare2 && sys/install.sh /usr )
+    - name: Installing radare2 from git
+      run: ( git clone --depth=1 https://github.com/radareorg/radare2 && cd radare2 && sys/install.sh /usr )
+    - name: Building r2ghidra with acr
+      run: ./preconfigure && ./configure --prefix=/usr && make -j4 ; make user-install
+    - name: Testing r2ghidra oneliner on home setup
+      run: R2_DEBUG=1 r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
+    - name: System-wide installation
+      run: make user-uninstall && sudo make install
+    - name: Testing r2ghidra oneliner on system wide install
+      run: R2_DEBUG=1 r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
+    - name: Packaging r2ghidra for Debian
+      run: make -C dist/debian
+    - name: Running Testsuite
+      run: make -C test || exit 0
+
+  linux-deb:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Installing radare2 from deb
+      run: |
+        wget https://github.com/radareorg/radare2/releases/download/5.8.8/radare2_5.8.8_amd64.deb
+        wget https://github.com/radareorg/radare2/releases/download/5.8.8/radare2-dev_5.8.8_amd64.deb
+        dpkg -i *.deb
     - name: Building r2ghidra with acr
       run: ./preconfigure && ./configure --prefix=/usr && make -j4 ; make user-install
     - name: Testing r2ghidra oneliner on home setup
@@ -225,7 +250,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/artifacts/linux-acr-ok/r2ghidra_${{ steps.r2gv.outputs.branch }}_amd64.deb
+          asset_path: dist/artifacts/linux-deb/r2ghidra_${{ steps.r2gv.outputs.branch }}_amd64.deb
           asset_name: r2ghidra_${{ steps.r2gv.outputs.branch }}_amd64.deb
           asset_content_type: application/vnd.debian.binary-package
       - name: Upload asset for macOS
