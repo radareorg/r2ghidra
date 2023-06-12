@@ -43,7 +43,7 @@ jobs:
       run: |
         wget https://github.com/radareorg/radare2/releases/download/5.8.8/radare2_5.8.8_amd64.deb
         wget https://github.com/radareorg/radare2/releases/download/5.8.8/radare2-dev_5.8.8_amd64.deb
-        dpkg -i *.deb
+        sudo dpkg -i *.deb
     - name: Building r2ghidra with acr
       run: ./preconfigure && ./configure --prefix=/usr && make -j4 ; make user-install
     - name: Testing r2ghidra oneliner on home setup
