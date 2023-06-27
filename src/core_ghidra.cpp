@@ -18,6 +18,7 @@
 #include "R2PrintC.h"
 
 #include <r_core.h>
+#include <r_arch.h>
 
 #include <vector>
 #include <mutex>
@@ -603,15 +604,21 @@ bool SleighHomeConfig(void */* user */, void *data) {
 	return true;
 }
 
-// TODO: should be an arch plugin
+#if R2_VERSION_NUMBER >= 50809
+extern "C" RArchPlugin r_arch_plugin_ghidra;
+#else
 extern "C" RAnalPlugin r_anal_plugin_ghidra;
+#endif
+
 extern "C" int r2ghidra_core_init(void *user, const char *cmd) {
 	std::lock_guard<std::recursive_mutex> lock(decompiler_mutex);
 	startDecompilerLibrary (nullptr);
 
 	auto *rcmd = reinterpret_cast<RCmd *>(user);
 	auto *core = reinterpret_cast<RCore *>(rcmd->data);
-#if R2_VERSION_NUMBER < 50809
+#if R2_VERSION_NUMBER >= 50809
+	r_arch_add (core->anal->arch, &r_arch_plugin_ghidra);
+#else
 	r_anal_add (core->anal, &r_anal_plugin_ghidra);
 #endif
 	RConfig *cfg = core->config;

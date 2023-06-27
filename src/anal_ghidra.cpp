@@ -22,7 +22,7 @@
 #define R_ANAL_ESIL_OP_TYPE_CUSTOM R_ESIL_OP_TYPE_CUSTOM
 #endif
 // XXX dont use globals
-static SleighAsm *sanal = nullptr;
+static R_TH_LOCAL SleighAsm *sanal = nullptr;
 
 static char *slid(RCore *core, const char *cpu, int bits, bool be) {
 	if (!strchr (cpu, ':')) {
@@ -33,7 +33,13 @@ static char *slid(RCore *core, const char *cpu, int bits, bool be) {
 	return strdup (cpu);
 }
 
-static char *slid_arch(RAnal *anal) {
+#if R2_VERSION_NUMBER >= 50809
+static char *slid_arch(RArchSession *as)
+
+#else
+static char *slid_arch(RAnal *anal)
+#endif
+	{
 #if R2_VERSION_NUMBER >= 50609
 	const char *cp = anal->config->cpu;
 	int bi = anal->config->bits;
@@ -350,7 +356,6 @@ static ut32 anal_type_XPUSH(RAnal *anal, RAnalOp *anal_op, const std::vector<Pco
 				continue;
 			}
 			out.mem (iter->output->size);
-
 #if R2_VERSION_NUMBER >= 50809
 			if ((out.reg && sanal->reg_mapping[sanal->sp_name] == out.reg) ||
 			   (out.regdelta && sanal->reg_mapping[sanal->sp_name] == out.regdelta))
@@ -1896,6 +1901,74 @@ static std::string regtype_name(const char *cpu, const std::string &regname) {
 	return "gpr";
 }
 
+#if R2_VERSION_NUMBER >= 50809
+extern "C" char *r2ghidra_regs(RArchSession *as) {
+	r_return_val_if_fail (as, nullptr);
+	const char *cpu = as->config->cpu;
+	if (R_STR_ISEMPTY (cpu)) {
+		return nullptr;
+	}
+	char *sa = slid_arch (as);
+	if (!sa) {
+		return nullptr;
+	}
+	free (sa);
+
+	auto reg_list = sanal->getRegs();
+	std::stringstream buf;
+
+	for (auto p = reg_list.begin(); p != reg_list.end(); p++) {
+		const std::string &group = sanal->reg_group[p->name];
+		const std::string &regname = sanal->reg_mapping[p->name];
+		const std::string &regtype = regtype_name (cpu, regname);
+		if (group.empty()) {
+			buf << regtype << "\t" << regname << "\t." << p->size * 8 << "\t"
+				    << p->offset << "\t" << "0\n";
+				continue;
+			}
+
+			for (size_t i = 0;; i++) {
+				if (!r_reg_type_arr[i]) {
+					eprintf ("anal_ghidra.cpp:get_reg_profile() -> Unexpected register group(%s) from SLEIGH, abort.",
+						group.c_str());
+					return nullptr;
+				}
+				if (group == r_reg_type_arr[i]) {
+					buf << r_reg_string_arr[i] << '\t';
+					break;
+				}
+			}
+			buf << sanal->reg_mapping[p->name] << "\t." << p->size * 8 << "\t" << p->offset << "\t" << "0\n";
+		}
+		if (!sanal->pc_name.empty()) {
+			buf << "=PC\t" << sanal->reg_mapping[sanal->pc_name] << '\n';
+		}
+		if (!sanal->sp_name.empty()) {
+			buf << "=SP\t" << sanal->reg_mapping[sanal->sp_name] << '\n';
+		}
+		for (unsigned i = 0; i != sanal->arg_names.size() && i <= 9; i++) {
+			buf << "=A" << i << '\t' << sanal->reg_mapping[sanal->arg_names[i]] << '\n';
+		}
+		for (unsigned i = 0; i != sanal->ret_names.size() && i <= 3; i++) {
+			buf << "=R" << i << '\t' << sanal->reg_mapping[sanal->ret_names[i]] << '\n';
+		}
+
+	ut64 pp = 0;
+	string arch = sanal->sleigh_id.substr(pp, sanal->sleigh_id.find (':', pp) - pp);
+	pp = sanal->sleigh_id.find (':', pp) + 1;
+	bool little = sanal->sleigh_id.substr(pp, sanal->sleigh_id.find (':', pp) - pp) == "LE";
+	pp = sanal->sleigh_id.find (':', pp) + 1;
+	int bits = std::stoi (sanal->sleigh_id.substr(pp, sanal->sleigh_id.find (':', pp) - pp));
+	pp = sanal->sleigh_id.find (':', pp) + 1;
+
+	append_hardcoded_regs (buf, arch, little, bits);
+
+	const std::string &res = buf.str ();
+	// fprintf(stderr, "%s\n", res.c_str());
+	return strdup (res.c_str ());
+}
+
+#else
 extern "C" char *get_reg_profile(RAnal *anal) {
 	r_return_val_if_fail (anal, nullptr);
 #if R2_VERSION_NUMBER >= 50609
@@ -1965,6 +2038,7 @@ extern "C" char *get_reg_profile(RAnal *anal) {
 	// fprintf(stderr, "%s\n", res.c_str());
 	return strdup (res.c_str ());
 }
+#endif
 
 #define ERR(x)              \
 	if (esil->verbose) { \
@@ -2039,6 +2113,7 @@ static bool sleigh_esil_popcount(RAnalEsil *esil) {
 	return ret;
 }
 
+
 extern "C" int esil_sleigh_init(RAnalEsil *esil) {
 	if (!esil) {
 		return false;
@@ -2060,6 +2135,21 @@ extern "C" int esil_sleigh_fini(RAnalEsil *esil) {
 	//float_mem.clear();
 	return true;
 }
+
+#if R2_VERSION_NUMBER >= 50809
+extern bool r2ghidra_esilcb(RArchSession *as, RArchEsilAction action) {
+	REsil *esil = as->arch->esil;
+	if (!esil) {
+		return false;
+	}
+	switch (action) {
+	case R_ARCH_ESIL_INIT:
+		return esil_sleigh_init (esil);
+	case R_ARCH_ESIL_FINI:
+		return esil_sleigh_fini (esil);
+	}
+}
+#endif
 
 extern "C" int sanal_fini(void *p) {
 	if (sanal) {
