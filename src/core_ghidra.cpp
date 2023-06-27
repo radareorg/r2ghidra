@@ -600,7 +600,9 @@ extern "C" int r2ghidra_core_init(void *user, const char *cmd) {
 
 	auto *rcmd = reinterpret_cast<RCmd *>(user);
 	auto *core = reinterpret_cast<RCore *>(rcmd->data);
+#if R2_VERSION_NUMBER < 50809
 	r_anal_add (core->anal, &r_anal_plugin_ghidra);
+#endif
 	RConfig *cfg = core->config;
 	r_config_lock (cfg, false);
 	for (const auto var : ConfigVar::GetAll ()) {
