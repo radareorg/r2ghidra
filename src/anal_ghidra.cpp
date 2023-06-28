@@ -851,7 +851,7 @@ static int index_of_unique(const std::vector<PcodeOperand *> &esil_stack, const 
 
 static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int len, const std::vector<Pcodeop> &Pcodes) {
 	std::vector<PcodeOperand *> esil_stack;
-	stringstream ss;
+	std::stringstream ss;
 
 	auto print_if_unique = [&esil_stack, &ss](const PcodeOperand *arg, int offset = 0) -> bool {
 		if (arg->is_unique())

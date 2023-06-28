@@ -3,7 +3,7 @@ set PATH=%CD%\radare2\bin;%PATH%
 set VSARCH=x64
 
 git submodule update --init
-set GNV=0.2.5
+set GNV=0.3.2
 
 python -m wget https://github.com/radareorg/ghidra-native/releases/download/%GNV%/ghidra-native-%GNV%.zip
 

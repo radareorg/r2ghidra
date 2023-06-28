@@ -10,6 +10,7 @@ typedef struct r_parse_ctype_t RParseCType;
 typedef struct r_parse_ctype_type_t RParseCTypeType;
 */
 
+using namespace ghidra;
 class R2Architecture;
 
 class R2TypeFactory : public TypeFactory {

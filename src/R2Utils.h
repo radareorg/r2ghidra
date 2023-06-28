@@ -1,7 +1,9 @@
-/* r2ghidra - LGPL - Copyright 2019-2022 - thestr4ng3r, pancake */
+/* r2ghidra - LGPL - Copyright 2019-2023 - thestr4ng3r, pancake */
 
 #ifndef R2GHIDRA_R2UTILS_H
 #define R2GHIDRA_R2UTILS_H
+
+#define GN030 1
 
 typedef struct r_list_t RList;
 typedef struct r_list_iter_t RListIter;

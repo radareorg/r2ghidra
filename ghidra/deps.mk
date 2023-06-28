@@ -6,7 +6,7 @@ USE_BISON=0
 GHIDRA_HOME=../ghidra-native
 GHIDRA_DECOMPILER=$(GHIDRA_HOME)/src/decompiler
 
-G_DECOMPILER=space.cc float.cc address.cc pcoderaw.cc
+G_DECOMPILER=marshal.cc space.cc float.cc address.cc pcoderaw.cc
 G_DECOMPILER+=translate.cc opcodes.cc globalcontext.cc
 G_DECOMPILER+=capability.cc architecture.cc options.cc graph.cc
 G_DECOMPILER+=cover.cc block.cc cast.cc typeop.cc database.cc
@@ -14,7 +14,7 @@ G_DECOMPILER+=cpool.cc comment.cc fspec.cc action.cc loadimage.cc
 G_DECOMPILER+=varnode.cc op.cc type.cc variable.cc varmap.cc
 G_DECOMPILER+=jumptable.cc emulate.cc emulateutil.cc flow.cc userop.cc
 G_DECOMPILER+=funcdata.cc funcdata_block.cc funcdata_varnode.cc
-G_DECOMPILER+=funcdata_op.cc pcodeinject.cc heritage.cc prefersplit.cc
+G_DECOMPILER+=funcdata_op.cc unionresolve.cc pcodeinject.cc heritage.cc prefersplit.cc
 G_DECOMPILER+=rangeutil.cc ruleaction.cc subflow.cc blockaction.cc
 G_DECOMPILER+=merge.cc double.cc coreaction.cc condexe.cc override.cc
 G_DECOMPILER+=dynamic.cc crc32.cc prettyprint.cc printlanguage.cc

@@ -12,6 +12,7 @@
 
 #include "loadimage.hh"
 
+using namespace ghidra;
 class RCoreMutex;
 
 class R2LoadImage : public LoadImage {

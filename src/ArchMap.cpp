@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2019-2022 - thestr4ng3r, pancake */
+/* r2ghidra - LGPL - Copyright 2019-2023 - thestr4ng3r, pancake */
 
 #include "ArchMap.h"
 #include <error.hh>
@@ -6,6 +6,8 @@
 #include "R2Utils.h"
 #include <map>
 #include <functional>
+
+using namespace ghidra;
 
 std::string CompilerFromCore(RCore *core);
 

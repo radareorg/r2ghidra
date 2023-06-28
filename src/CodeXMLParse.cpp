@@ -19,13 +19,15 @@
 #include <sstream>
 #include <string>
 
+using namespace ghidra;
+
 struct ParseCodeXMLContext {
-	Funcdata *func;
+	ghidra::Funcdata *func;
 	std::map<uintm, PcodeOp *> ops;
 	std::map<ut64, Varnode *> varnodes;
 	std::map<ut64, Symbol *> symbols;
 	
-	explicit ParseCodeXMLContext(Funcdata *func) : func (func) {
+	explicit ParseCodeXMLContext(ghidra::Funcdata *func) : func (func) {
 		for (auto it=func->beginOpAll (); it != func->endOpAll (); it++) {
 			ops[it->first.getTime ()] = it->second;
 		}
@@ -132,6 +134,44 @@ void AnnotateColor(ANNOTATOR_PARAMS) {
 	if (attr.empty ()) {
 		return;
 	}
+#if GN030
+	int color = attr.as_int(-1);
+	if (color < 0) {
+		return;
+	}
+	RSyntaxHighlightType type;
+	switch (color) {
+	case Emit::syntax_highlight::keyword_color:
+		type = R_SYNTAX_HIGHLIGHT_TYPE_KEYWORD;
+		break;
+	case Emit::syntax_highlight::comment_color:
+		type = R_SYNTAX_HIGHLIGHT_TYPE_COMMENT;
+		break;
+	case Emit::syntax_highlight::type_color:
+		type = R_SYNTAX_HIGHLIGHT_TYPE_DATATYPE;
+		break;
+	case Emit::syntax_highlight::funcname_color:
+		type = R_SYNTAX_HIGHLIGHT_TYPE_FUNCTION_NAME;
+		break;
+	case Emit::syntax_highlight::var_color:
+		type = R_SYNTAX_HIGHLIGHT_TYPE_LOCAL_VARIABLE;
+		break;
+	case Emit::syntax_highlight::const_color:
+		type = R_SYNTAX_HIGHLIGHT_TYPE_CONSTANT_VARIABLE;
+		break;
+	case Emit::syntax_highlight::param_color:
+		type = R_SYNTAX_HIGHLIGHT_TYPE_FUNCTION_PARAMETER;
+		break;
+	case Emit::syntax_highlight::global_color:
+		type = R_SYNTAX_HIGHLIGHT_TYPE_GLOBAL_VARIABLE;
+		break;
+	case Emit::syntax_highlight::no_color:
+	case Emit::syntax_highlight::error_color:
+	case Emit::syntax_highlight::special_color:
+	default:
+		return;
+	}
+#else
 	std::string color = attr.as_string();
 	RSyntaxHighlightType type;
 	if (color == "keyword") {
@@ -153,6 +193,7 @@ void AnnotateColor(ANNOTATOR_PARAMS) {
 	} else {
 		return;
 	}
+#endif
 	RCodeMetaItem annotation = {};
 	annotation.type = R_CODEMETA_TYPE_SYNTAX_HIGHLIGHT;
 	annotation.syntax_highlight.type = type;
@@ -298,7 +339,7 @@ static void ParseNode(pugi::xml_node node, ParseCodeXMLContext *ctx, std::ostrea
 #endif
 }
 
-R_API RCodeMeta *ParseCodeXML(Funcdata *func, const char *xml) {
+R_API RCodeMeta *ParseCodeXML(ghidra::Funcdata *func, const char *xml) {
 	pugi::xml_document doc;
 	if(!doc.load_string (xml, pugi::parse_default | pugi::parse_ws_pcdata)) {
 		return nullptr;

@@ -1,9 +1,11 @@
-/* r2ghidra - LGPL - Copyright 2019-2021 - thestr4ng3r, pancake */
+/* r2ghidra - LGPL - Copyright 2019-2023 - thestr4ng3r, pancake */
 
 #ifndef R2GHIDRA_R2COMMENTDATABASE_H
 #define R2GHIDRA_R2COMMENTDATABASE_H
 
 #include <comment.hh>
+
+using namespace ghidra;
 
 class R2Architecture;
 
@@ -29,10 +31,15 @@ public:
 	CommentSet::const_iterator beginComment(const Address &fad) const override;
 	CommentSet::const_iterator endComment(const Address &fad) const override;
 
+#if GN030
+	void encode(Encoder &encoder) const override { cache.encode(encoder); }
+	void decode(Decoder &decoder) override { throw LowlevelError("CommentDatabaseGhidra::decode unimplemented"); }
+#else
 	void saveXml(ostream &s) const override { cache.saveXml(s); }
 	void restoreXml(const Element *el, const AddrSpaceManager *trans) override {
 		throw LowlevelError("commentdb::restoreXml unimplemented");
 	}
+#endif
 };
 
 #endif //R2GHIDRA_R2COMMENTDATABASE_H
