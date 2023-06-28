@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2019 - thestr4ng3r */
+/* r2ghidra - LGPL - Copyright 2019-2023 - thestr4ng3r */
 
 #ifndef R2GHIDRA_R2ARCHITECTURE_H
 #define R2GHIDRA_R2ARCHITECTURE_H
@@ -7,6 +7,8 @@
 #include "sleigh_arch.hh"
 
 #include "RCoreMutex.h"
+
+using namespace ghidra;
 
 class R2TypeFactory;
 typedef struct r_core_t RCore;
@@ -48,6 +50,5 @@ protected:
 	void postSpecFile() override;
 	void buildAction(DocumentStorage &store) override;
 };
-
 
 #endif //R2GHIDRA_R2ARCHITECTURE_H

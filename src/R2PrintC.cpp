@@ -1,10 +1,12 @@
-/* r2ghidra - LGPL - Copyright 2019-2021 - thestr4ng3r, pancake */
+/* r2ghidra - LGPL - Copyright 2019-2023 - thestr4ng3r, pancake */
 
 #include "R2PrintC.h"
 #include "RCoreMutex.h"
 
 #include <varnode.hh>
 #include <architecture.hh>
+
+using namespace ghidra;
 
 // Constructing this registers the capability
 R2PrintCCapability R2PrintCCapability::inst;

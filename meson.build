@@ -1,10 +1,10 @@
 project(
   'r2ghidra',
   ['c', 'cpp'],
-license : 'LGPL3',
-meson_version : '>=0.50.1',
-version : '5.8.6',
-default_options : ['c_std=c11', 'cpp_std=c++11']
+  license : 'LGPL3',
+  meson_version : '>=0.50.1',
+  version : '5.8.8',
+  default_options : ['c_std=c11', 'cpp_std=c++11']
 )
 
 pugixml_sources = [
@@ -41,6 +41,7 @@ else
 endif
 
 cpp = meson.get_compiler('cpp')
+add_global_arguments('-DGN030=1', language:'cpp')
 if cpp.get_id() == 'msvc'
   incdirs += [
     'radare2/include/libr',
@@ -106,6 +107,7 @@ ghidra_decompiler_sources = [
   'ghidra-native/src/decompiler/funcdata_block.cc',
   'ghidra-native/src/decompiler/funcdata_op.cc',
   'ghidra-native/src/decompiler/funcdata_varnode.cc',
+  'ghidra-native/src/decompiler/unionresolve.cc',
   'ghidra-native/src/decompiler/ghidra_arch.cc',
   'ghidra-native/src/decompiler/ghidra_context.cc',
   # 'ghidra-native/src/decompiler/ghidra_process.cc',
@@ -158,6 +160,7 @@ ghidra_decompiler_sources = [
   'ghidra-native/src/decompiler/slghpattern.cc',
   # 'ghidra-native/src/decompiler/slghscan.cc',
   'ghidra-native/src/decompiler/slghsymbol.cc',
+  'ghidra-native/src/decompiler/marshal.cc',
   'ghidra-native/src/decompiler/space.cc',
   'ghidra-native/src/decompiler/string_ghidra.cc',
   'ghidra-native/src/decompiler/stringmanage.cc',

@@ -1,6 +1,8 @@
-/* r2ghidra - LGPL - Copyright 2020-2021 - FXTi, pancake */
+/* r2ghidra - LGPL - Copyright 2020-2023 - FXTi, pancake */
 
 #include "SleighInstruction.h"
+
+using namespace ghidra;
 
 SleighInstructionPrototype *R2Sleigh::getPrototype(SleighInstruction *context) {
 	SleighInstructionPrototype *new_proto = new SleighInstructionPrototype(this, context);
@@ -76,7 +78,7 @@ SleighParserContext *R2Sleigh::getParserContext(Address &addr, SleighInstruction
 
 SleighParserContext *R2Sleigh::newSleighParserContext(Address &addr, SleighInstructionPrototype *proto)
 {
-	SleighParserContext *pos = new SleighParserContext(getContextCache());
+	SleighParserContext *pos = new SleighParserContext(getContextCache(), this);
 	pos->initialize(1, 0, getConstantSpace());
 	pos->setAddr(addr);
 	pos->setPrototype(proto);
@@ -491,7 +493,11 @@ Address SleighInstructionPrototype::getHandleAddr(FixedHandle &hand, AddrSpace *
 		return Address();
 	}
 	Address newaddr (hand.space, hand.space->wrapOffset (hand.offset_offset));
+#if GN030
+// #pragma warning TODO
+#else
 	newaddr.toPhysical ();
+#endif
 #if 0
 	// if we are in an address space, translate it
 	if (curSpace.isOverlaySpace()) {

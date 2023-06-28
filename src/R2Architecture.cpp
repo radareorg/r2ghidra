@@ -14,6 +14,8 @@
 #include <iostream>
 #include <cassert>
 
+using namespace ghidra;
+
 // maps radare2 calling conventions to decompiler proto models
 static const std::map<std::string, std::string> cc_map = {
 	{ "cdecl", "__cdecl" },
@@ -36,7 +38,7 @@ std::string FilenameFromCore(RCore *core) {
 }
 
 R2Architecture::R2Architecture(RCore *core, const std::string &sleigh_id)
-	: SleighArchitecture (FilenameFromCore (core), sleigh_id.empty () ? SleighIdFromCore (core) : sleigh_id, &cout),
+	: SleighArchitecture (FilenameFromCore (core), sleigh_id.empty () ? SleighIdFromCore (core) : sleigh_id, &std::cout),
 	coreMutex (core) {
 #if 0
 	collectSpecFiles(std::cerr);		///< Gather specification files in normal locations
@@ -109,7 +111,7 @@ void R2Architecture::postSpecFile() {
 }
 
 void R2Architecture::buildAction(DocumentStorage &store) {
-	parseExtraRules (store);	// Look for any additional rules
+	parseExtraRules (store); // Look for any additional rules
 	allacts.universalAction (this);
 	allacts.resetDefaults ();
 	if (rawptr) {

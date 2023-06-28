@@ -128,7 +128,11 @@ static std::unordered_map<std::string, std::string> parseRegisterData(const Elem
 			hidden = (*iter)->getAttributeValue("hidden");
 			unused = (*iter)->getAttributeValue("unused");
 			rename = (*iter)->getAttributeValue("rename");
+#if GN030
+		} catch (const DecoderError &e) {
+#else
 		} catch (const XmlError &e) {
+#endif
 			std::string err_prefix("Unknown attribute: ");
 			if (e.explain == err_prefix + "group") { /* nothing */ }
 			else if (e.explain == err_prefix + "hidden") { /* nothing */ }
@@ -156,16 +160,19 @@ void SleighAsm::parseProcConfig(DocumentStorage &store) {
 	}
 	const List &list(el->getChildren ());
 	List::const_iterator iter;
+	XmlDecode decoder(&trans, el);
 
 	for (iter = list.begin(); iter != list.end (); iter++) {
 		const string &elname ((*iter)->getName ());
 		if (elname == "context_data") {
+#if GN030
+			context.decodeFromSpec (decoder); // , &trans);
+#else
 			context.restoreFromSpec (*iter, &trans);
-		}
-		if (elname == "programcounter") {
+#endif
+		} else if (elname == "programcounter") {
 			pc_name = (*iter)->getAttributeValue ("register");
-		}
-		if (elname == "register_data") {
+		} else if (elname == "register_data") {
 			reg_group = parseRegisterData (*iter);
 		}
 	}
@@ -192,7 +199,11 @@ void SleighAsm::buildSpecfile(DocumentStorage &store)
 	try {
 		Document *doc = store.openDocument(processorfile);
 		store.registerTag(doc->getRoot());
+#if GN030
+	} catch (DecoderError &err) {
+#else
 	} catch (XmlError &err) {
+#endif
 		ostringstream serr;
 		serr << "XML error parsing processor specification: " << processorfile;
 		serr << "\n " << err.explain;
@@ -207,7 +218,11 @@ void SleighAsm::buildSpecfile(DocumentStorage &store)
 	try {
 		Document *doc = store.openDocument(compilerfile);
 		store.registerTag(doc->getRoot());
+#if GN030
+	} catch (DecoderError &err) {
+#else
 	} catch (XmlError &err) {
+#endif
 		ostringstream serr;
 		serr << "XML error parsing compiler specification: " << compilerfile;
 		serr << "\n " << err.explain;
@@ -221,7 +236,11 @@ void SleighAsm::buildSpecfile(DocumentStorage &store)
 	try {
 		Document *doc = store.openDocument (slafile);
 		store.registerTag (doc->getRoot());
+#if GN030
+	} catch (DecoderError &err) {
+#else
 	} catch (XmlError &err) {
+#endif
 		ostringstream serr;
 		serr << "XML error parsing SLEIGH file: " << slafile;
 		serr << "\n " << err.explain;
@@ -317,7 +336,11 @@ void SleighAsm::loadLanguageDescription(const string &specfile) {
 	Document *doc;
 	try {
 		doc = xml_tree (s);
+#if GN030
+	} catch (DecoderError &err) {
+#else
 	} catch (XmlError &err) {
+#endif
 		throw LowlevelError ("Unable to parse sleigh specfile: " + specfile);
 	}
 	Element *el = doc->getRoot();
@@ -328,7 +351,11 @@ void SleighAsm::loadLanguageDescription(const string &specfile) {
 			continue;
 		}
 		description.push_back(LanguageDescription());
+#if GN030
+		//description.back().decoder(*iter);
+#else
 		description.back().restoreXml(*iter);
+#endif
 	}
 	delete doc;
 }

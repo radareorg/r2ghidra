@@ -2,6 +2,7 @@
 
 #include "R2Architecture.h"
 #include "CodeXMLParse.h"
+#include "PrettyXmlEncode.h"
 #include "ArchMap.h"
 #include "SleighAsm.h"
 #include "r2ghidra.h"
@@ -192,14 +193,27 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	case DecompileMode::OFFSET:
 	case DecompileMode::DISASM:
 	case DecompileMode::STATEMENTS:
+#if GN030
+		arch.print->setMarkup(true);
+#else
 		arch.print->setXML(true);
+#endif
 		break;
 	default:
 		break;
 	}
 	if (mode == DecompileMode::XML) {
 		out_stream << "<result><function>";
+#if GN030
+		{
+		//func->encode (out_stream);
+		//PrettyXmlEncode enc(out_stream);
+		XmlEncode enc(out_stream);
+		func->encode(enc, 0, true);
+		}
+#else
 		func->saveXml (out_stream, 0, true);
+#endif
 		out_stream << "</function><code>";
 	}
 	switch (mode) {
@@ -213,12 +227,25 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 		if (mode != DecompileMode::XML) {
 			*out_code = ParseCodeXML(func, out_stream.str().c_str ());
 			if (!*out_code) {
+				std::cout << out_stream.str().c_str() << std::endl;
 				throw LowlevelError ("Failed to parse XML code from Decompiler");
 			}
 		}
 		break;
 	case DecompileMode::DEBUG_XML:
+#if GN030
+#if 0
+		PrettyXmlEncode enc(out_stream);
+		arch.encode(enc);
+#else
+		{
+		XmlEncode enc(out_stream);
+		arch.encode(enc);
+		}
+#endif
+#else
 		arch.saveXml (out_stream);
+#endif
 		break;
 	default:
 		break;

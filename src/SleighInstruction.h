@@ -12,6 +12,8 @@
 #include <unordered_map>
 #include <list>
 
+using namespace ghidra;
+
 template<typename K, typename V>
 class LRUCache {
 private:
@@ -256,7 +258,11 @@ private:
 	SleighInstructionPrototype *prototype = nullptr;
 
 public:
+#if GN030
+	SleighParserContext(ContextCache *ccache, Translate *trans): ParserContext(ccache, trans) {}
+#else
 	SleighParserContext(ContextCache *ccache): ParserContext(ccache) {}
+#endif
 	SleighInstructionPrototype *getPrototype() { return prototype; }
 	void setPrototype(SleighInstructionPrototype *p);
 };

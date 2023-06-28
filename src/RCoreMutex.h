@@ -5,6 +5,7 @@
 
 typedef struct r_core_t RCore;
 
+
 /**
  * Maintains sleep/awake state of the current r2 task like a recursive mutex
  * Use with RCoreLock for RAII behavior
