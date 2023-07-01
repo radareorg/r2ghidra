@@ -1,7 +1,7 @@
 -include config.mk
 DESTDIR?=
 
-GHIDRA_NATIVE_COMMIT=0.3.2
+GHIDRA_NATIVE_COMMIT=0.3.3
 
 ifeq ($(shell test -f config.mk && echo $$?),0)
 all: ghidra-native ghidra-processors.txt
