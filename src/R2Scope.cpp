@@ -443,7 +443,8 @@ Symbol *R2Scope::registerFlag(RFlagItem *flag) const {
 	uint4 attr = Varnode::namelock | Varnode::typelock;
 	Datatype *type = nullptr;
 	// retrieve string from r2
-	if (flag->space && std::string (R_FLAGS_FS_STRINGS) == flag->space->name) {
+	// if (flag->space && std::string (R_FLAGS_FS_STRINGS) == flag->space->name) {
+	if (false) {
 		RBinString *str = nullptr;
 		RListIter *iter;
 		void *pos;
@@ -472,9 +473,13 @@ Symbol *R2Scope::registerFlag(RFlagItem *flag) const {
 		}
 		ptype = arch->types->findByName (tn);
 		int4 sz = static_cast<int4>(flag->size) / ptype->getSize ();
+		if (sz < 1) {
+			sz = 4;
+		}
 		type = arch->types->getTypeArray (sz, ptype);
 		attr |= Varnode::readonly;
 	}
+	return nullptr;
 
 	// TODO: more types
 	if (!type) {
@@ -523,6 +528,7 @@ Symbol *R2Scope::queryR2Absolute(ut64 addr, bool contain) const {
 			if (flag->space && flag->space->name && !strcmp (flag->space->name, R_FLAGS_FS_SECTIONS)) {
 				continue;
 			}
+			eprintf ("RE %s\n", flag->name);
 			return registerFlag (flag);
 		}
 	}
