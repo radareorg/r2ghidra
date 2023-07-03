@@ -76,7 +76,7 @@ plugins: $(R2G_CORE_PLUGIN) sleighc
 deps=$(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(R2G_PLUGIN_OBJS) $(PUGIXML_OBJS)
 
 asan:
-	CFLAGS="-fsanitize=address -g" $(MAKE) -j
+	LDFLAGS="-fsanitize=address" CFLAGS="-fsanitize=address -g" $(MAKE) -j
 	$(MAKE) user-install
 
 $(R2G_CORE_PLUGIN): $(deps)

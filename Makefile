@@ -23,7 +23,7 @@ ghidra-processors.txt:
 	cp -f ghidra-processors.txt.default ghidra-processors.txt
 
 asan: ghidra-native ghidra-processors.txt
-	$(MAKE) -C src asan CFLAGS=-g CXXFLAGS=-g
+	CFLAGS=-g CXXFLAGS=-g $(MAKE) -C src asan
 
 asan-run:
 	DYLD_INSERT_LIBRARIES=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/12.0.0/lib/darwin/libclang_rt.asan_osx_dynamic.dylib r2 -s 9664 /Users/pancake/Downloads/usr-4/bin/bc
