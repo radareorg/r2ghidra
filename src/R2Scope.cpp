@@ -1,4 +1,4 @@
-/* r2ghidra- LGPL - Copyright 2019-2021 - thestr4ng3r, pancake */
+/* r2ghidra- LGPL - Copyright 2019-2023 - thestr4ng3r, pancake */
 
 #include "R2Scope.h"
 #include "R2Architecture.h"
@@ -86,6 +86,7 @@ static std::string to_string(const char *str) {
 }
 
 FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
+	// lol globals
 	RCoreLock core (arch->getCore ());
 
 	const char *archName = r_config_get (core->config, "asm.arch");
@@ -164,7 +165,11 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	}
 
 	RangeList varRanges; // to check for overlaps
-	RList *vars = r_anal_var_all_list (core->anal, fcn);
+	RList *vars = NULL;
+	
+	if (r_config_get_b (core->config, "r2ghidra.vars")) {
+		r_anal_var_all_list (core->anal, fcn);
+	}
 	auto stackSpace = arch->getStackSpace ();
 
 	auto addrForVar = [&](RAnalVar *var, bool warn_on_fail) {

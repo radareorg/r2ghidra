@@ -56,6 +56,7 @@ bool SleighHomeConfig(void *user, void *data);
 
 static const ConfigVar cfg_var_sleighhome   ("sleighhome",  "",         "SLEIGHHOME", SleighHomeConfig);
 static const ConfigVar cfg_var_sleighid     ("lang",        "",         "Custom Sleigh ID to override auto-detection (e.g. x86:LE:32:default)");
+static const ConfigVar cfg_var_anal         ("vars",        "false",    "Honor local variable / argument analysis from r2 (may cause segfaults if enabled)");
 static const ConfigVar cfg_var_cmt_cpp      ("cmt.cpp",     "true",     "C++ comment style");
 static const ConfigVar cfg_var_cmt_indent   ("cmt.indent",  "4",        "Comment indent");
 #if 0
