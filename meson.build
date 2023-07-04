@@ -41,7 +41,6 @@ else
 endif
 
 cpp = meson.get_compiler('cpp')
-add_global_arguments('-DGN030=1', language:'cpp')
 if cpp.get_id() == 'msvc'
   incdirs += [
     'radare2/include/libr',

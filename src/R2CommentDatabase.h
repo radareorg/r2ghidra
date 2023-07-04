@@ -31,15 +31,8 @@ public:
 	CommentSet::const_iterator beginComment(const Address &fad) const override;
 	CommentSet::const_iterator endComment(const Address &fad) const override;
 
-#if GN030
 	void encode(Encoder &encoder) const override { cache.encode(encoder); }
 	void decode(Decoder &decoder) override { throw LowlevelError("CommentDatabaseGhidra::decode unimplemented"); }
-#else
-	void saveXml(ostream &s) const override { cache.saveXml(s); }
-	void restoreXml(const Element *el, const AddrSpaceManager *trans) override {
-		throw LowlevelError("commentdb::restoreXml unimplemented");
-	}
-#endif
 };
 
 #endif //R2GHIDRA_R2COMMENTDATABASE_H

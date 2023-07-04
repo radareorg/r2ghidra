@@ -3,8 +3,6 @@
 #ifndef R2GHIDRA_R2UTILS_H
 #define R2GHIDRA_R2UTILS_H
 
-#define GN030 1
-
 typedef struct r_list_t RList;
 typedef struct r_list_iter_t RListIter;
 

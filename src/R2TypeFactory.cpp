@@ -101,7 +101,6 @@ Datatype *R2TypeFactory::queryR2Struct(const string &n, std::set<std::string> &s
 			if (elements > 0) {
 				memberType = getTypeArray (elements, memberType);
 			}
-#if GN030
 			TypeField tf = {
 				(int4)offset, // id = offset by default
 				(int4)offset, // Currently, this is 0 most of the time: member->offset,
@@ -109,13 +108,6 @@ Datatype *R2TypeFactory::queryR2Struct(const string &n, std::set<std::string> &s
 				memberType
 			};
                         fields.push_back(tf);
-#else
-			fields.push_back ({
-				offset,
-				memberName,
-				memberType
-			});
-#endif
 		}
 
 		if (fields.empty ()) {

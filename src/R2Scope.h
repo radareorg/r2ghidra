@@ -82,13 +82,8 @@ public:
 	void renameSymbol(Symbol *sym,const string &newname) override	{ throw LowlevelError("renameSymbol unimplemented"); }
 	void retypeSymbol(Symbol *sym,Datatype *ct) override			{ throw LowlevelError("retypeSymbol unimplemented"); }
 	string makeNameUnique(const string &nm) const override			{ throw LowlevelError("makeNameUnique unimplemented"); }
-#if GN030
 	void encode(Encoder &encoder) const override { cache->encode(encoder); }
 	void decode(Decoder &decoder) override { throw LowlevelError("not implemented"); }
-#else
-	void saveXml(ostream &s) const override							{ cache->saveXml(s); }
-	void restoreXml(const Element *el) override						{ throw LowlevelError("restoreXml unimplemented"); }
-#endif
 	void printEntries(ostream &s) const override					{ throw LowlevelError("printEntries unimplemented"); }
 	int4 getCategorySize(int4 cat) const override					{ throw LowlevelError("getCategorySize unimplemented"); }
 	Symbol *getCategorySymbol(int4 cat,int4 ind) const override		{ throw LowlevelError("getCategorySymbol unimplemented"); }

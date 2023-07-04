@@ -493,11 +493,7 @@ Address SleighInstructionPrototype::getHandleAddr(FixedHandle &hand, AddrSpace *
 		return Address();
 	}
 	Address newaddr (hand.space, hand.space->wrapOffset (hand.offset_offset));
-#if GN030
-// #pragma warning TODO
-#else
-	newaddr.toPhysical ();
-#endif
+	// UHM newaddr.toPhysical ();
 #if 0
 	// if we are in an address space, translate it
 	if (curSpace.isOverlaySpace()) {

@@ -134,7 +134,6 @@ void AnnotateColor(ANNOTATOR_PARAMS) {
 	if (attr.empty ()) {
 		return;
 	}
-#if GN030
 	int color = attr.as_int(-1);
 	if (color < 0) {
 		return;
@@ -171,7 +170,7 @@ void AnnotateColor(ANNOTATOR_PARAMS) {
 	default:
 		return;
 	}
-#else
+#if 0
 	std::string color = attr.as_string();
 	RSyntaxHighlightType type;
 	if (color == "keyword") {

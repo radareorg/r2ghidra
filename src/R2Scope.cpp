@@ -318,7 +318,6 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 					return;
 				}
 
-#if GN030
 				int4 paramTrialIndex = params.whichTrial(addr, type->getSize());
 				if (paramTrialIndex < 0) {
 					arch->addWarning ("Failed to determine arg index of " + to_string(var->name));
@@ -331,13 +330,6 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 					}
 					paramIndex++;
 				}
-#else
-				paramIndex = params.whichTrial(addr, type->getSize());
-				if (paramIndex < 0) {
-					arch->addWarning ("Failed to determine arg index of " + to_string(var->name));
-					return;
-				}
-#endif
 			}
 
 			varRanges.insertRange(addr.getSpace(), addr.getOffset(), last);
@@ -433,12 +425,8 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 
 	child (&doc, "rangelist");
 
-#if GN030
 	XmlDecode dec(arch, &doc);
 	auto sym = cache->addMapSym (dec);
-#else
-	auto sym = cache->addMapSym (&doc);
-#endif
 	return dynamic_cast<FunctionSymbol *>(sym);
 }
 

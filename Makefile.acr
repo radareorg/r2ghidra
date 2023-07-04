@@ -3,7 +3,9 @@ DESTDIR?=
 
 GHIDRA_NATIVE_COMMIT=0.3.3
 
-all: ghidra-native ghidra-processors.txt third-party/pugixml
+PUGIXML=third-party/pugixml/Makefile
+
+all: ghidra-native ghidra-processors.txt $(PUGIXML)
 	$(MAKE) -C src
 	$(MAKE) -C ghidra
 
@@ -47,7 +49,7 @@ ghidra-native:
 	cd ghidra-native && git checkout $(GHIDRA_NATIVE_COMMIT)
 	$(MAKE) -C ghidra-native patch
 
-third-party/pugixml:
+$(PUGIXML):
 	git submodule update --init
 
 mrproper: clean
