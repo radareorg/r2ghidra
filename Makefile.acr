@@ -1,16 +1,11 @@
--include config.mk
+include config.mk
 DESTDIR?=
 
 GHIDRA_NATIVE_COMMIT=0.3.3
 
-ifeq ($(shell test -f config.mk && echo $$?),0)
-all: ghidra-native ghidra-processors.txt
+all: ghidra-native ghidra-processors.txt third-party/pugixml
 	$(MAKE) -C src
 	$(MAKE) -C ghidra
-else
-all:
-	@echo Run ./configure
-endif
 
 c:
 	make -C src -j4
@@ -51,6 +46,9 @@ ghidra-native:
 	git clone https://github.com/radareorg/ghidra-native
 	cd ghidra-native && git checkout $(GHIDRA_NATIVE_COMMIT)
 	$(MAKE) -C ghidra-native patch
+
+third-party/pugixml:
+	git submodule update --init
 
 mrproper: clean
 	git submodule deinit --all -f
