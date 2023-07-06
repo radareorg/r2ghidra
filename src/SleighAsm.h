@@ -222,7 +222,7 @@ public:
 	int disassemble(RAnalOp *op, unsigned long long offset);
 	int genOpcode(PcodeSlg &pcode_slg, Address &addr);
 	std::vector<R2Reg> getRegs(void);
-	static RConfig *getConfig(RAsm *a);
+	static RConfig *getConfig(RCore *c);
 	static RConfig *getConfig(RAnal *a);
 	void check(ut64 offset, const ut8 *buf, int len);
 };

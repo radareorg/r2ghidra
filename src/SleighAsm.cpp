@@ -348,15 +348,18 @@ void SleighAsm::collectSpecfiles(void) {
 	}
 }
 
-RConfig *SleighAsm::getConfig(RAsm *a) {
-	RCore *core = a->num ? (RCore *)(a->num->userptr) : NULL;
-	return core? core->config: nullptr;
+RConfig *SleighAsm::getConfig(RCore *core) {
+	if (core == nullptr) {
+		throw LowlevelError ("Can't get RCore from RAnal's RCoreBind");
+	}
+	return core->config;
 }
 
 RConfig *SleighAsm::getConfig(RAnal *a) {
 	RCore *core = a ? (RCore *)a->coreb.core : nullptr;
-	if (!core)
+	if (!core) {
 		throw LowlevelError ("Can't get RCore from RAnal's RCoreBind");
+	}
 	return core->config;
 }
 

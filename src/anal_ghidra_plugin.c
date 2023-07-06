@@ -17,6 +17,7 @@ extern RList *anal_preludes(RAnal *anal);
 extern char *r2ghidra_regs(RArchSession *as);
 extern bool r2ghidra_esilcb(RArchSession *as, RArchEsilAction action);
 // extern bool sleigh_decode(RArchSession *as, RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int len, RAnalOpMask mask);
+extern char *get_reg_profile(RAnal *anal);
 static bool sleigh_decode(RArchSession *as, RAnalOp *op, RArchDecodeMask mask);
 
 RArchPlugin r_arch_plugin_ghidra = {
@@ -36,7 +37,7 @@ RArchPlugin r_arch_plugin_ghidra = {
 	.info = &archinfo,
 	.preludes = anal_preludes,
 	.decode = &sleigh_decode,
-	.regs = &regs,
+	.regs = &r2ghidra_regs,
 	.esilcb = r2ghidra_esilcb,
 	.mnemonics = NULL,
 };

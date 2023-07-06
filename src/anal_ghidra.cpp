@@ -21,6 +21,7 @@
 #define R_ANAL_ESIL_PARM_REG R_ESIL_PARM_REG
 #define R_ANAL_ESIL_OP_TYPE_CUSTOM R_ESIL_OP_TYPE_CUSTOM
 #endif
+
 // XXX dont use globals
 static R_TH_LOCAL SleighAsm *sanal = nullptr;
 
@@ -34,12 +35,35 @@ static char *slid(RCore *core, const char *cpu, int bits, bool be) {
 }
 
 #if R2_VERSION_NUMBER >= 50809
-static char *slid_arch(RArchSession *as)
-
+static char *slid_arch(RArchSession *as) {
+	const char *cp = as->config->cpu;
+	int bi = as->config->bits;
+	bool be = as->config->big_endian;
+	if (R_STR_ISEMPTY (cp)) {
+		return nullptr;
+	}
+	// R2_590 - missing core char *cpu = slid ((RCore*)anal->coreb.core, cp, bi, be);
+	char *cpu = slid (nullptr, cp, bi, be);
+	try {
+		REsil *esil = as->arch->esil;
+		RIO *io = (RIO*)nullptr;
+		RBin *bin = as->arch->binb.bin;
+		RAnal *anal = nullptr;
+		if (bin != nullptr && esil != nullptr) {
+			io = bin->iob.io;
+			anal = esil->anal;
+			// sanal->init (cpu, bi, be, anal? anal->iob.io: nullptr, SleighAsm::getConfig (anal));
+		}
+		sanal->init (cpu, bi, be, io, SleighAsm::getConfig (anal));
+	} catch (const LowlevelError &e) {
+		R_FREE (cpu);
+		std::cerr << "SleightInit " << e.explain << std::endl;
+		return nullptr;
+	}
+	return cpu;
+}
 #else
-static char *slid_arch(RAnal *anal)
-#endif
-	{
+static char *slid_arch(RAnal *anal) {
 #if R2_VERSION_NUMBER >= 50609
 	const char *cp = anal->config->cpu;
 	int bi = anal->config->bits;
@@ -62,7 +86,27 @@ static char *slid_arch(RAnal *anal)
 	}
 	return cpu;
 }
+#endif
 
+#if R2_VERSION_NUMBER >= 50809
+
+extern "C" int archinfo(RArchSession *as, ut32 query) {
+	r_return_val_if_fail (as, 1);
+	// char *arch = slid_arch (as); // is this initializing sanal global ptr?
+	if (sanal != nullptr) {
+		switch (query) {
+		case R_ARCH_INFO_MAXOP_SIZE:
+			return sanal->maxopsz;
+		case R_ARCH_INFO_MINOP_SIZE:
+			return sanal->minopsz;
+		case R_ARCH_INFO_CODE_ALIGN:
+		case R_ARCH_INFO_DATA_ALIGN:
+			return sanal->alignment;
+		}
+	}
+	return 1;
+}
+#else
 extern "C" int archinfo(RAnal *anal, int query) {
 	// This is to check if RCore plugin set cpu properly.
 	r_return_val_if_fail (anal, -1);
@@ -87,6 +131,7 @@ extern "C" int archinfo(RAnal *anal, int query) {
 
 	return -1;
 }
+#endif
 
 static std::vector<std::string> string_split(const std::string &s) {
 	std::vector<std::string> tokens;
@@ -1434,23 +1479,22 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 
 #if 0
 /* Not in use for now. */
-static bool anal_type_NOP(const std::vector<Pcodeop> &Pcodes)
-{ // All p-codes have no side affects.
-	for (auto iter = Pcodes.cbegin(); iter != Pcodes.cend(); iter++)
-	{
-		if (iter->type == CPUI_STORE)
+static bool anal_type_NOP(const std::vector<Pcodeop> &Pcodes) {
+	// All p-codes have no side affects.
+	for (auto iter = Pcodes.cbegin(); iter != Pcodes.cend(); iter++) {
+		if (iter->type == CPUI_STORE) {
 			return false;
-
-		if (iter->output && !iter->output->is_unique())
+		}
+		if (iter->output && !iter->output->is_unique()) {
 			return false;
+		}
 	}
-
 	return true;
 }
 #endif
 
 extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int len, RAnalOpMask mask) {
-	char *arch = slid_arch (a);
+	char *arch = NULL; // slid_arch (a);
 	if (!arch) {
 		return -1;
 	}
@@ -1577,7 +1621,7 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 				break;
 			case FlowType::CONDITIONAL_COMPUTED_CALL:
 			{
-				char *reg = getIndirectReg(ins, isRefed);
+				char *reg = getIndirectReg (ins, isRefed);
 				if (reg) {
 					if (isRefed) {
 						anal_op->ireg = reg;
@@ -1617,7 +1661,7 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 				break;
 			}
 			default:
-				throw LowlevelError("Unexpected FlowType occured in sleigh_op.");
+				throw LowlevelError("Unexpected FlowType occured in sleigh_op");
 			}
 		} else {
 			anal_type (a, anal_op, pcode_slg, assem);
@@ -1707,6 +1751,22 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 		return 0;
 	}
 }
+
+#if R2_VERSION_NUMBER >= 50809
+extern "C" bool sleigh_decode(RArchSession *as, RAnalOp *aop, RArchDecodeMask mask) {
+	REsil *esil = as->arch->esil;
+	RIO *io = (RIO*)nullptr;
+	RBin *bin = as->arch->binb.bin;
+	RAnal *anal = nullptr;
+	if (bin != nullptr && esil != nullptr) {
+		io = bin->iob.io;
+		anal = esil->anal;
+		// sanal->init (cpu, bi, be, anal? anal->iob.io: nullptr, SleighAsm::getConfig (anal));
+	}
+	return sleigh_op (anal, aop, aop->addr, aop->bytes, aop->size, (RAnalOpMask)mask) > 0;
+}
+#endif
+
 
 /*
  * By 2020-05-24, there are 17 kinds of group of registers in SLEIGH.
@@ -2137,7 +2197,7 @@ extern "C" int esil_sleigh_fini(RAnalEsil *esil) {
 }
 
 #if R2_VERSION_NUMBER >= 50809
-extern bool r2ghidra_esilcb(RArchSession *as, RArchEsilAction action) {
+extern "C" bool r2ghidra_esilcb(RArchSession *as, RArchEsilAction action) {
 	REsil *esil = as->arch->esil;
 	if (!esil) {
 		return false;

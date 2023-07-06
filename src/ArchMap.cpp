@@ -239,9 +239,9 @@ int ai(RCore *core, std::string cpu, int query) {
 	const ArchMapper *am = &arch_it->second;
 	// auto res = arch_it->second.Map(core);
 	switch (query) {
-	case R_ANAL_ARCHINFO_MIN_OP_SIZE:
+	case R_ARCH_INFO_MINOP_SIZE:
 		return am->minopsz;
-	case R_ANAL_ARCHINFO_MAX_OP_SIZE:
+	case R_ARCH_INFO_MAXOP_SIZE:
 		return am->maxopsz;
 	// case R_ANAL_ARCHINFO_ALIGN: return am->align; // proc.align;
 	}
