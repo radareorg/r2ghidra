@@ -95,9 +95,9 @@ extern "C" int archinfo(RArchSession *as, ut32 query) {
 	// char *arch = slid_arch (as); // is this initializing sanal global ptr?
 	if (sanal != nullptr) {
 		switch (query) {
-		case R_ARCH_INFO_MAXOP_SIZE:
+		case R_ARCH_INFO_MAX_OP_SIZE:
 			return sanal->maxopsz;
-		case R_ARCH_INFO_MINOP_SIZE:
+		case R_ARCH_INFO_MIN_OP_SIZE:
 			return sanal->minopsz;
 		case R_ARCH_INFO_CODE_ALIGN:
 		case R_ARCH_INFO_DATA_ALIGN:
