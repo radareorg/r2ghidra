@@ -183,10 +183,10 @@ static const std::map<std::string, std::string> compiler_map = {
 };
 
 std::string CompilerFromCore(RCore *core) {
-	if (!core) {
+	if (core == nullptr) {
 		return "gcc";
 	}
-	RBinInfo *info = r_bin_get_info(core->bin);
+	RBinInfo *info = r_bin_get_info (core->bin);
 	if (!info || !info->rclass) {
 		return std::string ();
 	}
@@ -205,6 +205,7 @@ std::string SleighIdFromCore(RCore *core) {
 #if 1
 	R2Architecture::collectSpecFiles (std::cerr);
 	auto langs = R2Architecture::getLanguageDescriptions ();
+	eprintf ("jeje from core \n");
 #else
 	SleighArchitecture::collectSpecFiles (std::cerr);
 	auto langs = SleighArchitecture::getLanguageDescriptions ();

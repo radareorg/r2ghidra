@@ -56,23 +56,24 @@ std::vector<const ConfigVar *> ConfigVar::vars_all;
 
 bool SleighHomeConfig(void *user, void *data);
 
-static const ConfigVar cfg_var_sleighhome   ("sleighhome",  "",         "SLEIGHHOME", SleighHomeConfig);
-static const ConfigVar cfg_var_sleighid     ("lang",        "",         "Custom Sleigh ID to override auto-detection (e.g. x86:LE:32:default)");
-static const ConfigVar cfg_var_anal         ("vars",        "false",    "Honor local variable / argument analysis from r2 (may cause segfaults if enabled)");
-static const ConfigVar cfg_var_cmt_cpp      ("cmt.cpp",     "true",     "C++ comment style");
-static const ConfigVar cfg_var_cmt_indent   ("cmt.indent",  "4",        "Comment indent");
+#define CV static const ConfigVar
+CV cfg_var_sleighhome ("sleighhome",  "",         "SLEIGHHOME", SleighHomeConfig);
+CV cfg_var_sleighid   ("lang",        "",         "Custom Sleigh ID to override auto-detection (e.g. x86:LE:32:default)");
+CV cfg_var_anal       ("vars",        "false",    "Honor local variable / argument analysis from r2 (may cause segfaults if enabled)");
+CV cfg_var_cmt_cpp    ("cmt.cpp",     "true",     "C++ comment style");
+CV cfg_var_cmt_indent ("cmt.indent",  "4",        "Comment indent");
 #if 0
-static const ConfigVar cfg_var_nl_brace     ("nl.brace",    "false",    "Newline before opening '{'");
-static const ConfigVar cfg_var_nl_else      ("nl.else",     "false",    "Newline before else");
+CV cfg_var_nl_brace   ("nl.brace",    "false",    "Newline before opening '{'");
+CV cfg_var_nl_else    ("nl.else",     "false",    "Newline before else");
 #endif
-static const ConfigVar cfg_var_indent       ("indent",      "4",        "Indent increment");
-static const ConfigVar cfg_var_linelen      ("linelen",     "120",      "Max line length");
-static const ConfigVar cfg_var_maximplref   ("maximplref",  "2",        "Maximum number of references to an expression before showing an explicit variable.");
-static const ConfigVar cfg_var_rawptr       ("rawptr",      "true",     "Show unknown globals as raw addresses instead of variables");
-static const ConfigVar cfg_var_verbose      ("verbose",     "false",    "Show verbose warning messages while decompiling");
-static const ConfigVar cfg_var_casts        ("casts",       "false",    "Show type casts where needed");
-static const ConfigVar cfg_var_ropropagate  ("roprop",      "0",        "Propagate read-only constants (0,1,2,3,4)");
-static const ConfigVar cfg_var_timeout      ("timeout",     "0",        "Run decompilation in a separate process and kill it after a specific time");
+CV cfg_var_indent     ("indent",      "4",        "Indent increment");
+CV cfg_var_linelen    ("linelen",     "120",      "Max line length");
+CV cfg_var_maximplref ("maximplref",  "2",        "Maximum number of references to an expression before showing an explicit variable.");
+CV cfg_var_rawptr     ("rawptr",      "true",     "Show unknown globals as raw addresses instead of variables");
+CV cfg_var_verbose    ("verbose",     "false",    "Show verbose warning messages while decompiling");
+CV cfg_var_casts      ("casts",       "false",    "Show type casts where needed");
+CV cfg_var_roprop     ("roprop",      "0",        "Propagate read-only constants (0,1,2,3,4)");
+CV cfg_var_timeout    ("timeout",     "0",        "Run decompilation in a separate process and kill it after a specific time");
 
 
 static std::recursive_mutex decompiler_mutex;
@@ -151,7 +152,7 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	R2Architecture arch (core, cfg_var_sleighid.GetString (core->config));
 	DocumentStorage store = DocumentStorage ();
 	arch.max_implied_ref = cfg_var_maximplref.GetInt (core->config);
-	arch.readonlypropagate = cfg_var_ropropagate.GetBool (core->config);
+	arch.readonlypropagate = cfg_var_roprop.GetBool (core->config);
 	arch.setRawPtr (cfg_var_rawptr.GetBool (core->config));
 	arch.init (store);
 
@@ -439,7 +440,6 @@ static void Disassemble(RCore *core, ut64 ops) {
 }
 
 static void SetInitialSleighHome(RConfig *cfg) {
-	eprintf ("Init home %p\n", cfg);
 	if (!cfg_var_sleighhome.GetString (cfg).empty()) {
 		return;
 	}
@@ -551,7 +551,7 @@ static void _cmd(RCore *core, const char *input) {
 		if (pid == 0) {
 			runcmd (core, input);
 			r_cons_flush ();
-			fflush(stdout);
+			fflush (stdout);
 			write (fds[1], "\x12", 1);
 			exit (0);
 		} else {
@@ -596,13 +596,12 @@ extern "C" int r2ghidra_core_cmd(void *user, const char *input) {
 }
 
 bool SleighHomeConfig(void */* user */, void *data) {
-	eprintf ("salchipapa∫\n");
 	std::lock_guard<std::recursive_mutex> lock(decompiler_mutex);
 	auto node = reinterpret_cast<RConfigNode *>(data);
 	SleighArchitecture::shutdown();
 	SleighArchitecture::specpaths = FileManage ();
 	if (R_STR_ISNOTEMPTY (node->value)) {
-		SleighArchitecture::scanForSleighDirectories(node->value);
+		SleighArchitecture::scanForSleighDirectories (node->value);
 	}
 	return true;
 }
@@ -618,14 +617,12 @@ extern "C" int r2ghidra_core_init(void *user, const char *cmd) {
 	startDecompilerLibrary (nullptr);
 	auto *rcmd = reinterpret_cast<RCmd *>(user);
 	auto *core = reinterpret_cast<RCore *>(rcmd->data);
-	eprintf ("Set Gcore\n");
 	Gcore = core;
 #if R2_VERSION_NUMBER >= 50809
 	r_arch_plugin_add (core->anal->arch, &r_arch_plugin_ghidra);
 #else
 	r_anal_add (core->anal, &r_anal_plugin_ghidra);
 #endif
-	eprintf ("init the core and arch plugins\n");
 	RConfig *cfg = core->config;
 	r_config_lock (cfg, false);
 	for (const auto var : ConfigVar::GetAll ()) {

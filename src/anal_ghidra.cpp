@@ -23,8 +23,8 @@
 #endif
 
 // XXX dont use globals
-static R_TH_LOCAL SleighAsm *sanal = nullptr;
-R_TH_LOCAL RCore *Gcore = nullptr;
+static SleighAsm *sanal = nullptr;
+RCore *Gcore = nullptr;
 
 static char *slid(RCore *core, const char *cpu, int bits, bool be) {
 	R_LOG_DEBUG ("slid (%s:%d:%d)", cpu, bits, be);
@@ -32,6 +32,9 @@ static char *slid(RCore *core, const char *cpu, int bits, bool be) {
 		core = Gcore;
 	} else if (Gcore == nullptr) {
 		Gcore = core;
+	}
+	if (sanal == nullptr) {
+		sanal = new SleighAsm ();
 	}
 	if (!strchr (cpu, ':')) {
 		auto langs = SleighArchitecture::getLanguageDescriptions ();
@@ -41,40 +44,9 @@ static char *slid(RCore *core, const char *cpu, int bits, bool be) {
 	return strdup (cpu);
 }
 
-static char *slid_arch(RArchSession *as) {
-	eprintf ("one\n");
-	r_return_val_if_fail (as, nullptr);
-	eprintf ("slid_ARAAAAACH\n");
-	if (as->config == nullptr) {
-		throw new LowlevelError ("cannot find arch config");
-	}
-	const char *cp = as->config->cpu;
-	int bi = as->config->bits;
-	bool be = as->config->big_endian;
-	if (R_STR_ISEMPTY (cp)) {
-		return nullptr;
-	}
-	char *cpu = slid (Gcore, cp, bi, be);
-	try {
-		REsil *esil = as->arch->esil;
-		RIO *io = (RIO*)nullptr;
-		RBin *bin = as->arch->binb.bin;
-		RAnal *anal = nullptr;
-		if (bin != nullptr && esil != nullptr) {
-			io = bin->iob.io;
-			anal = esil->anal;
-			// sanal->init (cpu, bi, be, anal? anal->iob.io: nullptr, SleighAsm::getConfig (anal));
-		}
-		sanal->init (cpu, bi, be, io, SleighAsm::getConfig (anal));
-	} catch (const LowlevelError &e) {
-		R_FREE (cpu);
-		std::cerr << "SleightInit " << e.explain << std::endl;
-		return nullptr;
-	}
-	return cpu;
-}
 static char *slid_arch(RAnal *anal) {
 #if R2_VERSION_NUMBER >= 50609
+	// const char *cp = anal->config->cpu;
 	const char *cp = anal->config->cpu;
 	int bi = anal->config->bits;
 	bool be = anal->config->big_endian;
@@ -101,7 +73,7 @@ static char *slid_arch(RAnal *anal) {
 
 extern "C" int archinfo(RArchSession *as, ut32 query) {
 	r_return_val_if_fail (as, 1);
-	char *arch = slid_arch (as); // is this initializing sanal global ptr?
+	char *arch = slid_arch (Gcore->anal); // is this initializing sanal global ptr?
 	if (sanal != nullptr) {
 		switch (query) {
 		case R_ARCH_INFO_MAX_OP_SIZE:
@@ -1972,14 +1944,14 @@ static std::string regtype_name(const char *cpu, const std::string &regname) {
 #if R2_VERSION_NUMBER >= 50809
 extern "C" char *r2ghidra_regs(RArchSession *as) {
 	r_return_val_if_fail (as, nullptr);
-	const char *cpu = as->config->cpu;
-	eprintf ("get regs\n");
+
+	const char *cpu = r_config_get (Gcore->config, "asm.cpu"); // (as->config != nullptr)? as->config->cpu: "arm";
+
 	if (R_STR_ISEMPTY (cpu)) {
-		eprintf ("null regprofile\n");
 		return nullptr;
 	}
 	// slid-arch finds and initializes the plugin, needs a better name
-	char *sa = slid_arch (as);
+	char *sa = slid_arch (Gcore->anal);
 	if (!sa) {
 		return nullptr;
 	}
@@ -2180,7 +2152,6 @@ static bool sleigh_esil_popcount(RAnalEsil *esil) {
 
 
 extern "C" int esil_sleigh_init(RAnalEsil *esil) {
-	eprintf ("lseigh esil einit\n");
 	if (!esil) {
 		return false;
 	}
@@ -2192,7 +2163,6 @@ extern "C" int esil_sleigh_init(RAnalEsil *esil) {
 
 extern "C" bool sanal_init(void *p) {
 	if (sanal == nullptr) {
-		eprintf ("The new sleigh is in process %p\n", p);
 		sanal = new SleighAsm ();
 	}
 	return true;
