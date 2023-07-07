@@ -1,11 +1,17 @@
-/* r2ghidra - LGPL - Copyright 2020-2021 - FXTi, pancake */
+/* r2ghidra - LGPL - Copyright 2020-2023 - FXTi, pancake */
 
 #include "SleighAsm.h"
 #include "ArchMap.h"
 
+extern R_TH_LOCAL RCore *Gcore;
+
 void SleighAsm::init(const char *cpu, int bits, bool bigendian, RIO *io, RConfig *cfg) {
+	eprintf ("sleigh init\n");
 	if (!io) {
-		throw LowlevelError ("Can't get RIO from RBin");
+		if (Gcore == nullptr) {
+			throw LowlevelError ("Can't get RIO from RBin");
+		}
+		io = Gcore->io;
 	}
 	if (description.empty()) {
 		/* Initialize sleigh spec files */
@@ -20,6 +26,7 @@ void SleighAsm::init(const char *cpu, int bits, bool bigendian, RIO *io, RConfig
 }
 
 void SleighAsm::initInner(RIO *io, std::string sleigh_id) {
+	eprintf ("init inner\n");
 	/* Initialize Sleigh */
 	loader = std::move (AsmLoadImage (io));
 	docstorage = std::move (DocumentStorage ());
@@ -348,17 +355,28 @@ void SleighAsm::collectSpecfiles(void) {
 	}
 }
 
+
 RConfig *SleighAsm::getConfig(RCore *core) {
+	eprintf ("getConfigCore %p", Gcore);
 	if (core == nullptr) {
-		throw LowlevelError ("Can't get RCore from RAnal's RCoreBind");
+		if (Gcore == nullptr) {
+			throw LowlevelError ("Can't get RCore from RAnal's RCoreBind");
+		} else {
+			core = Gcore;
+		}
 	}
 	return core->config;
 }
 
 RConfig *SleighAsm::getConfig(RAnal *a) {
+	eprintf ("getConfig");
 	RCore *core = a ? (RCore *)a->coreb.core : nullptr;
-	if (!core) {
-		throw LowlevelError ("Can't get RCore from RAnal's RCoreBind");
+	if (core == nullptr) {
+		if (Gcore == nullptr) {
+			throw LowlevelError ("Can't get RCore from RAnal's RCoreBind");
+		} else {
+			core = Gcore;
+		}
 	}
 	return core->config;
 }
@@ -366,6 +384,8 @@ RConfig *SleighAsm::getConfig(RAnal *a) {
 std::string SleighAsm::getSleighHome(RConfig *cfg) {
 	const char varname[] = "r2ghidra.sleighhome";
 	char *path = nullptr;
+	eprintf ("getSleighhome %p", cfg);
+	return "";
 
 	// user-set, for example from .radare2rc
 	if (cfg != nullptr) {
@@ -381,7 +401,7 @@ std::string SleighAsm::getSleighHome(RConfig *cfg) {
 		if (cfg) {
 			r_config_set (cfg, varname, ev);
 		}
-		std::string res(ev);
+		std::string res (ev);
 		free (ev);
 		return res;
 	}
@@ -424,6 +444,7 @@ std::string SleighAsm::getSleighHome(RConfig *cfg) {
 }
 
 int SleighAsm::disassemble(RAnalOp *op, unsigned long long offset) {
+	eprintf ("disassembl");
 	AssemblySlg assem (this);
 	Address addr(trans.getDefaultCodeSpace (), offset);
 	int length = 0;

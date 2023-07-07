@@ -25,6 +25,7 @@
 
 #undef DEBUG_EXCEPTIONS
 
+extern "C" RCore *Gcore;
 
 typedef bool (*ConfigVarCb)(void *user, void *data);
 
@@ -438,6 +439,7 @@ static void Disassemble(RCore *core, ut64 ops) {
 }
 
 static void SetInitialSleighHome(RConfig *cfg) {
+	eprintf ("Init home %p\n", cfg);
 	if (!cfg_var_sleighhome.GetString (cfg).empty()) {
 		return;
 	}
@@ -594,6 +596,7 @@ extern "C" int r2ghidra_core_cmd(void *user, const char *input) {
 }
 
 bool SleighHomeConfig(void */* user */, void *data) {
+	eprintf ("salchipapa∫\n");
 	std::lock_guard<std::recursive_mutex> lock(decompiler_mutex);
 	auto node = reinterpret_cast<RConfigNode *>(data);
 	SleighArchitecture::shutdown();
@@ -613,14 +616,16 @@ extern "C" RAnalPlugin r_anal_plugin_ghidra;
 extern "C" int r2ghidra_core_init(void *user, const char *cmd) {
 	std::lock_guard<std::recursive_mutex> lock(decompiler_mutex);
 	startDecompilerLibrary (nullptr);
-
 	auto *rcmd = reinterpret_cast<RCmd *>(user);
 	auto *core = reinterpret_cast<RCore *>(rcmd->data);
+	eprintf ("Set Gcore\n");
+	Gcore = core;
 #if R2_VERSION_NUMBER >= 50809
 	r_arch_plugin_add (core->anal->arch, &r_arch_plugin_ghidra);
 #else
 	r_anal_add (core->anal, &r_anal_plugin_ghidra);
 #endif
+	eprintf ("init the core and arch plugins\n");
 	RConfig *cfg = core->config;
 	r_config_lock (cfg, false);
 	for (const auto var : ConfigVar::GetAll ()) {

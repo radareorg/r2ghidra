@@ -24,26 +24,37 @@
 
 // XXX dont use globals
 static R_TH_LOCAL SleighAsm *sanal = nullptr;
+R_TH_LOCAL RCore *Gcore = nullptr;
 
 static char *slid(RCore *core, const char *cpu, int bits, bool be) {
+	R_LOG_DEBUG ("slid (%s:%d:%d)", cpu, bits, be);
+	if (core == nullptr) {
+		core = Gcore;
+	} else if (Gcore == nullptr) {
+		Gcore = core;
+	}
 	if (!strchr (cpu, ':')) {
-		auto langs = SleighArchitecture::getLanguageDescriptions();
-		std::string res = SleighIdFromSleighAsmConfig(core, cpu, bits, be, langs);
-		return strdup (res.c_str());
+		auto langs = SleighArchitecture::getLanguageDescriptions ();
+		std::string res = SleighIdFromSleighAsmConfig (core, cpu, bits, be, langs);
+		return strdup (res.c_str ());
 	}
 	return strdup (cpu);
 }
 
-#if R2_VERSION_NUMBER >= 50809
 static char *slid_arch(RArchSession *as) {
+	eprintf ("one\n");
+	r_return_val_if_fail (as, nullptr);
+	eprintf ("slid_ARAAAAACH\n");
+	if (as->config == nullptr) {
+		throw new LowlevelError ("cannot find arch config");
+	}
 	const char *cp = as->config->cpu;
 	int bi = as->config->bits;
 	bool be = as->config->big_endian;
 	if (R_STR_ISEMPTY (cp)) {
 		return nullptr;
 	}
-	// R2_590 - missing core char *cpu = slid ((RCore*)anal->coreb.core, cp, bi, be);
-	char *cpu = slid (nullptr, cp, bi, be);
+	char *cpu = slid (Gcore, cp, bi, be);
 	try {
 		REsil *esil = as->arch->esil;
 		RIO *io = (RIO*)nullptr;
@@ -62,7 +73,6 @@ static char *slid_arch(RArchSession *as) {
 	}
 	return cpu;
 }
-#else
 static char *slid_arch(RAnal *anal) {
 #if R2_VERSION_NUMBER >= 50609
 	const char *cp = anal->config->cpu;
@@ -86,13 +96,12 @@ static char *slid_arch(RAnal *anal) {
 	}
 	return cpu;
 }
-#endif
 
 #if R2_VERSION_NUMBER >= 50809
 
 extern "C" int archinfo(RArchSession *as, ut32 query) {
 	r_return_val_if_fail (as, 1);
-	// char *arch = slid_arch (as); // is this initializing sanal global ptr?
+	char *arch = slid_arch (as); // is this initializing sanal global ptr?
 	if (sanal != nullptr) {
 		switch (query) {
 		case R_ARCH_INFO_MAX_OP_SIZE:
@@ -1017,7 +1026,6 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 			}
 			break;
 		}
-
 		case CPUI_LOAD:
 		{
 			if (iter->input0 && iter->input1 && iter->output) {
@@ -1494,7 +1502,7 @@ static bool anal_type_NOP(const std::vector<Pcodeop> &Pcodes) {
 #endif
 
 extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int len, RAnalOpMask mask) {
-	char *arch = NULL; // slid_arch (a);
+	char *arch = slid_arch (a);
 	if (!arch) {
 		return -1;
 	}
@@ -1718,19 +1726,19 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 					std::cerr << " dst: ";
 					char *tmp = r_anal_value_to_string (anal_op->dst);
 					std::cerr << tmp;
-					free(tmp);
+					free (tmp);
 				}
 				if (anal_op->src[0]) {
 					std::cerr << " in0: ";
 					char *tmp = r_anal_value_to_string (anal_op->src[0]);
 					std::cerr << tmp;
-					free(tmp);
+					free (tmp);
 				}
 				if (anal_op->src[1]) {
 					std::cerr << " in1: ";
 					char *tmp = r_anal_value_to_string (anal_op->src[1]);
 					std::cerr << tmp;
-					free(tmp);
+					free (tmp);
 				}
 #endif
 				std::cerr << std::endl;
@@ -1755,9 +1763,9 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 #if R2_VERSION_NUMBER >= 50809
 extern "C" bool sleigh_decode(RArchSession *as, RAnalOp *aop, RArchDecodeMask mask) {
 	REsil *esil = as->arch->esil;
-	RIO *io = (RIO*)nullptr;
-	RBin *bin = as->arch->binb.bin;
-	RAnal *anal = nullptr;
+	RIO *io = Gcore->io;
+	RBin *bin = Gcore->bin;
+	RAnal *anal = Gcore->anal;
 	if (bin != nullptr && esil != nullptr) {
 		io = bin->iob.io;
 		anal = esil->anal;
@@ -1965,9 +1973,12 @@ static std::string regtype_name(const char *cpu, const std::string &regname) {
 extern "C" char *r2ghidra_regs(RArchSession *as) {
 	r_return_val_if_fail (as, nullptr);
 	const char *cpu = as->config->cpu;
+	eprintf ("get regs\n");
 	if (R_STR_ISEMPTY (cpu)) {
+		eprintf ("null regprofile\n");
 		return nullptr;
 	}
+	// slid-arch finds and initializes the plugin, needs a better name
 	char *sa = slid_arch (as);
 	if (!sa) {
 		return nullptr;
@@ -1986,11 +1997,9 @@ extern "C" char *r2ghidra_regs(RArchSession *as) {
 				    << p->offset << "\t" << "0\n";
 				continue;
 			}
-
 			for (size_t i = 0;; i++) {
 				if (!r_reg_type_arr[i]) {
-					eprintf ("anal_ghidra.cpp:get_reg_profile() -> Unexpected register group(%s) from SLEIGH, abort.",
-						group.c_str());
+					R_LOG_WARN ("Unexpected register group(%s) from SLEIGH, abort", group.c_str());
 					return nullptr;
 				}
 				if (group == r_reg_type_arr[i]) {
@@ -2060,8 +2069,7 @@ extern "C" char *get_reg_profile(RAnal *anal) {
 
 			for (size_t i = 0;; i++) {
 				if (!r_reg_type_arr[i]) {
-					eprintf ("anal_ghidra.cpp:get_reg_profile() -> Unexpected register group(%s) from SLEIGH, abort.",
-						group.c_str());
+					R_LOG_WARN ("Unexpected register group(%s) from SLEIGH, abort", group.c_str());
 					return nullptr;
 				}
 				if (group == r_reg_type_arr[i]) {
@@ -2144,9 +2152,8 @@ static bool sleigh_esil_consts_pick(RAnalEsil *esil) {
 		goto end;
 	}
 	ret = true;
-
 end:
-	free(idx);
+	free (idx);
 	return ret;
 }
 
@@ -2154,7 +2161,6 @@ static bool sleigh_esil_popcount(RAnalEsil *esil) {
 	bool ret = false;
 	ut64 s, res = 0;
 	char *src = r_anal_esil_pop (esil);
-
 	if (src) {
 		if (src && r_anal_esil_get_parm (esil, src, &s)) {
 			while (s) {
@@ -2169,12 +2175,12 @@ static bool sleigh_esil_popcount(RAnalEsil *esil) {
 	} else {
 		ERR ("sleigh_esil_popcount: fail to get element from stack.");
 	}
-
 	return ret;
 }
 
 
 extern "C" int esil_sleigh_init(RAnalEsil *esil) {
+	eprintf ("lseigh esil einit\n");
 	if (!esil) {
 		return false;
 	}
@@ -2184,15 +2190,16 @@ extern "C" int esil_sleigh_init(RAnalEsil *esil) {
 	return true;
 }
 
-extern "C" int sanal_init(void *p) {
+extern "C" bool sanal_init(void *p) {
 	if (sanal == nullptr) {
+		eprintf ("The new sleigh is in process %p\n", p);
 		sanal = new SleighAsm ();
 	}
 	return true;
 }
 
 extern "C" int esil_sleigh_fini(RAnalEsil *esil) {
-	//float_mem.clear();
+	// float_mem.clear();
 	return true;
 }
 
@@ -2200,6 +2207,7 @@ extern "C" int esil_sleigh_fini(RAnalEsil *esil) {
 extern "C" bool r2ghidra_esilcb(RArchSession *as, RArchEsilAction action) {
 	REsil *esil = as->arch->esil;
 	if (!esil) {
+		R_LOG_ERROR ("esil is null");
 		return false;
 	}
 	switch (action) {
@@ -2207,11 +2215,14 @@ extern "C" bool r2ghidra_esilcb(RArchSession *as, RArchEsilAction action) {
 		return esil_sleigh_init (esil);
 	case R_ARCH_ESIL_FINI:
 		return esil_sleigh_fini (esil);
+	default:
+		R_LOG_WARN ("Unhandled ArchEsil action");
+		break;
 	}
 }
 #endif
 
-extern "C" int sanal_fini(void *p) {
+extern "C" bool sanal_fini(void *p) {
 	if (sanal) {
 		delete sanal;
 		sanal = nullptr;
@@ -2219,6 +2230,24 @@ extern "C" int sanal_fini(void *p) {
 	return true;
 }
 
+#if R2_VERSION_NUMBER >= 50809
+extern "C" RList *r2ghidra_preludes(RArchSession *as) {
+	RListIter *iter;
+	void *_plugin;
+	const char *cpu = as->config->cpu;
+	// reuse r2 preludes
+	if (R_STR_ISEMPTY (cpu)) {
+		return NULL;
+	}
+	r_list_foreach (as->arch->plugins, iter, _plugin) {
+		RArchPlugin *plugin = (RArchPlugin*)_plugin;
+		if (plugin->meta.name && !strcmp (plugin->meta.name, cpu)) {
+			return plugin->preludes (as);
+		}
+	}
+	return NULL;
+}
+#else
 extern "C" RList *anal_preludes(RAnal *anal) {
 	RListIter *iter;
 	void *_plugin;
@@ -2239,3 +2268,4 @@ extern "C" RList *anal_preludes(RAnal *anal) {
 	}
 	return NULL;
 }
+#endif
