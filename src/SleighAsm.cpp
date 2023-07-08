@@ -3,7 +3,8 @@
 #include "SleighAsm.h"
 #include "ArchMap.h"
 
-extern RCore *Gcore;
+// define it here because sleighc needs to compile without anal_ghidra.cpp
+R_API RCore *Gcore = nullptr;
 
 void SleighAsm::init(const char *cpu, int bits, bool bigendian, RIO *io, RConfig *cfg) {
 	if (!io) {
