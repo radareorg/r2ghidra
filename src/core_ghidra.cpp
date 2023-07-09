@@ -447,7 +447,7 @@ static void SetInitialSleighHome(RConfig *cfg) {
 		std::string path = SleighAsm::getSleighHome (cfg);
 		cfg_var_sleighhome.Set (cfg, path.c_str ());
 	} catch (LowlevelError &err) {
-		// eprintf ("Cannot find detfaault paz%c", 10);
+		// eprintf ("Cannot find sleigh in the default path\n");
 	}
 }
 

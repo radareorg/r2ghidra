@@ -205,7 +205,6 @@ std::string SleighIdFromCore(RCore *core) {
 #if 1
 	R2Architecture::collectSpecFiles (std::cerr);
 	auto langs = R2Architecture::getLanguageDescriptions ();
-	eprintf ("jeje from core \n");
 #else
 	SleighArchitecture::collectSpecFiles (std::cerr);
 	auto langs = SleighArchitecture::getLanguageDescriptions ();
