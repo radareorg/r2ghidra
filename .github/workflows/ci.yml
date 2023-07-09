@@ -75,6 +75,12 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+    - name: Installing radare2 from deb
+      run: |
+        wget https://github.com/radareorg/radare2/releases/download/5.8.8/radare2_5.8.8_amd64.deb
+        wget https://github.com/radareorg/radare2/releases/download/5.8.8/radare2-dev_5.8.8_amd64.deb
+        sudo dpkg -i *.deb
+        rm *.deb
     - name: Building tars
       run: make -C dist/tarball
     - name: Uploading balls

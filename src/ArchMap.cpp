@@ -183,10 +183,10 @@ static const std::map<std::string, std::string> compiler_map = {
 };
 
 std::string CompilerFromCore(RCore *core) {
-	if (!core) {
+	if (core == nullptr) {
 		return "gcc";
 	}
-	RBinInfo *info = r_bin_get_info(core->bin);
+	RBinInfo *info = r_bin_get_info (core->bin);
 	if (!info || !info->rclass) {
 		return std::string ();
 	}
@@ -239,9 +239,9 @@ int ai(RCore *core, std::string cpu, int query) {
 	const ArchMapper *am = &arch_it->second;
 	// auto res = arch_it->second.Map(core);
 	switch (query) {
-	case R_ANAL_ARCHINFO_MIN_OP_SIZE:
+	case R_ARCH_INFO_MIN_OP_SIZE:
 		return am->minopsz;
-	case R_ANAL_ARCHINFO_MAX_OP_SIZE:
+	case R_ARCH_INFO_MAX_OP_SIZE:
 		return am->maxopsz;
 	// case R_ANAL_ARCHINFO_ALIGN: return am->align; // proc.align;
 	}

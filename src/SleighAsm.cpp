@@ -1,18 +1,25 @@
-/* r2ghidra - LGPL - Copyright 2020-2021 - FXTi, pancake */
+/* r2ghidra - LGPL - Copyright 2020-2023 - FXTi, pancake */
 
 #include "SleighAsm.h"
 #include "ArchMap.h"
 
+// define it here because sleighc needs to compile without anal_ghidra.cpp
+R_API RCore *Gcore = nullptr;
+
 void SleighAsm::init(const char *cpu, int bits, bool bigendian, RIO *io, RConfig *cfg) {
 	if (!io) {
-		throw LowlevelError ("Can't get RIO from RBin");
+		if (Gcore == nullptr) {
+			throw LowlevelError ("Can't get RIO from RBin");
+		}
+		io = Gcore->io;
+		cfg = Gcore->config;
 	}
 	if (description.empty()) {
 		/* Initialize sleigh spec files */
 		scanSleigh (getSleighHome (cfg));
 		collectSpecfiles ();
 	}
-	std::string new_sleigh_id = SleighIdFromSleighAsmConfig (nullptr, cpu, bits, bigendian, description);
+	std::string new_sleigh_id = SleighIdFromSleighAsmConfig (Gcore, cpu, bits, bigendian, description);
 	if (!sleigh_id.empty() && sleigh_id == new_sleigh_id) {
 		return;
 	}
@@ -151,23 +158,32 @@ static std::unordered_map<std::string, std::string> parseRegisterData(const Elem
  */
 void SleighAsm::parseProcConfig(DocumentStorage &store) {
 	const Element *el = store.getTag ("processor_spec");
-	if (!el) {
+	if (el == nullptr) {
 		throw LowlevelError ("No processor configuration tag found");
 	}
-	const List &list(el->getChildren ());
-	List::const_iterator iter;
-	XmlDecode decoder(&trans, el);
-
-	for (iter = list.begin(); iter != list.end (); iter++) {
-		const string &elname ((*iter)->getName ());
-		if (elname == "context_data") {
-			context.decodeFromSpec (decoder); // , &trans);
-		} else if (elname == "programcounter") {
-			pc_name = (*iter)->getAttributeValue ("register");
-		} else if (elname == "register_data") {
-			reg_group = parseRegisterData (*iter);
+	XmlDecode decoder (&trans, el);
+	uint4 elemId = decoder.openElement (ELEM_PROCESSOR_SPEC);
+	for (;;) {
+		uint4 subId = decoder.peekElement();
+		if(subId == 0) {
+			break;
+		}
+		if (subId == ELEM_PROGRAMCOUNTER) {
+			decoder.openElement();
+			pc_name = decoder.readString(ATTRIB_REGISTER);
+			decoder.closeElement(subId);
+		} else if (subId == ELEM_CONTEXT_DATA) {
+			context.decodeFromSpec(decoder);
+		} else if (subId == ELEM_REGISTER_DATA) {
+			decoder.openElement();
+			parseRegisterData(decoder.getCurrentXmlElement());
+			decoder.closeElement(subId);
+		} else {
+			decoder.openElement();
+			decoder.closeElementSkipping(subId);
 		}
 	}
+	decoder.closeElement(elemId);
 }
 
 /*
@@ -243,10 +259,12 @@ void SleighAsm::resolveArch(const string &archid) {
 	languageindex = -1;
 	for (size_t i = 0; i < description.size(); i++) {
 		std::string id = description[i].getId();
+		// std::string id = description[i].getProcessor();
 		if (id == archid || id == baseid) {
 			languageindex = i;
-			if (description[i].isDeprecated())
+			if (description[i].isDeprecated()) {
 				throw LowlevelError ("Language " + baseid + " is deprecated");
+			}
 			break;
 		}
 	}
@@ -267,6 +285,8 @@ void SleighAsm::scanSleigh(const string &rootpath) {
 	std::vector<std::string> procdir2;
 	std::vector<std::string> languagesubdirs;
 
+	// /Users/pancake/.local/share/radare2/plugins/r2ghidra_sleigh/
+	FileManage::scanDirectoryRecursive(ghidradir, ".", rootpath, 2);
 	FileManage::scanDirectoryRecursive(ghidradir, "Ghidra", rootpath, 2);
 	size_t i;
 	for (i = 0; i < ghidradir.size(); i++) {
@@ -309,27 +329,33 @@ void SleighAsm::scanSleigh(const string &rootpath) {
  * This function is used to read a SLEIGH .ldefs file.
  */
 void SleighAsm::loadLanguageDescription(const string &specfile) {
-	ifstream s (specfile.c_str ());
+	ifstream s(specfile.c_str());
 	if (!s) {
-		throw LowlevelError ("Unable to open: " + specfile);
+		throw LowlevelError("Unable to open: " + specfile);
 	}
-	Document *doc;
-	try {
-		doc = xml_tree (s);
-	} catch (DecoderError &err) {
-		throw LowlevelError ("Unable to parse sleigh specfile: " + specfile);
+	XmlDecode decoder ((const AddrSpaceManager *)0);
+	try
+	{
+		decoder.ingestStream (s);
+	} catch(DecoderError &err) {
+		throw LowlevelError("Unable to parse sleigh specfile: " + specfile);
 	}
-	Element *el = doc->getRoot();
-	const List &list(el->getChildren());
-	List::const_iterator iter;
-	for (iter = list.begin(); iter != list.end (); iter++) {
-		if ((*iter)->getName() != "language") {
-			continue;
+
+	uint4 elemId = decoder.openElement(ELEM_LANGUAGE_DEFINITIONS);
+	for (;;) {
+		uint4 subId = decoder.peekElement();
+		if (subId == 0) {
+			break;
 		}
-		description.push_back(LanguageDescription());
-		// UHM description.back().decoder(*iter);
+		if (subId == ELEM_LANGUAGE) {
+			description.emplace_back ();
+			description.back ().decode (decoder);
+		} else {
+			decoder.openElement ();
+			decoder.closeElementSkipping (subId);
+		}
 	}
-	delete doc;
+	decoder.closeElement (elemId);
 }
 
 /*
@@ -348,15 +374,27 @@ void SleighAsm::collectSpecfiles(void) {
 	}
 }
 
-RConfig *SleighAsm::getConfig(RAsm *a) {
-	RCore *core = a->num ? (RCore *)(a->num->userptr) : NULL;
-	return core? core->config: nullptr;
+
+RConfig *SleighAsm::getConfig(RCore *core) {
+	if (core == nullptr) {
+		if (Gcore == nullptr) {
+			throw LowlevelError ("Can't get RCore from RAnal's RCoreBind");
+		} else {
+			core = Gcore;
+		}
+	}
+	return core->config;
 }
 
 RConfig *SleighAsm::getConfig(RAnal *a) {
 	RCore *core = a ? (RCore *)a->coreb.core : nullptr;
-	if (!core)
-		throw LowlevelError ("Can't get RCore from RAnal's RCoreBind");
+	if (core == nullptr) {
+		if (Gcore == nullptr) {
+			throw LowlevelError ("Can't get RCore from RAnal's RCoreBind");
+		} else {
+			core = Gcore;
+		}
+	}
 	return core->config;
 }
 
@@ -378,12 +416,14 @@ std::string SleighAsm::getSleighHome(RConfig *cfg) {
 		if (cfg) {
 			r_config_set (cfg, varname, ev);
 		}
-		std::string res(ev);
+		std::string res (ev);
 		free (ev);
 		return res;
 	}
 
-#if R2_VERSION_NUMBER >= 50709
+#if R2_VERSION_NUMBER >= 50809
+	path = r_xdg_datadir ("radare2/plugins/r2ghidra_sleigh");
+#elif R2_VERSION_NUMBER >= 50709
 	path = r_xdg_datadir ("radare2/r2pm/git/ghidra");
 #else
 	path = r_str_home (".local/share/radare2/r2pm/git/ghidra");
