@@ -10,10 +10,10 @@
 
 extern bool sanal_init(void *p);
 extern bool sanal_fini(void *p);
-extern int archinfo(RArchSession *as, ut32 query);
 extern RList *anal_preludes(RAnal *anal);
 
 #if R2_VERSION_NUMBER >= 50809
+extern int archinfo(RArchSession *as, ut32 query);
 extern RList *r2ghidra_preludes(RArchSession *as);
 extern char *r2ghidra_regs(RArchSession *as);
 extern bool r2ghidra_esilcb(RArchSession *as, RArchEsilAction action);
@@ -44,6 +44,7 @@ RArchPlugin r_arch_plugin_ghidra = {
 };
 #else
 
+extern int archinfo(RAnal *anal, ut32 query);
 extern RList *r2ghidra_preludes(RAnal *anal);
 extern char *get_reg_profile(RAnal *anal);
 extern int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int len, RAnalOpMask mask);
