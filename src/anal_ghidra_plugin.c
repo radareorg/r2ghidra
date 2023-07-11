@@ -11,8 +11,8 @@
 
 #if R2_VERSION_NUMBER >= 50809
 extern int archinfo(RArchSession *as, ut32 query);
-extern bool sanal_init(void *p);
-extern bool sanal_fini(void *p);
+extern bool sanal_init(RArchSession *as);
+extern bool sanal_fini(RArchSession *as);
 extern RList *r2ghidra_preludes(RArchSession *as);
 extern int archinfo(RArchSession *as, ut32 query);
 extern char *r2ghidra_regs(RArchSession *as);
