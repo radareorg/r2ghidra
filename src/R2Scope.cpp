@@ -442,10 +442,16 @@ Symbol *R2Scope::registerFlag(RFlagItem *flag) const {
 		void *pos;
 		r_list_foreach (core->bin->binfiles, iter, pos) {
 			auto bf = reinterpret_cast<RBinFile *>(pos);
-			if (!bf->o) {
+			RBinObject *bo = NULL;
+#if R2_VERSION_NUMBER < 50809
+			bo = bf->o;
+#else
+			bo = bf->bo;
+#endif
+			if (!bo) {
 				continue;
 			}
-			void *s = ht_up_find (bf->o->strings_db, flag->offset, nullptr);
+			void *s = ht_up_find (bo->strings_db, flag->offset, nullptr);
 			if (s) {
 				str = reinterpret_cast<RBinString *>(s);
 				break;
