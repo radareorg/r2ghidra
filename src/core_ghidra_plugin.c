@@ -5,11 +5,19 @@ extern int r2ghidra_core_init(void *user, const char *cmd);
 extern int r2ghidra_core_cmd(void *user, const char *input);
 
 RCorePlugin r_core_plugin_ghidra = {
+#if R2_VERSION_NUMBER > 50808
+	.meta = {
+		.name = "r2ghidra",
+		.desc = "Ghidra decompiler with pdg command",
+		.license = "GPL3",
+		.author = "thestr4ng3r, pancake",
+	},
+#else
 	.name = "r2ghidra",
 	.desc = "Ghidra decompiler with pdg command",
 	.license = "GPL3",
 	.author = "thestr4ng3r, pancake",
-	.version = NULL,
+#endif
 	.call = r2ghidra_core_cmd,
 	.init = r2ghidra_core_init,
 	.fini = r2ghidra_core_fini
