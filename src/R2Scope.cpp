@@ -117,6 +117,7 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 				if (flag->space && flag->space->name && !strcmp(flag->space->name, R_FLAGS_FS_SECTIONS)) {
 					continue;
 				}
+				// if (!strcmp(flag->name, fcn->name) && flag->realname && *flag->realname)
 				if (R_STR_ISNOTEMPTY (flag->realname)) {
 					fcn_name = flag->realname;
 					break;

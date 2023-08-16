@@ -165,8 +165,10 @@ void AnnotateColor(ANNOTATOR_PARAMS) {
 		type = R_SYNTAX_HIGHLIGHT_TYPE_GLOBAL_VARIABLE;
 		break;
 	case Emit::syntax_highlight::no_color:
+#if 1
 	case Emit::syntax_highlight::error_color:
 	case Emit::syntax_highlight::special_color:
+#endif
 	default:
 		return;
 	}
