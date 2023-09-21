@@ -2181,9 +2181,9 @@ extern "C" bool r2ghidra_esilcb(RArchSession *as, RArchEsilAction action) {
 		return false;
 	}
 	switch (action) {
-	case R_ARCH_ESIL_INIT:
+	case R_ARCH_ESIL_ACTION_INIT:
 		return esil_sleigh_init (esil);
-	case R_ARCH_ESIL_FINI:
+	case R_ARCH_ESIL_ACTION_FINI:
 		return esil_sleigh_fini (esil);
 	default:
 		R_LOG_WARN ("Unhandled ArchEsil action");
