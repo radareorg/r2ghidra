@@ -125,7 +125,7 @@ GHIDRA_PROCS=$(GHIDRA_SLEIGH_HOME)/*/*/*
 sleigh-install:
 	mkdir -p "$(D)"
 	for a in DATA $(shell cat ../ghidra-processors.txt) ; do \
-		for b in cspec ldefs pspec ; do \
+		for b in cspec ldefs sla pspec ; do \
 			cp -f $(GHIDRA_SLEIGH_HOME)/$$a/*/*/*.$$b "$(D)"; \
 		done ;\
 	done
