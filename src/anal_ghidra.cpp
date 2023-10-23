@@ -24,7 +24,7 @@
 
 // XXX dont use globals
 static SleighAsm *sanal = nullptr;
-extern RCore *Gcore;
+extern "C" RCore *Gcore;
 
 static char *slid(RCore *core, const char *cpu, int bits, bool be) {
 	R_LOG_DEBUG ("slid (%s:%d:%d)", cpu, bits, be);
