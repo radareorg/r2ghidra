@@ -250,7 +250,7 @@ int ai(RCore *core, std::string cpu, int query) {
 
 std::string SleighIdFromSleighAsmConfig(RCore *core, const char *cpu, int bits, bool bigendian, const vector<LanguageDescription> &langs) {
 	const char *colon = strchr (cpu, ':');
-	if (colon != nullptr && colon[1] != '\0' && colon[1] != '\0') {
+	if (colon != nullptr && colon[1] != '\0') {
 		// complete id specified
 		return cpu;
 	}
