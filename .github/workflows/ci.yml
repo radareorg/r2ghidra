@@ -1,7 +1,7 @@
 name: ci
 
 env:
-  R2V: 5.8.8
+  R2V: 5.9.0
 
 on:
   push:
@@ -41,8 +41,8 @@ jobs:
       uses: actions/checkout@v3
     - name: Installing radare2 from deb
       run: |
-        wget https://github.com/radareorg/radare2/releases/download/5.8.8/radare2_5.8.8_amd64.deb
-        wget https://github.com/radareorg/radare2/releases/download/5.8.8/radare2-dev_5.8.8_amd64.deb
+        wget https://github.com/radareorg/radare2/releases/download/5.9.0/radare2_5.9.0_amd64.deb
+        wget https://github.com/radareorg/radare2/releases/download/5.9.0/radare2-dev_5.9.0_amd64.deb
         sudo dpkg -i *.deb
     - name: Building r2ghidra with acr
       run: ./preconfigure && ./configure --prefix=/usr && make -j4 ; make user-install
@@ -60,7 +60,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         # path: radare2/dist/debian/*/*.deb r2ghidra/dist/debian/*.deb
-        name: linux-acr-ok
+        name: linux-deb
         path: dist/debian/*.deb
     - name: Precompiling the sleigh
       run: make dist
@@ -77,8 +77,8 @@ jobs:
       uses: actions/checkout@v3
     - name: Installing radare2 from deb
       run: |
-        wget https://github.com/radareorg/radare2/releases/download/5.8.8/radare2_5.8.8_amd64.deb
-        wget https://github.com/radareorg/radare2/releases/download/5.8.8/radare2-dev_5.8.8_amd64.deb
+        wget https://github.com/radareorg/radare2/releases/download/5.9.0/radare2_5.9.0_amd64.deb
+        wget https://github.com/radareorg/radare2/releases/download/5.9.0/radare2-dev_5.9.0_amd64.deb
         sudo dpkg -i *.deb
         rm *.deb
     - name: Building tars
