@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Installing radare2 from git
       run: ( git clone --depth=1 https://github.com/radareorg/radare2 && cd radare2 && sys/install.sh /usr )
     - name: Building r2ghidra with acr
@@ -38,7 +38,7 @@ jobs:
       fail-fast: false
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Installing radare2 from deb
       run: |
         wget https://github.com/radareorg/radare2/releases/download/5.9.0/radare2_5.9.0_amd64.deb
@@ -57,7 +57,7 @@ jobs:
     - name: Running Testsuite
       run: make -C test || exit 0
     - name: Uploading debs
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         # path: radare2/dist/debian/*/*.deb r2ghidra/dist/debian/*.deb
         name: linux-deb
@@ -65,7 +65,7 @@ jobs:
     - name: Precompiling the sleigh
       run: make dist
     - name: Uploading sleigh
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: linux-acr-ok
         path: r2ghidra_sleigh-*.zip
@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Installing radare2 from deb
       run: |
         wget https://github.com/radareorg/radare2/releases/download/5.9.0/radare2_5.9.0_amd64.deb
@@ -84,7 +84,7 @@ jobs:
     - name: Building tars
       run: make -C dist/tarball
     - name: Uploading balls
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: tarball
         path: dist/tarball/r2ghidra-*
@@ -99,7 +99,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Installing radare2
     #  run: ( git clone --depth=1 --branch "${R2V}" https://github.com/radareorg/radare2 && cd radare2 && sys/sanitize.sh --install /usr )
       run: ( git clone --depth=1 --branch "${R2V}" https://github.com/radareorg/radare2 && cd radare2 && sys/install.sh --install )
@@ -116,7 +116,7 @@ jobs:
       fail-fast: false
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Downloading Radare2 Debian packages
       run: |
         wget -O r2.deb     https://github.com/radareorg/radare2/releases/download/${{env.R2V}}/radare2_${{env.R2V}}_amd64.deb
@@ -145,7 +145,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Cloning Radare2 git repository
       run: git clone --depth=1 --branch "${R2V}" https://github.com/radareorg/radare2
     - name: Building Radare2 pkg for macOS
@@ -163,7 +163,7 @@ jobs:
         r2 -qc 'af;pdg' test/bins/rec | tee a.txt
         grep csu_init a.txt
     - name: Uploading artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: macos-pkg
         path: dist/macos/*.zip
@@ -172,7 +172,7 @@ jobs:
   w64:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/setup-python@v1
       with:
         python-version: 3.7.x
@@ -197,7 +197,7 @@ jobs:
         call preconfigure.bat
         call configure.bat
         call make.bat
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: w64
         path: destdir/r2ghidra-w64.zip
@@ -214,7 +214,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Download all git history and tags
       - name: Check if is a release
@@ -227,7 +227,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Download all git history and tags
       - name: Extract r2g version
@@ -236,7 +236,7 @@ jobs:
       - name: Prepare release notes
         run: echo Release > ./RELEASE_NOTES.md
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: dist/artifacts
       - name: Create GitHub release
