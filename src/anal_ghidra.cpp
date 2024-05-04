@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2020-2023 - pancake, FXTi */
+/* r2ghidra - LGPL - Copyright 2020-2024 - pancake, FXTi */
 
 #include <r_lib.h>
 #include <r_anal.h>
@@ -2211,7 +2211,7 @@ extern "C" RList *r2ghidra_preludes(RArchSession *as) {
 	}
 	r_list_foreach (as->arch->plugins, iter, _plugin) {
 		RArchPlugin *plugin = (RArchPlugin*)_plugin;
-		if (plugin->meta.name && !strcmp (plugin->meta.name, cpu)) {
+		if (plugin->preludes && plugin->meta.name && !strcmp (plugin->meta.name, cpu)) {
 			return plugin->preludes (as);
 		}
 	}
