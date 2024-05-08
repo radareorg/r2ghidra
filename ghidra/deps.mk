@@ -1,6 +1,9 @@
 # hardcoded for now
 USE_BISON=0
 
+
+LDFLAGS+=-lz
+
 # GHIDRA_HOME=../ghidra/ghidra/
 # GHIDRA_DECOMPILER=$(GHIDRA_HOME)/Ghidra/Features/Decompiler/src/decompile/cpp
 GHIDRA_HOME=../ghidra-native
@@ -20,6 +23,10 @@ G_DECOMPILER+=merge.cc double.cc coreaction.cc condexe.cc override.cc
 G_DECOMPILER+=dynamic.cc crc32.cc prettyprint.cc printlanguage.cc
 G_DECOMPILER+=printc.cc printjava.cc memstate.cc opbehavior.cc
 G_DECOMPILER+=paramid.cc transform.cc string_ghidra.cc stringmanage.cc
+G_DECOMPILER+=slaformat.cc
+G_DECOMPILER+=compression.cc
+G_DECOMPILER+=multiprecision.cc
+G_DECOMPILER+=modelrules.cc
 
 G_DECOMPILER+=ghidra_arch.cc
 G_DECOMPILER+=loadimage_ghidra.cc

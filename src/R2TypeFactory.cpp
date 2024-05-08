@@ -114,7 +114,7 @@ Datatype *R2TypeFactory::queryR2Struct(const string &n, std::set<std::string> &s
 			arch->addWarning ("Struct " + n + " has no fields.");
 			return nullptr;
 		}
-		setFields (fields, r, 0, 0);
+		// setFields (fields, r, 0, 0);
 		return r;
 	} catch (std::invalid_argument &e) {
 		arch->addWarning ("Failed to load struct " + n + " from sdb.");
@@ -168,10 +168,13 @@ Datatype *R2TypeFactory::queryR2Typedef(const string &n, std::set<std::string> &
 	if (!resolved) {
 		return nullptr;
 	}
+#if 0
 	Datatype *typedefd = resolved->clone ();
 	setName (typedefd, n); // this removes the old name from the nametree
 	setName (resolved, resolved->getName()); // add the old name back
 	return typedefd;
+#endif
+	return nullptr;
 }
 
 Datatype *R2TypeFactory::queryR2(const string &n, std::set<std::string> &stackTypes) {
