@@ -1,7 +1,7 @@
 include config.mk
 DESTDIR?=
 
-GHIDRA_NATIVE_COMMIT=0.4.4
+GHIDRA_NATIVE_COMMIT=0.4.5
 
 PUGIXML=third-party/pugixml/Makefile
 
