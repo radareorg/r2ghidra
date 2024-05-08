@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2019-2023 - thestr4ng3r, pancake */
+/* r2ghidra - LGPL - Copyright 2019-2024 - pancake */
 
 #ifndef R2GHIDRA_R2PRINTC_H
 #define R2GHIDRA_R2PRINTC_H
