@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2020-2023 - FXTi, pancake */
+/* r2ghidra - LGPL - Copyright 2020-2024 - FXTi, pancake */
 
 #include "SleighAnalValue.h"
 
@@ -70,7 +70,11 @@ SleighAnalValue SleighAnalValue::resolve_arg(RAnal *anal, const PcodeOperand *ar
 				res.imm = (curr_op->type == CPUI_INT_ADD)? in0.imm + in1.imm : in0.imm - in1.imm;
 			} else {
 				res.base = in0.imm + in0.base;
-				res.base += (curr_op->type == CPUI_INT_ADD)? (in1.imm + in1.base) : -(in1.imm + in1.base);
+				if (curr_op->type == CPUI_INT_ADD) {
+					res.base += (in1.imm + in1.base);
+				} else {
+					res.base -= (in1.imm + in1.base);
+				}
 			}
 			res.mul = inner_max(in0.mul, in1.mul); // Only one of inputs should set mul
 			res.delta = inner_max(in0.delta, in1.delta);

@@ -1,6 +1,7 @@
 #ifndef R2GHIDRA_H
 #define R2GHIDRA_H
 
+#undef R_LOG_ORIGIN
 #define R_LOG_ORIGIN "r2ghidra"
 
 #include <r_core.h>
