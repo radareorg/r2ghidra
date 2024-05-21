@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2020-2023 - pancake */
+/* r2ghidra - LGPL - Copyright 2020-2024 - pancake */
 
 #include <r_lib.h>
 #include <r_anal.h>
@@ -8,7 +8,6 @@
 #define RAnalEsil REsil
 #endif
 
-
 #if R2_VERSION_NUMBER >= 50809
 extern int archinfo(RArchSession *as, ut32 query);
 extern bool sanal_init(RArchSession *as);
@@ -17,9 +16,8 @@ extern RList *r2ghidra_preludes(RArchSession *as);
 extern int archinfo(RArchSession *as, ut32 query);
 extern char *r2ghidra_regs(RArchSession *as);
 extern bool r2ghidra_esilcb(RArchSession *as, RArchEsilAction action);
-// extern bool sleigh_decode(RArchSession *as, RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int len, RAnalOpMask mask);
 extern char *get_reg_profile(RAnal *anal);
-static bool sleigh_decode(RArchSession *as, RAnalOp *op, RArchDecodeMask mask);
+bool sleigh_decode(RArchSession *as, RAnalOp *op, RArchDecodeMask mask);
 
 RArchPlugin r_arch_plugin_ghidra = {
 	.meta = {
