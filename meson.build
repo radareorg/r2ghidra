@@ -69,6 +69,15 @@ else
   r_core = dependency('r_core')
 endif
 
+r2ghidra_version = meson.project_version()
+versionconf = configuration_data()
+versionconf.set('R2GHIDRA_VERSION', r2ghidra_version)
+r_version_h = configure_file(
+  input: 'config.h.acr',
+  output: 'config.h',
+  configuration: versionconf
+)
+
 r2ghidra_incdirs = include_directories(incdirs)
 
 ghidra_decompiler_sources = [

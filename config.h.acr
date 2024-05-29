@@ -1,0 +1,6 @@
+#ifndef R2GHIDRA_CONFIG_H
+#define R2GHIDRA_CONFIG_H 1
+
+#define R2GHIDRA_VERSION "@R2GHIDRA_VERSION@"
+
+#endif

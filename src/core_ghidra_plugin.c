@@ -1,4 +1,5 @@
 #include <r_core.h>
+#include "../config.h"
 
 extern int r2ghidra_core_fini(void *user, const char *cmd);
 extern int r2ghidra_core_init(void *user, const char *cmd);
@@ -11,6 +12,7 @@ RCorePlugin r_core_plugin_ghidra = {
 		.desc = "Ghidra decompiler with pdg command",
 		.license = "GPL3",
 		.author = "thestr4ng3r, pancake",
+		.version = R2GHIDRA_VERSION,
 	},
 #else
 	.name = "r2ghidra",
