@@ -400,7 +400,7 @@ RConfig *SleighAsm::getConfig(RAnal *a) {
 	return core->config;
 }
 
-std::string SleighAsm::getSleighHome(RConfig *cfg) {
+std::string SleighAsm::getSleighHome(R_NULLABLE RConfig *cfg) {
 	const char varname[] = "r2ghidra.sleighhome";
 	char *path = nullptr;
 
@@ -419,7 +419,6 @@ std::string SleighAsm::getSleighHome(RConfig *cfg) {
 			r_config_set (cfg, varname, ev);
 		}
 		std::string res (ev);
-		free (ev);
 		return res;
 	}
 
@@ -435,7 +434,6 @@ std::string SleighAsm::getSleighHome(RConfig *cfg) {
 			r_config_set (cfg, varname, path);
 		}
 		std::string res (path);
-		free ((void *)path);
 		return res;
 	}
 	free ((void *)path);
@@ -445,7 +443,6 @@ std::string SleighAsm::getSleighHome(RConfig *cfg) {
 			r_config_set (cfg, varname, path);
 		}
 		std::string res (path);
-		free ((void *)path);
 		return res;
 	} else {
 #ifdef R2GHIDRA_SLEIGHHOME_DEFAULT
@@ -453,7 +450,8 @@ std::string SleighAsm::getSleighHome(RConfig *cfg) {
 			if (cfg) {
 				r_config_set (cfg, varname, R2GHIDRA_SLEIGHHOME_DEFAULT);
 			}
-			return R2GHIDRA_SLEIGHHOME_DEFAULT;
+			std::string res (R2GHIDRA_SLEIGHHOME_DEFAULT);
+			return res;
 		}
 #endif
 		R_LOG_ERROR ("Cannot find the sleigh home at '%s'. Fix it with `r2pm -ci r2ghidra-sleigh`", path);
