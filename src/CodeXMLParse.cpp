@@ -346,7 +346,7 @@ R_API RCodeMeta *ParseCodeXML(ghidra::Funcdata *func, const char *xml) {
 		return nullptr;
 	}
 	std::stringstream ss;
-	RCodeMeta *code = r_codemeta_new(nullptr);
+	RCodeMeta *code = r_codemeta_new("");
 	if (!code) {
 		return nullptr;
 	}
