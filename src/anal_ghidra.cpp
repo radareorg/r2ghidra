@@ -2155,9 +2155,14 @@ extern "C" int esil_sleigh_init(RAnalEsil *esil) {
 	if (!esil) {
 		return false;
 	}
+#if R2_VERSION_NUMBER >= 50909
+	r_anal_esil_set_op (esil, "PICK", sleigh_esil_consts_pick, 1, 0, R_ANAL_ESIL_OP_TYPE_CUSTOM, "");
+	r_anal_esil_set_op (esil, "POPCOUNT", sleigh_esil_popcount, 1, 2, R_ANAL_ESIL_OP_TYPE_CUSTOM, "");
+#else
 	// Only consts-only version PICK will meet my demand
 	r_anal_esil_set_op (esil, "PICK", sleigh_esil_consts_pick, 1, 0, R_ANAL_ESIL_OP_TYPE_CUSTOM);
 	r_anal_esil_set_op (esil, "POPCOUNT", sleigh_esil_popcount, 1, 2, R_ANAL_ESIL_OP_TYPE_CUSTOM);
+#endif
 	return true;
 }
 
