@@ -239,10 +239,17 @@ int ai(RCore *core, std::string cpu, int query) {
 	const ArchMapper *am = &arch_it->second;
 	// auto res = arch_it->second.Map(core);
 	switch (query) {
+#if R2_VERSION_NUMBER >= 50909
+	case R_ARCH_INFO_MINOP_SIZE:
+		return am->minopsz;
+	case R_ARCH_INFO_MAXOP_SIZE:
+		return am->maxopsz;
+#else
 	case R_ARCH_INFO_MIN_OP_SIZE:
 		return am->minopsz;
 	case R_ARCH_INFO_MAX_OP_SIZE:
 		return am->maxopsz;
+#endif
 	// case R_ANAL_ARCHINFO_ALIGN: return am->align; // proc.align;
 	}
 	return 1;

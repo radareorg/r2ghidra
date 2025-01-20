@@ -76,10 +76,17 @@ extern "C" int archinfo(RArchSession *as, ut32 query) {
 	char *arch = slid_arch (Gcore->anal); // is this initializing sanal global ptr?
 	if (sanal != nullptr) {
 		switch (query) {
+#if R2_VERSION_NUMBER >= 50909
+		case R_ARCH_INFO_MAXOP_SIZE:
+			return sanal->maxopsz;
+		case R_ARCH_INFO_MINOP_SIZE:
+			return sanal->minopsz;
+#else
 		case R_ARCH_INFO_MAX_OP_SIZE:
 			return sanal->maxopsz;
 		case R_ARCH_INFO_MIN_OP_SIZE:
 			return sanal->minopsz;
+#endif
 		case R_ARCH_INFO_CODE_ALIGN:
 		case R_ARCH_INFO_DATA_ALIGN:
 			return sanal->alignment;
