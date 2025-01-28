@@ -3,7 +3,7 @@ project(
   ['c', 'cpp'],
   license : 'LGPL3',
   meson_version : '>=0.50.1',
-version : '5.9.4',
+  version : '5.9.6',
   default_options : ['c_std=c11', 'cpp_std=c++11']
 )
 
