@@ -146,7 +146,7 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-    - name: Cloning Radare2 git repository
+    - name: Cloning radare2
       run: git clone --depth=1 --branch "${R2V}" https://github.com/radareorg/radare2
     - name: Building Radare2 pkg for macOS
       run: make -C radare2/dist/macos

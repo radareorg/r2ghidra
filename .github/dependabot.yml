@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: "weekly"
     commit-message:
-      prefix: "##build "
-      prefix-development: "##build "
+      suffix: " ##ci"
+      suffix-development: " ##ci"
     labels:
       - buildsystem
