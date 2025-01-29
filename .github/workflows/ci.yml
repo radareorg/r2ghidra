@@ -11,7 +11,7 @@ on:
 
 jobs:
   r2git:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
     steps:
@@ -33,7 +33,7 @@ jobs:
       run: make -C test || exit 0
 
   linux-deb:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
     steps:
@@ -71,14 +71,14 @@ jobs:
         path: r2ghidra_sleigh-*.zip
 
   tarball:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Installing radare2 from deb
       run: |
-        wget https://github.com/radareorg/radare2/releases/download/5.9.0/radare2_5.9.0_amd64.deb
-        wget https://github.com/radareorg/radare2/releases/download/5.9.0/radare2-dev_5.9.0_amd64.deb
+        wget https://github.com/radareorg/radare2/releases/download/5.9.0/radare2_5.9.8_amd64.deb
+        wget https://github.com/radareorg/radare2/releases/download/5.9.0/radare2-dev_5.9.8_amd64.deb
         sudo dpkg -i *.deb
         rm *.deb
     - name: Building tars
@@ -92,7 +92,7 @@ jobs:
   linux-asan:
     if: ${{ false }}  # disable for now
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
 
@@ -111,7 +111,7 @@ jobs:
         grep entry0 a.txt
 
   linux-meson:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
     steps:
@@ -211,7 +211,7 @@ jobs:
       - linux-deb
       - macos-pkg
       - w64
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -224,7 +224,7 @@ jobs:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && needs.check_release.outputs.is_release == 'yes' }}
     needs:
       - check_release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
