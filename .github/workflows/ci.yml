@@ -77,8 +77,8 @@ jobs:
       uses: actions/checkout@v4
     - name: Installing radare2 from deb
       run: |
-        wget https://github.com/radareorg/radare2/releases/download/5.9.0/radare2_5.9.8_amd64.deb
-        wget https://github.com/radareorg/radare2/releases/download/5.9.0/radare2-dev_5.9.8_amd64.deb
+        wget https://github.com/radareorg/radare2/releases/download/5.9.8/radare2_5.9.8_amd64.deb
+        wget https://github.com/radareorg/radare2/releases/download/5.9.8/radare2-dev_5.9.8_amd64.deb
         sudo dpkg -i *.deb
         rm *.deb
     - name: Building tars
