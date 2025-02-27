@@ -452,7 +452,11 @@ Symbol *R2Scope::registerFlag(RFlagItem *flag) const {
 			if (!bo) {
 				continue;
 			}
+#if R2_VERSION_NUMBER >= 50909
+			void *s = ht_up_find (bo->strings_db, flag->addr, nullptr);
+#else
 			void *s = ht_up_find (bo->strings_db, flag->offset, nullptr);
+#endif
 			if (s) {
 				str = reinterpret_cast<RBinString *>(s);
 				break;
@@ -483,7 +487,12 @@ Symbol *R2Scope::registerFlag(RFlagItem *flag) const {
 
 	// Check whether flags should be displayed by their real name
 	const char *name = (core->flags->realnames && flag->realname) ? flag->realname : flag->name;
-	SymbolEntry *entry = cache->addSymbol (name, type, Address (arch->getDefaultCodeSpace(), flag->offset), Address());
+#if R2_VERSION_NUMBER >= 50909
+	const ut64 at = flag->addr;
+#else
+	const ut64 at = flag->offset;
+#endif
+	SymbolEntry *entry = cache->addSymbol (name, type, Address (arch->getDefaultCodeSpace(), at), Address());
 	if (!entry) {
 		return nullptr;
 	}
