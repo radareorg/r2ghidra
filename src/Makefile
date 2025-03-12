@@ -46,9 +46,9 @@ CFLAGS+=-Wshadow
 CFLAGS+=-I$(GHIDRA_DECOMPILER)
 CFLAGS+=-I.
 
-CFLAGS+=-g -ggdb
-LDFLAGS+=-g -ggdb
-CXXFLAGS+=-g -ggdb
+#CFLAGS+=-g -ggdb
+#LDFLAGS+=-g -ggdb
+#CXXFLAGS+=-g -ggdb
 
 CXXFLAGS+=-std=c++11
 CFLAGS+=$(R2_CFLAGS)
