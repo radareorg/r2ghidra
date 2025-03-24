@@ -250,6 +250,7 @@ R_API RCodeMeta *r2ghidra_decompile_annotated_code(RCore *core, ut64 addr) {
 		return code;
 #ifndef DEBUG_EXCEPTIONS
 	} catch (const LowlevelError &error) {
+		R_LOG_INFO ("test");
 		std::string s = "Ghidra Decompiler Error: " + error.explain;
  		code = r_codemeta_new (s.c_str ());
 		// Push an annotation with: range = full string, type = error
@@ -267,7 +268,7 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 #endif
 		RCodeMeta *code = nullptr;
 		std::stringstream out_stream;
-		Decompile(core, core->offset, mode, out_stream, &code);
+		Decompile(core, core->addr, mode, out_stream, &code);
 		switch (mode) {
 		case DecompileMode::DISASM:
 			{
@@ -308,6 +309,7 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 		r_codemeta_free (code);
 #ifndef DEBUG_EXCEPTIONS
 	} catch (const LowlevelError &error) {
+		R_LOG_INFO ("test");
 		std::string s = "Ghidra Decompiler Error: " + error.explain;
 		if (mode == DecompileMode::JSON) {
 			PJ *pj = pj_new ();
@@ -424,7 +426,7 @@ static void Disassemble(RCore *core, ut64 ops) {
 	const Translate *trans = arch.translate;
 	PcodeRawOut emit (arch.translate);
 	AssemblyRaw assememit;
-	Address addr (trans->getDefaultCodeSpace(), core->offset);
+	Address addr (trans->getDefaultCodeSpace(), core->addr);
 	for (ut64 i = 0; i < ops; i++) {
 		try {
 			trans->printAssembly (assememit, addr);

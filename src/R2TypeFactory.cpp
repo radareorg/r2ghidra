@@ -46,6 +46,7 @@ R2TypeFactory::R2TypeFactory(R2Architecture *arch) : TypeFactory (arch), arch (a
 	setCoreType ("char", 1, TYPE_INT, true);
 	setCoreType ("char16_t", 2, TYPE_INT, true);
 	setCoreType ("char32_t", 4, TYPE_INT, true);
+
 	cacheCoreTypes ();
 }
 
@@ -114,7 +115,7 @@ Datatype *R2TypeFactory::queryR2Struct(const string &n, std::set<std::string> &s
 			arch->addWarning ("Struct " + n + " has no fields.");
 			return nullptr;
 		}
-		// setFields (fields, r, 0, 0);
+		setFields (fields, r, 0, 0, 0);
 		return r;
 	} catch (std::invalid_argument &e) {
 		arch->addWarning ("Failed to load struct " + n + " from sdb.");

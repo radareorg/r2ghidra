@@ -113,7 +113,7 @@ The procedure is like the standard autoconf:
 
 ```
 $ ./preconfigure   # optional, but useful for offline-packagers, as its downloads the external repos
-$ ./configure
+$ ./configure --prefix=$(r2 -H R2_PREFIX)
 $ make
 $ make install  # or make user-install
 ```
