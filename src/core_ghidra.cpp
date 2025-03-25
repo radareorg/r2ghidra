@@ -219,11 +219,12 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	case DecompileMode::OFFSET:
 	case DecompileMode::STATEMENTS:
 	case DecompileMode::DISASM:
+		// XXX: Can docFunction return unindented xml??
 		arch.print->docFunction(func);
 		if (mode != DecompileMode::XML) {
 			*out_code = ParseCodeXML(func, out_stream.str().c_str ());
 			if (!*out_code) {
-				std::cout << out_stream.str().c_str() << std::endl;
+				std::cout << out_stream.str().c_str () << std::endl;
 				throw LowlevelError ("Failed to parse XML code from Decompiler");
 			}
 		}

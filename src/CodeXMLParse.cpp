@@ -286,8 +286,14 @@ static const std::map<std::string, std::vector <void (*)(ANNOTATOR_PARAMS)> > an
  **/
 static void ParseNode(pugi::xml_node node, ParseCodeXMLContext *ctx, std::ostream &stream, RCodeMeta *code) {
 	// A leaf is an XML node which contains parts of the high level decompilation language
-	if (node.type() == pugi::xml_node_type::node_pcdata) {
-		stream << node.value();
+	if (node.type () == pugi::xml_node_type::node_pcdata) {
+		// XXX: optimise it?
+		char* cleaned = strdup (node.value());
+		if (strlen (cleaned) > 1) {
+			r_str_trim (cleaned);
+		}
+		stream << cleaned;
+		R_FREE (cleaned);
 		return;
 	}
 
@@ -341,7 +347,6 @@ static void ParseNode(pugi::xml_node node, ParseCodeXMLContext *ctx, std::ostrea
 }
 
 R_API RCodeMeta *ParseCodeXML(ghidra::Funcdata *func, const char *xml) {
-	R_LOG_INFO ("-- xml: %s", xml);
 	pugi::xml_document doc;
 	if(!doc.load_string (xml, pugi::parse_default | pugi::parse_ws_pcdata)) {
 		return nullptr;
