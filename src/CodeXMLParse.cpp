@@ -341,6 +341,7 @@ static void ParseNode(pugi::xml_node node, ParseCodeXMLContext *ctx, std::ostrea
 }
 
 R_API RCodeMeta *ParseCodeXML(ghidra::Funcdata *func, const char *xml) {
+	R_LOG_INFO ("-- xml: %s", xml);
 	pugi::xml_document doc;
 	if(!doc.load_string (xml, pugi::parse_default | pugi::parse_ws_pcdata)) {
 		return nullptr;

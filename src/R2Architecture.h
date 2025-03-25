@@ -46,6 +46,7 @@ protected:
 	void buildLoader(DocumentStorage &store) override;
 	Scope *buildDatabase(DocumentStorage &store) override;
 	void buildTypegrp(DocumentStorage &store) override;
+	void buildCoreTypes(DocumentStorage &store) override;
 	void buildCommentDB(DocumentStorage &store) override;
 	void postSpecFile() override;
 	void buildAction(DocumentStorage &store) override;

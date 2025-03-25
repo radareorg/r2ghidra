@@ -56,7 +56,7 @@ void R2PrintC::pushUnnamedLocation(const Address &addr, const Varnode *vn, const
 		pushOp (&dereference, op);
 		auto type = glb->types->getTypePointer (space->getAddrSize (), vn->getType (), space->getWordSize ());
 		// pushConstant (addr.getOffset (), type, vn, op);
-		pushConstant(addr.getOffset(),type,casetoken,vn, op);
+		pushConstant(addr.getOffset(),type,vartoken,vn, op);
 	} else {
 		PrintC::pushUnnamedLocation (addr,vn, op);
 	}
