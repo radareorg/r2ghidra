@@ -268,7 +268,11 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 #endif
 		RCodeMeta *code = nullptr;
 		std::stringstream out_stream;
-		Decompile (core, core->addr, mode, out_stream, &code);
+#if R2_VERSION_NUMBER >= 50909
+		Decompile(core, core->addr, mode, out_stream, &code);
+#else
+		Decompile(core, core->offset, mode, out_stream, &code);
+#endif
 		switch (mode) {
 		case DecompileMode::DISASM:
 			{
@@ -425,7 +429,12 @@ static void Disassemble(RCore *core, ut64 ops) {
 	const Translate *trans = arch.translate;
 	PcodeRawOut emit (arch.translate);
 	AssemblyRaw assememit;
+
+#if R2_VERSION_NUMBER >= 50909
 	Address addr (trans->getDefaultCodeSpace(), core->addr);
+#else
+	Address addr (trans->getDefaultCodeSpace(), core->offset);
+#endif
 	for (ut64 i = 0; i < ops; i++) {
 		try {
 			trans->printAssembly (assememit, addr);
