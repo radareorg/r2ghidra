@@ -124,8 +124,9 @@ At the moment there is no way to select which processors to support, so it build
 Also works with `muon/samu` and that's the preferred way to build r2ghidra on Windows.
 
 ```
-meson b
-ninja -C b
+meson setup b
+meson compile -C b
+meson install -C b
 ```
 
 ### Windows
