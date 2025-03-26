@@ -443,7 +443,7 @@ static void Disassemble(RCore *core, ut64 ops) {
 		} catch (const BadDataError &error) {
 			std::stringstream ss;
 			addr.printRaw (ss);
-			R_LOG_ERROR ("%s: invalid\n", ss.str ().c_str ());
+			R_LOG_ERROR ("%s: invalid", ss.str ().c_str ());
 			addr = addr + trans->getAlignment();
 		}
 	}
