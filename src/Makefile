@@ -80,11 +80,11 @@ asan:
 
 $(R2G_CORE_PLUGIN): $(deps)
 	$(CXX) -shared -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) core_ghidra.o \
-		anal_ghidra.o core_ghidra_plugin.o anal_ghidra_plugin.o $(R2_LDFLAGS) $(CXXFLAGS)
+		anal_ghidra.o core_ghidra_plugin.o anal_ghidra_plugin.o $(R2_LDFLAGS) $(LDFLAGS) $(CXXFLAGS)
 
 $(R2G_ANAL_PLUGIN): $(deps)
 	$(CXX) -shared $(GHIDRA_OBJS) $(PUGIXML_OBJS) anal_ghidra.o anal_ghidra_plugin.o \
-		$(R2_LDFLAGS) $(CXXFLAGS) -o $@ $(R2GHIDRA_OBJS)
+		 $(R2GHIDRA_OBJS) $(R2_LDFLAGS) $(LDFLAGS) $(CXXFLAGS) -o $@
 
 ifneq (,$(wildcard /usr/bin/codesign))
 sign macsign:

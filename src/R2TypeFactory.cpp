@@ -18,35 +18,6 @@ R2TypeFactory::R2TypeFactory(R2Architecture *arch) : TypeFactory (arch), arch (a
 		throw LowlevelError ("Failed to create RParseCType");
 	}
 #endif
-	// TODO: load from r2?
-	setCoreType ("void", 1, TYPE_VOID, false);
-	setCoreType ("bool", 1, TYPE_BOOL, false);
-	setCoreType ("uint8_t", 1, TYPE_UINT, false);
-	setCoreType ("uint16_t", 2, TYPE_UINT, false);
-	setCoreType ("uint32_t", 4, TYPE_UINT, false);
-	setCoreType ("uint64_t", 8, TYPE_UINT, false);
-	setCoreType ("int8_t", 1, TYPE_INT, false);
-	setCoreType ("int16_t", 2, TYPE_INT, false);
-	setCoreType ("int32_t", 4, TYPE_INT, false);
-	setCoreType ("int64_t", 8, TYPE_INT, false);
-	setCoreType ("double", 8, TYPE_FLOAT, false);
-	setCoreType ("float", 4, TYPE_FLOAT, false);
-	setCoreType ("float8", 8, TYPE_FLOAT, false);
-	setCoreType ("float10", 10, TYPE_FLOAT, false);
-	setCoreType ("float16", 16 ,TYPE_FLOAT, false);
-
-	setCoreType ("uchar", 1, TYPE_UNKNOWN, false);
-	setCoreType ("ushort", 2, TYPE_UNKNOWN, false);
-	setCoreType ("uint", 4, TYPE_UNKNOWN, false);
-	setCoreType ("ulong", 8, TYPE_UNKNOWN, false);
-
-	setCoreType ("code", 1, TYPE_CODE, false);
-	setCoreType ("char", 1, TYPE_INT, true);
-	setCoreType ("wchar", 2, TYPE_INT, true);
-	setCoreType ("char", 1, TYPE_INT, true);
-	setCoreType ("char16_t", 2, TYPE_INT, true);
-	setCoreType ("char32_t", 4, TYPE_INT, true);
-	cacheCoreTypes ();
 }
 
 R2TypeFactory::~R2TypeFactory() {
@@ -114,7 +85,7 @@ Datatype *R2TypeFactory::queryR2Struct(const string &n, std::set<std::string> &s
 			arch->addWarning ("Struct " + n + " has no fields.");
 			return nullptr;
 		}
-		setFields (fields, r, 0, 0);
+		setFields (fields, r, 0, 0, 0);
 		return r;
 	} catch (std::invalid_argument &e) {
 		arch->addWarning ("Failed to load struct " + n + " from sdb.");
@@ -168,10 +139,12 @@ Datatype *R2TypeFactory::queryR2Typedef(const string &n, std::set<std::string> &
 	if (!resolved) {
 		return nullptr;
 	}
-	Datatype *typedefd = resolved->clone ();
+	//Datatype *typedefd = resolved->clone ();
+	Datatype *typedefd = getTypedef (resolved, n, 0, 0);
 	setName (typedefd, n); // this removes the old name from the nametree
 	setName (resolved, resolved->getName()); // add the old name back
 	return typedefd;
+	//return nullptr;
 }
 
 Datatype *R2TypeFactory::queryR2(const string &n, std::set<std::string> &stackTypes) {

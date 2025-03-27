@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2019-2023 - thestr4ng3r, pancake */
+/* r2ghidra - LGPL - Copyright 2019-2024 - thestr4ng3r, pancake */
 
 #include "R2PrintC.h"
 #include "RCoreMutex.h"
@@ -55,8 +55,17 @@ void R2PrintC::pushUnnamedLocation(const Address &addr, const Varnode *vn, const
 	if (space->getType() == IPTR_PROCESSOR) {
 		pushOp (&dereference, op);
 		auto type = glb->types->getTypePointer (space->getAddrSize (), vn->getType (), space->getWordSize ());
-		pushConstant (addr.getOffset (), type, vn, op);
+		// pushConstant (addr.getOffset (), type, vn, op);
+		pushConstant(addr.getOffset(),type,vartoken,vn, op);
 	} else {
 		PrintC::pushUnnamedLocation (addr,vn, op);
 	}
 }
+
+/*
+void R2PrintC::push_integer(uintb val,int4 sz,bool sign,tagtype tag, const Varnode *vn,const PcodeOp *op) {
+}
+
+void R2PrintC::pushConstant(uintb val,const Datatype *ct,tagtype tag, const Varnode *vn, const PcodeOp *op) {
+}
+*/
