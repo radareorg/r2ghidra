@@ -14,7 +14,7 @@ This project was presented at r2con 2019 as part of the Cutter talk: [https://yo
 An r2pm package is available that can easily be installed like:
 
 ```
-r2pm update
+r2pm -U
 r2pm -ci r2ghidra
 ```
 
