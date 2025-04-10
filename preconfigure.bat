@@ -6,6 +6,10 @@ git submodule update --init
 set GNV=0.5.0
 
 python -m wget https://github.com/radareorg/ghidra-native/releases/download/%GNV%/ghidra-native-%GNV%.zip
+if %ERRORLEVEL% NEQ 0 (
+  ECHO NOT FOUND
+  exit /b 1
+)
 
 unzip -q ghidra-native-%GNV%.zip
 if %ERRORLEVEL% NEQ 0 (
