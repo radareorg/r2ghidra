@@ -69,6 +69,8 @@ else
   r_core = dependency('r_core')
 endif
 
+zlib = dependency('zlib', version : '>=1.2.8')
+
 r2ghidra_version = meson.project_version()
 versionconf = configuration_data()
 versionconf.set('R2GHIDRA_VERSION', r2ghidra_version)
@@ -212,7 +214,7 @@ sleighc_sources = [
 
 r2ghidra_core_plugin = library('core_r2ghidra',
   r2ghidra_core_sources,
-  dependencies: [r_core],
+  dependencies: [r_core, zlib],
   override_options : ['c_std=c11', 'cpp_std=c++11'],
   include_directories: r2ghidra_incdirs,
   install: true,
@@ -222,6 +224,6 @@ r2ghidra_core_plugin = library('core_r2ghidra',
 sleighc_exe = executable('sleighc', sleighc_sources,
   include_directories: r2ghidra_incdirs,
   override_options : ['c_std=c11', 'cpp_std=c++11'],
-  dependencies: [r_core],
+  dependencies: [r_core, zlib],
   install: true
 )
