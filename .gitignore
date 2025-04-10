@@ -9,3 +9,9 @@ ghidra/flex/
 .ccls-cache
 .gdb_history
 dist/artifacts
+
+*.o
+*.so
+ghidra-native/
+ghidra-processors.txt
+ghidra/sleighc
