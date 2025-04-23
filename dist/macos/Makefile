@@ -1,5 +1,6 @@
+ARCH ?= $(shell uname -m)
 V=$(shell ../../configure -qV)
-P=r2ghidra_sleigh-$(V)
+P=r2ghidra_sleigh-$(V)-$(ARCH)
 D=$(shell pwd)/$(P)
 
 all:
@@ -7,6 +8,7 @@ all:
 	mkdir -p $(P)
 	make -C ../../src sleigh-install D=$(D)
 	zip -r $(P).zip $(P)
-	mkdir r2ghidra-$(V)-macos
-	cp ../../src/*.dylib r2ghidra-$(V)-macos
-	zip -r r2ghidra-$(V)-macos.zip r2ghidra-$(V)-macos
+	# package plugin for specific architecture
+	mkdir r2ghidra-$(V)-macos-$(ARCH)
+	cp ../../src/*.dylib r2ghidra-$(V)-macos-$(ARCH)
+	zip -r r2ghidra-$(V)-macos-$(ARCH).zip r2ghidra-$(V)-macos-$(ARCH)
