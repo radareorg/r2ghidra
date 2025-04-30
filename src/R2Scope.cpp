@@ -151,10 +151,15 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 
 	auto symbollistElement = child(scopeElement, "symbollist");
 
-	ProtoModel *proto = fcn->cc ? arch->protoModelFromR2CC(fcn->cc) : nullptr;
+#if R2_VERSION_NUMBER >= 50909
+#define CALLCONV(x) (x)->callconv
+#else
+#define CALLCONV(x) (x)->cc
+#endif
+	ProtoModel *proto = CALLCONV(fcn) ? arch->protoModelFromR2CC(CALLCONV(fcn)) : nullptr;
 	if (!proto) {
-		if (fcn->cc) {
-			arch->addWarning ("Matching calling convention " + to_string(fcn->cc) + " of function " + to_string(fcn_name) + " failed, args may be inaccurate.");
+		if (CALLCONV(fcn)) {
+			arch->addWarning ("Matching calling convention " + to_string(CALLCONV(fcn)) + " of function " + to_string(fcn_name) + " failed, args may be inaccurate.");
 		} else {
 			arch->addWarning ("Function " + to_string(fcn_name) + " has no calling convention set, args may be inaccurate.");
 		}
