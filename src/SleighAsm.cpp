@@ -405,7 +405,7 @@ RConfig *SleighAsm::getConfig(RAnal *a) {
 	return core->config;
 }
 
-std::string SleighAsm::getSleighHome(R_NULLABLE RConfig *cfg) {
+std::string SleighAsm::getSleighHome(RConfig * R_NULLABLE cfg) {
 	const char varname[] = "r2ghidra.sleighhome";
 	char *path = nullptr;
 
