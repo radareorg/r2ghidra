@@ -70,6 +70,11 @@ else
 endif
 
 zlib = dependency('zlib', version : '>=1.2.8')
+if not zlib.found()
+  zlib_proj = subproject('zlib', default_options: ['default_library=static', 'werror=false'])
+  zlib = zlib_proj.get_variable('zlib_dep')
+  meson.override_dependency('zlib', zlib)
+endif
 
 r2ghidra_version = meson.project_version()
 versionconf = configuration_data()
