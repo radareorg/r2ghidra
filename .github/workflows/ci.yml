@@ -200,7 +200,6 @@ jobs:
       shell: bash
       run: |
         pip install ninja meson wget
-        nuget install zlib_static
     - name: install r2
       shell: bash
       run: |
