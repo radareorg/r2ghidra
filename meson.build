@@ -69,7 +69,7 @@ else
   r_core = dependency('r_core')
 endif
 
-zlib = dependency('zlib', version : '>=1.2.8')
+zlib = dependency('zlib', version : '>=1.2.8', required: false)
 if not zlib.found()
   zlib_proj = subproject('zlib', default_options: ['default_library=static', 'werror=false'])
   zlib = zlib_proj.get_variable('zlib_dep')
