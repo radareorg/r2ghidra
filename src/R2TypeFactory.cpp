@@ -11,6 +11,8 @@
 #endif
 #include "R2Utils.h"
 
+using namespace ghidra;
+
 R2TypeFactory::R2TypeFactory(R2Architecture *arch) : TypeFactory (arch), arch (arch) {
 #if R2G_USE_CTYPE
 	ctype = r_parse_ctype_new ();

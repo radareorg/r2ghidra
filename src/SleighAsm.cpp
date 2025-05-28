@@ -3,6 +3,8 @@
 #include "SleighAsm.h"
 #include "ArchMap.h"
 
+using namespace ghidra;
+
 // define it here because sleighc needs to compile without anal_ghidra.cpp
 extern "C" {
 R_API RCore *Gcore = nullptr;

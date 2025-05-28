@@ -26,7 +26,7 @@ public:
 	bool is_mem() const { return type == R_ANAL_VAL_MEM; }
 
 	void invalid() { absolute = -1; }
-	void mem(uint4 size);
+	void mem(ghidra::uint4 size);
 	RAnalValue *dup() const;
 
 private:
