@@ -1,7 +1,7 @@
 all: run
 
 run:
-	r2r -L db/extras
+	r2r -L db/attic
 
 attic: r2-testbins
 	r2r -L db/attic

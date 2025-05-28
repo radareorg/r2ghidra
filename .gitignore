@@ -3,6 +3,8 @@ cmake-build-*
 src/sleighc
 build
 *.swp
+*.o
+*.so
 compile_commands.json
 ghidra/flex/
 .vscode
