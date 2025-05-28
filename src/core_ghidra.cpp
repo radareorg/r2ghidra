@@ -23,6 +23,8 @@
 #include <vector>
 #include <mutex>
 
+using namespace ghidra;
+
 #undef DEBUG_EXCEPTIONS
 
 extern "C" RCore *Gcore;

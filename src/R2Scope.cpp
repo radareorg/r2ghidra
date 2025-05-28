@@ -12,6 +12,8 @@
 
 #include "R2Utils.h"
 
+using namespace ghidra;
+
 R2Scope::R2Scope(R2Architecture *arch)
 		: Scope (0, "", arch, this),
 		  arch (arch),

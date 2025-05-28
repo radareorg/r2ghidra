@@ -8,7 +8,9 @@
 
 //using namespace ghidra;
 
-//class Funcdata;
+namespace ghidra {
+  class Funcdata;
+};
 
 R_API RCodeMeta *ParseCodeXML(ghidra::Funcdata *func, const char *xml);
 

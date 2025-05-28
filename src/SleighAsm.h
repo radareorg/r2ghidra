@@ -11,26 +11,26 @@
 #include "sleigh_arch.hh"
 #include "SleighInstruction.h"
 
-class AsmLoadImage : public LoadImage {
+class AsmLoadImage : public ghidra::LoadImage {
 private:
 	RIO *io = nullptr;
 
 public:
-	AsmLoadImage(RIO *io): LoadImage("radare2_program"), io(io) {}
-	virtual void loadFill(uint1 *ptr, int4 size, const Address &addr) {
+	AsmLoadImage(RIO *io): ghidra::LoadImage("radare2_program"), io(io) {}
+	virtual void loadFill(ghidra::uint1 *ptr, ghidra::int4 size, const ghidra::Address &addr) {
 		r_io_read_at (io, addr.getOffset(), ptr, size);
 	}
-	virtual string getArchType(void) const {
+	virtual std::string getArchType(void) const {
 		return "radare2";
 	}
 	virtual void adjustVma(long adjust) {
-		throw LowlevelError ("Cannot adjust radare2 virtual memory");
+		throw ghidra::LowlevelError ("Cannot adjust radare2 virtual memory");
 	}
 };
 
 class SleighAsm;
 
-class AssemblySlg : public AssemblyEmit {
+class AssemblySlg : public ghidra::AssemblyEmit {
 private:
 	SleighAsm *sasm = nullptr;
 public:
@@ -38,7 +38,7 @@ public:
 
 	AssemblySlg(SleighAsm *s): sasm(s) {}
 
-	void dump(const Address &addr, const string &mnem, const string &body) override;
+	void dump(const ghidra::Address &addr, const std::string &mnem, const std::string &body) override;
 
 	~AssemblySlg() {
 		free (str);
@@ -46,9 +46,9 @@ public:
 };
 
 struct PcodeOperand {
-	PcodeOperand(uintb offset, uint4 size): type(RAM), offset(offset), size(size) {}
-	PcodeOperand(uintb number): type(CONSTANT), number(number), size(0) {}
-	PcodeOperand(const std::string &name, uint4 size): type(REGISTER), name(name), size(size) {}
+	PcodeOperand(ghidra::uintb offset, ghidra::uint4 size): type(RAM), offset(offset), size(size) {}
+	PcodeOperand(ghidra::uintb number): type(CONSTANT), number(number), size(0) {}
+	PcodeOperand(const std::string &name, ghidra::uint4 size): type(REGISTER), name(name), size(size) {}
 	virtual ~PcodeOperand() {
 		if (type == REGISTER) {
 			name.~string();
@@ -57,10 +57,10 @@ struct PcodeOperand {
 
 	union {
 		std::string name;
-		uintb offset;
-		uintb number;
+		ghidra::uintb offset;
+		ghidra::uintb number;
 	};
-	uint4 size;
+	ghidra::uint4 size;
 
 	enum {
 		REGISTER,
@@ -78,7 +78,7 @@ struct PcodeOperand {
 		case UNIQUE: /* Same as RAM */
 		case RAM: offset = rhs.offset; break;
 		case CONSTANT: number = rhs.number; break;
-		default: throw LowlevelError("Unexpected type of PcodeOperand found in operator==.");
+		default: ghidra::throw LowlevelError("Unexpected type of PcodeOperand found in operator==.");
 		}
 	}
 
@@ -91,7 +91,7 @@ struct PcodeOperand {
 		case UNIQUE: /* Same as RAM */
 		case RAM: return offset == rhs.offset && size == rhs.size;
 		case CONSTANT: return number == rhs.number;
-		default: throw LowlevelError("Unexpected type of PcodeOperand found in operator==.");
+		default: throw ghidra::LowlevelError("Unexpected type of PcodeOperand found in operator==.");
 		}
 	}
 	bool is_unique() const { return type == UNIQUE; }
@@ -100,9 +100,9 @@ struct PcodeOperand {
 	bool is_reg() const { return type == REGISTER; }
 };
 
-ostream &operator<<(ostream &s, const PcodeOperand &arg);
+std::ostream &operator<<(std::ostream &s, const PcodeOperand &arg);
 
-typedef OpCode PcodeOpType;
+typedef ghidra::OpCode PcodeOpType;
 
 struct Pcodeop {
 	PcodeOpType type;
@@ -129,7 +129,7 @@ struct Pcodeop {
 	}
 };
 
-ostream &operator<<(ostream &s, const Pcodeop &op);
+std::ostream &operator<<(std::ostream &s, const Pcodeop &op);
 
 struct UniquePcodeOperand: public PcodeOperand {
 	const Pcodeop *def = nullptr;
@@ -137,21 +137,21 @@ struct UniquePcodeOperand: public PcodeOperand {
 	~UniquePcodeOperand() = default;
 };
 
-class PcodeSlg : public PcodeEmit {
+class PcodeSlg : public ghidra::PcodeEmit {
 private:
 	SleighAsm *sanal = nullptr;
 
-	PcodeOperand *parse_vardata(VarnodeData &data);
+	PcodeOperand *parse_vardata(ghidra::VarnodeData &data);
 
 public:
 	std::vector<Pcodeop> pcodes;
 
 	PcodeSlg(SleighAsm *s): sanal(s) {}
 
-	void dump(const Address &addr, OpCode opc, VarnodeData *outvar, VarnodeData *vars, int4 isize) override {
+	void dump(const ghidra::Address &addr, ghidra::OpCode opc, ghidra::VarnodeData *outvar, ghidra::VarnodeData *vars, ghidra::int4 isize) override {
 		PcodeOperand *out = nullptr, *in0 = nullptr, *in1 = nullptr;
 
-		if (opc == CPUI_CALLOTHER) {
+		if (opc == ghidra::CPUI_CALLOTHER) {
 			isize = isize > 2? 2: isize;
 		}
 		switch (isize) {
@@ -159,7 +159,7 @@ public:
 		case 2: in1 = parse_vardata (vars[1]);
 		case 1: in0 = parse_vardata (vars[0]);
 		case 0: break;
-		default: throw LowlevelError ("Unexpexted isize in PcodeSlg::dump()");
+		default: throw ghidra::LowlevelError ("Unexpexted isize in PcodeSlg::dump()");
 		}
 
 		if (outvar) {
@@ -178,8 +178,8 @@ public:
 
 struct R2Reg {
 	std::string name;
-	ut64 size;
-	ut64 offset;
+	ghidra::ut64 size;
+	ghidra::ut64 offset;
 };
 
 class R2Sleigh;
@@ -187,21 +187,21 @@ class R2Sleigh;
 class SleighAsm {
 private:
 	AsmLoadImage loader;
-	ContextInternal context;
-	DocumentStorage docstorage;
-	FileManage specpaths;
-	std::vector<LanguageDescription> description;
+	ghidra::ContextInternal context;
+	ghidra::DocumentStorage docstorage;
+	ghidra::FileManage specpaths;
+	std::vector<ghidra::LanguageDescription> description;
 	int languageindex;
 
 	void initInner(RIO *io, std::string sleigh_id);
 	void initRegMapping(void);
 	void collectSpecfiles(void);
-	void scanSleigh(const string &rootpath);
-	void resolveArch(const string &archid);
-	void buildSpecfile(DocumentStorage &store);
-	void parseProcConfig(DocumentStorage &store);
-	void parseCompConfig(DocumentStorage &store);
-	void loadLanguageDescription(const string &specfile);
+	void scanSleigh(const std::string &rootpath);
+	void resolveArch(const std::string &archid);
+	void buildSpecfile(ghidra::DocumentStorage &store);
+	void parseProcConfig(ghidra::DocumentStorage &store);
+	void parseCompConfig(ghidra::DocumentStorage &store);
+	void loadLanguageDescription(const std::string &specfile);
 
 public:
 	static std::string getSleighHome(RConfig *cfg);
@@ -220,7 +220,7 @@ public:
 	SleighAsm(): loader(nullptr), trans(nullptr, nullptr) {}
 	void init(const char *cpu, int bits, bool bigendian, RIO *io, RConfig *cfg);
 	int disassemble(RAnalOp *op, unsigned long long offset);
-	int genOpcode(PcodeSlg &pcode_slg, Address &addr);
+	int genOpcode(PcodeSlg &pcode_slg, ghidra::Address &addr);
 	std::vector<R2Reg> getRegs(void);
 	static RConfig *getConfig(RCore *c);
 	static RConfig *getConfig(RAnal *a);

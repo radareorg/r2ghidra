@@ -2,6 +2,8 @@
 
 #include "SleighAnalValue.h"
 
+using namespace ghidra;
+
 RAnalValueType SleighAnalValue::type_from_values(const SleighAnalValue &in0, const SleighAnalValue &in1) {
 	if (in0.is_mem () || in1.is_mem ()) {
 		return R_ANAL_VAL_MEM;

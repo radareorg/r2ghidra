@@ -10,32 +10,32 @@ typedef struct r_parse_ctype_t RParseCType;
 typedef struct r_parse_ctype_type_t RParseCTypeType;
 */
 
-using namespace ghidra;
+// using namespace ghidra;
 class R2Architecture;
 
-class R2TypeFactory : public TypeFactory {
+class R2TypeFactory : public ghidra::TypeFactory {
 private:
 	R2Architecture *arch;
 	// RParseCType *ctype;
 
-	Datatype *queryR2Struct(const string &n, std::set<std::string> &stackTypes);
-	Datatype *queryR2Enum(const string &n);
-	Datatype *queryR2Typedef(const string &n, std::set<std::string> &stackTypes);
-	Datatype *queryR2(const string &n, std::set<std::string> &stackTypes);
+	ghidra::Datatype *queryR2Struct(const std::string &n, std::set<std::string> &stackTypes);
+	ghidra::Datatype *queryR2Enum(const std::string &n);
+	ghidra::Datatype *queryR2Typedef(const std::string &n, std::set<std::string> &stackTypes);
+	ghidra::Datatype *queryR2(const std::string &n, std::set<std::string> &stackTypes);
 
 protected:
-	Datatype *findById(const string &n, uint8 id, int4 sz, std::set<std::string> &stackTypes);
-	Datatype *findById(const string &n, uint8 id, int4 sz) override;
+	ghidra::Datatype *findById(const std::string &n, ghidra::uint8 id, ghidra::int4 sz, std::set<std::string> &stackTypes);
+	ghidra::Datatype *findById(const std::string &n, ghidra::uint8 id, ghidra::int4 sz) override;
 	using TypeFactory::findByName;
-	Datatype *findByName(const string &n, std::set<std::string> &stackTypes) { return findById(n, 0, 0, stackTypes); }
+	ghidra::Datatype *findByName(const std::string &n, std::set<std::string> &stackTypes) { return findById(n, 0, 0, stackTypes); }
 
 public:
 	using StackTypes = std::set<std::string>;
 	R2TypeFactory(R2Architecture *arch);
 	~R2TypeFactory() override;
 
-	Datatype *fromCString(const string &str, string *error = nullptr, std::set<std::string> *stackTypes = nullptr);
-//	Datatype *fromCType(const RParseCTypeType *ctype, string *error = nullptr, std::set<std::string> *stackTypes = nullptr);
+	ghidra::Datatype *fromCString(const std::string &str, std::string *error = nullptr, std::set<std::string> *stackTypes = nullptr);
+//	ghidra::Datatype *fromCType(const RParseCTypeType *ctype, string *error = nullptr, std::set<std::string> *stackTypes = nullptr);
 };
 
 #endif //R2GHIDRA_R2TYPEFACTORY_H
