@@ -52,8 +52,8 @@ public:
 			item_list.erase(it->second);
 			item_map.erase(it);
 		}
-		item_list.push_front(make_pair(key, val));
-		item_map.insert(make_pair(key, item_list.begin()));
+		item_list.push_front(std::make_pair(key, val));
+		item_map.insert(std::make_pair(key, item_list.begin()));
 		clean();
 	};
 

@@ -63,7 +63,7 @@ public:
 	bool isNameUsed(const std::string &name, const ghidra::Scope *op2) const override { throw ghidra::LowlevelError("isNameUsed unimplemented"); }
 	ghidra::Funcdata *resolveExternalRefFunction(ghidra::ExternRefSymbol *sym) const override;
 
-	ghidra::SymbolEntry *findOverlap(const ghidra::Address &addr,ghidra::int4 size) const override { throw LowlevelError("findOverlap unimplemented"); }
+	ghidra::SymbolEntry *findOverlap(const ghidra::Address &addr,ghidra::int4 size) const override { throw ghidra::LowlevelError("findOverlap unimplemented"); }
 	ghidra::SymbolEntry *findBefore(const ghidra::Address &addr) const				{ throw ghidra::LowlevelError("findBefore unimplemented"); }
 	ghidra::SymbolEntry *findAfter(const ghidra::Address &addr) const				{ throw ghidra::LowlevelError("findAfter unimplemented"); }
 	void findByName(const std::string &name,std::vector<ghidra::Symbol *> &res) const	override { throw ghidra::LowlevelError("findByName unimplemented"); }

@@ -51,6 +51,7 @@ struct PcodeOperand {
 	PcodeOperand(const std::string &name, ghidra::uint4 size): type(REGISTER), name(name), size(size) {}
 	virtual ~PcodeOperand() {
 		if (type == REGISTER) {
+			using namespace std;
 			name.~string();
 		}
 	}
@@ -78,7 +79,7 @@ struct PcodeOperand {
 		case UNIQUE: /* Same as RAM */
 		case RAM: offset = rhs.offset; break;
 		case CONSTANT: number = rhs.number; break;
-		default: ghidra::throw LowlevelError("Unexpected type of PcodeOperand found in operator==.");
+		default: throw ghidra::LowlevelError("Unexpected type of PcodeOperand found in operator==.");
 		}
 	}
 
@@ -178,8 +179,8 @@ public:
 
 struct R2Reg {
 	std::string name;
-	ghidra::ut64 size;
-	ghidra::ut64 offset;
+	ut64 size;
+	ut64 offset;
 };
 
 class R2Sleigh;
