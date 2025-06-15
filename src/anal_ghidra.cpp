@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2020-2024 - pancake, FXTi */
+/* r2ghidra - LGPL - Copyright 2020-2025 - pancake, FXTi */
 
 #include <r_lib.h>
 #include <r_anal.h>
@@ -72,7 +72,7 @@ static char *slid_arch(RAnal *anal) {
 #if R2_VERSION_NUMBER >= 50809
 
 extern "C" int archinfo(RArchSession *as, ut32 query) {
-	r_return_val_if_fail (as, 1);
+	R_RETURN_VAL_IF_FAIL (as, 1);
 	char *arch = slid_arch (Gcore->anal); // is this initializing sanal global ptr?
 	if (sanal != nullptr) {
 		switch (query) {
@@ -97,7 +97,7 @@ extern "C" int archinfo(RArchSession *as, ut32 query) {
 #else
 extern "C" int archinfo(RAnal *anal, int query) {
 	// This is to check if RCore plugin set cpu properly.
-	r_return_val_if_fail (anal, -1);
+	R_RETURN_VAL_IF_FAIL (anal, -1);
 #if R2_VERSION_NUMBER >= 50609
 	if (R_STR_ISEMPTY (anal->config->cpu)) {
 		return -1;
@@ -1950,7 +1950,7 @@ static std::string regtype_name(const char *cpu, const std::string &regname) {
 
 #if R2_VERSION_NUMBER >= 50809
 extern "C" char *r2ghidra_regs(RArchSession *as) {
-	r_return_val_if_fail (as, nullptr);
+	R_RETURN_VAL_IF_FAIL (as, nullptr);
 
 	const char *cpu = r_config_get (Gcore->config, "asm.cpu"); // (as->config != nullptr)? as->config->cpu: "arm";
 
@@ -2018,7 +2018,7 @@ extern "C" char *r2ghidra_regs(RArchSession *as) {
 
 #else
 extern "C" char *get_reg_profile(RAnal *anal) {
-	r_return_val_if_fail (anal, nullptr);
+	R_RETURN_VAL_IF_FAIL (anal, nullptr);
 #if R2_VERSION_NUMBER >= 50609
 	const char *cpu = anal->config->cpu;
 #else
