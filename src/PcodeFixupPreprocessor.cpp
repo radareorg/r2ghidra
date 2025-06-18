@@ -54,7 +54,7 @@ void PcodeFixupPreprocessor::fixupSharedReturnJumpToRelocs(RAnalFunction *r2Func
 		// R_LOG_INFO ("refi 0x%"PFMT64x"", refi->addr);
 		RFlagItem *f = r_flag_get_at (core->flags, refi->addr, true);
 		if (f) {
-			if (1 && is_import_name (f->name)) {
+			if (is_import_name (f->name)) {
 				RAnalOp *op = r_core_anal_op (core, refi->at, 0);
 				// Differentiate tail-call jumps from calls
 				bool isTailCall = (op->type == R_ANAL_OP_TYPE_JMP);
@@ -79,6 +79,7 @@ void PcodeFixupPreprocessor::fixupSharedReturnJumpToRelocs(RAnalFunction *r2Func
                     if (!strcmp(basename, "printf")) {
                         // int printf(const char *format, ...);
                         // Set return type to int
+			printf ("SETTING THE PRINTF\n");
                         auto *tf = arch.getTypeFactory();
                         // Use unnamed base int type
                         Datatype *intType = tf->getBase(
@@ -96,16 +97,24 @@ void PcodeFixupPreprocessor::fixupSharedReturnJumpToRelocs(RAnalFunction *r2Func
                         pieces.firstVarArgSlot = (int)pieces.intypes.size();
                     }
                     else if (!strcmp(basename, "scanf")) {
-                        // int scanf(const char *format, ...);
+                        // Treat scanf as two-arg function for decomp: format and destination buffer
                         auto *tf2 = arch.getTypeFactory();
+                        // Return type: int
                         Datatype *intType2 = tf2->getBase(tf2->getSizeOfInt(), TYPE_INT);
                         pieces.outtype = intType2;
                         auto space2 = arch.getDefaultCodeSpace();
+                        // Pointer to char type
                         Datatype *charType2 = tf2->getBase(1, TYPE_INT);
-                        Datatype *fmtType2 = tf2->getTypePointer(space2->getAddrSize(), charType2, space2->getWordSize());
-                        pieces.intypes.push_back(fmtType2);
+                        Datatype *ptrType2 = tf2->getTypePointer(
+                            space2->getAddrSize(), charType2, space2->getWordSize());
+                        // Named argument: format
+                        pieces.intypes.push_back(ptrType2);
                         pieces.innames.push_back("format");
-                        pieces.firstVarArgSlot = (int)pieces.intypes.size();
+                        // Named argument: dest (buffer)
+                        pieces.intypes.push_back(ptrType2);
+                        pieces.innames.push_back("dest");
+                        // No varargs beyond these
+                        pieces.firstVarArgSlot = -1;
                     }
                     else if (!strcmp(basename, "sscanf")) {
                         // int sscanf(const char *str, const char *format, ...);
