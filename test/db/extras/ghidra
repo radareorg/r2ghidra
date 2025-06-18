@@ -175,7 +175,7 @@ x86:LE:16:Real Mode:
 
 //WARNING: Unable to track spacebase fully for stack
 
-uint fcn.00001c98(ushort param_1, ushort param_2, ushort param_3, uint param_4, int16_t param_5)
+uint fcn.00001c98(ushort param_1,ushort param_2,ushort param_3,uint param_4,int16_t param_5)
 
 {
     int16_t *piVar1;
@@ -236,7 +236,7 @@ uint fcn.00001c98(ushort param_1, ushort param_2, ushort param_3, uint param_4, 
             if (cStack_4 == '\r') {
                 cStack_4 = '\n';
             }
-            if (SBORROW2(iStack_6, param_5) != iStack_6 - param_5 < 0) {
+            if (SBORROW2(iStack_6,param_5) != iStack_6 - param_5 < 0) {
                 *(param_4 + iStack_6) = cStack_4;
                 iStack_6 = iStack_6 + 1;
             }
@@ -270,7 +270,7 @@ uint fcn.00001c98(ushort param_1, ushort param_2, ushort param_3, uint param_4, 
         iVar2 = param_4;
     } while (*(iVar2 + iStack_6 + -1) != '\n');
     *(iVar2 + iStack_6 + -1) = 0;
-    return CONCAT22(uVar12, iVar2);
+    return CONCAT22(uVar12,iVar2);
 }
 
 EOF

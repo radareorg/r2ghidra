@@ -30,7 +30,7 @@ jobs:
     - name: Packaging r2ghidra for Debian
       run: make -C dist/debian
     - name: Running Testsuite
-      run: make -C test || exit 0
+      run: make -C test
 
   linux-deb:
     runs-on: ubuntu-22.04
@@ -55,7 +55,7 @@ jobs:
     - name: Packaging r2ghidra for Debian using Dockcross
       run: make -C dist/debian
     - name: Running Testsuite
-      run: make -C test || exit 0
+      run: make -C test
     - name: Uploading debs
       uses: actions/upload-artifact@v4
       with:
