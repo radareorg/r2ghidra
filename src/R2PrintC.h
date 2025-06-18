@@ -11,6 +11,7 @@ class R2PrintC : public PrintC {
 protected:
 	void pushUnnamedLocation(const Address &addr, const Varnode *vn,const PcodeOp *op) override;
 	// void opCast(const PcodeOp *op) override;
+	std::string genericFunctionName(const Address &addr) override;
 
 public:
 	explicit R2PrintC(Architecture *g, const string &nm = "c-language");

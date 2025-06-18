@@ -5,6 +5,7 @@
 #include "PrettyXmlEncode.h"
 #include "ArchMap.h"
 #include "SleighAsm.h"
+#include "PcodeFixupPreprocessor.h"
 #include "r2ghidra.h"
 #include "r_anal.h"
 
@@ -169,6 +170,13 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	}
 	arch.getCore()->sleepBegin ();
 	auto action = arch.allacts.getCurrent ();
+	
+	// Apply PcodeFixup preprocessor to handle PLT jumps correctly
+	if (strstr(core->analysis->cpu, "x86")) {
+		// Must be called after arch.init(), but before decompiling the function
+		PcodeFixupPreprocessor::fixupSharedReturnJumpToRelocs(function, func, core, arch);
+	}
+	
 	int res;
 #ifndef DEBUG_EXCEPTIONS
 	try {

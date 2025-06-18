@@ -12,6 +12,7 @@ R2GHIDRA_SRCS+=CodeXMLParse.cpp
 R2GHIDRA_SRCS+=ArchMap.cpp
 R2GHIDRA_SRCS+=R2PrintC.cpp
 R2GHIDRA_SRCS+=RCoreMutex.cpp
+R2GHIDRA_SRCS+=PcodeFixupPreprocessor.cpp
 
 R2GHIDRA_SRCS+=SleighAnalValue.cpp
 R2GHIDRA_SRCS+=SleighAsm.cpp

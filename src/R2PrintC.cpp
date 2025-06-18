@@ -22,18 +22,13 @@ PrintLanguage *R2PrintCCapability::buildLanguage(Architecture *glb) {
 
 R2PrintC::R2PrintC(Architecture *g, const string &nm) : PrintC(g, nm) {
  	option_NULL = true;
-//	option_space_after_comma = true;
-// 	option_nocasts = true;
-///  option_convention = true;
-///  option_hide_exts = true;
-///  option_inplace_ops = false;
-///  option_nocasts = false;
-///  option_NULL = false;
-///  option_unplaced = false;
-///  option_space_after_comma = false;
-///  option_newline_before_else = true;
-///  option_newline_before_opening_brace = false;
-///  option_newline_after_prototype = true;
+	option_space_after_comma = true;
+	option_convention = true;
+	option_hide_exts = true;
+	option_inplace_ops = false;
+	option_unplaced = false;
+	option_newline_before_else = true;
+	option_newline_after_prototype = true;
 }
 
 void R2PrintC::setOptionNoCasts(bool nc) {
@@ -60,6 +55,21 @@ void R2PrintC::pushUnnamedLocation(const Address &addr, const Varnode *vn, const
 	} else {
 		PrintC::pushUnnamedLocation (addr,vn, op);
 	}
+}
+
+std::string R2PrintC::genericFunctionName(const Address &addr) {
+	auto arch = dynamic_cast<R2Architecture *>(glb);
+	if (arch) {
+		RCoreLock core(arch->getCore());
+		RFlagItem *flag = r_flag_get_at(core->flags, addr.getOffset(), false);
+		if (flag) {
+			if (core->flags->realnames && flag->realname) {
+				return flag->realname;
+			}
+			return flag->name;
+		}
+	}
+	return PrintC::genericFunctionName(addr);
 }
 
 /*
