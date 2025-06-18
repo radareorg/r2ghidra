@@ -54,18 +54,20 @@ void PcodeFixupPreprocessor::fixupSharedReturnJumpToRelocs(RAnalFunction *r2Func
 		// R_LOG_INFO ("refi 0x%"PFMT64x"", refi->addr);
 		RFlagItem *f = r_flag_get_at (core->flags, refi->addr, true);
 		if (f) {
-			if (is_import_name (f->name)) {
+			if (1 && is_import_name (f->name)) {
 				RAnalOp *op = r_core_anal_op (core, refi->at, 0);
-				// bool isCallRet = (op->type == R_ANAL_OP_TYPE_JMP);
-				bool isCallRet = (op->type == R_ANAL_OP_TYPE_CALL);
-				// isCallRet = true;
-				if (isCallRet) {
-					// apply only if its a jump ref?
-					// Address callAddr (space, refi->addr); // address of FUNCTION
-					Address callAddr (space, refi->at); // address of CALL
-					R_LOG_INFO ("OverridingCallReturn %s", extractLibcFuncName (f->name));
+				// Differentiate tail-call jumps from calls
+				bool isTailCall = (op->type == R_ANAL_OP_TYPE_JMP);
+				bool isCall = (op->type == R_ANAL_OP_TYPE_CALL);
+				Address callAddr (space, refi->at);
+				if (isTailCall) {
+					R_LOG_INFO ("OverridingTailCallReturn %s", extractLibcFuncName (f->name));
+					ghFunc->getOverride().insertFlowOverride(callAddr, Override::CALL_RETURN);
+				}
+				if (isCall) {
+					R_LOG_INFO ("OverridingCallReturn %s", extractLibcFuncName (f->name)); // disabled flow override logging
                 // Insert branch override (CALL/RETURN)
-                ghFunc->getOverride().insertFlowOverride(callAddr, Override::CALL_RETURN);
+                // ghFunc->getOverride().insertFlowOverride(callAddr, Override::CALL_RETURN); // disabled flow override
                 // Also apply simple hardcoded prototype for printf/exit
                 const char *basename = extractLibcFuncName(f->name);
                 if (basename) {
@@ -91,6 +93,32 @@ void PcodeFixupPreprocessor::fixupSharedReturnJumpToRelocs(RAnalFunction *r2Func
                         pieces.intypes.push_back(fmtType);
                         pieces.innames.push_back("format");
                         // Varargs start after named parameters
+                        pieces.firstVarArgSlot = (int)pieces.intypes.size();
+                    }
+                    else if (!strcmp(basename, "scanf")) {
+                        // int scanf(const char *format, ...);
+                        auto *tf2 = arch.getTypeFactory();
+                        Datatype *intType2 = tf2->getBase(tf2->getSizeOfInt(), TYPE_INT);
+                        pieces.outtype = intType2;
+                        auto space2 = arch.getDefaultCodeSpace();
+                        Datatype *charType2 = tf2->getBase(1, TYPE_INT);
+                        Datatype *fmtType2 = tf2->getTypePointer(space2->getAddrSize(), charType2, space2->getWordSize());
+                        pieces.intypes.push_back(fmtType2);
+                        pieces.innames.push_back("format");
+                        pieces.firstVarArgSlot = (int)pieces.intypes.size();
+                    }
+                    else if (!strcmp(basename, "sscanf")) {
+                        // int sscanf(const char *str, const char *format, ...);
+                        auto *tf2 = arch.getTypeFactory();
+                        Datatype *intType2 = tf2->getBase(tf2->getSizeOfInt(), TYPE_INT);
+                        pieces.outtype = intType2;
+                        auto space2 = arch.getDefaultCodeSpace();
+                        Datatype *charType2 = tf2->getBase(1, TYPE_INT);
+                        Datatype *ptrType2 = tf2->getTypePointer(space2->getAddrSize(), charType2, space2->getWordSize());
+                        pieces.intypes.push_back(ptrType2);
+                        pieces.innames.push_back("str");
+                        pieces.intypes.push_back(ptrType2);
+                        pieces.innames.push_back("format");
                         pieces.firstVarArgSlot = (int)pieces.intypes.size();
                     }
 #if 0
