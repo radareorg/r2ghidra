@@ -2,6 +2,7 @@
 
 #include "R2Architecture.h"
 #include "CodeXMLParse.h"
+#include "PcodeFixupPreprocessor.h"
 #include "PrettyXmlEncode.h"
 #include "ArchMap.h"
 #include "SleighAsm.h"
@@ -72,6 +73,7 @@ CV cfg_var_maximplref ("maximplref",  "2",        "Maximum number of references 
 CV cfg_var_rawptr     ("rawptr",      "true",     "Show unknown globals as raw addresses instead of variables");
 CV cfg_var_verbose    ("verbose",     "false",    "Show verbose warning messages while decompiling");
 CV cfg_var_casts      ("casts",       "false",    "Show type casts where needed");
+CV cfg_var_fixups     ("fixups",      "false",    "Apply pcode fixups");
 CV cfg_var_roprop     ("roprop",      "0",        "Propagate read-only constants (0,1,2,3,4)");
 CV cfg_var_timeout    ("timeout",     "0",        "Run decompilation in a separate process and kill it after a specific time");
 
@@ -169,6 +171,11 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	}
 	arch.getCore()->sleepBegin ();
 	auto action = arch.allacts.getCurrent ();
+
+	if (cfg_var_fixups.GetBool (core->config)) {
+		PcodeFixupPreprocessor::fixupSharedReturnJumpToRelocs(function, func, core, arch);
+	}
+
 	int res;
 #ifndef DEBUG_EXCEPTIONS
 	try {

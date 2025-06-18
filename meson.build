@@ -16,6 +16,7 @@ r2ghidra_sources = [
   'src/CodeXMLParse.cpp',
   'src/R2Architecture.cpp',
   'src/R2CommentDatabase.cpp',
+  'src/PcodeFixupPreprocessor.cpp',
   'src/R2LoadImage.cpp',
   'src/R2PrintC.cpp',
   'src/R2Scope.cpp',
