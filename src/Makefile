@@ -4,6 +4,7 @@ all: plugins
 include ../ghidra/deps.mk
 
 R2GHIDRA_SRCS= R2Architecture.cpp
+R2GHIDRA_SRCS+=PcodeFixupPreprocessor.cpp
 R2GHIDRA_SRCS+=R2LoadImage.cpp
 R2GHIDRA_SRCS+=R2Scope.cpp
 R2GHIDRA_SRCS+=R2TypeFactory.cpp
@@ -56,6 +57,7 @@ CFLAGS+=$(R2_CFLAGS)
 CXXFLAGS+=$(CFLAGS)
 
 R2_LIBEXT=$(shell r2 -H R2_LIBEXT)
+# TODO: rename to r2ghidra.$(R2_LIBEXT)
 R2G_CORE_PLUGIN=core_ghidra.$(R2_LIBEXT)
 R2G_ASM_PLUGIN=asm_ghidra.$(R2_LIBEXT)
 R2G_ANAL_PLUGIN=anal_ghidra.$(R2_LIBEXT)

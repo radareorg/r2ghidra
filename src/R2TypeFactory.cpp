@@ -171,11 +171,10 @@ Datatype *R2TypeFactory::queryR2(const string &n, std::set<std::string> &stackTy
 Datatype *R2TypeFactory::findById(const string &n, uint8 id, int4 sz, std::set<std::string> &stackTypes) {
 	// resolve basic types
 	Datatype *r = TypeFactory::findById (n, id, sz);
-	if (r != nullptr) {
-		return r;
+	if (r == nullptr) {
+		r = queryR2 (n, stackTypes);
 	}
-	r = queryR2 (n, stackTypes);
-	return (r != nullptr)? r: queryR2 (n, stackTypes);
+	return r;
 }
 
 // overriden call
