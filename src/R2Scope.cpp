@@ -397,12 +397,46 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 
 	r_list_free (vars);
 
-	auto prototypeElement = child(functionElement, "prototype", {
-		{ "extrapop", to_string(extraPop) },
-		{ "model", proto ? proto->getName() : "unknown" }
-	});
+    auto prototypeElement = child(functionElement, "prototype", {
+        { "extrapop", to_string(extraPop) },
+        { "model", proto ? proto->getName() : "unknown" }
+    });
+    // PoC: hardcode printf/exit signatures
+    const char *last_dot = r_str_lchr (fcn_name, '.');
+    if (last_dot) {
+	    fcn_name = last_dot + 1;
+    }
+#if 0
+    if (!strcmp(fcn_name, "printf")) {
+        // printf(const char *format, ...)
+        child(prototypeElement, "param", {
+            { "name", "format" },
+            { "type", "const char *" }
+        });
+        child(prototypeElement, "param", {
+            { "name", "..." },
+            { "type", "" }
+        });
+    } else if (!strcmp(fcn_name, "exit")) {
+        // exit(int status)
+        child(prototypeElement, "param", {
+            { "name", "status" },
+            { "type", "int" }
+        });
+    }
+#endif
+#if 0
+    } else {
+        // exit(int status)
+        child(prototypeElement, "param", {
+            { "name", "unknown" },
+            { "type", "int" }
+        });
+#endif
 
-	Address returnAddr(arch->getSpaceByName("register"), 0);
+    // Use code space return address to avoid null space
+    Address returnAddr(arch->getDefaultCodeSpace(), fcn->addr);
+#if 1
 	bool returnFound = false;
 	if (proto) {
 		for (auto it = proto->effectBegin (); it != proto->effectEnd(); it++) {
@@ -417,12 +451,26 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	}
 	// TODO: should we try to get the return address from r2's cc?
 
+#endif
 	auto returnsymElement = child(prototypeElement, "returnsym");
-	childAddr (returnsymElement, "addr", returnAddr);
+    // Return symbol storage location
+    childAddr(returnsymElement, "addr", returnAddr);
 
-	child (returnsymElement, "typeref", {
-		{ "name", "uint" }
-	});
+	// Set return type, default uint, override for printf/exit
+	if (!strcmp(fcn_name, "printf")) {
+	    child (returnsymElement, "typeref", {
+	        { "name", "int" }
+	    });
+	} else if (!strcmp(fcn_name, "exit")) {
+	    child (returnsymElement, "typeref", {
+	        { "name", "void" }
+	    });
+	} else {
+	    // Default return type is void
+	    child (returnsymElement, "typeref", {
+	        { "name", "void" }
+	    });
+	}
 
 	child (&doc, "addr", {
 		{ "space", arch->getDefaultCodeSpace()->getName() },
@@ -442,7 +490,7 @@ Symbol *R2Scope::registerFlag(RFlagItem *flag) const {
 	uint4 attr = Varnode::namelock | Varnode::typelock;
 	Datatype *type = nullptr;
 	// retrieve string from r2
-	if (flag->space && std::string (R_FLAGS_FS_STRINGS) == flag->space->name) {
+    if (flag->space && std::string (R_FLAGS_FS_STRINGS) == flag->space->name) {
 		RBinString *str = nullptr;
 		RListIter *iter;
 		void *pos;

@@ -22,11 +22,11 @@ PrintLanguage *R2PrintCCapability::buildLanguage(Architecture *glb) {
 
 R2PrintC::R2PrintC(Architecture *g, const string &nm) : PrintC(g, nm) {
  	option_NULL = true;
-//	option_space_after_comma = true;
+// option_space_after_comma = true;
 // 	option_nocasts = true;
-///  option_convention = true;
-///  option_hide_exts = true;
-///  option_inplace_ops = false;
+option_convention = true;
+option_hide_exts = true;
+option_inplace_ops = false;
 ///  option_nocasts = false;
 ///  option_NULL = false;
 ///  option_unplaced = false;

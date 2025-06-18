@@ -1,9 +1,10 @@
-/* r2ghidra - LGPL - Copyright 2019-2022 - thestr4ng3r, pancake */
+/* r2ghidra - LGPL - Copyright 2019-2025 - thestr4ng3r, pancake */
 
 #include "R2LoadImage.h"
 #include "R2Scope.h"
 #include "R2Architecture.h"
 #include "R2TypeFactory.h"
+#include "PcodeFixupPreprocessor.h"
 #include "R2CommentDatabase.h"
 #include "R2Utils.h"
 #include "ArchMap.h"
@@ -97,17 +98,21 @@ ContextDatabase *R2Architecture::getContextDatabase() {
 }
 
 void R2Architecture::postSpecFile() {
-	RCoreLock core(getCore());
-	r_list_foreach_cpp<RAnalFunction>(core->anal->fcns, [&](RAnalFunction *func) {
-		if (func->is_noreturn) {
-			// Configure noreturn functions
-			Funcdata *infd = symboltab->getGlobalScope()->queryFunction(Address(getDefaultCodeSpace(), func->addr));
-			if (!infd) {
-				return;
-			}
-			infd->getFuncProto ().setNoReturn(true);
-		}
-	});
+   RCoreLock core(getCore());
+   // For each r2 function, configure decompiler overrides
+   r_list_foreach_cpp<RAnalFunction>(core->anal->fcns, [&](RAnalFunction *func) {
+       Address addr(getDefaultCodeSpace(), func->addr);
+       Funcdata *infd = symboltab->getGlobalScope()->queryFunction(addr);
+       if (!infd) {
+           return;
+       }
+       // Configure noreturn functions
+       if (func->is_noreturn) {
+           infd->getFuncProto().setNoReturn(true);
+       }
+       // PoC: Apply call-return override to imported calls (e.g., printf, exit)
+       PcodeFixupPreprocessor::fixupSharedReturnJumpToRelocs(func, infd, core, *this);
+   });
 }
 
 void R2Architecture::buildAction(DocumentStorage &store) {
@@ -154,14 +159,17 @@ void R2Architecture::buildCoreTypes(DocumentStorage &store) {
 	types->setCoreType ("uchar", 1, TYPE_UNKNOWN, false);
 	types->setCoreType ("ushort", 2, TYPE_UNKNOWN, false);
 	types->setCoreType ("uint", 4, TYPE_UNKNOWN, false);
+	types->setCoreType ("int", 4, TYPE_INT, false);
+	types->setCoreType ("int0", 0, TYPE_INT, false);
 	types->setCoreType ("ulong", 8, TYPE_UNKNOWN, false);
 
 	types->setCoreType ("code", 1, TYPE_CODE, false);
-	types->setCoreType ("char", 1, TYPE_INT, true);
 	types->setCoreType ("wchar", 2, TYPE_INT, true);
 	types->setCoreType ("char", 1, TYPE_INT, true);
 	types->setCoreType ("char16_t", 2, TYPE_INT, true);
 	types->setCoreType ("char32_t", 4, TYPE_INT, true);
+
+	types->setCoreType ("undefined", 1, TYPE_UNKNOWN, false);
 
 	types->cacheCoreTypes ();
 }

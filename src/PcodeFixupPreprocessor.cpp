@@ -2,11 +2,15 @@
 
 #include "R2LoadImage.h"
 #include "PcodeFixupPreprocessor.h"
+#include "R2Architecture.h"
+#include "R2TypeFactory.h"
 
 #include <funcdata.hh>
 #include <r_core.h>
 #include <flow.hh>
 #include <override.hh>
+#include <fspec.hh>
+#include <fspec.hh>
 #include <database.hh>
 #include <r_anal.h>
 #include <r_core.h>
@@ -52,14 +56,62 @@ void PcodeFixupPreprocessor::fixupSharedReturnJumpToRelocs(RAnalFunction *r2Func
 		if (f) {
 			if (is_import_name (f->name)) {
 				RAnalOp *op = r_core_anal_op (core, refi->at, 0);
-				bool isCallRet = (op->type == R_ANAL_OP_TYPE_JMP);
+				// bool isCallRet = (op->type == R_ANAL_OP_TYPE_JMP);
+				bool isCallRet = (op->type == R_ANAL_OP_TYPE_CALL);
 				// isCallRet = true;
 				if (isCallRet) {
 					// apply only if its a jump ref?
 					// Address callAddr (space, refi->addr); // address of FUNCTION
 					Address callAddr (space, refi->at); // address of CALL
 					R_LOG_INFO ("OverridingCallReturn %s", extractLibcFuncName (f->name));
-					ghFunc->getOverride().insertFlowOverride(callAddr, Override::CALL_RETURN);
+                // Insert branch override (CALL/RETURN)
+                ghFunc->getOverride().insertFlowOverride(callAddr, Override::CALL_RETURN);
+                // Also apply simple hardcoded prototype for printf/exit
+                const char *basename = extractLibcFuncName(f->name);
+                if (basename) {
+                    // Build raw prototype pieces
+                    ProtoModel *pm = arch.protoModelFromR2CC("cdecl");
+                    PrototypePieces pieces;
+                    pieces.model = pm;
+                    pieces.name = basename;
+                    if (!strcmp(basename, "printf")) {
+                        // int printf(const char *format, ...);
+                        // Set return type to int
+                        auto *tf = arch.getTypeFactory();
+                        // Use unnamed base int type
+                        Datatype *intType = tf->getBase(
+                            tf->getSizeOfInt(), TYPE_INT);
+                        pieces.outtype = intType;
+                        // Build argument type: char *
+                        auto space = arch.getDefaultCodeSpace();
+                        // Use unnamed base char type (size 1, TYPE_INT)
+                        Datatype *charType = tf->getBase(1, TYPE_INT);
+                        Datatype *fmtType = tf->getTypePointer(
+                            space->getAddrSize(), charType, space->getWordSize());
+                        pieces.intypes.push_back(fmtType);
+                        pieces.innames.push_back("format");
+                        // Varargs start after named parameters
+                        pieces.firstVarArgSlot = (int)pieces.intypes.size();
+                    }
+#if 0
+                    else if (!strcmp(basename, "exit")) {
+                        // void exit(int status);
+                        Datatype *voidType = arch.getTypeFactory()->getTypeVoid();
+                        pieces.outtype = voidType;
+                        Datatype *intType2 = arch.getTypeFactory()->getBase(arch.getTypeFactory()->getSizeOfInt(), TYPE_INT, "int");
+                        pieces.intypes.push_back(intType2);
+                        pieces.innames.push_back("status");
+                        pieces.firstVarArgSlot = -1;
+                    }
+#endif
+                    // Only attach if we have a valid prototype
+                    if (!pieces.intypes.empty() || pieces.outtype) {
+                        FuncProto *fp = new FuncProto();
+                        fp->setInternal(pm, pieces.outtype);
+                        fp->setPieces(pieces);
+                        ghFunc->getOverride().insertProtoOverride(callAddr, fp);
+                    }
+                }
 				}
 				r_anal_op_free (op);
 			}
