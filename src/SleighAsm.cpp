@@ -240,8 +240,9 @@ void SleighAsm::buildSpecfile(DocumentStorage &store)
 		serr << "\n " << err.explain;
 		throw SleighError (serr.str ());
 	}
+	istringstream s("<sleigh>" + slafile + "</sleigh>");
 	try {
-		Document *doc = store.openDocument (slafile);
+		Document *doc = store.parseDocument (s);
 		store.registerTag (doc->getRoot());
 	} catch (DecoderError &err) {
 		ostringstream serr;
