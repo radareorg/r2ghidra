@@ -1,74 +1,74 @@
 NAME=x86:LE:32:default:gcc
 FILE=malloc://2048
 EXPECT=<<EOF
-            0x00000000      89e1           MOV ecx,esp
+            0x00000000      89e1           mov ecx, esp
 type: mov
 ----
-            0x00000000      a168a00408     MOV eax,[0x804a068]
-type: load
+            0x00000000      a168a00408     mov eax, dword [0x804a068]  ; [0x804a068:4]=-1
+type: mov
 ----
-            0x00000000      a368a00408     MOV [0x804a068],eax
-type: store
+            0x00000000      a368a00408     mov dword [0x804a068], eax  ; [0x804a068:4]=-1
+type: mov
 ----
-            0x00000000      8945f0         MOV dword ptr [ebp + -0x10],eax
-type: store
+            0x00000000      8945f0         mov dword [ebp - 0x10], eax
+type: mov
 ----
-            0x00000000      8b4510         MOV eax,dword ptr [ebp + 0x10]
-type: load
+            0x00000000      8b4510         mov eax, dword [ebp + 0x10]
+type: mov
 ----
-            0x00000000      0f4c0d030000.  CMOVL ecx,dword ptr [0x3]
-type: load
+            0x00000000      0f4c0d0300..   cmovl ecx, dword [3]        ; [0x3:4]=3
+type: cmov
 ----
-            0x00000000      cd80           INT 0x80
-type: ucall
+            0x00000000      cd80           int 0x80
+type: swi
 ----
-            0x00000000      55             PUSH ebp
+            0x00000000      55             push ebp
 type: rpush
 ----
-            0x00000000      6a00           PUSH 0x0
-type: upush
+            0x00000000      6a00           push 0
+type: push
 ----
-            0x00000000      5d             POP ebp
+            0x00000000      5d             pop ebp
 type: pop
 ----
-            0x00000000      83f853         CMP eax,0x53
+            0x00000000      83f853         cmp eax, 0x53               ; 'S'
 type: cmp
 ----
-            0x00000000      85c0           TEST eax,eax
+            0x00000000      85c0           test eax, eax
 type: acmp
 ----
-            0x00000000      83c410         ADD esp,0x10
+            0x00000000      83c410         add esp, 0x10
 type: add
 ----
-            0x00000000      81ec88100000   SUB esp,0x1088
+            0x00000000      81ec88100000   sub esp, 0x1088
 type: sub
 ----
-            0x00000000      f7ea           IMUL edx
+            0x00000000      f7ea           imul edx
 type: mul
 ----
-            0x00000000      f7f2           DIV edx
-type: mod
+            0x00000000      f7f2           div edx
+type: div
 ----
-            0x00000000      d1e8           SHR eax,1
+            0x00000000      d1e8           shr eax, 1
 type: shr
 ----
-            0x00000000      d1e0           SHL eax,1
+            0x00000000      d1e0           shl eax, 1
 type: shl
 ----
-            0x00000000      d1f8           SAR eax,1
+            0x00000000      d1f8           sar eax, 1
 type: sar
 ----
-            0x00000000      0b25f0ff0000   OR esp,dword ptr [0xfff0]
+            0x00000000      0b25f0ff0000   or esp, dword [0xfff0]      ; [0xfff0:4]=-1
 type: or
 ----
-            0x00000000      2325f0ff0000   AND esp,dword ptr [0xfff0]
+            0x00000000      2325f0ff0000   and esp, dword [0xfff0]     ; [0xfff0:4]=-1
 type: and
 ----
-            0x00000000      3325f0ff0000   XOR esp,dword ptr [0xfff0]
+            0x00000000      3325f0ff0000   xor esp, dword [0xfff0]     ; [0xfff0:4]=-1
 type: xor
 ----
-            0x00000000      8703           XCHG dword ptr [ebx],eax
-type: xchg
+            0x00000000      8703           xchg dword [ebx], eax
+type: mov
 EOF
 CMDS=<<EOF
 e asm.cpu=x86
@@ -194,23 +194,20 @@ NAME=v850cmp
 FILE=-
 EXPECT=<<EOF
 r2ghidra
-V850:LE:32:default
 address: 0x0
 opcode: cmp r7, r6
 esilcost: 0
 disasm: cmp r7, r6
-pseudo: var = r7 - r6
+pseudo: v = r7 - r6
 mnemonic: cmp
 mask: ffff
-prefix: 0
 id: 0
 bytes: e731
-refptr: 0
 size: 2
 sign: true
 type: cmp
 cycles: 0
-esil: r7,NUM,r6,NUM,-,32,1,<<,1,SWAP,-,&,4294967287,psw,NUM,&,32,1,<<,1,SWAP,-,&,r7,NUM,r6,NUM,<,1,PICK,3,2,PICK,<<,32,1,<<,1,SWAP,-,&,1,PICK,5,PICK,|,32,1,<<,1,SWAP,-,&,psw,=,r6,NUM,r7,NUM,1,PICK,3,PICK,-,32,1,<<,1,SWAP,-,&,31,4,PICK,>>,32,1,<<,1,SWAP,-,&,1,PICK,0,SWAP,>>,8,1,<<,1,SWAP,-,&,31,5,PICK,>>,32,1,<<,1,SWAP,-,&,1,PICK,0,SWAP,>>,8,1,<<,1,SWAP,-,&,31,6,PICK,>>,32,1,<<,1,SWAP,-,&,1,PICK,0,SWAP,>>,8,1,<<,1,SWAP,-,&,1,2,PICK,&,8,1,<<,1,SWAP,-,&,4294967291,psw,NUM,&,32,1,<<,1,SWAP,-,&,5,PICK,8,PICK,==,!,3,PICK,7,PICK,==,1,PICK,3,PICK,&,8,1,<<,1,SWAP,-,&,1,PICK,2,2,PICK,<<,32,1,<<,1,SWAP,-,&,1,PICK,7,PICK,|,32,1,<<,1,SWAP,-,&,psw,=,4294967293,psw,NUM,&,32,1,<<,1,SWAP,-,&,0,23,PICK,32,SWAP,SIGN,SWAP,32,SWAP,SIGN,SWAP,<,1,PICK,1,2,PICK,<<,32,1,<<,1,SWAP,-,&,1,PICK,5,PICK,|,32,1,<<,1,SWAP,-,&,psw,=,4294967294,psw,NUM,&,32,1,<<,1,SWAP,-,&,0,27,PICK,==,1,PICK,1,PICK,4,PICK,|,32,1,<<,1,SWAP,-,&,psw,=,CLEAR
+esil: r7,NUM,r6,NUM,-,1,32,1,<<,-,&,4294967287,psw,NUM,&,1,32,1,<<,-,&,r7,NUM,r6,NUM,<,DUP,3,2,PICK,<<,1,32,1,<<,-,&,DUP,5,PICK,|,1,32,1,<<,-,&,psw,=,r6,NUM,r7,NUM,DUP,3,PICK,-,1,32,1,<<,-,&,31,4,PICK,>>,1,32,1,<<,-,&,DUP,0,SWAP,>>,1,8,1,<<,-,&,31,5,PICK,>>,1,32,1,<<,-,&,DUP,0,SWAP,>>,1,8,1,<<,-,&,31,6,PICK,>>,1,32,1,<<,-,&,DUP,0,SWAP,>>,1,8,1,<<,-,&,1,2,PICK,&,1,8,1,<<,-,&,4294967291,psw,NUM,&,1,32,1,<<,-,&,5,PICK,8,PICK,-,!,!,3,PICK,7,PICK,-,!,DUP,3,PICK,&,1,8,1,<<,-,&,DUP,2,2,PICK,<<,1,32,1,<<,-,&,DUP,7,PICK,|,1,32,1,<<,-,&,psw,=,4294967293,psw,NUM,&,1,32,1,<<,-,&,0,23,PICK,32,SWAP,~,SWAP,32,SWAP,~,SWAP,<,DUP,1,2,PICK,<<,1,32,1,<<,-,&,DUP,5,PICK,|,1,32,1,<<,-,&,psw,=,4294967294,psw,NUM,&,1,32,1,<<,-,&,0,27,PICK,-,!,DUP,DUP,4,PICK,|,1,32,1,<<,-,&,psw,=
 family: cpu
 EOF
 CMDS=<<EOF
@@ -229,23 +226,20 @@ NAME=v850load
 FILE=-
 EXPECT=<<EOF
 r2ghidra
-V850:LE:32:default
 address: 0x0
 opcode: ld.w 0x4[r29], r11
 esilcost: 4
 disasm: ld.w 0x4[r29], r11
-pseudo: ld.w 0x4[r29],r11 
+pseudo: ld.w 0x4[r29] r11
 mnemonic: ld.w
 mask: ffffffff
-prefix: 0
 id: 0
 bytes: 3d5f0500
-refptr: 0
 size: 4
 sign: true
 type: load
 cycles: 0
-esil: 4,r29,NUM,+,32,1,<<,1,SWAP,-,&,1,PICK,[4],r11,=,CLEAR
+esil: 4,r29,NUM,+,1,32,1,<<,-,&,DUP,[4],r11,=
 family: cpu
 EOF
 CMDS=<<EOF
