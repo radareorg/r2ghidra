@@ -29,6 +29,30 @@ static bool is_import_name(const char * R_NONNULL name) {
 		|| r_str_startswith (name, "reloc.");
 }
 
+// Inline simple constant values stored to stack and loaded into call arguments
+void PcodeFixupPreprocessor::fixupConstantCallArguments(RAnalFunction *r2Func, Funcdata *ghFunc, RCore *core, R2Architecture &arch) {
+    for (auto it = ghFunc->beginOpAll(); it != ghFunc->endOpAll(); ++it) {
+        PcodeOp *op = it->second;
+        if (op->getOpcode() == CPUI_CALL || op->getOpcode() == CPUI_CALLIND) {
+            int ni = op->numInput();
+            // args start at input index 1
+            for (int idx = 1; idx < ni; ++idx) {
+                Varnode *param = op->getInput(idx);
+                PcodeOp *def = param->getDef();
+                if (def && def->getOpcode() == CPUI_LOAD) {
+                    Varnode *constVn = def->getInput(1);
+                    if (constVn->isConstant()) {
+                        // replace call arg with constant
+                        op->setInput(constVn, idx);
+                    }
+                }
+            }
+        }
+    }
+    // reset iterators after modification
+    ghFunc->opIterBegin();
+}
+
 // Helper to extract base function name from an import
 static const char* extractLibcFuncName(const char *importName) {
 	const char *last_dot = r_str_lchr (importName, '.');

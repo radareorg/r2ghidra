@@ -19,6 +19,25 @@ R2PrintCCapability::R2PrintCCapability(void) {
 PrintLanguage *R2PrintCCapability::buildLanguage(Architecture *glb) {
 	return new R2PrintC (glb, name);
 }
+// Inline loads from stack of constants recorded by opStore
+// Inline loads from stack of constants recorded by opStore
+void R2PrintC::opLoad(const PcodeOp *op) {
+    // PcodeOp LOAD: input[0]=memory state, input[1]=address
+    const Varnode *addrVN = op->getIn(1);
+    AddrSpace *stackSp = glb->getStackSpace();
+    if (addrVN->getSpace() == stackSp) {
+        uintb offset = addrVN->getOffset();
+        auto it = constMap.find(offset);
+        if (it != constMap.end()) {
+            // Inline the recorded constant value
+            uintb val = it->second;
+            const Datatype *type = op->getOut()->getType();
+            pushConstant(val, type, vartoken, op->getOut(), op);
+            return;
+        }
+    }
+    PrintC::opLoad(op);
+}
 
 R2PrintC::R2PrintC(Architecture *g, const string &nm) : PrintC(g, nm) {
  	option_NULL = true;
@@ -60,6 +79,22 @@ void R2PrintC::pushUnnamedLocation(const Address &addr, const Varnode *vn, const
 	} else {
 		PrintC::pushUnnamedLocation (addr,vn, op);
 	}
+}
+// Skip printing of raw stores of constant or pointer arguments to the stack
+void R2PrintC::opStore(const PcodeOp *op) {
+    // PcodeOp STORE: input[0]=memory state, input[1]=address, input[2]=value
+    // Record STORE of constant into stack: argument setup
+    const Varnode *destVN = op->getIn(1);
+    const Varnode *valVN = op->getIn(2);
+    AddrSpace *stackSp = glb->getStackSpace();
+    // Only inline constant pointers stored into the stack frame
+    if (destVN->getSpace() == stackSp && valVN->isConstant() && valVN->getType()->getMetatype() == TYPE_PTR) {
+        uintb off = destVN->getOffset();
+        constMap[off] = valVN->getOffset();
+        // skip printing this store
+        return;
+    }
+    PrintC::opStore(op);
 }
 
 /*

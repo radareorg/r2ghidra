@@ -172,9 +172,10 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 
 	RangeList varRanges; // to check for overlaps
 	RList *vars = NULL;
-	
+	// If enabled, pull in radare2's local variable analysis for this function
 	if (r_config_get_b (core->config, "r2ghidra.vars")) {
-		r_anal_var_all_list (core->anal, fcn);
+		// Retrieve all variables (stack slots, registers, etc.)
+		vars = r_anal_var_all_list (core->anal, fcn);
 	}
 	auto stackSpace = arch->getStackSpace ();
 

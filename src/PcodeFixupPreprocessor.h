@@ -10,6 +10,10 @@ class PcodeFixupPreprocessor
 	public:
 		static void fixupSharedReturnJumpToRelocs(RAnalFunction *function, ghidra::Funcdata *func, RCore *core, R2Architecture &arch);
 		static bool applyFunctionSignature(const char *funcName, const ghidra::Address &addr, R2Architecture &arch);
+/// Detect simple constant stores into stack slots followed by a load into a call argument,
+    /// and replace the load with the constant to inline argument values.
+    static void fixupConstantCallArguments(RAnalFunction *function, ghidra::Funcdata *func, RCore *core, R2Architecture
+    &arch);
 };
 
 #endif

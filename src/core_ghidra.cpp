@@ -74,7 +74,7 @@ CV cfg_var_rawptr     ("rawptr",      "true",     "Show unknown globals as raw a
 CV cfg_var_verbose    ("verbose",     "false",    "Show verbose warning messages while decompiling");
 CV cfg_var_casts      ("casts",       "false",    "Show type casts where needed");
 CV cfg_var_fixups     ("fixups",      "false",    "Apply pcode fixups");
-CV cfg_var_roprop     ("roprop",      "0",        "Propagate read-only constants (0,1,2,3,4)");
+CV cfg_var_roprop     ("roprop",      "3",        "Propagate read-only constants (0=off,1=pointer-scan,2=pointer-scan,3=section,4=all)");
 CV cfg_var_timeout    ("timeout",     "0",        "Run decompilation in a separate process and kill it after a specific time");
 
 
@@ -174,6 +174,8 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 
 	if (cfg_var_fixups.GetBool (core->config)) {
 		PcodeFixupPreprocessor::fixupSharedReturnJumpToRelocs(function, func, core, arch);
+		// Inline simple constant arguments stored to stack
+		PcodeFixupPreprocessor::fixupConstantCallArguments(function, func, core, arch);
 	}
 
 	int res;
