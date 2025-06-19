@@ -136,7 +136,11 @@ Scope *R2Architecture::buildDatabase(DocumentStorage &store) {
 void R2Architecture::buildCoreTypes(DocumentStorage &store) {
 	// TODO: load from r2?
 	types->setCoreType ("void", 1, TYPE_VOID, false);
+
 	types->setCoreType ("bool", 1, TYPE_BOOL, false);
+	types->setCoreType ("bool4", 4, TYPE_BOOL, false);
+	types->setCoreType ("bool8", 8, TYPE_BOOL, false);
+
 	types->setCoreType ("uint8_t", 1, TYPE_UINT, false);
 	types->setCoreType ("uint16_t", 2, TYPE_UINT, false);
 	types->setCoreType ("uint32_t", 4, TYPE_UINT, false);
@@ -145,6 +149,8 @@ void R2Architecture::buildCoreTypes(DocumentStorage &store) {
 	types->setCoreType ("int16_t", 2, TYPE_INT, false);
 	types->setCoreType ("int32_t", 4, TYPE_INT, false);
 	types->setCoreType ("int64_t", 8, TYPE_INT, false);
+	types->setCoreType ("int", sizeof (int), TYPE_INT, false);
+
 	types->setCoreType ("double", 8, TYPE_FLOAT, false);
 	types->setCoreType ("float", 4, TYPE_FLOAT, false);
 	types->setCoreType ("float8", 8, TYPE_FLOAT, false);
@@ -157,9 +163,10 @@ void R2Architecture::buildCoreTypes(DocumentStorage &store) {
 	types->setCoreType ("ulong", 8, TYPE_UNKNOWN, false);
 
 	types->setCoreType ("code", 1, TYPE_CODE, false);
+
 	types->setCoreType ("char", 1, TYPE_INT, true);
 	types->setCoreType ("wchar", 2, TYPE_INT, true);
-	types->setCoreType ("char", 1, TYPE_INT, true);
+	types->setCoreType ("char8_t", 1, TYPE_INT, true);
 	types->setCoreType ("char16_t", 2, TYPE_INT, true);
 	types->setCoreType ("char32_t", 4, TYPE_INT, true);
 
