@@ -196,7 +196,7 @@ uint fcn.00001c98(ushort param_1,ushort param_2,ushort param_3,uint param_4,int1
     ushort unaff_DS;
     int16_t aiStack_c [2];
     int16_t iStack_6;
-    char8_t cStack_4;
+    char cStack_4;
     
     puVar11 = *0x10 + -0xc;
     *(*0x10 + -0xc) = unaff_SI;
