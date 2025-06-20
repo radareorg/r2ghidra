@@ -34,6 +34,9 @@ R_API RLibStruct radare_plugin = {
 	.data = &r_core_plugin_ghidra,
 	.version = R2_VERSION,
 	.free = NULL,
+#if R2_VERSION_NUMBER >= 50909
+	.abi_version = R_LIB_CURRENT_ABI_VERSION,
+#endif
 #if R2_VERSION_NUMBER >= 40200
 	.pkgname = "r2ghidra"
 #endif
