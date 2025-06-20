@@ -110,8 +110,8 @@ x86:LE:64:default:gcc
 void main(void)
 
 {
-    int32_t iVar1;
-    int32_t iVar2;
+    int iVar1;
+    int iVar2;
     ulong uVar3;
     int64_t iVar4;
     uchar *puVar5;
@@ -119,8 +119,8 @@ void main(void)
     uchar *puVar7;
     uchar *puVar8;
     ulong uStack_30;
-    int32_t iStack_28;
-    int32_t iStack_24;
+    int iStack_28;
+    int iStack_24;
     ulong uStack_20;
     ulong uStack_18;
     int64_t iStack_10;
@@ -143,12 +143,12 @@ void main(void)
         iVar4 = iStack_10;
         puVar7 = puVar6;
         *(puVar6 + -8) = 0x819;
-        sym.imp.strcpy(iVar4, uVar3);
+        sym.imp.strcpy(iVar4,uVar3);
         uVar3 = uStack_18;
         iVar4 = iStack_10;
         puVar8 = puVar7;
         *(puVar7 + -8) = 0x82c;
-        sym.imp.strcat(iVar4, uVar3);
+        sym.imp.strcat(iVar4,uVar3);
         iVar4 = iStack_10;
         *(puVar8 + -8) = 0x838;
         sym.imp.puts(iVar4);
@@ -175,7 +175,7 @@ x86:LE:16:Real Mode:
 
 //WARNING: Unable to track spacebase fully for stack
 
-uint fcn.00001c98(ushort param_1, ushort param_2, ushort param_3, uint param_4, int16_t param_5)
+uint fcn.00001c98(ushort param_1,ushort param_2,ushort param_3,uint param_4,int16_t param_5)
 
 {
     int16_t *piVar1;
@@ -236,7 +236,7 @@ uint fcn.00001c98(ushort param_1, ushort param_2, ushort param_3, uint param_4, 
             if (cStack_4 == '\r') {
                 cStack_4 = '\n';
             }
-            if (SBORROW2(iStack_6, param_5) != iStack_6 - param_5 < 0) {
+            if (SBORROW2(iStack_6,param_5) != iStack_6 - param_5 < 0) {
                 *(param_4 + iStack_6) = cStack_4;
                 iStack_6 = iStack_6 + 1;
             }
@@ -270,7 +270,7 @@ uint fcn.00001c98(ushort param_1, ushort param_2, ushort param_3, uint param_4, 
         iVar2 = param_4;
     } while (*(iVar2 + iStack_6 + -1) != '\n');
     *(iVar2 + iStack_6 + -1) = 0;
-    return CONCAT22(uVar12, iVar2);
+    return CONCAT22(uVar12,iVar2);
 }
 
 EOF
@@ -290,8 +290,8 @@ x86:LE:64:default:gcc
 void main(void)
 
 {
-    int32_t iVar1;
-    int32_t iVar2;
+    int iVar1;
+    int iVar2;
     ulong uVar3;
     int64_t iVar4;
     uchar *puVar5;
@@ -299,8 +299,8 @@ void main(void)
     uchar *puVar7;
     uchar *puVar8;
     ulong uStack_30;
-    int32_t iStack_28;
-    int32_t iStack_24;
+    int iStack_28;
+    int iStack_24;
     ulong uStack_20;
     ulong uStack_18;
     int64_t iStack_10;
@@ -323,12 +323,12 @@ void main(void)
         iVar4 = iStack_10;
         puVar7 = puVar6;
         *(puVar6 + -8) = 0x819;
-        sym.imp.strcpy(iVar4, uVar3);
+        sym.imp.strcpy(iVar4,uVar3);
         uVar3 = uStack_18;
         iVar4 = iStack_10;
         puVar8 = puVar7;
         *(puVar7 + -8) = 0x82c;
-        sym.imp.strcat(iVar4, uVar3);
+        sym.imp.strcat(iVar4,uVar3);
         iVar4 = iStack_10;
         *(puVar8 + -8) = 0x838;
         sym.imp.puts(iVar4);
@@ -467,7 +467,7 @@ NAME=function variable annotations
 FILE=bins/dectest64
 EXPECT=<<EOF
 {
-  "code": "\nulong main(uint param_1, ulong param_2)\n\n{\n    ulong uVar1;\n    int64_t in_FS_OFFSET;\n    ulong uStack_40;\n    ulong uStack_38;\n    uint uStack_2c;\n    uchar auStack_28 [24];\n    int64_t iStack_10;\n    \n    iStack_10 = *(in_FS_OFFSET + 0x28);\n    uStack_38 = param_2;\n    uStack_2c = param_1;\n    *(*0x20 + -0x40) = 0x4011b1;\n    sym.Aeropause(&stack0xffffffffffffffd8, param_1, param_2);\n    uVar1 = 0;\n    if (iStack_10 != *(in_FS_OFFSET + 0x28)) {\n        *(*0x20 + -0x38 + -8) = 0x4011ca;\n        uVar1 = sym.imp.__stack_chk_fail();\n    }\n    return uVar1;\n}\n\n",
+  "code": "\nulong main(uint param_1,ulong param_2)\n\n{\n    ulong uVar1;\n    int64_t in_FS_OFFSET;\n    ulong uStack_40;\n    ulong uStack_38;\n    uint uStack_2c;\n    uchar auStack_28 [24];\n    int64_t iStack_10;\n    \n    iStack_10 = *(in_FS_OFFSET + 0x28);\n    uStack_38 = param_2;\n    uStack_2c = param_1;\n    *(*0x20 + -0x40) = 0x4011b1;\n    sym.Aeropause(&stack0xffffffffffffffd8,param_1,param_2);\n    uVar1 = 0;\n    if (iStack_10 != *(in_FS_OFFSET + 0x28)) {\n        *(*0x20 + -0x38 + -8) = 0x4011ca;\n        uVar1 = sym.imp.__stack_chk_fail();\n    }\n    return uVar1;\n}\n\n",
   "annotations": [
     {
       "start": 1,
@@ -2228,11 +2228,11 @@ NAME=aeropause32 (many features combined)
 FILE=bins/dectest32
 EXPECT=<<EOF
 
-void sym.Aeropause(uint32_t **param_1, uint32_t param_2, uint32_t param_3)
+void sym.Aeropause(uint32_t **param_1,uint32_t param_2,uint32_t param_3)
 
 {
     uint32_t *puVar1;
-    int32_t iVar2;
+    int iVar2;
     uchar *puVar3;
     uint32_t *apuStack_20 [5];
     uchar auStack_c [8];
@@ -2347,12 +2347,12 @@ NAME=aeropause64 (many features combined)
 FILE=bins/dectest64
 EXPECT=<<EOF
 
-void sym.Aeropause(uint32_t **param_1, uint32_t param_2, ulong param_3)
+void sym.Aeropause(uint32_t **param_1,uint32_t param_2,ulong param_3)
 
 {
     uint32_t uVar1;
     uint uVar2;
-    int32_t iVar3;
+    int iVar3;
     uint32_t *puVar4;
     uchar *puVar5;
     ulong uStack_30;
@@ -2377,7 +2377,7 @@ void sym.Aeropause(uint32_t **param_1, uint32_t param_2, ulong param_3)
         ppuStack_10[1] = *(*(*ppuStack_10 + 2) + 8);
         puVar4 = ppuStack_10[1];
         *(&stack0xffffffffffffffd8 + -8) = 0x40130a;
-        iVar3 = sym.imp.strcmp(puVar4, "the  ");
+        iVar3 = sym.imp.strcmp(puVar4,"the  ");
         if (iVar3 == 0) {
             *(ppuStack_10 + 2) = 1;
             puVar5 = &stack0xffffffffffffffd8;
@@ -2385,7 +2385,7 @@ void sym.Aeropause(uint32_t **param_1, uint32_t param_2, ulong param_3)
         else {
             puVar4 = ppuStack_10[1];
             *(&stack0xffffffffffffffd8 + -8) = 0x401330;
-            iVar3 = sym.imp.strcmp(puVar4, "dark");
+            iVar3 = sym.imp.strcmp(puVar4,"dark");
             if (iVar3 == 0) {
                 *(ppuStack_10 + 2) = 2;
                 puVar5 = &stack0xffffffffffffffd8;
@@ -2393,7 +2393,7 @@ void sym.Aeropause(uint32_t **param_1, uint32_t param_2, ulong param_3)
             else {
                 puVar4 = ppuStack_10[1];
                 *(&stack0xffffffffffffffd8 + -8) = 0x401356;
-                iVar3 = sym.imp.strcmp(puVar4, "third");
+                iVar3 = sym.imp.strcmp(puVar4,"third");
                 puVar5 = &stack0xffffffffffffffd8;
                 if (iVar3 == 0) {
                     *(ppuStack_10 + 2) = 3;
@@ -2453,11 +2453,11 @@ NAME=typedef
 FILE=bins/dectest32
 EXPECT=<<EOF
 
-void sym.Aeropause(uint32_t **param_1, uint32_t param_2, uint32_t param_3)
+void sym.Aeropause(uint32_t **param_1,uint32_t param_2,uint32_t param_3)
 
 {
     uint32_t *puVar1;
-    int32_t iVar2;
+    int iVar2;
     uchar *puVar3;
     uint32_t *apuStack_20 [5];
     uchar auStack_c [8];
@@ -2558,11 +2558,11 @@ void sym.Aeropause(uint32_t **param_1, uint32_t param_2, uint32_t param_3)
 
 --
 
-void sym.Aeropause(uint32_t **param_1, uint32_t param_2, uint32_t param_3)
+void sym.Aeropause(uint32_t **param_1,uint32_t param_2,uint32_t param_3)
 
 {
     uint32_t *puVar1;
-    int32_t iVar2;
+    int iVar2;
     uchar *puVar3;
     uint32_t *apuStack_20 [5];
     uchar auStack_c [8];
@@ -2663,11 +2663,11 @@ void sym.Aeropause(uint32_t **param_1, uint32_t param_2, uint32_t param_3)
 
 --
 
-void sym.Aeropause(uint32_t **param_1, uint32_t param_2, uint32_t param_3)
+void sym.Aeropause(uint32_t **param_1,uint32_t param_2,uint32_t param_3)
 
 {
     uint32_t *puVar1;
-    int32_t iVar2;
+    int iVar2;
     uchar *puVar3;
     uint32_t *apuStack_20 [5];
     uchar auStack_c [8];
@@ -3994,8 +3994,8 @@ EXPECT=<<EOF
     0x10000000000007aa    |void main(void)
                           |
                           |{
-                          |    int32_t iVar1;
-                          |    int32_t iVar2;
+                          |    int iVar1;
+                          |    int iVar2;
                           |    char *pcVar3;
                           |    int64_t iVar4;
                           |    uchar *puVar5;
@@ -4003,8 +4003,8 @@ EXPECT=<<EOF
                           |    uchar *puVar7;
                           |    uchar *puVar8;
                           |    ulong uStack_30;
-                          |    int32_t iStack_28;
-                          |    int32_t iStack_24;
+                          |    int iStack_28;
+                          |    int iStack_24;
                           |    char *pcStack_20;
                           |    char *pcStack_18;
                           |    int64_t iStack_10;
@@ -4027,12 +4027,12 @@ EXPECT=<<EOF
     0x100000000000080a    |        iVar4 = iStack_10;
     0x1000000000000814    |        puVar7 = puVar6;
     0x1000000000000814    |        *(puVar6 + -8) = 0x1000000000000819;
-    0x1000000000000814    |        sym.imp.strcpy(iVar4, pcVar3);
+    0x1000000000000814    |        sym.imp.strcpy(iVar4,pcVar3);
     0x1000000000000819    |        pcVar3 = pcStack_18;
     0x100000000000081d    |        iVar4 = iStack_10;
     0x1000000000000827    |        puVar8 = puVar7;
     0x1000000000000827    |        *(puVar7 + -8) = 0x100000000000082c;
-    0x1000000000000827    |        sym.imp.strcat(iVar4, pcVar3);
+    0x1000000000000827    |        sym.imp.strcat(iVar4,pcVar3);
     0x100000000000082c    |        iVar4 = iStack_10;
     0x1000000000000833    |        *(puVar8 + -8) = 0x1000000000000838;
     0x1000000000000833    |        sym.imp.puts(iVar4);

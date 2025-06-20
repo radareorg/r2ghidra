@@ -302,6 +302,7 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 			{
 				RVector *offsets = r_codemeta_line_offsets (code);
 				r_codemeta_print (code, offsets);
+				r_cons_flush ();
 				r_vector_free (offsets);
 			}
 			break;
@@ -312,7 +313,15 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 			r_codemeta_print_comment_cmds (code);
 			break;
 		case DecompileMode::JSON:
-			r_codemeta_print_json (code);
+			{
+#if R2_VERSION_NUMBER >= 50909
+				char *s = r_codemeta_print_json (code);
+				r_kons_println (core->cons, s);
+				free (s);
+#else
+				r_codemeta_print_json (code);
+#endif
+			}
 			break;
 		case DecompileMode::XML:
 			out_stream << "</code></result>";

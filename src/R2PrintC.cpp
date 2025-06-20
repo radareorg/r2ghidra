@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2019-2024 - thestr4ng3r, pancake */
+/* r2ghidra - LGPL - Copyright 2019-2025 - thestr4ng3r, pancake */
 
 #include "R2PrintC.h"
 #include "RCoreMutex.h"
@@ -22,6 +22,8 @@ PrintLanguage *R2PrintCCapability::buildLanguage(Architecture *glb) {
 
 R2PrintC::R2PrintC(Architecture *g, const string &nm) : PrintC(g, nm) {
  	option_NULL = true;
+	// unplaced option is necessary to show the inline ::user2 comments defined from radare2
+	option_unplaced = false;
 //	option_space_after_comma = true;
 // 	option_nocasts = true;
 ///  option_convention = true;
@@ -29,7 +31,6 @@ R2PrintC::R2PrintC(Architecture *g, const string &nm) : PrintC(g, nm) {
 ///  option_inplace_ops = false;
 ///  option_nocasts = false;
 ///  option_NULL = false;
-///  option_unplaced = false;
 ///  option_space_after_comma = false;
 ///  option_newline_before_else = true;
 ///  option_newline_before_opening_brace = false;
