@@ -302,6 +302,7 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 			{
 				RVector *offsets = r_codemeta_line_offsets (code);
 				r_codemeta_print (code, offsets);
+				r_cons_flush ();
 				r_vector_free (offsets);
 			}
 			break;

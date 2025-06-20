@@ -2286,6 +2286,7 @@ void sym.Aeropause(uint32_t **param_1,uint32_t param_2,uint32_t param_3)
     }
     puVar1 = param_1[2];
     if (puVar1 < 0x5) {
+    //switch table (5 cases) at 0x804a070
         switch(puVar1) {
         case NULL:
             *(puVar3 + -0x10) = "pure";
@@ -2415,6 +2416,7 @@ void sym.Aeropause(uint32_t **param_1,uint32_t param_2,ulong param_3)
     else if (uVar1 < 5) {
     //WARNING: Could not recover jumptable at 0x0040138d. Too many branches
     //WARNING: Treating indirect jump as call
+    //switch table (5 cases) at 0x402088
         (**(uVar1 * 8 + 0x402088))();
         return;
     }
@@ -2509,6 +2511,7 @@ void sym.Aeropause(uint32_t **param_1,uint32_t param_2,uint32_t param_3)
     }
     puVar1 = param_1[2];
     if (puVar1 < 0x5) {
+    //switch table (5 cases) at 0x804a070
         switch(puVar1) {
         case NULL:
             *(puVar3 + -0x10) = "pure";
@@ -2613,6 +2616,7 @@ void sym.Aeropause(uint32_t **param_1,uint32_t param_2,uint32_t param_3)
     }
     puVar1 = param_1[2];
     if (puVar1 < 0x5) {
+    //switch table (5 cases) at 0x804a070
         switch(puVar1) {
         case NULL:
             *(puVar3 + -0x10) = "pure";
@@ -2717,6 +2721,7 @@ void sym.Aeropause(uint32_t **param_1,uint32_t param_2,uint32_t param_3)
     }
     puVar1 = param_1[2];
     if (puVar1 < 0x5) {
+    //switch table (5 cases) at 0x804a070
         switch(puVar1) {
         case NULL:
             *(puVar3 + -0x10) = "pure";
@@ -2821,6 +2826,7 @@ void entry0(void)
     uint auStack_c [3];
     uchar *puVar2;
     
+    //[11] -r-x section size 200 named .text
     *(*0x54 + -4) = in_lr;
     puVar1 = *0x54 + -4 + -4;
     *puVar1 = unaff_r11;
@@ -4291,8 +4297,10 @@ uint main(void)
     uchar auStack_8c [16];
     uchar auStack_7c [120];
     
+    //main starts here
     uVar1 = *0x10 + -0x8c & 0xfffffff0;
     *(uVar1 - 0x10) = "IOLI Crackme Level 0x05\n";
+    //printf call here
     *(uVar1 - 0x14) = 0x804856b;
     sym.imp.printf();
     *(uVar1 - 0x10) = "Password: ";
@@ -4300,11 +4308,13 @@ uint main(void)
     sym.imp.printf();
     *(uVar1 - 0xc) = &stack0xffffff84;
     *(uVar1 - 0x10) = 0x80486b2;
+    //scanf call here
     *(uVar1 - 0x14) = 0x804858a;
     sym.imp.scanf();
     *(uVar1 - 0x10) = &stack0xffffff84;
     *((uVar1 - 0x10) + -4) = 0x8048595;
     sym.check();
+    //main returns here
     return 0;
 }
 
@@ -4332,8 +4342,10 @@ EXPECT=<<EOF
                   |    uchar auStack_8c [16];
                   |    uchar auStack_7c [120];
                   |    
+    0x08048540    |    //main starts here
     0x08048549    |    uVar1 = *0x10 + -0x8c & 0xfffffff0;
     0x0804855f    |    *(uVar1 - 0x10) = "IOLI Crackme Level 0x05\n";
+    0x08048566    |    //printf call here
     0x08048566    |    *(uVar1 - 0x14) = 0x804856b;
     0x08048566    |    sym.imp.printf();
     0x0804856b    |    *(uVar1 - 0x10) = "Password: ";
@@ -4341,11 +4353,13 @@ EXPECT=<<EOF
     0x08048572    |    sym.imp.printf();
     0x0804857a    |    *(uVar1 - 0xc) = &stack0xffffff84;
     0x0804857e    |    *(uVar1 - 0x10) = 0x80486b2;
+    0x08048585    |    //scanf call here
     0x08048585    |    *(uVar1 - 0x14) = 0x804858a;
     0x08048585    |    sym.imp.scanf();
     0x0804858d    |    *(uVar1 - 0x10) = &stack0xffffff84;
     0x08048590    |    *((uVar1 - 0x10) + -4) = 0x8048595;
     0x08048590    |    sym.check();
+    0x0804859b    |    //main returns here
     0x0804859b    |    return 0;
                   |}
                   |

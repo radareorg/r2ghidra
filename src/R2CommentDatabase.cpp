@@ -32,6 +32,7 @@ void R2CommentDatabase::fillCache(const Address &fad) const {
 			return;
 		}
 		cache.addComment (Comment::user2, fad, Address(arch->getDefaultCodeSpace(), node->start), meta->str);
+		// cache.addComment (Comment::header, fad, Address(arch->getDefaultCodeSpace(), node->start), meta->str);
 	});
 	cache_filled = true;
 }
