@@ -143,12 +143,12 @@ void main(void)
         iVar4 = iStack_10;
         puVar7 = puVar6;
         *(puVar6 + -8) = 0x819;
-        sym.imp.strcpy(iVar4, uVar3);
+        sym.imp.strcpy(iVar4,uVar3);
         uVar3 = uStack_18;
         iVar4 = iStack_10;
         puVar8 = puVar7;
         *(puVar7 + -8) = 0x82c;
-        sym.imp.strcat(iVar4, uVar3);
+        sym.imp.strcat(iVar4,uVar3);
         iVar4 = iStack_10;
         *(puVar8 + -8) = 0x838;
         sym.imp.puts(iVar4);
@@ -175,7 +175,7 @@ x86:LE:16:Real Mode:
 
 //WARNING: Unable to track spacebase fully for stack
 
-uint fcn.00001c98(ushort param_1, ushort param_2, ushort param_3, uint param_4, int16_t param_5)
+uint fcn.00001c98(ushort param_1,ushort param_2,ushort param_3,uint param_4,int16_t param_5)
 
 {
     int16_t *piVar1;
@@ -236,7 +236,7 @@ uint fcn.00001c98(ushort param_1, ushort param_2, ushort param_3, uint param_4, 
             if (cStack_4 == '\r') {
                 cStack_4 = '\n';
             }
-            if (SBORROW2(iStack_6, param_5) != iStack_6 - param_5 < 0) {
+            if (SBORROW2(iStack_6,param_5) != iStack_6 - param_5 < 0) {
                 *(param_4 + iStack_6) = cStack_4;
                 iStack_6 = iStack_6 + 1;
             }
@@ -270,7 +270,7 @@ uint fcn.00001c98(ushort param_1, ushort param_2, ushort param_3, uint param_4, 
         iVar2 = param_4;
     } while (*(iVar2 + iStack_6 + -1) != '\n');
     *(iVar2 + iStack_6 + -1) = 0;
-    return CONCAT22(uVar12, iVar2);
+    return CONCAT22(uVar12,iVar2);
 }
 
 EOF
@@ -323,12 +323,12 @@ void main(void)
         iVar4 = iStack_10;
         puVar7 = puVar6;
         *(puVar6 + -8) = 0x819;
-        sym.imp.strcpy(iVar4, uVar3);
+        sym.imp.strcpy(iVar4,uVar3);
         uVar3 = uStack_18;
         iVar4 = iStack_10;
         puVar8 = puVar7;
         *(puVar7 + -8) = 0x82c;
-        sym.imp.strcat(iVar4, uVar3);
+        sym.imp.strcat(iVar4,uVar3);
         iVar4 = iStack_10;
         *(puVar8 + -8) = 0x838;
         sym.imp.puts(iVar4);
@@ -467,7 +467,7 @@ NAME=function variable annotations
 FILE=bins/dectest64
 EXPECT=<<EOF
 {
-  "code": "\nulong main(uint param_1, ulong param_2)\n\n{\n    ulong uVar1;\n    int64_t in_FS_OFFSET;\n    ulong uStack_40;\n    ulong uStack_38;\n    uint uStack_2c;\n    uchar auStack_28 [24];\n    int64_t iStack_10;\n    \n    iStack_10 = *(in_FS_OFFSET + 0x28);\n    uStack_38 = param_2;\n    uStack_2c = param_1;\n    *(*0x20 + -0x40) = 0x4011b1;\n    sym.Aeropause(&stack0xffffffffffffffd8, param_1, param_2);\n    uVar1 = 0;\n    if (iStack_10 != *(in_FS_OFFSET + 0x28)) {\n        *(*0x20 + -0x38 + -8) = 0x4011ca;\n        uVar1 = sym.imp.__stack_chk_fail();\n    }\n    return uVar1;\n}\n\n",
+  "code": "\nulong main(uint param_1,ulong param_2)\n\n{\n    ulong uVar1;\n    int64_t in_FS_OFFSET;\n    ulong uStack_40;\n    ulong uStack_38;\n    uint uStack_2c;\n    uchar auStack_28 [24];\n    int64_t iStack_10;\n    \n    iStack_10 = *(in_FS_OFFSET + 0x28);\n    uStack_38 = param_2;\n    uStack_2c = param_1;\n    *(*0x20 + -0x40) = 0x4011b1;\n    sym.Aeropause(&stack0xffffffffffffffd8,param_1,param_2);\n    uVar1 = 0;\n    if (iStack_10 != *(in_FS_OFFSET + 0x28)) {\n        *(*0x20 + -0x38 + -8) = 0x4011ca;\n        uVar1 = sym.imp.__stack_chk_fail();\n    }\n    return uVar1;\n}\n\n",
   "annotations": [
     {
       "start": 1,
@@ -2228,7 +2228,7 @@ NAME=aeropause32 (many features combined)
 FILE=bins/dectest32
 EXPECT=<<EOF
 
-void sym.Aeropause(uint32_t **param_1, uint32_t param_2, uint32_t param_3)
+void sym.Aeropause(uint32_t **param_1,uint32_t param_2,uint32_t param_3)
 
 {
     uint32_t *puVar1;
@@ -2286,7 +2286,6 @@ void sym.Aeropause(uint32_t **param_1, uint32_t param_2, uint32_t param_3)
     }
     puVar1 = param_1[2];
     if (puVar1 < 0x5) {
-    //switch table (5 cases) at 0x804a070
         switch(puVar1) {
         case NULL:
             *(puVar3 + -0x10) = "pure";
@@ -2347,7 +2346,7 @@ NAME=aeropause64 (many features combined)
 FILE=bins/dectest64
 EXPECT=<<EOF
 
-void sym.Aeropause(uint32_t **param_1, uint32_t param_2, ulong param_3)
+void sym.Aeropause(uint32_t **param_1,uint32_t param_2,ulong param_3)
 
 {
     uint32_t uVar1;
@@ -2377,7 +2376,7 @@ void sym.Aeropause(uint32_t **param_1, uint32_t param_2, ulong param_3)
         ppuStack_10[1] = *(*(*ppuStack_10 + 2) + 8);
         puVar4 = ppuStack_10[1];
         *(&stack0xffffffffffffffd8 + -8) = 0x40130a;
-        iVar3 = sym.imp.strcmp(puVar4, "the  ");
+        iVar3 = sym.imp.strcmp(puVar4,"the  ");
         if (iVar3 == 0) {
             *(ppuStack_10 + 2) = 1;
             puVar5 = &stack0xffffffffffffffd8;
@@ -2385,7 +2384,7 @@ void sym.Aeropause(uint32_t **param_1, uint32_t param_2, ulong param_3)
         else {
             puVar4 = ppuStack_10[1];
             *(&stack0xffffffffffffffd8 + -8) = 0x401330;
-            iVar3 = sym.imp.strcmp(puVar4, "dark");
+            iVar3 = sym.imp.strcmp(puVar4,"dark");
             if (iVar3 == 0) {
                 *(ppuStack_10 + 2) = 2;
                 puVar5 = &stack0xffffffffffffffd8;
@@ -2393,7 +2392,7 @@ void sym.Aeropause(uint32_t **param_1, uint32_t param_2, ulong param_3)
             else {
                 puVar4 = ppuStack_10[1];
                 *(&stack0xffffffffffffffd8 + -8) = 0x401356;
-                iVar3 = sym.imp.strcmp(puVar4, "third");
+                iVar3 = sym.imp.strcmp(puVar4,"third");
                 puVar5 = &stack0xffffffffffffffd8;
                 if (iVar3 == 0) {
                     *(ppuStack_10 + 2) = 3;
@@ -2416,7 +2415,6 @@ void sym.Aeropause(uint32_t **param_1, uint32_t param_2, ulong param_3)
     else if (uVar1 < 5) {
     //WARNING: Could not recover jumptable at 0x0040138d. Too many branches
     //WARNING: Treating indirect jump as call
-    //switch table (5 cases) at 0x402088
         (**(uVar1 * 8 + 0x402088))();
         return;
     }
@@ -2453,7 +2451,7 @@ NAME=typedef
 FILE=bins/dectest32
 EXPECT=<<EOF
 
-void sym.Aeropause(uint32_t **param_1, uint32_t param_2, uint32_t param_3)
+void sym.Aeropause(uint32_t **param_1,uint32_t param_2,uint32_t param_3)
 
 {
     uint32_t *puVar1;
@@ -2511,7 +2509,6 @@ void sym.Aeropause(uint32_t **param_1, uint32_t param_2, uint32_t param_3)
     }
     puVar1 = param_1[2];
     if (puVar1 < 0x5) {
-    //switch table (5 cases) at 0x804a070
         switch(puVar1) {
         case NULL:
             *(puVar3 + -0x10) = "pure";
@@ -2558,7 +2555,7 @@ void sym.Aeropause(uint32_t **param_1, uint32_t param_2, uint32_t param_3)
 
 --
 
-void sym.Aeropause(uint32_t **param_1, uint32_t param_2, uint32_t param_3)
+void sym.Aeropause(uint32_t **param_1,uint32_t param_2,uint32_t param_3)
 
 {
     uint32_t *puVar1;
@@ -2616,7 +2613,6 @@ void sym.Aeropause(uint32_t **param_1, uint32_t param_2, uint32_t param_3)
     }
     puVar1 = param_1[2];
     if (puVar1 < 0x5) {
-    //switch table (5 cases) at 0x804a070
         switch(puVar1) {
         case NULL:
             *(puVar3 + -0x10) = "pure";
@@ -2663,7 +2659,7 @@ void sym.Aeropause(uint32_t **param_1, uint32_t param_2, uint32_t param_3)
 
 --
 
-void sym.Aeropause(uint32_t **param_1, uint32_t param_2, uint32_t param_3)
+void sym.Aeropause(uint32_t **param_1,uint32_t param_2,uint32_t param_3)
 
 {
     uint32_t *puVar1;
@@ -2721,7 +2717,6 @@ void sym.Aeropause(uint32_t **param_1, uint32_t param_2, uint32_t param_3)
     }
     puVar1 = param_1[2];
     if (puVar1 < 0x5) {
-    //switch table (5 cases) at 0x804a070
         switch(puVar1) {
         case NULL:
             *(puVar3 + -0x10) = "pure";
@@ -2826,7 +2821,6 @@ void entry0(void)
     uint auStack_c [3];
     uchar *puVar2;
     
-    //[11] -r-x section size 200 named .text
     *(*0x54 + -4) = in_lr;
     puVar1 = *0x54 + -4 + -4;
     *puVar1 = unaff_r11;
@@ -4027,12 +4021,12 @@ EXPECT=<<EOF
     0x100000000000080a    |        iVar4 = iStack_10;
     0x1000000000000814    |        puVar7 = puVar6;
     0x1000000000000814    |        *(puVar6 + -8) = 0x1000000000000819;
-    0x1000000000000814    |        sym.imp.strcpy(iVar4, pcVar3);
+    0x1000000000000814    |        sym.imp.strcpy(iVar4,pcVar3);
     0x1000000000000819    |        pcVar3 = pcStack_18;
     0x100000000000081d    |        iVar4 = iStack_10;
     0x1000000000000827    |        puVar8 = puVar7;
     0x1000000000000827    |        *(puVar7 + -8) = 0x100000000000082c;
-    0x1000000000000827    |        sym.imp.strcat(iVar4, pcVar3);
+    0x1000000000000827    |        sym.imp.strcat(iVar4,pcVar3);
     0x100000000000082c    |        iVar4 = iStack_10;
     0x1000000000000833    |        *(puVar8 + -8) = 0x1000000000000838;
     0x1000000000000833    |        sym.imp.puts(iVar4);
@@ -4295,10 +4289,8 @@ uint main(void)
     uchar auStack_8c [16];
     uchar auStack_7c [120];
     
-    //main starts here
     uVar1 = *0x10 + -0x8c & 0xfffffff0;
     *(uVar1 - 0x10) = "IOLI Crackme Level 0x05\n";
-    //printf call here
     *(uVar1 - 0x14) = 0x804856b;
     sym.imp.printf();
     *(uVar1 - 0x10) = "Password: ";
@@ -4306,13 +4298,11 @@ uint main(void)
     sym.imp.printf();
     *(uVar1 - 0xc) = &stack0xffffff84;
     *(uVar1 - 0x10) = 0x80486b2;
-    //scanf call here
     *(uVar1 - 0x14) = 0x804858a;
     sym.imp.scanf();
     *(uVar1 - 0x10) = &stack0xffffff84;
     *((uVar1 - 0x10) + -4) = 0x8048595;
     sym.check();
-    //main returns here
     return 0;
 }
 
@@ -4340,10 +4330,8 @@ EXPECT=<<EOF
                   |    uchar auStack_8c [16];
                   |    uchar auStack_7c [120];
                   |    
-    0x08048540    |    //main starts here
     0x08048549    |    uVar1 = *0x10 + -0x8c & 0xfffffff0;
     0x0804855f    |    *(uVar1 - 0x10) = "IOLI Crackme Level 0x05\n";
-    0x08048566    |    //printf call here
     0x08048566    |    *(uVar1 - 0x14) = 0x804856b;
     0x08048566    |    sym.imp.printf();
     0x0804856b    |    *(uVar1 - 0x10) = "Password: ";
@@ -4351,13 +4339,11 @@ EXPECT=<<EOF
     0x08048572    |    sym.imp.printf();
     0x0804857a    |    *(uVar1 - 0xc) = &stack0xffffff84;
     0x0804857e    |    *(uVar1 - 0x10) = 0x80486b2;
-    0x08048585    |    //scanf call here
     0x08048585    |    *(uVar1 - 0x14) = 0x804858a;
     0x08048585    |    sym.imp.scanf();
     0x0804858d    |    *(uVar1 - 0x10) = &stack0xffffff84;
     0x08048590    |    *((uVar1 - 0x10) + -4) = 0x8048595;
     0x08048590    |    sym.check();
-    0x0804859b    |    //main returns here
     0x0804859b    |    return 0;
                   |}
                   |
