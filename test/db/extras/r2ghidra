@@ -110,8 +110,8 @@ x86:LE:64:default:gcc
 void main(void)
 
 {
-    int32_t iVar1;
-    int32_t iVar2;
+    int iVar1;
+    int iVar2;
     ulong uVar3;
     int64_t iVar4;
     uchar *puVar5;
@@ -119,8 +119,8 @@ void main(void)
     uchar *puVar7;
     uchar *puVar8;
     ulong uStack_30;
-    int32_t iStack_28;
-    int32_t iStack_24;
+    int iStack_28;
+    int iStack_24;
     ulong uStack_20;
     ulong uStack_18;
     int64_t iStack_10;
@@ -196,7 +196,7 @@ uint fcn.00001c98(ushort param_1,ushort param_2,ushort param_3,uint param_4,int1
     ushort unaff_DS;
     int16_t aiStack_c [2];
     int16_t iStack_6;
-    char cStack_4;
+    char8_t cStack_4;
     
     puVar11 = *0x10 + -0xc;
     *(*0x10 + -0xc) = unaff_SI;
@@ -290,8 +290,8 @@ x86:LE:64:default:gcc
 void main(void)
 
 {
-    int32_t iVar1;
-    int32_t iVar2;
+    int iVar1;
+    int iVar2;
     ulong uVar3;
     int64_t iVar4;
     uchar *puVar5;
@@ -299,8 +299,8 @@ void main(void)
     uchar *puVar7;
     uchar *puVar8;
     ulong uStack_30;
-    int32_t iStack_28;
-    int32_t iStack_24;
+    int iStack_28;
+    int iStack_24;
     ulong uStack_20;
     ulong uStack_18;
     int64_t iStack_10;
@@ -2232,7 +2232,7 @@ void sym.Aeropause(uint32_t **param_1,uint32_t param_2,uint32_t param_3)
 
 {
     uint32_t *puVar1;
-    int32_t iVar2;
+    int iVar2;
     uchar *puVar3;
     uint32_t *apuStack_20 [5];
     uchar auStack_c [8];
@@ -2351,7 +2351,7 @@ void sym.Aeropause(uint32_t **param_1,uint32_t param_2,ulong param_3)
 {
     uint32_t uVar1;
     uint uVar2;
-    int32_t iVar3;
+    int iVar3;
     uint32_t *puVar4;
     uchar *puVar5;
     ulong uStack_30;
@@ -2455,7 +2455,7 @@ void sym.Aeropause(uint32_t **param_1,uint32_t param_2,uint32_t param_3)
 
 {
     uint32_t *puVar1;
-    int32_t iVar2;
+    int iVar2;
     uchar *puVar3;
     uint32_t *apuStack_20 [5];
     uchar auStack_c [8];
@@ -2559,7 +2559,7 @@ void sym.Aeropause(uint32_t **param_1,uint32_t param_2,uint32_t param_3)
 
 {
     uint32_t *puVar1;
-    int32_t iVar2;
+    int iVar2;
     uchar *puVar3;
     uint32_t *apuStack_20 [5];
     uchar auStack_c [8];
@@ -2663,7 +2663,7 @@ void sym.Aeropause(uint32_t **param_1,uint32_t param_2,uint32_t param_3)
 
 {
     uint32_t *puVar1;
-    int32_t iVar2;
+    int iVar2;
     uchar *puVar3;
     uint32_t *apuStack_20 [5];
     uchar auStack_c [8];
@@ -3988,8 +3988,8 @@ EXPECT=<<EOF
     0x10000000000007aa    |void main(void)
                           |
                           |{
-                          |    int32_t iVar1;
-                          |    int32_t iVar2;
+                          |    int iVar1;
+                          |    int iVar2;
                           |    char *pcVar3;
                           |    int64_t iVar4;
                           |    uchar *puVar5;
@@ -3997,8 +3997,8 @@ EXPECT=<<EOF
                           |    uchar *puVar7;
                           |    uchar *puVar8;
                           |    ulong uStack_30;
-                          |    int32_t iStack_28;
-                          |    int32_t iStack_24;
+                          |    int iStack_28;
+                          |    int iStack_24;
                           |    char *pcStack_20;
                           |    char *pcStack_18;
                           |    int64_t iStack_10;
