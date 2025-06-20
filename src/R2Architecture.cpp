@@ -166,7 +166,7 @@ void R2Architecture::buildCoreTypes(DocumentStorage &store) {
 
 	types->setCoreType ("char", 1, TYPE_INT, true);
 	types->setCoreType ("wchar", 2, TYPE_INT, true);
-	types->setCoreType ("char8_t", 1, TYPE_INT, true);
+	// types->setCoreType ("char8_t", 1, TYPE_INT, true); // last type defined overrides the previous
 	types->setCoreType ("char16_t", 2, TYPE_INT, true);
 	types->setCoreType ("char32_t", 4, TYPE_INT, true);
 
