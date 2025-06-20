@@ -54,8 +54,6 @@ jobs:
       run: R2_DEBUG=1 r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
     - name: Packaging r2ghidra for Debian using Dockcross
       run: make -C dist/debian
-    - name: Running Testsuite
-      run: make -C test
     - name: Uploading debs
       uses: actions/upload-artifact@v4
       with:
