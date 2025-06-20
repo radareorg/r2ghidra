@@ -312,7 +312,15 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 			r_codemeta_print_comment_cmds (code);
 			break;
 		case DecompileMode::JSON:
-			r_codemeta_print_json (code);
+			{
+#if R2_VERSION_NUMBER >= 50909
+				char *s = r_codemeta_print_json (code);
+				r_kons_println (core->cons, s);
+				free (s);
+#else
+				r_codemeta_print_json (code);
+#endif
+			}
 			break;
 		case DecompileMode::XML:
 			out_stream << "</code></result>";
