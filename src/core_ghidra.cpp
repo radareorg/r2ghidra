@@ -113,7 +113,11 @@ static void PrintUsage(const RCore *const core) {
 		"%SLEIGHHOME" , "", "# Path to ghidra sleigh directory (same as r2ghidra.sleighhome)",
 		NULL
 	};
+#if R2_VERSION_NUMBER >= 50909
+	r_cons_cmd_help (core->cons, help, core->print->flags & R_PRINT_FLAGS_COLOR);
+#else
 	r_cons_cmd_help (help, core->print->flags & R_PRINT_FLAGS_COLOR);
+#endif
 }
 
 enum class DecompileMode {
