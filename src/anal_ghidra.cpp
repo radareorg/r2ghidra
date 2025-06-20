@@ -10,6 +10,8 @@
 #include "SleighAsm.h"
 #include "SleighAnalValue.h"
 
+using namespace ghidra;
+
 #if R2_VERSION_NUMBER >= 50709
 #define RAnalEsil REsil
 #define r_anal_esil_get_parm r_esil_get_parm

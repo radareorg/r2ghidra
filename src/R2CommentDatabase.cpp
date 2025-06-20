@@ -7,6 +7,8 @@
 
 #include "R2Utils.h"
 
+using namespace ghidra;
+
 R2CommentDatabase::R2CommentDatabase(R2Architecture *arch) : arch (arch), cache_filled (false) {
 }
 

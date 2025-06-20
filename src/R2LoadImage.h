@@ -12,21 +12,21 @@
 
 #include "loadimage.hh"
 
-using namespace ghidra;
+// using namespace ghidra;
 class RCoreMutex;
 
-class R2LoadImage : public LoadImage {
+class R2LoadImage : public ghidra::LoadImage {
 private:
 	RCoreMutex *const coreMutex;
-	AddrSpaceManager *addr_space_manager;
+	ghidra::AddrSpaceManager *addr_space_manager;
 
 public:
-	explicit R2LoadImage(RCoreMutex *coreMutex, AddrSpaceManager *addr_space_manager);
+	explicit R2LoadImage(RCoreMutex *coreMutex, ghidra::AddrSpaceManager *addr_space_manager);
 
-	void loadFill(uint1 *ptr, int4 size, const Address &addr) override;
-	string getArchType() const override;
+	void loadFill(ghidra::uint1 *ptr, ghidra::int4 size, const ghidra::Address &addr) override;
+	std::string getArchType() const override;
 	void adjustVma(long adjust) override;
-	void getReadonly(RangeList &list) const override;
+	void getReadonly(ghidra::RangeList &list) const override;
 };
 
 #endif //R2GHIDRA_R2LOADIMAGE_H
