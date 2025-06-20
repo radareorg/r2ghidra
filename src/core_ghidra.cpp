@@ -287,30 +287,52 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 		switch (mode) {
 		case DecompileMode::DISASM:
 			{
-#if R2_VERSION_NUMBER >= 50403
 				RVector *offsets = r_codemeta_line_offsets (code);
-				r_codemeta_print_disasm (code, offsets, core->anal);
-				r_vector_free(offsets);
+#if R2_VERSION_NUMBER >= 50909
+				char *s = r_codemeta_print_disasm (code, offsets, core->anal);
+				r_kons_print (core->cons, s);
+				free (s);
 #else
-				RVector *offsets = r_codemeta_line_offsets (code);
-				r_codemeta_print (code, offsets);
-				r_vector_free (offsets);
+				r_codemeta_print_disasm (code, offsets, core->anal);
 #endif
+				r_vector_free (offsets);
 			}
 			break;
 		case DecompileMode::OFFSET:
 			{
 				RVector *offsets = r_codemeta_line_offsets (code);
+#if R2_VERSION_NUMBER >= 50909
+				char *s = r_codemeta_print (code, offsets);
+				r_kons_print (core->cons, s);
+				free (s);
+#else
 				r_codemeta_print (code, offsets);
 				r_cons_flush ();
+#endif
 				r_vector_free (offsets);
 			}
 			break;
 		case DecompileMode::DEFAULT:
-			r_codemeta_print (code, nullptr);
+			{
+#if R2_VERSION_NUMBER >= 50909
+				char *s = r_codemeta_print (code, nullptr);
+				r_kons_print (core->cons, s);
+				free (s);
+#else
+				r_codemeta_print (code, nullptr);
+#endif
+			}
 			break;
 		case DecompileMode::STATEMENTS:
+#if R2_VERSION_NUMBER >= 50909
+			{
+				char *s = r_codemeta_print_comment_cmds (code);
+				r_kons_print (core->cons, s);
+				free (s);
+			}
+#else
 			r_codemeta_print_comment_cmds (code);
+#endif
 			break;
 		case DecompileMode::JSON:
 			{
@@ -580,7 +602,11 @@ static void _cmd(RCore *core, const char *input) {
 		}
 		if (pid == 0) {
 			runcmd (core, input);
+#if R2_VERSION_NUMBER >= 50909
+			r_kons_flush (core->cons);
+#else
 			r_cons_flush ();
+#endif
 			fflush (stdout);
 			write (fds[1], "\x12", 1);
 			exit (0);
