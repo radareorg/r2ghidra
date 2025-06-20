@@ -35,6 +35,24 @@ R2PrintC::R2PrintC(Architecture *g, const string &nm) : PrintC(g, nm) {
 ///  option_newline_before_else = true;
 ///  option_newline_before_opening_brace = false;
 ///  option_newline_after_prototype = true;
+// Default r2ghidra C printer options:
+#if 0
+	setNULLPrinting(true);                             // print NULL keyword for null pointers
+	setNoCastPrinting(false);                          // show C casts by default
+	setInplaceOps(false);                              // disable in-place operators (+=, *=, etc.)
+	setConvention(true);                               // include calling convention in function prototypes
+	setHideImpliedExts(true);                          // hide implied zero/sign extensions (ZEXT/SEXT)
+	setCStyleComments();                               // use C-style /* */ comments
+	setMaxLineSize(80);                                // wrap lines at 80 characters
+	setIndentIncrement(2);                             // indent 2 spaces per nested block
+	setLineCommentIndent(0);                           // align line comments with code
+	setCommentStyle("c");                            // use traditional C comment style
+	setBraceFormatFunction(Emit::skip_line);           // function opening brace on a separate line
+	setBraceFormatIfElse(Emit::same_line);             // if/else opening brace on same line
+	setBraceFormatLoop(Emit::same_line);               // loop opening brace on same line
+	setBraceFormatSwitch(Emit::same_line);             // switch opening brace on same line
+	setNamespaceStrategy(PrintLanguage::MINIMAL_NAMESPACES); // minimal namespace qualifiers
+#endif
 }
 
 void R2PrintC::setOptionNoCasts(bool nc) {
