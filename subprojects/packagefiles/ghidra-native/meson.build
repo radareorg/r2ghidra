@@ -117,15 +117,24 @@ slgh_sources = [
   'src/decompiler/slghscan.cc',
 ]
 
+zlib = dependency('zlib', version : '>=1.2.8', required: false)
+if not zlib.found()
+  zlib_proj = subproject('zlib', default_options: ['default_library=static', 'werror=false'])
+  zlib = zlib_proj.get_variable('zlib_dep')
+  meson.override_dependency('zlib', zlib)
+endif
+
 incs = include_directories('src/decompiler')
 
 ghidra_static = static_library(
   'ghidra', sources,
+  dependencies: zlib,
   include_directories: incs
 )
 
 slgh_static = static_library(
   'slgh', sources + slgh_sources,
+  dependencies: zlib,
   include_directories: incs
 )
 
