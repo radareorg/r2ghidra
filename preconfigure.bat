@@ -5,23 +5,6 @@ set PATH=%CD%\radare2\bin;%PATH%
 set VSARCH=x64
 
 git submodule update --init
-set GNV=0.5.0
-
-if exist ghidra-native-%GNV%\ (
-  echo ghidra-native-%GNV% directory exists. Skipping unziping...
-) else (
-  python -m wget https://github.com/radareorg/ghidra-native/releases/download/%GNV%/ghidra-native-%GNV%.zip
-  if ERRORLEVEL 1 (
-    ECHO NOT FOUND
-    exit /b 1
-  )
-  unzip -q ghidra-native-%GNV%.zip
-  if ERRORLEVEL 1 (
-    powershell "Expand-Archive -LiteralPath ghidra-native-%GNV%.zip -DestinationPath ."
-  )
-  ren ghidra-native-%GNV% ghidra-native
-)
-
 
 REM call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
 echo === Finding Visual Studio...

@@ -91,16 +91,19 @@ r_version_h = configure_file(
 r2ghidra_incdirs = include_directories(incdirs)
 
 ghidra = subproject('ghidra-native', default_options: ['default_library=static', 'werror=false'])
-ghidra_decompiler_sources = ghidra.get_variable('sources')
-ghidra_slgh_sources = ghidra.get_variable('slgh_sources')
+# ghidra_decompiler_sources = ghidra.get_variable('sources')
+# ghidra_slgh_sources = ghidra.get_variable('slgh_sources')
 ghidra_incs = ghidra.get_variable('incs')
+ghidra_static = ghidra.get_variable('ghidra_static')
+slgh_static = ghidra.get_variable('slgh_static')
+
 
 # r2ghidra_incdirs += ghidra_incs
 
 r2ghidra_core_sources = [
   r2ghidra_sources,
   pugixml_sources,
-  ghidra_decompiler_sources,
+  # ghidra_decompiler_sources,
   'src/anal_ghidra_plugin.c',
   'src/anal_ghidra.cpp',
   'src/core_ghidra_plugin.c',
@@ -110,13 +113,14 @@ r2ghidra_core_sources = [
 sleighc_sources = [
   r2ghidra_sources,
   pugixml_sources,
-  ghidra_slgh_sources,
-  ghidra_decompiler_sources,
+  # ghidra_slgh_sources,
+  # ghidra_decompiler_sources,
 ]
 
 r2ghidra_core_plugin = library('core_r2ghidra',
   r2ghidra_core_sources,
   dependencies: [r_core, zlib],
+  link_with: ghidra_static,
   override_options : ['c_std=c11', 'cpp_std=c++11'],
   include_directories: [ghidra_incs, r2ghidra_incdirs],
   install: true,
@@ -124,8 +128,9 @@ r2ghidra_core_plugin = library('core_r2ghidra',
 )
 
 sleighc_exe = executable('sleighc', sleighc_sources,
+  dependencies: [r_core, zlib],
+  link_with: slgh_static,
   include_directories: [ghidra_incs, r2ghidra_incdirs],
   override_options : ['c_std=c11', 'cpp_std=c++11'],
-  dependencies: [r_core, zlib],
   install: true
 )

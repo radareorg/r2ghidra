@@ -5,7 +5,7 @@ GHIDRA_NATIVE_COMMIT=0.5.0
 
 PUGIXML=third-party/pugixml/Makefile
 
-all: ghidra-native ghidra-processors.txt $(PUGIXML)
+all: ghidra-processors.txt $(PUGIXML)
 	$(MAKE) -C src
 	$(MAKE) -C ghidra
 
@@ -19,7 +19,7 @@ purge: clean
 ghidra-processors.txt:
 	cp -f ghidra-processors.txt.default ghidra-processors.txt
 
-asan: ghidra-native ghidra-processors.txt
+asan: ghidra-processors.txt
 	CFLAGS=-g CXXFLAGS=-g $(MAKE) -C src asan
 
 asan-run:
@@ -43,11 +43,6 @@ clean:
 install uninstall user-install user-uninstall:
 	$(MAKE) -C src $@
 	$(MAKE) -C ghidra $@
-
-ghidra-native:
-	git clone https://github.com/radareorg/ghidra-native
-	cd ghidra-native && git checkout $(GHIDRA_NATIVE_COMMIT)
-	$(MAKE) -C ghidra-native patch
 
 $(PUGIXML):
 	git submodule update --init
