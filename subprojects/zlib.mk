@@ -13,7 +13,7 @@ zlib:
 	git clone --no-checkout --depth=1 https://github.com/madler/zlib zlib
 	cd zlib && git fetch --depth=1 origin 51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf
 	cd zlib && git checkout FETCH_HEAD
-	cp -f packagefiles/zlib/* zlib
+	cp -rf packagefiles/zlib/* zlib
 
 zlib_clean:
 	rm -rf zlib

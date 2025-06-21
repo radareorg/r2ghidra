@@ -128,7 +128,7 @@ jobs:
     - name: Installing System's Meson Ninja
       run: sudo pip install ninja meson && sudo ninja --version && sudo meson --version
     - name: Building r2ghidra with meson
-      run: ./preconfigure && meson b && ninja -C b && sudo ninja -C b install
+      run: meson b && ninja -C b && sudo ninja -C b install
     - name: Cannot test meson builds, because those cant be installed yet
       run: echo nada
 #    - name: Testing r2ghidra oneliner
