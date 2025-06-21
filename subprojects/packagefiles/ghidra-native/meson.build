@@ -7,7 +7,7 @@ sources = [
   #e/src/decompiler/bfd_arch.cc',
   'src/decompiler/block.cc',
   'src/decompiler/blockaction.cc',
-  'src/decompiler/callgraph.cc',
+  # 'src/decompiler/callgraph.cc', # debug
   'src/decompiler/capability.cc',
   'src/decompiler/cast.cc',
   #e/src/decompiler/codedata.cc',
@@ -42,15 +42,15 @@ sources = [
   #e/src/decompiler/ghidra_process.cc',
   'src/decompiler/ghidra_translate.cc',
   'src/decompiler/globalcontext.cc',
-  'src/decompiler/grammar.cc',
+  # 'src/decompiler/grammar.cc', # used by diagnostic mode
   'src/decompiler/graph.cc',
   'src/decompiler/heritage.cc',
-  'src/decompiler/ifacedecomp.cc',
-  'src/decompiler/testfunction.cc',
-  'src/decompiler/ifaceterm.cc',
+   # 'src/decompiler/ifacedecomp.cc', # debug
+   #'src/decompiler/testfunction.cc',
+  # 'src/decompiler/ifaceterm.cc',
   'src/decompiler/inject_ghidra.cc',
   'src/decompiler/inject_sleigh.cc',
-  'src/decompiler/interface.cc',
+  # 'src/decompiler/interface.cc', # debug
   'src/decompiler/jumptable.cc',
   'src/decompiler/libdecomp.cc',
   'src/decompiler/loadimage.cc',
