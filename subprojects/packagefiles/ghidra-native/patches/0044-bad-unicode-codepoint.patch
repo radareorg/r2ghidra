@@ -1,0 +1,21 @@
+diff --git a/src/decompiler/stringmanage.cc b/src/decompiler/stringmanage.cc
+index 6e60b4f..fb7e2eb 100644
+--- a/src/decompiler/stringmanage.cc
++++ b/src/decompiler/stringmanage.cc
+@@ -40,14 +40,14 @@ void StringManager::writeUtf8(ostream &s,int4 codepoint)
+   int4 size;
+ 
+   if (codepoint < 0)
+-    throw LowlevelError("Negative unicode codepoint");
++    return; // throw LowlevelError("Negative unicode codepoint");
+   if (codepoint < 128) {
+     s.put((uint1)codepoint);
+     return;
+   }
+   int4 bits = mostsigbit_set(codepoint) + 1;
+   if (bits > 21)
+-    throw LowlevelError("Bad unicode codepoint");
++    return; // throw LowlevelError("Bad unicode codepoint");
+   if (bits < 12) {	// Encode with two bytes
+     bytes[0] = 0xc0 ^ ((codepoint >> 6)&0x1f);
+     bytes[1] = 0x80 ^ (codepoint & 0x3f);

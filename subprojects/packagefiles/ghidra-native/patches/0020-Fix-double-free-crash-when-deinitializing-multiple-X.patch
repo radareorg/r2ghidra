@@ -1,0 +1,33 @@
+diff --git a/src/decompiler/xml.cc b/src/decompiler/xml.cc
+index 51fb587..3a064d4 100644
+--- a/src/decompiler/xml.cc
++++ b/src/decompiler/xml.cc
+@@ -98,8 +98,6 @@
+ #include <iostream>
+ #include <string>
+ 
+-string Attributes::bogus_uri("http://unused.uri");
+-
+ /// \brief The XML character scanner
+ ///
+ /// Tokenize a byte stream suitably for the main XML parser.  The scanner expects an ASCII or UTF-8
+diff --git a/src/decompiler/xml.hh b/src/decompiler/xml.hh
+index 75e7dd9..93f6278 100644
+--- a/src/decompiler/xml.hh
++++ b/src/decompiler/xml.hh
+@@ -27,6 +27,7 @@
+ 
+ using namespace std;
+ 
++#define bogus_uri "http://unused.uri"
+ /// \brief The \e attributes for a single XML element
+ ///
+ /// A container for name/value pairs (of strings) for the formal attributes, as collected during parsing.
+@@ -34,7 +35,6 @@ using namespace std;
+ /// This also holds other properties of the element that are unused in this implementation,
+ /// including the \e namespace URI.
+ class Attributes {
+-  static string bogus_uri;		///< A placeholder for the namespace URI that should be attached to the element
+ //  static string prefix;
+   string *elementname;			///< The name of the XML element
+   vector<string *> name;		///< List of names for each formal XML attribute

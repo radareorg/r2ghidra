@@ -1,0 +1,28 @@
+From 8e5f8c4f5902e5874468181687fd64580eeb3119 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Florian=20M=C3=A4rkl?= <info@florianmaerkl.de>
+Date: Sun, 14 Mar 2021 22:20:31 +0100
+Subject: [PATCH 21/23] Fail gently in PrintC when a Basic Block gives an
+ invalid Address
+
+---
+ Ghidra/Features/Decompiler/src/decompile/cpp/printc.cc | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/Ghidra/Features/Decompiler/src/decompile/cpp/printc.cc b/Ghidra/Features/Decompiler/src/decompile/cpp/printc.cc
+index 56c37e783..07461326a 100644
+--- a/Ghidra/Features/Decompiler/src/decompile/cpp/printc.cc
++++ b/Ghidra/Features/Decompiler/src/decompile/cpp/printc.cc
+@@ -2904,6 +2904,10 @@ void PrintC::emitLabel(const FlowBlock *bl)
+   if (bl == (FlowBlock *)0) return;
+   BlockBasic *bb = (BlockBasic *)bl->subBlock(0);
+   Address addr = bb->getEntryAddr();
++  if (addr.isInvalid()) {
++    emit->print("INVALID_ADDRESS");
++    return;
++  }
+   const AddrSpace *spc = addr.getSpace();
+   uintb off = addr.getOffset();
+   if (!bb->hasSpecialLabel()) {
+-- 
+2.24.3 (Apple Git-128)
+

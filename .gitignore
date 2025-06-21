@@ -13,6 +13,8 @@ ghidra/flex/
 dist/artifacts
 
 
-ghidra-native/
 ghidra-processors.txt
 ghidra/sleighc
+
+subprojects/ghidra-native
+subprojects/zlib

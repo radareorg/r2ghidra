@@ -1,0 +1,35 @@
+From c16edaf929f9087bb457a3e76e067cac9772d67b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Florian=20M=C3=A4rkl?= <info@florianmaerkl.de>
+Date: Sun, 25 Aug 2019 21:20:48 +0200
+Subject: [PATCH 12/23] Make SleighArchitecture Langs public
+
+---
+ Ghidra/Features/Decompiler/src/decompile/cpp/sleigh_arch.hh | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/Ghidra/Features/Decompiler/src/decompile/cpp/sleigh_arch.hh b/Ghidra/Features/Decompiler/src/decompile/cpp/sleigh_arch.hh
+index 01d41fe07..7a902c5b0 100644
+--- a/Ghidra/Features/Decompiler/src/decompile/cpp/sleigh_arch.hh
++++ b/Ghidra/Features/Decompiler/src/decompile/cpp/sleigh_arch.hh
+@@ -98,7 +98,6 @@ class SleighArchitecture : public Architecture {
+ protected:
+   ostream *errorstream;					///< Error stream associated with \b this SleighArchitecture
+   // buildLoader must be filled in by derived class
+-  static void collectSpecFiles(ostream &errs);		///< Gather specification files in normal locations
+   virtual Translate *buildTranslator(DocumentStorage &store);
+   virtual PcodeInjectLibrary *buildPcodeInjectLibrary(void);
+   virtual void buildSpecFile(DocumentStorage &store);
+@@ -113,7 +112,9 @@ public:
+   virtual void printMessage(const string &message) const { *errorstream << message << endl; }
+   virtual ~SleighArchitecture(void);
+   virtual string getDescription(void) const;
+-  
++
++  static void collectSpecFiles(ostream &errs);		///< Gather specification files in normal locations
++  static const vector<LanguageDescription> &getLanguageDescriptions() { return description; }
+   static string normalizeProcessor(const string &nm);		///< Try to recover a \e language \e id processor field
+   static string normalizeEndian(const string &nm);		///< Try to recover a \e language \e id endianess field
+   static string normalizeSize(const string &nm);		///< Try to recover a \e language \e id size field
+-- 
+2.24.3 (Apple Git-128)
+

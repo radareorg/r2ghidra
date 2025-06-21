@@ -1,0 +1,14 @@
+diff --git a/src/decompiler/subflow.cc b/src/decompiler/subflow.cc
+index 0c42b50..522c435 100644
+--- a/src/decompiler/subflow.cc
++++ b/src/decompiler/subflow.cc
+@@ -66,6 +66,9 @@ SubvariableFlow::ReplaceVarnode *SubvariableFlow::setReplacement(Varnode *vn,uin
+ 
+ {
+   ReplaceVarnode *res;
++  if (vn == nullptr) {
++    return nullptr;
++  }
+   if (vn->isMark()) {		// Already seen before
+     map<Varnode *,ReplaceVarnode>::iterator iter;
+     iter = varmap.find(vn);

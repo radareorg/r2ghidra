@@ -1,0 +1,15 @@
+diff --git a/src/decompiler/loadimage.hh b/src/decompiler/loadimage.hh
+index 59d4c9a..3557744 100644
+--- a/src/decompiler/loadimage.hh
++++ b/src/decompiler/loadimage.hh
+@@ -21,6 +21,10 @@
+ 
+ #include "address.hh"
+ 
++#ifdef LoadImage
++#undef LoadImage
++#endif
++
+ /// \brief Exception indicating data was not available
+ ///
+ /// This exception is thrown when a request for load image

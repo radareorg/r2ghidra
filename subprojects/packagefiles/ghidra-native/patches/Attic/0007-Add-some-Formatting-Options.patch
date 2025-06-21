@@ -1,0 +1,173 @@
+From ce0bda47d99042322af318ecb425453279e8c7a4 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Florian=20M=C3=A4rkl?= <info@florianmaerkl.de>
+Date: Thu, 25 Jul 2019 12:31:44 +0200
+Subject: [PATCH 07/23] Add some Formatting Options
+
+---
+ .../Decompiler/src/decompile/cpp/printc.cc    | 60 +++++++++++++++----
+ .../Decompiler/src/decompile/cpp/printc.hh    |  7 +++
+ 2 files changed, 55 insertions(+), 12 deletions(-)
+
+diff --git a/Ghidra/Features/Decompiler/src/decompile/cpp/printc.cc b/Ghidra/Features/Decompiler/src/decompile/cpp/printc.cc
+index 79da4cfa3..c7e290fe8 100644
+--- a/Ghidra/Features/Decompiler/src/decompile/cpp/printc.cc
++++ b/Ghidra/Features/Decompiler/src/decompile/cpp/printc.cc
+@@ -353,8 +353,9 @@ void PrintC::opFunc(const PcodeOp *op)
+   string nm = op->getOpcode()->getOperatorName(op);
+   pushAtom(Atom(nm,optoken,EmitXml::no_color,op));
+   if (op->numInput() > 0) {
+-    for(int4 i=0;i<op->numInput()-1;++i)
+-      pushOp(&comma,op);
++    for(int4 i=0;i<op->numInput()-1;++i) {
++		pushOp(&comma,op);
++    }
+   // implied vn's pushed on in reverse order for efficiency
+   // see PrintLanguage::pushVnImplied
+     for(int4 i=op->numInput()-1;i>=0;--i)
+@@ -1386,6 +1387,10 @@ void PrintC::resetDefaultsPrintC(void)
+   option_nocasts = false;
+   option_NULL = false;
+   option_unplaced = false;
++  option_space_after_comma = false;
++  option_newline_before_else = true;
++  option_newline_before_opening_brace = false;
++  option_newline_after_prototype = true;
+   setCStyleComments();
+ }
+ 
+@@ -1838,6 +1843,9 @@ void PrintC::emitStructDefinition(const TypeStruct *ct)
+     iter++;
+     if (iter != ct->endField()) {
+       emit->print(","); // Print comma separator
++      if (option_space_after_comma) {
++      	emit->spaces(1);
++      }
+       emit->tagLine();
+     }
+   }
+@@ -1935,8 +1943,12 @@ void PrintC::emitPrototypeInputs(const FuncProto *proto)
+   else {
+     bool printComma = false;
+     for(int4 i=0;i<sz;++i) {
+-      if (printComma)
+-	emit->print(",");
++      if (printComma) {
++		  emit->print(",");
++		  if (option_space_after_comma) {
++			  emit->spaces(1);
++		  }
++      }
+       ProtoParameter *param = proto->getParam(i);
+       if (isSet(hide_thisparam) && param->isThisPointer())
+ 	continue;
+@@ -1954,8 +1966,12 @@ void PrintC::emitPrototypeInputs(const FuncProto *proto)
+     }
+   }
+   if (proto->isDotdotdot()) {
+-    if (sz != 0)
+-      emit->print(",");
++    if (sz != 0) {
++		emit->print(",");
++		if (option_space_after_comma) {
++			emit->spaces(1);
++		}
++	}
+     emit->print("...");
+   }
+ }
+@@ -2351,7 +2367,9 @@ void PrintC::docFunction(const Funcdata *fd)
+     emit->tagLine();
+     emitFunctionDeclaration(fd);	// Causes us to enter function's scope
+     emit->tagLine();
+-    emit->tagLine();
++    if (option_newline_after_prototype) {
++      emit->tagLine();
++    }
+     int4 id = emit->startIndent();
+     emit->print("{");
+     emitLocalVarDecls(fd);
+@@ -2606,7 +2624,11 @@ void PrintC::emitBlockIf(const BlockIf *bl)
+   }
+   
+   setMod(no_branch);
+-  emit->spaces(1);
++  if (!option_newline_before_opening_brace) {
++	emit->spaces(1);
++  } else {
++  	emit->tagLine();
++  }
+   int4 id = emit->startIndent();
+   emit->print("{");
+   int4 id1 = emit->beginBlock(bl->getBlock(1));
+@@ -2616,9 +2638,15 @@ void PrintC::emitBlockIf(const BlockIf *bl)
+   emit->tagLine();
+   emit->print("}");
+   if (bl->getSize()==3) {
+-    emit->tagLine();
++  	if (option_newline_before_else) {
++		emit->tagLine();
++  	}
+     emit->print("else",EmitXml::keyword_color);
+-    emit->spaces(1);
++    if (option_newline_before_else) {
++	  emit->tagLine();
++    } else {
++	  emit->spaces(1);
++    }
+     int4 id = emit->startIndent();
+     emit->print("{");
+     int4 id2 = emit->beginBlock(bl->getBlock(2));
+@@ -2769,7 +2797,11 @@ void PrintC::emitBlockDoWhile(const BlockDoWhile *bl)
+   emitAnyLabelStatement(bl);
+   emit->tagLine();
+   emit->print("do",EmitXml::keyword_color);
+-  emit->spaces(1);
++  if (option_newline_before_opening_brace) {
++  	emit->tagLine();
++  } else {
++	emit->spaces(1);
++  }
+   int4 id = emit->startIndent();
+   emit->print("{");
+   pushMod();
+@@ -2801,7 +2833,11 @@ void PrintC::emitBlockInfLoop(const BlockInfLoop *bl)
+   emitAnyLabelStatement(bl);
+   emit->tagLine();
+   emit->print("do",EmitXml::keyword_color);
+-  emit->spaces(1);
++  if (option_newline_before_opening_brace) {
++  	emit->tagLine();
++  } else {
++	emit->spaces(1);
++  }
+   int4 id = emit->startIndent();
+   emit->print("{");
+   int4 id1 = emit->beginBlock(bl->getBlock(0));
+diff --git a/Ghidra/Features/Decompiler/src/decompile/cpp/printc.hh b/Ghidra/Features/Decompiler/src/decompile/cpp/printc.hh
+index 92afe1ee1..f315d7023 100644
+--- a/Ghidra/Features/Decompiler/src/decompile/cpp/printc.hh
++++ b/Ghidra/Features/Decompiler/src/decompile/cpp/printc.hh
+@@ -119,6 +119,10 @@ protected:
+   bool option_nocasts;		///< Don't print a cast if \b true
+   bool option_unplaced;		///< Set to \b true if we should display unplaced comments
+   bool option_hide_exts;	///< Set to \b true if we should hide implied extension operations
++  bool option_space_after_comma;
++  bool option_newline_before_else;
++  bool option_newline_before_opening_brace;
++  bool option_newline_after_prototype;
+   string nullToken;		///< Token to use for 'null'
+   CommentSorter commsorter;	///< Container/organizer for comments in the current function
+ 
+@@ -205,6 +209,9 @@ public:
+   void setCPlusPlusStyleComments(void) { setCommentDelimeter("// ","",true); }	///< Set c++-style "//" comment delimiters
+   void setDisplayUnplaced(bool val) { option_unplaced = val; }	///< Toggle whether \e unplaced comments are displayed in the header
+   void setHideImpliedExts(bool val) { option_hide_exts = val; }	///< Toggle whether implied extensions are hidden
++  void setSpaceAfterComma(bool val) { option_space_after_comma = val; }
++  void setNewlineBeforeOpeningBrace(bool val) { option_newline_before_opening_brace = val; }
++  void setNewlineAfterPrototype(bool val) { option_newline_after_prototype = val; }
+   virtual ~PrintC(void) {}
+   virtual void resetDefaults(void);
+   virtual void adjustTypeOperators(void);
+-- 
+2.24.3 (Apple Git-128)
+

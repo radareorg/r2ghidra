@@ -1,0 +1,23 @@
+From 8ae5683e2342ec67c0b4efd2cf2d6913b56e62b8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Florian=20M=C3=A4rkl?= <info@florianmaerkl.de>
+Date: Sun, 25 Aug 2019 18:23:23 +0200
+Subject: [PATCH 11/23] Clean Sleigh Descriptions on Shutdown
+
+---
+ Ghidra/Features/Decompiler/src/decompile/cpp/sleigh_arch.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Ghidra/Features/Decompiler/src/decompile/cpp/sleigh_arch.cc b/Ghidra/Features/Decompiler/src/decompile/cpp/sleigh_arch.cc
+index 038bc379e..7cd004b4b 100644
+--- a/Ghidra/Features/Decompiler/src/decompile/cpp/sleigh_arch.cc
++++ b/Ghidra/Features/Decompiler/src/decompile/cpp/sleigh_arch.cc
+@@ -467,5 +467,5 @@ void SleighArchitecture::shutdown(void)
+     delete last_sleigh;
+     last_sleigh = (Sleigh *)0;
+   }
+-  // description.clear();  // static vector is destroyed by the normal exit handler
++  description.clear();
+ }
+-- 
+2.24.3 (Apple Git-128)
+

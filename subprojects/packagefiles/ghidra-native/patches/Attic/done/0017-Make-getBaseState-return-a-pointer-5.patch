@@ -1,0 +1,25 @@
+From 815e71870e67c29187a20ee2563a11c09acb5a93 Mon Sep 17 00:00:00 2001
+From: FXTi <zjxiang1998@gmail.com>
+Date: Wed, 26 Aug 2020 22:37:55 +0800
+Subject: [PATCH 17/23] Make getBaseState return a pointer (#5)
+
+---
+ Ghidra/Features/Decompiler/src/decompile/cpp/context.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Ghidra/Features/Decompiler/src/decompile/cpp/context.hh b/Ghidra/Features/Decompiler/src/decompile/cpp/context.hh
+index 5920bceb4..5d2e108f7 100644
+--- a/Ghidra/Features/Decompiler/src/decompile/cpp/context.hh
++++ b/Ghidra/Features/Decompiler/src/decompile/cpp/context.hh
+@@ -90,7 +90,7 @@ private:
+   int4 alloc;			// Number of ConstructState's allocated
+   int4 delayslot;		// delayslot depth
+ protected:
+-  ConstructState *getBaseState(void) { return base_state; }
++  ConstructState **getBaseState(void) { return &base_state; }
+ public:
+   ParserContext(ContextCache *ccache);
+   ~ParserContext(void) { if (context != (uintm *)0) delete [] context; }
+-- 
+2.24.3 (Apple Git-128)
+

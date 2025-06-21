@@ -1,0 +1,12 @@
+diff --git a/src/decompiler/merge.hh b/src/decompiler/merge.hh
+index bcce463..c965f86 100644
+--- a/src/decompiler/merge.hh
++++ b/src/decompiler/merge.hh
+@@ -137,6 +137,7 @@ public:
+ inline bool Merge::compareHighByBlock(const HighVariable *a,const HighVariable *b)
+ 
+ {
++  if (!a || !b) return false;
+   int4 result = a->getCover().compareTo(b->getCover());
+   if ( result == 0 ) {
+     Varnode *v1 = a->getInstance( 0 );

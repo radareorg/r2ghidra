@@ -30,7 +30,7 @@ r2ghidra_sources = [
 incdirs = [
   'src',
   'third-party/pugixml/src/',
-  'ghidra-native/src/decompiler/',
+  #  'ghidra-native/src/decompiler/',
 ]
 
 res = run_command(['radare2','-HR2_LIBR_PLUGINS'], capture:true, check:false)
@@ -47,9 +47,9 @@ if cpp.get_id() == 'msvc'
     'radare2/include/libr',
     'radare2/include/libr/sdb',
   ]
-  add_global_arguments('/D_WINDOWS', language:'cpp')
-  add_global_arguments('/D_WIN32', language:'cpp')
-  add_global_arguments('/DZLIB_WINAPI', language:'cpp')
+  add_global_arguments('-D_WINDOWS', language:'cpp')
+  add_global_arguments('-D_WIN32', language:'cpp')
+  add_global_arguments('-DZLIB_WINAPI', language:'cpp')
   r2libdir = [
     meson.current_source_dir() + '\\radare2\\lib',
     'C:\\radare2\\lib'
@@ -90,116 +90,12 @@ r_version_h = configure_file(
 
 r2ghidra_incdirs = include_directories(incdirs)
 
-ghidra_decompiler_sources = [
-  'ghidra-native/src/decompiler/action.cc',
-  'ghidra-native/src/decompiler/address.cc',
-  'ghidra-native/src/decompiler/architecture.cc',
-  # 'ghidra-native/src/decompiler/bfd_arch.cc',
-  'ghidra-native/src/decompiler/block.cc',
-  'ghidra-native/src/decompiler/blockaction.cc',
-  'ghidra-native/src/decompiler/callgraph.cc',
-  'ghidra-native/src/decompiler/capability.cc',
-  'ghidra-native/src/decompiler/cast.cc',
-  # 'ghidra-native/src/decompiler/codedata.cc',
-  'ghidra-native/src/decompiler/comment.cc',
-  'ghidra-native/src/decompiler/comment_ghidra.cc',
-  'ghidra-native/src/decompiler/condexe.cc',
-  # 'ghidra-native/src/decompiler/consolemain.cc',
-  'ghidra-native/src/decompiler/context.cc',
-  'ghidra-native/src/decompiler/coreaction.cc',
-  'ghidra-native/src/decompiler/cover.cc',
-  'ghidra-native/src/decompiler/cpool.cc',
-  'ghidra-native/src/decompiler/cpool_ghidra.cc',
-  'ghidra-native/src/decompiler/crc32.cc',
-  'ghidra-native/src/decompiler/database.cc',
-  'ghidra-native/src/decompiler/database_ghidra.cc',
-  'ghidra-native/src/decompiler/double.cc',
-  'ghidra-native/src/decompiler/dynamic.cc',
-  'ghidra-native/src/decompiler/emulate.cc',
-  'ghidra-native/src/decompiler/emulateutil.cc',
-  'ghidra-native/src/decompiler/filemanage.cc',
-  'ghidra-native/src/decompiler/float.cc',
-  'ghidra-native/src/decompiler/flow.cc',
-  'ghidra-native/src/decompiler/fspec.cc',
-  'ghidra-native/src/decompiler/multiprecision.cc',
-  'ghidra-native/src/decompiler/funcdata.cc',
-  'ghidra-native/src/decompiler/funcdata_block.cc',
-  'ghidra-native/src/decompiler/funcdata_op.cc',
-  'ghidra-native/src/decompiler/funcdata_varnode.cc',
-  'ghidra-native/src/decompiler/unionresolve.cc',
-  'ghidra-native/src/decompiler/ghidra_arch.cc',
-  'ghidra-native/src/decompiler/ghidra_context.cc',
-  # 'ghidra-native/src/decompiler/ghidra_process.cc',
-  'ghidra-native/src/decompiler/ghidra_translate.cc',
-  'ghidra-native/src/decompiler/globalcontext.cc',
-  'ghidra-native/src/decompiler/grammar.cc',
-  'ghidra-native/src/decompiler/graph.cc',
-  'ghidra-native/src/decompiler/heritage.cc',
-  'ghidra-native/src/decompiler/ifacedecomp.cc',
-  'ghidra-native/src/decompiler/testfunction.cc',
-  'ghidra-native/src/decompiler/ifaceterm.cc',
-  'ghidra-native/src/decompiler/inject_ghidra.cc',
-  'ghidra-native/src/decompiler/inject_sleigh.cc',
-  'ghidra-native/src/decompiler/interface.cc',
-  'ghidra-native/src/decompiler/jumptable.cc',
-  'ghidra-native/src/decompiler/libdecomp.cc',
-  'ghidra-native/src/decompiler/loadimage.cc',
-  # 'ghidra-native/src/decompiler/loadimage_bfd.cc',
-  'ghidra-native/src/decompiler/loadimage_ghidra.cc',
-  'ghidra-native/src/decompiler/loadimage_xml.cc',
-  'ghidra-native/src/decompiler/memstate.cc',
-  'ghidra-native/src/decompiler/merge.cc',
-  'ghidra-native/src/decompiler/op.cc',
-  'ghidra-native/src/decompiler/opbehavior.cc',
-  'ghidra-native/src/decompiler/opcodes.cc',
-  'ghidra-native/src/decompiler/options.cc',
-  'ghidra-native/src/decompiler/override.cc',
-  'ghidra-native/src/decompiler/paramid.cc',
-  'ghidra-native/src/decompiler/pcodecompile.cc',
-  'ghidra-native/src/decompiler/pcodeinject.cc',
-  'ghidra-native/src/decompiler/pcodeparse.cc',
-  'ghidra-native/src/decompiler/pcoderaw.cc',
-  'ghidra-native/src/decompiler/prefersplit.cc',
-  'ghidra-native/src/decompiler/prettyprint.cc',
-  'ghidra-native/src/decompiler/printc.cc',
-  'ghidra-native/src/decompiler/printjava.cc',
-  'ghidra-native/src/decompiler/printlanguage.cc',
-  'ghidra-native/src/decompiler/rangeutil.cc',
-  'ghidra-native/src/decompiler/raw_arch.cc',
-  'ghidra-native/src/decompiler/ruleaction.cc',
-  'ghidra-native/src/decompiler/rulecompile.cc',
-  'ghidra-native/src/decompiler/compression.cc',
-  'ghidra-native/src/decompiler/slaformat.cc',
-  'ghidra-native/src/decompiler/semantics.cc',
-  'ghidra-native/src/decompiler/sleigh.cc',
-  'ghidra-native/src/decompiler/sleigh_arch.cc',
-  'ghidra-native/src/decompiler/sleighbase.cc',
-  # 'ghidra-native/src/decompiler/sleighexample.cc',
-  # 'ghidra-native/src/decompiler/slgh_compile.cc',
-  # 'ghidra-native/src/decompiler/slghparse.cc',
-  'ghidra-native/src/decompiler/slghpatexpress.cc',
-  'ghidra-native/src/decompiler/slghpattern.cc',
-  # 'ghidra-native/src/decompiler/slghscan.cc',
-  'ghidra-native/src/decompiler/slghsymbol.cc',
-  'ghidra-native/src/decompiler/marshal.cc',
-  'ghidra-native/src/decompiler/space.cc',
-  'ghidra-native/src/decompiler/string_ghidra.cc',
-  'ghidra-native/src/decompiler/stringmanage.cc',
-  'ghidra-native/src/decompiler/modelrules.cc',
-  'ghidra-native/src/decompiler/subflow.cc',
-  'ghidra-native/src/decompiler/transform.cc',
-  'ghidra-native/src/decompiler/translate.cc',
-  'ghidra-native/src/decompiler/type.cc',
-  'ghidra-native/src/decompiler/typegrp_ghidra.cc',
-  'ghidra-native/src/decompiler/typeop.cc',
-  'ghidra-native/src/decompiler/unify.cc',
-  'ghidra-native/src/decompiler/userop.cc',
-  'ghidra-native/src/decompiler/variable.cc',
-  'ghidra-native/src/decompiler/varmap.cc',
-  'ghidra-native/src/decompiler/varnode.cc',
-  'ghidra-native/src/decompiler/xml.cc',
-  'ghidra-native/src/decompiler/xml_arch.cc',
-]
+ghidra = subproject('ghidra-native', default_options: ['default_library=static', 'werror=false'])
+ghidra_decompiler_sources = ghidra.get_variable('sources')
+ghidra_slgh_sources = ghidra.get_variable('slgh_sources')
+ghidra_incs = ghidra.get_variable('incs')
+
+# r2ghidra_incdirs += ghidra_incs
 
 r2ghidra_core_sources = [
   r2ghidra_sources,
@@ -214,9 +110,7 @@ r2ghidra_core_sources = [
 sleighc_sources = [
   r2ghidra_sources,
   pugixml_sources,
-  'ghidra-native/src/decompiler/slgh_compile.cc',
-  'ghidra-native/src/decompiler/slghparse.cc',
-  'ghidra-native/src/decompiler/slghscan.cc',
+  ghidra_slgh_sources,
   ghidra_decompiler_sources,
 ]
 
@@ -224,13 +118,13 @@ r2ghidra_core_plugin = library('core_r2ghidra',
   r2ghidra_core_sources,
   dependencies: [r_core, zlib],
   override_options : ['c_std=c11', 'cpp_std=c++11'],
-  include_directories: r2ghidra_incdirs,
+  include_directories: [ghidra_incs, r2ghidra_incdirs],
   install: true,
   install_dir: r2_plugdir
 )
 
 sleighc_exe = executable('sleighc', sleighc_sources,
-  include_directories: r2ghidra_incdirs,
+  include_directories: [ghidra_incs, r2ghidra_incdirs],
   override_options : ['c_std=c11', 'cpp_std=c++11'],
   dependencies: [r_core, zlib],
   install: true

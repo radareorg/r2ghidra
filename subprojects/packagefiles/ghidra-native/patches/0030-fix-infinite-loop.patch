@@ -1,0 +1,13 @@
+diff --git a/src/decompiler/ruleaction.cc b/src/decompiler/ruleaction.cc
+index 55a3bdd..c8cba80 100644
+--- a/src/decompiler/ruleaction.cc
++++ b/src/decompiler/ruleaction.cc
+@@ -3605,6 +3605,8 @@ int4 RulePropagateCopy::applyOp(PcodeOp *op,Funcdata &data)
+   Varnode *vn,*invn;
+ 
+   if (op->stopsCopyPropagation()) return 0;
++  // op->setStopTypePropagation();
++  op->setStopCopyPropagation();
+   for(i=0;i<op->numInput();++i) {
+     vn = op->getIn(i);
+     if (!vn->isWritten()) continue; // Varnode must be written to

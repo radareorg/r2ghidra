@@ -4,4 +4,14 @@ MAKE=make
 ./configure
 gmake --version > /dev/null 2>&1
 [ $? = 0 ] && MAKE=gmake
-${MAKE} ghidra-native
+
+export NEED_ZLIB=1
+pkg-config --cflags zlib > /dev/null 2>&1
+if [ $? = 0 ]; then
+	NEED_ZLIB=0
+else
+	echo "Warning: Cannot find system wide zlib"
+fi
+echo "[*] Checking subprojects... "
+${MAKE} -C subprojects # > /dev/null
+# ${MAKE} ghidra-native
