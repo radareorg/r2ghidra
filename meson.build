@@ -47,7 +47,9 @@ if cpp.get_id() == 'msvc'
     'radare2/include/libr',
     'radare2/include/libr/sdb',
   ]
-  add_global_arguments('-D_WINDOWS', language:'cpp')
+  add_global_arguments('/D_WINDOWS', language:'cpp')
+  add_global_arguments('/D_WIN32', language:'cpp')
+  add_global_arguments('/DZLIB_WINAPI', language:'cpp')
   r2libdir = [
     meson.current_source_dir() + '\\radare2\\lib',
     'C:\\radare2\\lib'
@@ -68,6 +70,13 @@ if cpp.get_id() == 'msvc'
   ]
 else
   r_core = dependency('r_core')
+endif
+
+zlib = dependency('zlib', version : '>=1.2.8', required: false)
+if not zlib.found()
+  zlib_proj = subproject('zlib', default_options: ['default_library=static', 'werror=false'])
+  zlib = zlib_proj.get_variable('zlib_dep')
+  meson.override_dependency('zlib', zlib)
 endif
 
 r2ghidra_version = meson.project_version()
@@ -213,7 +222,7 @@ sleighc_sources = [
 
 r2ghidra_core_plugin = library('core_r2ghidra',
   r2ghidra_core_sources,
-  dependencies: [r_core],
+  dependencies: [r_core, zlib],
   override_options : ['c_std=c11', 'cpp_std=c++11'],
   include_directories: r2ghidra_incdirs,
   install: true,
@@ -223,6 +232,6 @@ r2ghidra_core_plugin = library('core_r2ghidra',
 sleighc_exe = executable('sleighc', sleighc_sources,
   include_directories: r2ghidra_incdirs,
   override_options : ['c_std=c11', 'cpp_std=c++11'],
-  dependencies: [r_core],
+  dependencies: [r_core, zlib],
   install: true
 )
