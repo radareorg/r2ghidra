@@ -1,0 +1,25 @@
+From bfa4d25c3154306fe03b853efec84bbc9d19c518 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Florian=20M=C3=A4rkl?= <info@florianmaerkl.de>
+Date: Thu, 25 Jul 2019 19:00:44 +0200
+Subject: [PATCH 08/23] Make Commas less ugly
+
+---
+ Ghidra/Features/Decompiler/src/decompile/cpp/printc.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Ghidra/Features/Decompiler/src/decompile/cpp/printc.cc b/Ghidra/Features/Decompiler/src/decompile/cpp/printc.cc
+index c7e290fe8..19acbfaf0 100644
+--- a/Ghidra/Features/Decompiler/src/decompile/cpp/printc.cc
++++ b/Ghidra/Features/Decompiler/src/decompile/cpp/printc.cc
+@@ -52,7 +52,7 @@ OpToken PrintC::boolean_and = { "&&", 2, 22, false, OpToken::binary, 1, 0, (OpTo
+ OpToken PrintC::boolean_xor = { "^^", 2, 20, false, OpToken::binary, 1, 0, (OpToken *)0 };
+ OpToken PrintC::boolean_or = { "||", 2, 18, false, OpToken::binary, 1, 0, (OpToken *)0 };
+ OpToken PrintC::assignment = { "=", 2, 14, false, OpToken::binary, 1, 5, (OpToken *)0 };
+-OpToken PrintC::comma = { ",", 2, 2, true, OpToken::binary, 0, 0, (OpToken *)0 };
++OpToken PrintC::comma = { ", ", 2, 2, true, OpToken::binary, 0, 0, (OpToken *)0 };
+ OpToken PrintC::new_op = { "", 2, 62, false, OpToken::space, 1, 0, (OpToken *)0 };
+ 
+ // Inplace assignment operators
+-- 
+2.24.3 (Apple Git-128)
+

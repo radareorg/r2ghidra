@@ -1,0 +1,25 @@
+diff --git a/src/decompiler/context.hh b/src/decompiler/context.hh
+index 3372e5a..5d2e108 100644
+--- a/src/decompiler/context.hh
++++ b/src/decompiler/context.hh
+@@ -89,6 +89,8 @@ private:
+   ConstructState *base_state;
+   int4 alloc;			// Number of ConstructState's allocated
+   int4 delayslot;		// delayslot depth
++protected:
++  ConstructState **getBaseState(void) { return &base_state; }
+ public:
+   ParserContext(ContextCache *ccache);
+   ~ParserContext(void) { if (context != (uintm *)0) delete [] context; }
+diff --git a/src/decompiler/sleigh.hh b/src/decompiler/sleigh.hh
+index 1a758a4..1e96c2c 100644
+--- a/src/decompiler/sleigh.hh
++++ b/src/decompiler/sleigh.hh
+@@ -166,6 +166,7 @@ protected:
+   ParserContext *obtainContext(const Address &addr,int4 state) const;
+   void resolve(ParserContext &pos) const;	///< Generate a parse tree suitable for disassembly
+   void resolveHandles(ParserContext &pos) const;	///< Prepare the parse tree for p-code generation
++  ContextCache *getContextCache(void) { return cache; }
+ public:
+   Sleigh(LoadImage *ld,ContextDatabase *c_db);		///< Constructor
+   virtual ~Sleigh(void);				///< Destructor

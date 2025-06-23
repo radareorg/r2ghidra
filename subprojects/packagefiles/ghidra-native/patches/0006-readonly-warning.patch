@@ -1,0 +1,20 @@
+diff --git a/src/decompiler/funcdata_varnode.cc b/src/decompiler/funcdata_varnode.cc
+index dad2994..5a43b1d 100644
+--- a/src/decompiler/funcdata_varnode.cc
++++ b/src/decompiler/funcdata_varnode.cc
+@@ -516,6 +516,7 @@ void Funcdata::transferVarnodeProperties(Varnode *vn,Varnode *newVn,int4 lsbOffs
+ bool Funcdata::fillinReadOnly(Varnode *vn)
+ 
+ {
++/*
+   if (vn->isWritten()) {	// Can't replace output with constant
+     PcodeOp *defop = vn->getDef();
+     if (defop->isMarker())
+@@ -534,6 +535,7 @@ bool Funcdata::fillinReadOnly(Varnode *vn)
+     }
+     return false;		// No change was made
+   }
++*/
+ 
+   if (vn->getSize() > sizeof(uintb))
+     return false;		// Constant will exceed precision

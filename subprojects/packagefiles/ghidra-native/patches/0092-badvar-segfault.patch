@@ -1,0 +1,26 @@
+diff --git a/src/decompiler/varmap.cc b/src/decompiler/varmap.cc
+index ce1660b..4928ad0 100644
+--- a/src/decompiler/varmap.cc
++++ b/src/decompiler/varmap.cc
+@@ -1198,7 +1198,7 @@ void ScopeLocal::markUnaliased(const vector<uintb> &alias)
+     // NOTE: this is primarily to reset aliasing between
+     // stack parameters and stack locals
+     if (aliason && (curoff - curalias > 0xffff)) aliason = false;
+-    if (!aliason) symbol->getScope()->setAttribute(symbol,Varnode::nolocalalias);
++    if (!aliason && symbol->getName().length () > 0) symbol->getScope()->setAttribute(symbol,Varnode::nolocalalias);
+     if (symbol->isTypeLocked() && alias_block_level != 0) {
+       if (alias_block_level == 3)
+ 	aliason = false;		// For this level, all locked data-types block aliases
+diff --git a/src/decompiler/database.cc b/src/decompiler/database.cc
+index 5544616..ec1a036 100644
+--- a/src/decompiler/database.cc
++++ b/src/decompiler/database.cc
+@@ -158,6 +158,8 @@ Datatype *SymbolEntry::getSizedType(const Address &inaddr,int4 sz) const
+   else
+     off = (int4)(inaddr.getOffset() - addr.getOffset()) + offset;
+   Datatype *cur = symbol->getType();
++  if (symbol->getName().length() == 0)
++    return nullptr;
+   return symbol->getScope()->getArch()->types->getExactPiece(cur, off, sz);
+ }
+ 

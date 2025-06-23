@@ -1,0 +1,34 @@
+From 20caeaccb5e2b85e7c0f519b5f23cddea24b8801 Mon Sep 17 00:00:00 2001
+From: Anton Kochkov <xvilka@gmail.com>
+Date: Tue, 22 Dec 2020 17:28:02 +0800
+Subject: [PATCH 18/23] Add FreeBSD and OpenBSD support (#6)
+
+---
+ Ghidra/Features/Decompiler/src/decompile/cpp/types.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Ghidra/Features/Decompiler/src/decompile/cpp/types.h b/Ghidra/Features/Decompiler/src/decompile/cpp/types.h
+index ff6f423ab..6d5b6acb2 100644
+--- a/Ghidra/Features/Decompiler/src/decompile/cpp/types.h
++++ b/Ghidra/Features/Decompiler/src/decompile/cpp/types.h
+@@ -71,7 +71,7 @@ typedef char int1;
+ typedef uint8 uintp;
+ #endif
+ 
+-#if defined (__linux__) && (defined (__i386__) || defined (__arm__))
++#if (defined (__linux__) || defined (__FreeBSD__) || defined (__OpenBSD__)) && (defined (__i386__) || defined (__arm__))
+ #if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+ #define HOST_ENDIAN 1
+ #else
+@@ -90,7 +90,7 @@ typedef char int1;
+ typedef uint4 uintp;
+ #endif
+ 
+-#if defined (__linux__) && (defined (__x86_64__) || defined (__aarch64__))
++#if (defined (__linux__) || defined (__FreeBSD__) || defined (__OpenBSD__)) && (defined (__x86_64__) || defined (__aarch64__))
+ #if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+ #define HOST_ENDIAN 1
+ #else
+-- 
+2.24.3 (Apple Git-128)
+

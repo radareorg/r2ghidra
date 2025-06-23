@@ -1,0 +1,17 @@
+diff --git a/src/decompiler/flow.cc b/src/decompiler/flow.cc
+index 178047f..78565eb 100644
+--- a/src/decompiler/flow.cc
++++ b/src/decompiler/flow.cc
+@@ -1006,8 +1006,10 @@ void FlowInfo::connectBasic(void)
+     op = *iter++;
+     targ_op = *iter2++;
+     bs = op->getParent();
+-    targ_bs = targ_op->getParent();
+-    bblocks.addEdge(bs,targ_bs);
++    if (targ_op != nullptr) {
++      targ_bs = targ_op->getParent();
++      bblocks.addEdge(bs,targ_bs);
++    }
+   }
+ }
+ 

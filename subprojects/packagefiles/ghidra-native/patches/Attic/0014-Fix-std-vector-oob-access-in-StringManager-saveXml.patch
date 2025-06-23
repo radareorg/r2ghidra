@@ -1,0 +1,25 @@
+From 49accbd25688976dc665b8bc7abd8775de2b26ed Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Florian=20M=C3=A4rkl?= <info@florianmaerkl.de>
+Date: Thu, 11 Jun 2020 21:39:54 +0200
+Subject: [PATCH 14/23] Fix std::vector oob access in StringManager::saveXml()
+
+---
+ Ghidra/Features/Decompiler/src/decompile/cpp/stringmanage.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Ghidra/Features/Decompiler/src/decompile/cpp/stringmanage.cc b/Ghidra/Features/Decompiler/src/decompile/cpp/stringmanage.cc
+index 6e60b4f66..60b6d6852 100644
+--- a/Ghidra/Features/Decompiler/src/decompile/cpp/stringmanage.cc
++++ b/Ghidra/Features/Decompiler/src/decompile/cpp/stringmanage.cc
+@@ -98,7 +98,7 @@ void StringManager::saveXml(ostream &s) const
+     s << " <bytes";
+     a_v_b(s, "trunc", stringData.isTruncated);
+     s << ">\n" << setfill('0');
+-    for(int4 i=0;stringData.byteData.size();++i) {
++    for(uintp i=0;i<stringData.byteData.size();++i) {
+       s << hex << setw(2) << (int4)stringData.byteData[i];
+       if (i%20 == 19)
+ 	s << "\n  ";
+-- 
+2.24.3 (Apple Git-128)
+

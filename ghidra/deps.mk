@@ -6,7 +6,8 @@ LDFLAGS+=-lz
 
 # GHIDRA_HOME=../ghidra/ghidra/
 # GHIDRA_DECOMPILER=$(GHIDRA_HOME)/Ghidra/Features/Decompiler/src/decompile/cpp
-GHIDRA_HOME=../ghidra-native
+# GHIDRA_HOME=../ghidra-native
+GHIDRA_HOME=../subprojects/ghidra-native
 GHIDRA_DECOMPILER=$(GHIDRA_HOME)/src/decompiler
 
 G_DECOMPILER=marshal.cc space.cc float.cc address.cc pcoderaw.cc

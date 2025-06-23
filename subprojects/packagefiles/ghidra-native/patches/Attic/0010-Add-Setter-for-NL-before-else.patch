@@ -1,0 +1,46 @@
+From 87d83f509ba66f1b41bb5306da19d3f04f455d78 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Florian=20M=C3=A4rkl?= <info@florianmaerkl.de>
+Date: Fri, 23 Aug 2019 18:45:22 +0200
+Subject: [PATCH 10/23] Add Setter for NL before else
+
+---
+ Ghidra/Features/Decompiler/src/decompile/cpp/printc.cc | 8 +++++---
+ Ghidra/Features/Decompiler/src/decompile/cpp/printc.hh | 1 +
+ 2 files changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/Ghidra/Features/Decompiler/src/decompile/cpp/printc.cc b/Ghidra/Features/Decompiler/src/decompile/cpp/printc.cc
+index 19acbfaf0..56c37e783 100644
+--- a/Ghidra/Features/Decompiler/src/decompile/cpp/printc.cc
++++ b/Ghidra/Features/Decompiler/src/decompile/cpp/printc.cc
+@@ -2638,11 +2638,13 @@ void PrintC::emitBlockIf(const BlockIf *bl)
+   emit->tagLine();
+   emit->print("}");
+   if (bl->getSize()==3) {
+-  	if (option_newline_before_else) {
+-		emit->tagLine();
++    if (option_newline_before_else) {
++      emit->tagLine();
++    } else {
++      emit->spaces(1);
+   	}
+     emit->print("else",EmitXml::keyword_color);
+-    if (option_newline_before_else) {
++    if (option_newline_before_opening_brace) {
+ 	  emit->tagLine();
+     } else {
+ 	  emit->spaces(1);
+diff --git a/Ghidra/Features/Decompiler/src/decompile/cpp/printc.hh b/Ghidra/Features/Decompiler/src/decompile/cpp/printc.hh
+index 9301678ee..86d4e47d2 100644
+--- a/Ghidra/Features/Decompiler/src/decompile/cpp/printc.hh
++++ b/Ghidra/Features/Decompiler/src/decompile/cpp/printc.hh
+@@ -211,6 +211,7 @@ public:
+   void setHideImpliedExts(bool val) { option_hide_exts = val; }	///< Toggle whether implied extensions are hidden
+   void setSpaceAfterComma(bool val) { option_space_after_comma = val; }
+   void setNewlineBeforeOpeningBrace(bool val) { option_newline_before_opening_brace = val; }
++  void setNewlineBeforeElse(bool val) { option_newline_before_else = val; }
+   void setNewlineAfterPrototype(bool val) { option_newline_after_prototype = val; }
+   virtual ~PrintC(void) {}
+   virtual void resetDefaults(void);
+-- 
+2.24.3 (Apple Git-128)
+

@@ -1,0 +1,20 @@
+diff --git a/src/decompiler/printc.cc b/src/decompiler/printc.cc
+index 64ecda1..a02ca74 100644
+--- a/src/decompiler/printc.cc
++++ b/src/decompiler/printc.cc
+@@ -3095,6 +3097,7 @@ void PrintC::emitCommentFuncHeader(const Funcdata *fd)
+       emitLineComment(1,comm);
+     }
+   }
++/*
+   if (option_nocasts) {
+     if (extralinebreak)
+       emit->tagLine();
+@@ -3103,6 +3106,7 @@ void PrintC::emitCommentFuncHeader(const Funcdata *fd)
+     emitLineComment(0,&comm);
+     extralinebreak = true;
+   }
++*/
+   if (extralinebreak)
+     emit->tagLine();		// Extra linebreak if comment exists
+ }

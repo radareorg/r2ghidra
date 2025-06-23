@@ -1,0 +1,13 @@
+diff --git a/src/decompiler/prettyprint.cc b/src/decompiler/prettyprint.cc
+index 3e8d18a..4d48bf8 100644
+--- a/src/decompiler/prettyprint.cc
++++ b/src/decompiler/prettyprint.cc
+@@ -279,7 +279,7 @@ void EmitMarkup::setOutputStream(ostream *t)
+   if (encoder != (Encoder *)0)
+     delete encoder;
+   s = t;
+-  encoder = new PackedEncode(*s);
++  encoder = new XmlEncode(*s);
+ }
+ 
+ int4 TokenSplit::countbase = 0;
