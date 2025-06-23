@@ -186,6 +186,7 @@ jobs:
           /tmp/r2ghidra-macos-${{ env.ARCH }}.tar.gz
 
   w64:
+    if: false
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
