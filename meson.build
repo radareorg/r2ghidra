@@ -4,8 +4,9 @@ project(
   license : 'LGPL3',
   meson_version : '>=0.50.1',
 version : '5.9.8',
-  default_options : ['c_std=c11', 'cpp_std=c++11']
+  default_options : ['c_std=c11', 'cpp_std=c++14']
 )
+
 
 pugixml_sources = [
   'third-party/pugixml/src/pugixml.cpp'
@@ -72,13 +73,6 @@ else
   r_core = dependency('r_core')
 endif
 
-zlib = dependency('zlib', version : '>=1.2.8', required: false)
-if not zlib.found()
-  zlib_proj = subproject('zlib', default_options: ['default_library=static', 'werror=false'])
-  zlib = zlib_proj.get_variable('zlib_dep')
-  meson.override_dependency('zlib', zlib)
-endif
-
 r2ghidra_version = meson.project_version()
 versionconf = configuration_data()
 versionconf.set('R2GHIDRA_VERSION', r2ghidra_version)
@@ -90,11 +84,19 @@ r_version_h = configure_file(
 
 r2ghidra_incdirs = include_directories(incdirs)
 
+zlib = dependency('zlib', version : '>=1.2.8', required: false)
+if not zlib.found()
+  zlib_proj = subproject('zlib', default_options: ['default_library=static', 'werror=false'])
+  zlib = zlib_proj.get_variable('zlib_dep')
+  meson.override_dependency('zlib', zlib)
+endif
+
+
 ghidra = subproject('ghidra-native', default_options: ['default_library=static', 'werror=false'])
 # ghidra_decompiler_sources = ghidra.get_variable('sources')
 # ghidra_slgh_sources = ghidra.get_variable('slgh_sources')
 ghidra_incs = ghidra.get_variable('incs')
-ghidra_static = ghidra.get_variable('ghidra_static')
+libdecomp_static = ghidra.get_variable('libdecomp_static')
 slgh_static = ghidra.get_variable('slgh_static')
 
 
@@ -107,7 +109,7 @@ r2ghidra_core_sources = [
   'src/anal_ghidra_plugin.c',
   'src/anal_ghidra.cpp',
   'src/core_ghidra_plugin.c',
-  'src/core_ghidra.cpp'
+  'src/core_ghidra.cpp',
 ]
 
 sleighc_sources = [
@@ -117,20 +119,13 @@ sleighc_sources = [
   # ghidra_decompiler_sources,
 ]
 
-r2ghidra_core_plugin = library('core_r2ghidra',
+r2ghidra_core_plugin = shared_library('core_r2ghidra',
   r2ghidra_core_sources,
   dependencies: [r_core, zlib],
-  link_with: ghidra_static,
-  override_options : ['c_std=c11', 'cpp_std=c++11'],
+  link_with: libdecomp_static,
+  override_options : ['c_std=c11', 'cpp_std=c++14'],
   include_directories: [ghidra_incs, r2ghidra_incdirs],
   install: true,
   install_dir: r2_plugdir
 )
 
-sleighc_exe = executable('sleighc', sleighc_sources,
-  dependencies: [r_core, zlib],
-  link_with: slgh_static,
-  include_directories: [ghidra_incs, r2ghidra_incdirs],
-  override_options : ['c_std=c11', 'cpp_std=c++11'],
-  install: true
-)
