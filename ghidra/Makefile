@@ -16,6 +16,9 @@ user-install:
 user-uninstall:
 	$(MAKE) sleigh-uninstall D="$(DH)"
 
+clean:
+	@echo clean
+
 uninstall:
 	$(MAKE) sleigh-uninstall D="$(DD)"
 
