@@ -1,3 +1,5 @@
+/* r2ghidra - LGPL - Copyright 2019-2025 - thestr4ng3r, pancake */
+
 #include <r_core.h>
 #include "../config.h"
 
@@ -35,7 +37,7 @@ R_API RLibStruct radare_plugin = {
 	.version = R2_VERSION,
 	.free = NULL,
 #if R2_VERSION_NUMBER >= 50909
-	.abi_version = R_LIB_CURRENT_ABI_VERSION,
+	.abiversion = R2_ABIVERSION,
 #endif
 #if R2_VERSION_NUMBER >= 40200
 	.pkgname = "r2ghidra"

@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2019-2023 - thestr4ng3r, pancake */
+/* r2ghidra - LGPL - Copyright 2019-2025 - thestr4ng3r, pancake */
 
 #include "R2Architecture.h"
 #include "CodeXMLParse.h"
@@ -550,7 +550,11 @@ static void PrintAutoSleighLang(RCore *core) {
 	DecompilerLock lock(core);
 	try {
 		auto id = SleighIdFromCore (core);
+#if R2_VERSION_NUMBER >= 50909
 		r_cons_printf (core->cons, "%s\n", id.c_str ());
+#else
+		r_cons_printf ("%s\n", id.c_str ());
+#endif
 	} catch (LowlevelError &e) {
 		R_LOG_WARN ("%s", e.explain.c_str ());
 	}
