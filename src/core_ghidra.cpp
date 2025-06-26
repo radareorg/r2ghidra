@@ -7,7 +7,7 @@
 #include "ArchMap.h"
 #include "SleighAsm.h"
 #include "r2ghidra.h"
-#include "r_anal.h"
+#include <r_core.h>
 
 // Windows clash
 #ifdef restrict
@@ -17,9 +17,6 @@
 #include <libdecomp.hh>
 #include <printc.hh>
 #include "R2PrintC.h"
-
-#include <r_core.h>
-#include <r_arch.h>
 
 #include <vector>
 #include <mutex>
@@ -81,12 +78,20 @@ CV cfg_var_timeout    ("timeout",     "0",        "Run decompilation in a separa
 static std::recursive_mutex decompiler_mutex;
 
 class DecompilerLock {
+private:
+	RCore *_core;
 public:
-	DecompilerLock() {
+	DecompilerLock(RCore *core) : _core (core) {
 		if (!decompiler_mutex.try_lock()) {
+#if R2_VERSION_NUMBER >= 50909
+			void *bed = r_cons_sleep_begin (_core->cons);
+			decompiler_mutex.lock ();
+			r_cons_sleep_end (_core->cons, bed);
+#else
 			void *bed = r_cons_sleep_begin ();
 			decompiler_mutex.lock ();
 			r_cons_sleep_end (bed);
+#endif
 		}
 	}
 
@@ -252,7 +257,7 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 }
 
 R_API RCodeMeta *r2ghidra_decompile_annotated_code(RCore *core, ut64 addr) {
-	DecompilerLock lock;
+	DecompilerLock lock(core);
 	RCodeMeta *code = nullptr;
 #ifndef DEBUG_EXCEPTIONS
 	try {
@@ -272,7 +277,7 @@ R_API RCodeMeta *r2ghidra_decompile_annotated_code(RCore *core, ut64 addr) {
 }
 
 static void DecompileCmd (RCore *core, DecompileMode mode) {
-	DecompilerLock lock;
+	DecompilerLock lock(core);
 
 #ifndef DEBUG_EXCEPTIONS
 	try {
@@ -290,7 +295,7 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 				RVector *offsets = r_codemeta_line_offsets (code);
 #if R2_VERSION_NUMBER >= 50909
 				char *s = r_codemeta_print_disasm (code, offsets, core->anal);
-				r_kons_print (core->cons, s);
+				r_cons_print (core->cons, s);
 				free (s);
 #else
 				r_codemeta_print_disasm (code, offsets, core->anal);
@@ -303,7 +308,7 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 				RVector *offsets = r_codemeta_line_offsets (code);
 #if R2_VERSION_NUMBER >= 50909
 				char *s = r_codemeta_print (code, offsets);
-				r_kons_print (core->cons, s);
+				r_cons_print (core->cons, s);
 				free (s);
 #else
 				r_codemeta_print (code, offsets);
@@ -316,7 +321,7 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 			{
 #if R2_VERSION_NUMBER >= 50909
 				char *s = r_codemeta_print (code, nullptr);
-				r_kons_print (core->cons, s);
+				r_cons_print (core->cons, s);
 				free (s);
 #else
 				r_codemeta_print (code, nullptr);
@@ -327,7 +332,7 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 #if R2_VERSION_NUMBER >= 50909
 			{
 				char *s = r_codemeta_print_comment_cmds (code);
-				r_kons_print (core->cons, s);
+				r_cons_print (core->cons, s);
 				free (s);
 			}
 #else
@@ -338,7 +343,7 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 			{
 #if R2_VERSION_NUMBER >= 50909
 				char *s = r_codemeta_print_json (code);
-				r_kons_println (core->cons, s);
+				r_cons_println (core->cons, s);
 				free (s);
 #else
 				r_codemeta_print_json (code);
@@ -349,7 +354,11 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 			out_stream << "</code></result>";
 			// fallthrough
 		default:
+#if R2_VERSION_NUMBER >= 50909
+			r_cons_printf (core->cons, "%s\n", out_stream.str().c_str ());
+#else
 			r_cons_printf ("%s\n", out_stream.str().c_str ());
+#endif
 			break;
 		}
 		r_codemeta_free (code);
@@ -365,7 +374,11 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 				pj_s (pj, s.c_str ());
 				pj_end (pj);
 				pj_end (pj);
+#if R2_VERSION_NUMBER >= 50909
+				r_cons_printf (core->cons, "%s\n", pj_string (pj));
+#else
 				r_cons_printf ("%s\n", pj_string (pj));
+#endif
 				pj_free (pj);
 			}
 		} else {
@@ -382,7 +395,11 @@ public:
 		std::stringstream ss;
 		addr.printRaw (ss);
 		ss << ": " << mnem << ' ' << body;
+#if R2_VERSION_NUMBER >= 50909
+		r_cons_gprintf ("%s\n", ss.str().c_str ());
+#else
 		r_cons_printf ("%s\n", ss.str().c_str ());
+#endif
 	}
 };
 
@@ -456,7 +473,11 @@ public:
 				print_vardata (ss, vars[i]);
 			}
 		}
+#if R2_VERSION_NUMBER >= 50909
+		r_cons_gprintf ("    %s\n", ss.str().c_str ());
+#else
 		r_cons_printf ("    %s\n", ss.str().c_str ());
+#endif
 	}
 };
 
@@ -504,7 +525,7 @@ static void SetInitialSleighHome(RConfig *cfg) {
 }
 
 static void ListSleighLangs(RCore *core) {
-	DecompilerLock lock;
+	DecompilerLock lock(core);
 	R2Architecture::collectSpecFiles (std::cerr);
 	auto langs = R2Architecture::getLanguageDescriptions ();
 	if (langs.empty()) {
@@ -516,16 +537,20 @@ static void ListSleighLangs(RCore *core) {
 		return lang.getId ();
 	});
 	std::sort (ids.begin (), ids.end ());
-	std::for_each (ids.begin (), ids.end (), [](const std::string &id) {
+	std::for_each (ids.begin (), ids.end (), [core](const std::string &id) {
+#if R2_VERSION_NUMBER >= 50909
+		r_cons_printf (core->cons, "%s\n", id.c_str ());
+#else
 		r_cons_printf ("%s\n", id.c_str ());
+#endif
 	});
 }
 
 static void PrintAutoSleighLang(RCore *core) {
-	DecompilerLock lock;
+	DecompilerLock lock(core);
 	try {
 		auto id = SleighIdFromCore (core);
-		r_cons_printf ("%s\n", id.c_str ());
+		r_cons_printf (core->cons, "%s\n", id.c_str ());
 	} catch (LowlevelError &e) {
 		R_LOG_WARN ("%s", e.explain.c_str ());
 	}
@@ -603,7 +628,7 @@ static void _cmd(RCore *core, const char *input) {
 		if (pid == 0) {
 			runcmd (core, input);
 #if R2_VERSION_NUMBER >= 50909
-			r_kons_flush (core->cons);
+			r_cons_flush (core->cons);
 #else
 			r_cons_flush ();
 #endif

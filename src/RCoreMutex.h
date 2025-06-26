@@ -1,10 +1,9 @@
-/* r2ghidra - LGPL - Copyright 2020-2021 - thestr4ng3r */
+/* r2ghidra - LGPL - Copyright 2020-2025 - thestr4ng3r */
 
 #ifndef R2GHIDRA_RCOREMUTEX_H
 #define R2GHIDRA_RCOREMUTEX_H
 
-typedef struct r_core_t RCore;
-
+#include <r_core.h>
 
 /**
  * Maintains sleep/awake state of the current r2 task like a recursive mutex
