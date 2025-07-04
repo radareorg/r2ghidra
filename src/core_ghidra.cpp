@@ -23,7 +23,9 @@
 
 #undef DEBUG_EXCEPTIONS
 
+#if R2_VERSION_NUMBER < 50909
 extern "C" RCore *Gcore;
+#endif
 
 typedef bool (*ConfigVarCb)(void *user, void *data);
 
@@ -671,6 +673,16 @@ static void _cmd(RCore *core, const char *input) {
 	}
 }
 
+#if R2_VERSION_NUMBER > 50909
+extern "C" bool r2ghidra_core_cmd(RCorePluginSession *cps, const char *input) {
+	RCore *core = cps->core;
+	if (r_str_startswith (input, "pdg")) {
+		_cmd (core, input + 3);
+		return true;
+	}
+	return false;
+}
+#else
 extern "C" int r2ghidra_core_cmd(void *user, const char *input) {
 	RCore *core = (RCore *) user;
 	if (r_str_startswith (input, "pdg")) {
@@ -679,6 +691,7 @@ extern "C" int r2ghidra_core_cmd(void *user, const char *input) {
 	}
 	return false;
 }
+#endif
 
 bool SleighHomeConfig(void */* user */, void *data) {
 	std::lock_guard<std::recursive_mutex> lock(decompiler_mutex);
@@ -697,6 +710,25 @@ extern "C" RArchPlugin r_arch_plugin_ghidra;
 extern "C" RAnalPlugin r_anal_plugin_ghidra;
 #endif
 
+#if R2_VERSION_NUMBER >= 50909
+extern "C" bool r2ghidra_core_init(RCorePluginSession *cps) {
+	std::lock_guard<std::recursive_mutex> lock(decompiler_mutex);
+	startDecompilerLibrary (nullptr);
+	auto *core = reinterpret_cast<RCore *>(cps->core);
+	r_arch_plugin_add (core->anal->arch, &r_arch_plugin_ghidra);
+	RConfig *cfg = core->config;
+	r_config_lock (cfg, false);
+	for (const auto var : ConfigVar::GetAll ()) {
+		RConfigNode *node = var->GetCallback()
+			? r_config_set_cb (cfg, var->GetName (), var->GetDefault (), var->GetCallback ())
+			: r_config_set (cfg, var->GetName (), var->GetDefault ());
+		r_config_node_desc (node, var->GetDesc ());
+	}
+	r_config_lock (cfg, true);
+	SetInitialSleighHome (cfg);
+	return true;
+}
+#else
 extern "C" int r2ghidra_core_init(void *user, const char *cmd) {
 	std::lock_guard<std::recursive_mutex> lock(decompiler_mutex);
 	startDecompilerLibrary (nullptr);
@@ -720,9 +752,18 @@ extern "C" int r2ghidra_core_init(void *user, const char *cmd) {
 	SetInitialSleighHome (cfg);
 	return true;
 }
+#endif
 
+#if R2_VERSION_NUMBER >= 50909
+extern "C" bool r2ghidra_core_fini(RCorePluginSession *cps, const char *cmd) {
+	std::lock_guard<std::recursive_mutex> lock (decompiler_mutex);
+	shutdownDecompilerLibrary ();
+	return true;
+}
+#else
 extern "C" int r2ghidra_core_fini(void *user, const char *cmd) {
 	std::lock_guard<std::recursive_mutex> lock (decompiler_mutex);
 	shutdownDecompilerLibrary ();
 	return true;
 }
+#endif
