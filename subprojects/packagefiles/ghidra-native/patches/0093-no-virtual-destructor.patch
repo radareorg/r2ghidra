@@ -1,0 +1,35 @@
+diff --git a/src/decompiler/constseq.hh b/src/decompiler/constseq.hh
+index dbfc3c5..0036c53 100644
+--- a/src/decompiler/constseq.hh
++++ b/src/decompiler/constseq.hh
+@@ -112,6 +112,7 @@ public:
+     if (!grouplist.contains(getGroup())) return (Rule *)0;
+     return new RuleStringCopy(getGroup());
+   }
++  virtual ~RuleStringCopy();
+   virtual void getOpList(vector<uint4> &oplist) const;
+   virtual int4 applyOp(PcodeOp *op,Funcdata &data);
+ };
+@@ -123,6 +124,7 @@ public:
+     if (!grouplist.contains(getGroup())) return (Rule *)0;
+     return new RuleStringStore(getGroup());
+   }
++  virtual ~RuleStringStore();
+   virtual void getOpList(vector<uint4> &oplist) const;
+   virtual int4 applyOp(PcodeOp *op,Funcdata &data);
+ };
+diff --git a/src/decompiler/coreaction.cc b/src/decompiler/coreaction.cc
+index bed14fc..8a808d5 100644
+--- a/src/decompiler/coreaction.cc
++++ b/src/decompiler/coreaction.cc
+@@ -21,6 +21,10 @@
+ 
+ namespace ghidra {
+ 
++RuleStringCopy::~RuleStringCopy() {}
++
++RuleStringStore::~RuleStringStore() {}
++
+ /// \brief A stack equation
+ struct StackEqn {
+   int4 var1;			///< Variable with 1 coefficient
