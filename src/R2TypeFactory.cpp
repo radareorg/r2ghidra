@@ -120,7 +120,9 @@ Datatype *R2TypeFactory::queryR2Enum(const string &n) {
 	}
 	try {
 		auto enumType = getTypeEnum(n);
-		setEnumValues(namelist, vallist, assignlist, enumType);
+		map<uintb,string> namemap;
+		TypeEnum::assignValues(namemap,namelist,vallist,assignlist,enumType);
+		setEnumValues(namemap, enumType);
 		return enumType;
 	} catch (LowlevelError &e) {
 		arch->addWarning("Failed to load " + n);
