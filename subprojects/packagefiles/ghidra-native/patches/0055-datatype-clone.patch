@@ -1,14 +1,16 @@
 diff --git a/src/decompiler/type.hh b/src/decompiler/type.hh
-index 76710b3..b26868a 100644
+index 92d4882..26bfa3e 100644
 --- a/src/decompiler/type.hh
 +++ b/src/decompiler/type.hh
-@@ -197,10 +197,10 @@ protected:
+@@ -201,12 +201,12 @@ protected:
+   void encodeTypedef(Encoder &encoder) const;	///< Encode \b this as a \e typedef element to a stream
    void markComplete(void) { flags &= ~(uint4)type_incomplete; }		///< Mark \b this data-type as completely defined
    void setDisplayFormat(uint4 format);		///< Set a specific display format
-   void calcAlignSize(void);	///< Calculate aligned size, assuming alignment is known
 -  virtual Datatype *clone(void) const=0;	///< Clone the data-type
    static uint8 hashName(const string &nm);	///< Produce a data-type id by hashing the type name
    static uint8 hashSize(uint8 id,int4 size);	///< Reversibly hash size into id
+ protected:
+   static int4 calcAlignSize(int4 sz,int4 align);	///< Calculate aligned size, given size and alignment of data-type
  public:
 +  virtual Datatype *clone(void) const=0;	///< Clone the data-type
    /// Construct the base data-type copying low-level properties of another

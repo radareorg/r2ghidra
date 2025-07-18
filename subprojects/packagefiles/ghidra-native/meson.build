@@ -1,4 +1,4 @@
-project('ghidra-native', 'cpp', meson_version : '>=0.60.0', version : '7c1f8b6975a685f785d4801b794715d9a6a55b19')
+project('ghidra-native', 'cpp', meson_version : '>=0.60.0', version : '<<FILLME>>')
 
 base_sources = [
   'src/decompiler/marshal.cc',
@@ -68,6 +68,7 @@ decompiler_sources = [
   'src/decompiler/opbehavior.cc',
   'src/decompiler/paramid.cc',
   'src/decompiler/string_ghidra.cc',
+  'src/decompiler/constseq.cc',
 ]
 
 libdecomp_sources = [
