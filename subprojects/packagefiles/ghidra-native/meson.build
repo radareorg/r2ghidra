@@ -1,4 +1,4 @@
-project('ghidra-native', 'cpp', meson_version : '>=0.60.0', version : '<<FILLME>>')
+project('ghidra-native', 'cpp', meson_version : '>=0.60.0', version : 'd2242691bf45a12e3ea483a4789f825af4651506')
 
 base_sources = [
   'src/decompiler/marshal.cc',
