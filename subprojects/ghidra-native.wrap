@@ -1,6 +1,6 @@
 [wrap-git]
 url = https://github.com/radareorg/ghidra-native
-revision = <<FILLME>>
+revision = d2242691bf45a12e3ea483a4789f825af4651506
 directory = ghidra-native
 patch_directory = ghidra-native
 diff_files = ghidra-native/patches/0001-space-after-comma.patch, ghidra-native/patches/0002-make-sleigharch-public.patch, ghidra-native/patches/0004-public-fields.patch, ghidra-native/patches/0006-readonly-warning.patch, ghidra-native/patches/0010-null-subflow.patch, ghidra-native/patches/0020-Fix-double-free-crash-when-deinitializing-multiple-X.patch, ghidra-native/patches/0023-Undef-LoadImage-for-windows.patch, ghidra-native/patches/0024-ignore-symbol-beyond-space.patch, ghidra-native/patches/0044-bad-unicode-codepoint.patch, ghidra-native/patches/0055-datatype-clone.patch, ghidra-native/patches/0056-nullderef-workaround.patch, ghidra-native/patches/0080-getparent-flow.patch, ghidra-native/patches/0090-nocasts-warnings.patch, ghidra-native/patches/0091-decompiler-xml-packer.patch, ghidra-native/patches/0092-badvar-segfault.patch, ghidra-native/patches/0093-no-virtual-destructor.patch
