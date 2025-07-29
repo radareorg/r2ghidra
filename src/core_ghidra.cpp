@@ -45,10 +45,10 @@ public:
 	const char *GetDesc() const { return desc; }
 	ConfigVarCb GetCallback() const	{ return callback; }
 
-	ut64 GetInt(RConfig *cfg) const	{ return r_config_get_i(cfg, name.c_str ()); }
-	bool GetBool(RConfig *cfg) const { return GetInt(cfg) != 0; }
-	std::string GetString(RConfig *cfg) const { return r_config_get(cfg, name.c_str ()); }
-	void Set(RConfig *cfg, const char *s) const { r_config_set(cfg, name.c_str (), s); }
+	ut64 GetInt(RConfig *cfg) const	{ eprintf ("GETI %p\n", cfg); return r_config_get_i (cfg, name.c_str ()); }
+	bool GetBool(RConfig *cfg) const { return GetInt (cfg) != 0; }
+	std::string GetString(RConfig *cfg) const { return r_config_get (cfg, name.c_str ()); }
+	void Set(RConfig *cfg, const char *s) const { r_config_set (cfg, name.c_str (), s); }
 	static const std::vector<const ConfigVar *> &GetAll() { return vars_all; }
 };
 
@@ -287,9 +287,9 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 		RCodeMeta *code = nullptr;
 		std::stringstream out_stream;
 #if R2_VERSION_NUMBER >= 50909
-		Decompile(core, core->addr, mode, out_stream, &code);
+		Decompile (core, core->addr, mode, out_stream, &code);
 #else
-		Decompile(core, core->offset, mode, out_stream, &code);
+		Decompile (core, core->offset, mode, out_stream, &code);
 #endif
 		switch (mode) {
 		case DecompileMode::DISASM:
@@ -549,7 +549,7 @@ static void ListSleighLangs(RCore *core) {
 }
 
 static void PrintAutoSleighLang(RCore *core) {
-	DecompilerLock lock(core);
+	DecompilerLock lock (core);
 	try {
 		auto id = SleighIdFromCore (core);
 #if R2_VERSION_NUMBER >= 50909
@@ -673,7 +673,7 @@ static void _cmd(RCore *core, const char *input) {
 	}
 }
 
-#if R2_VERSION_NUMBER > 50909
+#if R2_VERSION_NUMBER >= 50909
 extern "C" bool r2ghidra_core_cmd(RCorePluginSession *cps, const char *input) {
 	RCore *core = cps->core;
 	if (r_str_startswith (input, "pdg")) {
@@ -695,8 +695,8 @@ extern "C" int r2ghidra_core_cmd(void *user, const char *input) {
 
 bool SleighHomeConfig(void */* user */, void *data) {
 	std::lock_guard<std::recursive_mutex> lock(decompiler_mutex);
-	auto node = reinterpret_cast<RConfigNode *>(data);
-	SleighArchitecture::shutdown();
+	RConfigNode *node = reinterpret_cast<RConfigNode *>(data);
+	SleighArchitecture::shutdown ();
 	SleighArchitecture::specpaths = FileManage ();
 	if (R_STR_ISNOTEMPTY (node->value)) {
 		SleighArchitecture::scanForSleighDirectories (node->value);
@@ -714,7 +714,7 @@ extern "C" RAnalPlugin r_anal_plugin_ghidra;
 extern "C" bool r2ghidra_core_init(RCorePluginSession *cps) {
 	std::lock_guard<std::recursive_mutex> lock(decompiler_mutex);
 	startDecompilerLibrary (nullptr);
-	auto *core = reinterpret_cast<RCore *>(cps->core);
+	RCore *core = reinterpret_cast<RCore *>(cps->core);
 	r_arch_plugin_add (core->anal->arch, &r_arch_plugin_ghidra);
 	RConfig *cfg = core->config;
 	r_config_lock (cfg, false);
@@ -732,8 +732,8 @@ extern "C" bool r2ghidra_core_init(RCorePluginSession *cps) {
 extern "C" int r2ghidra_core_init(void *user, const char *cmd) {
 	std::lock_guard<std::recursive_mutex> lock(decompiler_mutex);
 	startDecompilerLibrary (nullptr);
-	auto *rcmd = reinterpret_cast<RCmd *>(user);
-	auto *core = reinterpret_cast<RCore *>(rcmd->data);
+	RCmd *rcmd = reinterpret_cast<RCmd *>(user);
+	RCore *core = reinterpret_cast<RCore *>(rcmd->data);
 	Gcore = core;
 #if R2_VERSION_NUMBER >= 50809
 	r_arch_plugin_add (core->anal->arch, &r_arch_plugin_ghidra);
