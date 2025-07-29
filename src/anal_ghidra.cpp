@@ -24,14 +24,15 @@
 
 // XXX dont use globals
 static SleighAsm *sanal = nullptr;
+#if R2_VERSION_NUMBER < 50909
 extern "C" RCore *Gcore;
+#endif
 
 static char *slid(RCore *core, const char *cpu, int bits, bool be) {
 	R_LOG_DEBUG ("slid (%s:%d:%d)", cpu, bits, be);
 	if (core == nullptr) {
-		core = Gcore;
-	} else if (Gcore == nullptr) {
-		Gcore = core;
+		R_LOG_ERROR ("cannot slid with nul core");
+		return NULL;
 	}
 	if (sanal == nullptr) {
 		sanal = new SleighAsm ();
@@ -73,6 +74,11 @@ static char *slid_arch(RAnal *anal) {
 
 extern "C" int archinfo(RArchSession *as, ut32 query) {
 	R_RETURN_VAL_IF_FAIL (as, 1);
+#if R2_VERSION_NUMBER >= 50909
+	RBin *bin = (RBin*)as->arch->binb.bin;
+	RIO *io = (RIO*)bin->iob.io;
+	RCore *Gcore = (RCore *)io->coreb.core;
+#endif
 	char *arch = slid_arch (Gcore->anal); // is this initializing sanal global ptr?
 	if (sanal != nullptr) {
 		switch (query) {
@@ -1742,8 +1748,14 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 #if R2_VERSION_NUMBER >= 50809
 extern "C" bool sleigh_decode(RArchSession *as, RAnalOp *aop, RArchDecodeMask mask) {
 	REsil *esil = as->arch->esil;
+#if R2_VERSION_NUMBER >= 50909
+	RBin *bin = (RBin*)as->arch->binb.bin;
+	RIO *io = (RIO*)bin->iob.io;
+	RCore *Gcore = (RCore *)io->coreb.core;
+#else
 	RIO *io = Gcore->io;
 	RBin *bin = Gcore->bin;
+#endif
 	RAnal *anal = Gcore->anal;
 	if (bin != nullptr && esil != nullptr) {
 		io = bin->iob.io;
@@ -1951,7 +1963,11 @@ static std::string regtype_name(const char *cpu, const std::string &regname) {
 #if R2_VERSION_NUMBER >= 50809
 extern "C" char *r2ghidra_regs(RArchSession *as) {
 	R_RETURN_VAL_IF_FAIL (as, nullptr);
-
+#if R2_VERSION_NUMBER >= 50909
+	RBin *bin = (RBin*)as->arch->binb.bin;
+	RIO *io = (RIO*)bin->iob.io;
+	RCore *Gcore = (RCore *)io->coreb.core;
+#endif
 	const char *cpu = r_config_get (Gcore->config, "asm.cpu"); // (as->config != nullptr)? as->config->cpu: "arm";
 
 	if (R_STR_ISEMPTY (cpu)) {
