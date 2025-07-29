@@ -45,7 +45,7 @@ public:
 	const char *GetDesc() const { return desc; }
 	ConfigVarCb GetCallback() const	{ return callback; }
 
-	ut64 GetInt(RConfig *cfg) const	{ eprintf ("GETI %p\n", cfg); return r_config_get_i (cfg, name.c_str ()); }
+	ut64 GetInt(RConfig *cfg) const	{ return r_config_get_i (cfg, name.c_str ()); }
 	bool GetBool(RConfig *cfg) const { return GetInt (cfg) != 0; }
 	std::string GetString(RConfig *cfg) const { return r_config_get (cfg, name.c_str ()); }
 	void Set(RConfig *cfg, const char *s) const { r_config_set (cfg, name.c_str (), s); }
