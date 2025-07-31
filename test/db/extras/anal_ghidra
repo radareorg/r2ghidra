@@ -199,7 +199,7 @@ address: 0x0
 opcode: cmp r7, r6
 esilcost: 0
 disasm: cmp r7, r6
-pseudo: (a, b) = compare (r7, r6)
+pseudo: v = r7 - r6
 mnemonic: cmp
 mask: ffff
 id: 0
@@ -231,7 +231,7 @@ address: 0x0
 opcode: ld.w 0x4[r29], r11
 esilcost: 4
 disasm: ld.w 0x4[r29], r11
-pseudo: ld.w 0x4[r29], r11
+pseudo: ld.w 0x4[r29] r11
 mnemonic: ld.w
 mask: ffffffff
 id: 0
