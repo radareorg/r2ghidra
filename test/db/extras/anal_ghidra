@@ -1,4 +1,5 @@
 NAME=x86:LE:32:default:gcc
+ARGS=-a x86
 FILE=malloc://2048
 EXPECT=<<EOF
             0x00000000      89e1           mov ecx, esp
