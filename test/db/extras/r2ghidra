@@ -6,24 +6,12 @@ x86:LE:32:default:gcc
 uint main(void)
 
 {
-    uint32_t uVar1;
-    uchar auStack_8c [16];
     uchar auStack_7c [120];
     
-    uVar1 = *0x10 + -0x8c & 0xfffffff0;
-    *(uVar1 - 0x10) = "IOLI Crackme Level 0x05\n";
-    *(uVar1 - 0x14) = 0x804856b;
-    sym.imp.printf();
-    *(uVar1 - 0x10) = "Password: ";
-    *(uVar1 - 0x14) = 0x8048577;
-    sym.imp.printf();
-    *(uVar1 - 0xc) = &stack0xffffff84;
-    *(uVar1 - 0x10) = 0x80486b2;
-    *(uVar1 - 0x14) = 0x804858a;
-    sym.imp.scanf();
-    *(uVar1 - 0x10) = &stack0xffffff84;
-    *((uVar1 - 0x10) + -4) = 0x8048595;
-    sym.check();
+    sym.imp.printf("IOLI Crackme Level 0x05\n");
+    sym.imp.printf("Password: ");
+    sym.imp.scanf(0x80486b2,auStack_7c);
+    sym.check(auStack_7c);
     return 0;
 }
 
@@ -43,24 +31,12 @@ EXPECT=<<EOF
     0x08048540 push ebp                         |uint main(void)
                                                 |
                                                 |{
-                                                |    uint32_t uVar1;
-                                                |    uchar auStack_8c [16];
                                                 |    uchar auStack_7c [120];
                                                 |    
-    0x08048549 and esp, 0xfffffff0              |    uVar1 = *0x10 + -0x8c & 0xfffffff0;
-    0x0804855f mov dword [esp], str.IOLI_Crackme_Level_0x05_n    |    *(uVar1 - 0x10) = "IOLI Crackme Level 0x05\n";
-    0x08048566 call sym.imp.printf              |    *(uVar1 - 0x14) = 0x804856b;
-    0x08048566 call sym.imp.printf              |    sym.imp.printf();
-    0x0804856b mov dword [esp], str.Password:    |    *(uVar1 - 0x10) = "Password: ";
-    0x08048572 call sym.imp.printf              |    *(uVar1 - 0x14) = 0x8048577;
-    0x08048572 call sym.imp.printf              |    sym.imp.printf();
-    0x0804857a mov dword [esp + 4], eax         |    *(uVar1 - 0xc) = &stack0xffffff84;
-    0x0804857e mov dword [esp], 0x80486b2       |    *(uVar1 - 0x10) = 0x80486b2;
-    0x08048585 call sym.imp.scanf               |    *(uVar1 - 0x14) = 0x804858a;
-    0x08048585 call sym.imp.scanf               |    sym.imp.scanf();
-    0x0804858d mov dword [esp], eax             |    *(uVar1 - 0x10) = &stack0xffffff84;
-    0x08048590 call sym.check                   |    *((uVar1 - 0x10) + -4) = 0x8048595;
-    0x08048590 call sym.check                   |    sym.check();
+    0x08048566 call sym.imp.printf              |    sym.imp.printf("IOLI Crackme Level 0x05\n");
+    0x08048572 call sym.imp.printf              |    sym.imp.printf("Password: ");
+    0x08048585 call sym.imp.scanf               |    sym.imp.scanf(0x80486b2,auStack_7c);
+    0x08048590 call sym.check                   |    sym.check(auStack_7c);
     0x0804859b ret                              |    return 0;
                                                 |}
                                                 |
@@ -70,24 +46,12 @@ x86:LE:32:default:gcc
 uint main(void)
 
 {
-    uint32_t uVar1;
-    uchar auStack_8c [16];
     uchar auStack_7c [120];
     
-    uVar1 = *0x10 + -0x8c & 0xfffffff0;
-    *(uVar1 - 0x10) = "IOLI Crackme Level 0x05\n";
-    *(uVar1 - 0x14) = 0x804856b;
-    sym.imp.printf();
-    *(uVar1 - 0x10) = "Password: ";
-    *(uVar1 - 0x14) = 0x8048577;
-    sym.imp.printf();
-    *(uVar1 - 0xc) = &stack0xffffff84;
-    *(uVar1 - 0x10) = 0x80486b2;
-    *(uVar1 - 0x14) = 0x804858a;
-    sym.imp.scanf();
-    *(uVar1 - 0x10) = &stack0xffffff84;
-    *((uVar1 - 0x10) + -4) = 0x8048595;
-    sym.check();
+    sym.imp.printf("IOLI Crackme Level 0x05\n");
+    sym.imp.printf("Password: ");
+    sym.imp.scanf(0x80486b2,auStack_7c);
+    sym.check(auStack_7c);
     return 0;
 }
 
@@ -112,49 +76,16 @@ void main(void)
 {
     int iVar1;
     int iVar2;
-    ulong uVar3;
-    int64_t iVar4;
-    uchar *puVar5;
-    uchar *puVar6;
-    uchar *puVar7;
-    uchar *puVar8;
-    ulong uStack_30;
-    int iStack_28;
-    int iStack_24;
-    ulong uStack_20;
-    ulong uStack_18;
-    int64_t iStack_10;
+    int64_t iVar3;
     
-    uStack_20 = 0x8d4;
-    uStack_18 = 0x8da;
-    *(*0x20 + -0x30) = 0x7d4;
-    iStack_28 = sym.imp.strlen(0x8d4);
-    uVar3 = uStack_18;
-    puVar5 = *0x20 + -0x28;
-    *(*0x20 + -0x28 + -8) = 0x7e3;
-    iStack_24 = sym.imp.strlen(uVar3);
-    iVar1 = iStack_28;
-    iVar2 = iStack_24;
-    puVar6 = puVar5;
-    *(puVar5 + -8) = 0x7fb;
-    iStack_10 = sym.imp.malloc(iVar2 + iVar1 + 1);
-    if (iStack_10 != 0) {
-        uVar3 = uStack_20;
-        iVar4 = iStack_10;
-        puVar7 = puVar6;
-        *(puVar6 + -8) = 0x819;
-        sym.imp.strcpy(iVar4,uVar3);
-        uVar3 = uStack_18;
-        iVar4 = iStack_10;
-        puVar8 = puVar7;
-        *(puVar7 + -8) = 0x82c;
-        sym.imp.strcat(iVar4,uVar3);
-        iVar4 = iStack_10;
-        *(puVar8 + -8) = 0x838;
-        sym.imp.puts(iVar4);
-        iVar4 = iStack_10;
-        *(puVar8 + -8) = 0x844;
-        sym.imp.free(iVar4);
+    iVar1 = sym.imp.strlen(0x8d4);
+    iVar2 = sym.imp.strlen(0x8da);
+    iVar3 = sym.imp.malloc(iVar2 + iVar1 + 1);
+    if (iVar3 != 0) {
+        sym.imp.strcpy(iVar3,0x8d4);
+        sym.imp.strcat(iVar3,0x8da);
+        sym.imp.puts(iVar3);
+        sym.imp.free(iVar3);
     }
     return;
 }
@@ -173,104 +104,51 @@ FILE=bins/mz/unzip.exe
 EXPECT=<<EOF
 x86:LE:16:Real Mode:
 
-//WARNING: Unable to track spacebase fully for stack
-
 uint fcn.00001c98(ushort param_1,ushort param_2,ushort param_3,uint param_4,int16_t param_5)
 
 {
     int16_t *piVar1;
     int16_t iVar2;
-    uchar *puVar3;
-    uchar *puVar4;
-    uchar *puVar5;
-    uchar *puVar6;
-    uchar *puVar7;
-    ushort *puVar8;
-    uchar *puVar9;
-    uchar *puVar10;
-    uchar *puVar11;
-    ushort unaff_SI;
-    ushort uVar12;
+    ushort uVar3;
     ushort unaff_CS;
-    ushort unaff_SS;
     ushort unaff_DS;
-    int16_t aiStack_c [2];
+    ushort uStack_a;
     int16_t iStack_6;
     char cStack_4;
     
-    puVar11 = *0x10 + -0xc;
-    *(*0x10 + -0xc) = unaff_SI;
-    aiStack_c[1] = 0x13da;
+    uStack_a = 0x13da;
     do {
-        *(puVar11 + -2) = unaff_DS;
-        *(puVar11 + -4) = 0x401e;
-        *(puVar11 + -6) = unaff_DS;
-        *(puVar11 + -8) = aiStack_c[1];
-        *(puVar11 + -10) = unaff_CS;
-        puVar3 = puVar11 + -0xc;
-        *(puVar11 + -0xc) = 0x1cb7;
-        func_0x0000ec24();
-        *(puVar3 + 6) = unaff_DS;
-        *(puVar3 + 4) = 0x401e;
-        puVar4 = puVar3;
-        *(puVar3 + 2) = param_3;
-        *puVar3 = param_2;
-        *(puVar4 + -2) = 0xdee;
-        puVar5 = puVar4 + -4;
-        *(puVar4 + -4) = 0x1cca;
-        func_0x0000ec24();
-        *(puVar5 + 6) = unaff_DS;
-        *(puVar5 + 4) = 0x401e;
-        *(puVar5 + 2) = 0xdee;
-        puVar6 = puVar5;
-        *puVar5 = 0x1cd7;
-        func_0x0000e59a();
-        puVar7 = puVar6 + 4;
+        func_0x0000ec24(unaff_CS,uStack_a,unaff_DS,0x401e);
+        func_0x0000ec24(0xdee,param_2,param_3,0x401e);
+        func_0x0000e59a(0xdee,0x401e);
         iStack_6 = 0;
         do {
-            *(puVar7 + -2) = 0xdee;
-            puVar8 = puVar7 + -4;
-            puVar7 = puVar7 + -4;
-            *puVar8 = 0x1ce4;
-            cStack_4 = func_0x0000eb82();
+            cStack_4 = func_0x0000eb82(0xdee);
             if (cStack_4 == '\r') {
                 cStack_4 = '\n';
             }
-            if (SBORROW2(iStack_6,param_5) != iStack_6 - param_5 < 0) {
-                *(param_4 + iStack_6) = cStack_4;
+            iVar2 = param_4;
+            uVar3 = param_4 >> 0x10;
+            if (iStack_6 < param_5) {
+                *(iVar2 + iStack_6) = cStack_4;
                 iStack_6 = iStack_6 + 1;
             }
         } while (cStack_4 != '\n');
         piVar1 = 0x4022;
         *piVar1 = *piVar1 + -1;
         if (*piVar1 < 0) {
-            *(puVar7 + -2) = unaff_DS;
-            *(puVar7 + -4) = 0x401e;
-            *(puVar7 + -6) = 10;
-            *(puVar7 + -8) = 0xdee;
-            puVar9 = puVar7 + -10;
-            *(puVar7 + -10) = 0x1d2e;
-            func_0x0000e4ae();
-            puVar7 = puVar9 + 6;
+            func_0x0000e4ae(0xdee,10,0x401e);
         }
         else {
             **0x401e = 10;
             *0x401e = *0x401e + 1;
         }
-        *(puVar7 + -2) = unaff_DS;
-        *(puVar7 + -4) = 0x401e;
-        *(puVar7 + -6) = 0xdee;
         unaff_CS = 0xdee;
-        puVar10 = puVar7 + -8;
-        *(puVar7 + -8) = 0x1d3b;
-        func_0x0000e59a();
-        puVar11 = puVar10 + 4;
-        aiStack_c[1] = 0x13db;
-        uVar12 = param_4 >> 0x10;
-        iVar2 = param_4;
+        func_0x0000e59a(0xdee,0x401e);
+        uStack_a = 0x13db;
     } while (*(iVar2 + iStack_6 + -1) != '\n');
     *(iVar2 + iStack_6 + -1) = 0;
-    return CONCAT22(uVar12,iVar2);
+    return param_4;
 }
 
 EOF
@@ -292,49 +170,16 @@ void main(void)
 {
     int iVar1;
     int iVar2;
-    ulong uVar3;
-    int64_t iVar4;
-    uchar *puVar5;
-    uchar *puVar6;
-    uchar *puVar7;
-    uchar *puVar8;
-    ulong uStack_30;
-    int iStack_28;
-    int iStack_24;
-    ulong uStack_20;
-    ulong uStack_18;
-    int64_t iStack_10;
+    int64_t iVar3;
     
-    uStack_20 = 0x8d4;
-    uStack_18 = 0x8da;
-    *(*0x20 + -0x30) = 0x7d4;
-    iStack_28 = sym.imp.strlen(0x8d4);
-    uVar3 = uStack_18;
-    puVar5 = *0x20 + -0x28;
-    *(*0x20 + -0x28 + -8) = 0x7e3;
-    iStack_24 = sym.imp.strlen(uVar3);
-    iVar1 = iStack_28;
-    iVar2 = iStack_24;
-    puVar6 = puVar5;
-    *(puVar5 + -8) = 0x7fb;
-    iStack_10 = sym.imp.malloc(iVar2 + iVar1 + 1);
-    if (iStack_10 != 0) {
-        uVar3 = uStack_20;
-        iVar4 = iStack_10;
-        puVar7 = puVar6;
-        *(puVar6 + -8) = 0x819;
-        sym.imp.strcpy(iVar4,uVar3);
-        uVar3 = uStack_18;
-        iVar4 = iStack_10;
-        puVar8 = puVar7;
-        *(puVar7 + -8) = 0x82c;
-        sym.imp.strcat(iVar4,uVar3);
-        iVar4 = iStack_10;
-        *(puVar8 + -8) = 0x838;
-        sym.imp.puts(iVar4);
-        iVar4 = iStack_10;
-        *(puVar8 + -8) = 0x844;
-        sym.imp.free(iVar4);
+    iVar1 = sym.imp.strlen(0x8d4);
+    iVar2 = sym.imp.strlen(0x8da);
+    iVar3 = sym.imp.malloc(iVar2 + iVar1 + 1);
+    if (iVar3 != 0) {
+        sym.imp.strcpy(iVar3,0x8d4);
+        sym.imp.strcat(iVar3,0x8da);
+        sym.imp.puts(iVar3);
+        sym.imp.free(iVar3);
     }
     return;
 }
@@ -364,13 +209,13 @@ void fcn.0000080e(void)
     uVar2 = 0xff;
     do {
         *(uVar2 + 0x3ff) = 0x41;
-        uVar2 = uVar2 + -1;
+        uVar1 = *0x824;
+        uVar2 = uVar2 - 1;
     } while (uVar2 != 0);
-    uVar1 = *0x824;
     uVar2 = 0xff;
     do {
         *(uVar2 + 0xd7ff) = uVar1;
-        uVar2 = uVar2 + -1;
+        uVar2 = uVar2 - 1;
     } while (uVar2 != 0);
     return;
 }
@@ -392,10 +237,6 @@ EXPECT=<<EOF
 uint sym.get_global_array_entry(void)
 
 {
-    uint unaff_EBP;
-    uint uStack_4;
-    
-    *(*0x10 + -4) = unaff_EBP;
     return *0x804c034;
 }
 
@@ -404,10 +245,6 @@ uint sym.get_global_array_entry(void)
 uint sym.get_global_array_entry(void)
 
 {
-    uint unaff_EBP;
-    uint uStack_4;
-    
-    *(*0x10 + -4) = unaff_EBP;
     return uRam0804c034;
 }
 
@@ -430,10 +267,6 @@ EXPECT=<<EOF
 uint sym.get_global_var(void)
 
 {
-    uint unaff_EBP;
-    uint uStack_4;
-    
-    *(*0x10 + -4) = unaff_EBP;
     return _obj.global_var;
 }
 
@@ -444,10 +277,6 @@ uint sym.get_global_var(void)
 uint sym.get_global_var(void)
 
 {
-    uint unaff_EBP;
-    uint uStack_4;
-    
-    *(*0x10 + -4) = unaff_EBP;
     return _obj.global_var;
 }
 
@@ -467,7 +296,7 @@ NAME=function variable annotations
 FILE=bins/dectest64
 EXPECT=<<EOF
 {
-  "code": "\nulong main(uint param_1,ulong param_2)\n\n{\n    ulong uVar1;\n    int64_t in_FS_OFFSET;\n    ulong uStack_40;\n    ulong uStack_38;\n    uint uStack_2c;\n    uchar auStack_28 [24];\n    int64_t iStack_10;\n    \n    iStack_10 = *(in_FS_OFFSET + 0x28);\n    uStack_38 = param_2;\n    uStack_2c = param_1;\n    *(*0x20 + -0x40) = 0x4011b1;\n    sym.Aeropause(&stack0xffffffffffffffd8,param_1,param_2);\n    uVar1 = 0;\n    if (iStack_10 != *(in_FS_OFFSET + 0x28)) {\n        *(*0x20 + -0x38 + -8) = 0x4011ca;\n        uVar1 = sym.imp.__stack_chk_fail();\n    }\n    return uVar1;\n}\n\n",
+  "code": "\nulong main(uint param_1,ulong param_2)\n\n{\n    ulong uVar1;\n    int64_t in_FS_OFFSET;\n    uchar auStack_28 [24];\n    int64_t iStack_10;\n    \n    iStack_10 = *(in_FS_OFFSET + 0x28);\n    sym.Aeropause(auStack_28,param_1,param_2);\n    uVar1 = 0;\n    if (iStack_10 != *(in_FS_OFFSET + 0x28)) {\n        uVar1 = sym.imp.__stack_chk_fail();\n    }\n    return uVar1;\n}\n\n",
   "annotations": [
     {
       "start": 1,
@@ -574,549 +403,309 @@ EXPECT=<<EOF
     },
     {
       "start": 96,
-      "end": 105,
-      "type": "local_variable",
-      "name": "uStack_40"
-    },
-    {
-      "start": 96,
-      "end": 105,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 111,
-      "end": 116,
-      "type": "syntax_highlight",
-      "syntax_highlight": "datatype"
-    },
-    {
-      "start": 117,
-      "end": 126,
-      "type": "local_variable",
-      "name": "uStack_38"
-    },
-    {
-      "start": 117,
-      "end": 126,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 132,
-      "end": 136,
-      "type": "syntax_highlight",
-      "syntax_highlight": "datatype"
-    },
-    {
-      "start": 137,
-      "end": 146,
-      "type": "local_variable",
-      "name": "uStack_2c"
-    },
-    {
-      "start": 137,
-      "end": 146,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 152,
-      "end": 157,
-      "type": "syntax_highlight",
-      "syntax_highlight": "datatype"
-    },
-    {
-      "start": 158,
-      "end": 168,
+      "end": 106,
       "type": "local_variable",
       "name": "auStack_28"
     },
     {
-      "start": 158,
-      "end": 168,
+      "start": 96,
+      "end": 106,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 170,
-      "end": 172,
+      "start": 108,
+      "end": 110,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 179,
-      "end": 186,
+      "start": 117,
+      "end": 124,
       "type": "syntax_highlight",
       "syntax_highlight": "datatype"
     },
     {
-      "start": 187,
-      "end": 196,
+      "start": 125,
+      "end": 134,
       "type": "local_variable",
       "name": "iStack_10"
     },
     {
-      "start": 187,
-      "end": 196,
+      "start": 125,
+      "end": 134,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 207,
-      "end": 216,
+      "start": 145,
+      "end": 154,
       "type": "local_variable",
       "name": "iStack_10"
     },
     {
-      "start": 207,
-      "end": 216,
+      "start": 145,
+      "end": 154,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 217,
-      "end": 218,
+      "start": 155,
+      "end": 156,
       "type": "offset",
       "offset": 4198797
     },
     {
-      "start": 219,
-      "end": 220,
+      "start": 157,
+      "end": 158,
       "type": "offset",
       "offset": 4198797
     },
     {
-      "start": 221,
-      "end": 233,
+      "start": 159,
+      "end": 171,
       "type": "local_variable",
       "name": "in_FS_OFFSET"
     },
     {
-      "start": 221,
-      "end": 233,
+      "start": 159,
+      "end": 171,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 234,
-      "end": 235,
+      "start": 172,
+      "end": 173,
       "type": "offset",
       "offset": 4198797
     },
     {
-      "start": 236,
-      "end": 240,
+      "start": 174,
+      "end": 178,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 207,
-      "end": 241,
+      "start": 145,
+      "end": 179,
       "type": "offset",
       "offset": 4198797
     },
     {
-      "start": 247,
-      "end": 256,
-      "type": "local_variable",
-      "name": "uStack_38"
-    },
-    {
-      "start": 247,
-      "end": 256,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 257,
-      "end": 258,
-      "type": "offset",
-      "offset": 4198828
-    },
-    {
-      "start": 259,
-      "end": 266,
-      "type": "function_parameter",
-      "name": "param_2"
-    },
-    {
-      "start": 259,
-      "end": 266,
-      "type": "syntax_highlight",
-      "syntax_highlight": "function_parameter"
-    },
-    {
-      "start": 247,
-      "end": 266,
-      "type": "offset",
-      "offset": 4198828
-    },
-    {
-      "start": 272,
-      "end": 281,
-      "type": "local_variable",
-      "name": "uStack_2c"
-    },
-    {
-      "start": 272,
-      "end": 281,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 282,
-      "end": 283,
-      "type": "offset",
-      "offset": 4198828
-    },
-    {
-      "start": 284,
-      "end": 291,
-      "type": "function_parameter",
-      "name": "param_1"
-    },
-    {
-      "start": 284,
-      "end": 291,
-      "type": "syntax_highlight",
-      "syntax_highlight": "function_parameter"
-    },
-    {
-      "start": 272,
-      "end": 291,
-      "type": "offset",
-      "offset": 4198828
-    },
-    {
-      "start": 297,
-      "end": 298,
-      "type": "offset",
-      "offset": 4198828
-    },
-    {
-      "start": 299,
-      "end": 300,
-      "type": "offset",
-      "offset": 4198828
-    },
-    {
-      "start": 300,
-      "end": 304,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 305,
-      "end": 306,
-      "type": "offset",
-      "offset": 4198828
-    },
-    {
-      "start": 307,
-      "end": 312,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 314,
-      "end": 315,
-      "type": "offset",
-      "offset": 4198828
-    },
-    {
-      "start": 316,
-      "end": 324,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 297,
-      "end": 324,
-      "type": "offset",
-      "offset": 4198828
-    },
-    {
-      "start": 330,
-      "end": 343,
+      "start": 185,
+      "end": 198,
       "type": "function_name",
       "name": "sym.Aeropause",
       "offset": 4199038
     },
     {
-      "start": 330,
-      "end": 343,
+      "start": 185,
+      "end": 198,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 344,
-      "end": 345,
-      "type": "offset",
-      "offset": 4198819
-    },
-    {
-      "start": 345,
-      "end": 368,
+      "start": 199,
+      "end": 209,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 368,
-      "end": 369,
+      "start": 209,
+      "end": 210,
       "type": "offset",
       "offset": 4198828
     },
     {
-      "start": 369,
-      "end": 376,
+      "start": 210,
+      "end": 217,
       "type": "function_parameter",
       "name": "param_1"
     },
     {
-      "start": 369,
-      "end": 376,
+      "start": 210,
+      "end": 217,
       "type": "syntax_highlight",
       "syntax_highlight": "function_parameter"
     },
     {
-      "start": 376,
-      "end": 377,
+      "start": 217,
+      "end": 218,
       "type": "offset",
       "offset": 4198828
     },
     {
-      "start": 377,
-      "end": 384,
+      "start": 218,
+      "end": 225,
       "type": "function_parameter",
       "name": "param_2"
     },
     {
-      "start": 377,
-      "end": 384,
+      "start": 218,
+      "end": 225,
       "type": "syntax_highlight",
       "syntax_highlight": "function_parameter"
     },
     {
-      "start": 330,
-      "end": 385,
+      "start": 185,
+      "end": 226,
       "type": "offset",
       "offset": 4198828
     },
     {
-      "start": 391,
-      "end": 396,
+      "start": 232,
+      "end": 237,
       "type": "local_variable",
       "name": "uVar1"
     },
     {
-      "start": 391,
-      "end": 396,
+      "start": 232,
+      "end": 237,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 397,
-      "end": 398,
+      "start": 238,
+      "end": 239,
       "type": "offset",
       "offset": 4198833
     },
     {
-      "start": 399,
-      "end": 400,
+      "start": 240,
+      "end": 241,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 391,
-      "end": 400,
+      "start": 232,
+      "end": 241,
       "type": "offset",
       "offset": 4198833
     },
     {
-      "start": 406,
-      "end": 408,
+      "start": 247,
+      "end": 249,
       "type": "offset",
       "offset": 4198851
     },
     {
-      "start": 406,
-      "end": 408,
+      "start": 247,
+      "end": 249,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 410,
-      "end": 419,
+      "start": 251,
+      "end": 260,
       "type": "local_variable",
       "name": "iStack_10"
     },
     {
-      "start": 410,
-      "end": 419,
+      "start": 251,
+      "end": 260,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 420,
-      "end": 422,
+      "start": 261,
+      "end": 263,
       "type": "offset",
       "offset": 4198842
     },
     {
-      "start": 423,
-      "end": 424,
+      "start": 264,
+      "end": 265,
       "type": "offset",
       "offset": 4198842
     },
     {
-      "start": 425,
-      "end": 437,
+      "start": 266,
+      "end": 278,
       "type": "local_variable",
       "name": "in_FS_OFFSET"
     },
     {
-      "start": 425,
-      "end": 437,
+      "start": 266,
+      "end": 278,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 438,
-      "end": 439,
+      "start": 279,
+      "end": 280,
       "type": "offset",
       "offset": 4198842
     },
     {
-      "start": 440,
-      "end": 444,
+      "start": 281,
+      "end": 285,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 457,
-      "end": 458,
-      "type": "offset",
-      "offset": 4198853
-    },
-    {
-      "start": 459,
-      "end": 460,
-      "type": "offset",
-      "offset": 4198786
-    },
-    {
-      "start": 460,
-      "end": 464,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 465,
-      "end": 466,
-      "type": "offset",
-      "offset": 4198786
-    },
-    {
-      "start": 467,
-      "end": 472,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 473,
-      "end": 474,
-      "type": "offset",
-      "offset": 4198853
-    },
-    {
-      "start": 475,
-      "end": 477,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 479,
-      "end": 480,
-      "type": "offset",
-      "offset": 4198853
-    },
-    {
-      "start": 481,
-      "end": 489,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 457,
-      "end": 489,
-      "type": "offset",
-      "offset": 4198853
-    },
-    {
-      "start": 499,
-      "end": 504,
+      "start": 298,
+      "end": 303,
       "type": "local_variable",
       "name": "uVar1"
     },
     {
-      "start": 499,
-      "end": 504,
+      "start": 298,
+      "end": 303,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 505,
-      "end": 506,
+      "start": 304,
+      "end": 305,
       "type": "offset",
       "offset": 4198853
     },
     {
-      "start": 507,
-      "end": 531,
+      "start": 306,
+      "end": 330,
       "type": "function_name",
       "name": "sym.imp.__stack_chk_fail",
       "offset": 4198464
     },
     {
-      "start": 507,
-      "end": 531,
+      "start": 306,
+      "end": 330,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 499,
-      "end": 533,
+      "start": 298,
+      "end": 332,
       "type": "offset",
       "offset": 4198853
     },
     {
-      "start": 545,
-      "end": 551,
+      "start": 344,
+      "end": 350,
       "type": "offset",
       "offset": 4198859
     },
     {
-      "start": 545,
-      "end": 551,
+      "start": 344,
+      "end": 350,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 552,
-      "end": 557,
+      "start": 351,
+      "end": 356,
       "type": "local_variable",
       "name": "uVar1"
     },
     {
-      "start": 552,
-      "end": 557,
+      "start": 351,
+      "end": 356,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 545,
-      "end": 557,
+      "start": 344,
+      "end": 356,
       "type": "offset",
       "offset": 4198859
     }
@@ -1134,7 +723,7 @@ NAME=global variable annotation
 FILE=bins/dectest32
 EXPECT=<<EOF
 {
-  "code": "\nuint sym.get_global_array_entry(void)\n\n{\n    uint unaff_EBP;\n    uint uStack_4;\n    \n    *(*0x10 + -4) = unaff_EBP;\n    return *0x804c034;\n}\n\n",
+  "code": "\nuint sym.get_global_array_entry(void)\n\n{\n    return *0x804c034;\n}\n\n",
   "annotations": [
     {
       "start": 1,
@@ -1169,127 +758,37 @@ EXPECT=<<EOF
     },
     {
       "start": 46,
-      "end": 50,
-      "type": "syntax_highlight",
-      "syntax_highlight": "datatype"
-    },
-    {
-      "start": 51,
-      "end": 60,
-      "type": "local_variable",
-      "name": "unaff_EBP"
-    },
-    {
-      "start": 51,
-      "end": 60,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 66,
-      "end": 70,
-      "type": "syntax_highlight",
-      "syntax_highlight": "datatype"
-    },
-    {
-      "start": 71,
-      "end": 79,
-      "type": "local_variable",
-      "name": "uStack_4"
-    },
-    {
-      "start": 71,
-      "end": 79,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 90,
-      "end": 91,
-      "type": "offset",
-      "offset": 134517184
-    },
-    {
-      "start": 92,
-      "end": 93,
-      "type": "offset",
-      "offset": 134517184
-    },
-    {
-      "start": 93,
-      "end": 97,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 98,
-      "end": 99,
-      "type": "offset",
-      "offset": 134517184
-    },
-    {
-      "start": 100,
-      "end": 102,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 104,
-      "end": 105,
-      "type": "offset",
-      "offset": 134517184
-    },
-    {
-      "start": 106,
-      "end": 115,
-      "type": "local_variable",
-      "name": "unaff_EBP"
-    },
-    {
-      "start": 106,
-      "end": 115,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 90,
-      "end": 115,
-      "type": "offset",
-      "offset": 134517184
-    },
-    {
-      "start": 121,
-      "end": 127,
+      "end": 52,
       "type": "offset",
       "offset": 134517193
     },
     {
-      "start": 121,
-      "end": 127,
+      "start": 46,
+      "end": 52,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 128,
-      "end": 129,
+      "start": 53,
+      "end": 54,
       "type": "offset",
       "offset": 134517187
     },
     {
-      "start": 129,
-      "end": 138,
+      "start": 54,
+      "end": 63,
       "type": "global_variable",
       "offset": 134529076
     },
     {
-      "start": 129,
-      "end": 138,
+      "start": 54,
+      "end": 63,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 121,
-      "end": 138,
+      "start": 46,
+      "end": 63,
       "type": "offset",
       "offset": 134517193
     }
@@ -1307,7 +806,7 @@ NAME=constant variable annotation
 FILE=bins/dectest32
 EXPECT=<<EOF
 {
-  "code": "\nvoid sym.PrintAmbassador(uint32_t param_1)\n\n{\n    uchar *puVar1;\n    char *apcStack_20 [5];\n    uchar auStack_c [8];\n    \n    *(*0x10 + -0x1c) = \"Ambassador value: \";\n    *(*0x10 + -0x20) = 0x8049234;\n    func_0x08049050();\n    puVar1 = &stack0xfffffff4;\n    if (param_1 < 5) {\n        puVar1 = &stack0xfffffff4;\n        switch(param_1) {\n        case 0:\n        case 1:\n        case 2:\n        case 3:\n        case 4:\n            *(&stack0xfffffff4 + -0x10) = \"pure\";\n            *(&stack0xfffffff4 + -0x14) = 0x804926e;\n            func_0x08049050();\n            puVar1 = &stack0xfffffff4 + 0;\n        }\n    }\n    else if (param_1 == 1000000) {\n        *(&stack0xfffffff4 + -0x10) = \"million\";\n        *(&stack0xfffffff4 + -0x14) = 0x80492c8;\n        func_0x08049050();\n        puVar1 = &stack0xfffffff4 + 0;\n    }\n    *(puVar1 + -0x10) = 10;\n    *(puVar1 + -0x14) = 0x80492d8;\n    func_0x08049090();\n    return;\n}\n\n",
+  "code": "\nvoid sym.PrintAmbassador(uint32_t param_1)\n\n{\n    func_0x08049050(\"Ambassador value: \");\n    if (param_1 < 5) {\n        switch(param_1) {\n        case 0:\n            func_0x08049050(\"pure\");\n            break;\n        case 1:\n            func_0x08049050(\"reason\");\n            break;\n        case 2:\n            func_0x08049050(\"revolution\");\n            break;\n        case 3:\n            func_0x08049050(\"echoes\");\n            break;\n        case 4:\n            func_0x08049050(\"wall\");\n        }\n    }\n    else if (param_1 == 1000000) {\n        func_0x08049050(\"million\");\n    }\n    func_0x08049090(10);\n    return;\n}\n\n",
   "annotations": [
     {
       "start": 1,
@@ -1354,863 +853,441 @@ EXPECT=<<EOF
     },
     {
       "start": 51,
-      "end": 56,
-      "type": "syntax_highlight",
-      "syntax_highlight": "datatype"
-    },
-    {
-      "start": 58,
-      "end": 64,
-      "type": "local_variable",
-      "name": "puVar1"
-    },
-    {
-      "start": 58,
-      "end": 64,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 70,
-      "end": 74,
-      "type": "syntax_highlight",
-      "syntax_highlight": "datatype"
-    },
-    {
-      "start": 76,
-      "end": 87,
-      "type": "local_variable",
-      "name": "apcStack_20"
-    },
-    {
-      "start": 76,
-      "end": 87,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 89,
-      "end": 90,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 97,
-      "end": 102,
-      "type": "syntax_highlight",
-      "syntax_highlight": "datatype"
-    },
-    {
-      "start": 103,
-      "end": 112,
-      "type": "local_variable",
-      "name": "auStack_c"
-    },
-    {
-      "start": 103,
-      "end": 112,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 114,
-      "end": 115,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 127,
-      "end": 128,
-      "type": "offset",
-      "offset": 134517290
-    },
-    {
-      "start": 129,
-      "end": 130,
-      "type": "offset",
-      "offset": 134517290
-    },
-    {
-      "start": 130,
-      "end": 134,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 135,
-      "end": 136,
-      "type": "offset",
-      "offset": 134517290
-    },
-    {
-      "start": 137,
-      "end": 142,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 144,
-      "end": 145,
-      "type": "offset",
-      "offset": 134517290
-    },
-    {
-      "start": 146,
-      "end": 166,
-      "type": "constant_variable",
-      "offset": 134520840
-    },
-    {
-      "start": 146,
-      "end": 166,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 127,
-      "end": 166,
-      "type": "offset",
-      "offset": 134517290
-    },
-    {
-      "start": 172,
-      "end": 173,
-      "type": "offset",
-      "offset": 134517295
-    },
-    {
-      "start": 174,
-      "end": 175,
-      "type": "offset",
-      "offset": 134517295
-    },
-    {
-      "start": 175,
-      "end": 179,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 180,
-      "end": 181,
-      "type": "offset",
-      "offset": 134517295
-    },
-    {
-      "start": 182,
-      "end": 187,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 189,
-      "end": 190,
-      "type": "offset",
-      "offset": 134517295
-    },
-    {
-      "start": 191,
-      "end": 200,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 172,
-      "end": 200,
-      "type": "offset",
-      "offset": 134517295
-    },
-    {
-      "start": 206,
-      "end": 221,
+      "end": 66,
       "type": "function_name",
       "name": "",
       "offset": 134516816
     },
     {
-      "start": 206,
-      "end": 221,
+      "start": 51,
+      "end": 66,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 206,
-      "end": 223,
+      "start": 67,
+      "end": 87,
+      "type": "constant_variable",
+      "offset": 134520840
+    },
+    {
+      "start": 67,
+      "end": 87,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 51,
+      "end": 88,
       "type": "offset",
       "offset": 134517295
     },
     {
-      "start": 229,
-      "end": 235,
-      "type": "local_variable",
-      "name": "puVar1"
+      "start": 94,
+      "end": 96,
+      "type": "offset",
+      "offset": 134517307
     },
     {
-      "start": 229,
-      "end": 235,
+      "start": 94,
+      "end": 96,
       "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
+      "syntax_highlight": "keyword"
     },
     {
-      "start": 236,
-      "end": 237,
-      "type": "offset",
-      "offset": 134517300
+      "start": 98,
+      "end": 105,
+      "type": "function_parameter",
+      "name": "param_1"
     },
     {
-      "start": 238,
-      "end": 239,
+      "start": 98,
+      "end": 105,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_parameter"
+    },
+    {
+      "start": 106,
+      "end": 107,
       "type": "offset",
-      "offset": 134517284
+      "offset": 134517307
+    },
+    {
+      "start": 108,
+      "end": 109,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 121,
+      "end": 127,
+      "type": "offset",
+      "offset": 134517332
+    },
+    {
+      "start": 121,
+      "end": 127,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 128,
+      "end": 135,
+      "type": "function_parameter",
+      "name": "param_1"
+    },
+    {
+      "start": 128,
+      "end": 135,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_parameter"
+    },
+    {
+      "start": 147,
+      "end": 151,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 167,
+      "end": 182,
+      "type": "function_name",
+      "name": "",
+      "offset": 134516816
+    },
+    {
+      "start": 167,
+      "end": 182,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_name"
+    },
+    {
+      "start": 183,
+      "end": 189,
+      "type": "constant_variable",
+      "offset": 134520859
+    },
+    {
+      "start": 183,
+      "end": 189,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 167,
+      "end": 190,
+      "type": "offset",
+      "offset": 134517353
+    },
+    {
+      "start": 204,
+      "end": 209,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 204,
+      "end": 210,
+      "type": "offset",
+      "offset": 134517361
+    },
+    {
+      "start": 219,
+      "end": 223,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 239,
+      "end": 254,
+      "type": "function_name",
+      "name": "",
+      "offset": 134516816
     },
     {
       "start": 239,
       "end": 254,
       "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
+      "syntax_highlight": "function_name"
     },
     {
-      "start": 229,
-      "end": 254,
-      "type": "offset",
-      "offset": 134517300
-    },
-    {
-      "start": 260,
-      "end": 262,
-      "type": "offset",
-      "offset": 134517307
-    },
-    {
-      "start": 260,
-      "end": 262,
-      "type": "syntax_highlight",
-      "syntax_highlight": "keyword"
-    },
-    {
-      "start": 264,
-      "end": 271,
-      "type": "function_parameter",
-      "name": "param_1"
-    },
-    {
-      "start": 264,
-      "end": 271,
-      "type": "syntax_highlight",
-      "syntax_highlight": "function_parameter"
-    },
-    {
-      "start": 272,
-      "end": 273,
-      "type": "offset",
-      "offset": 134517307
-    },
-    {
-      "start": 274,
-      "end": 275,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 287,
-      "end": 293,
-      "type": "local_variable",
-      "name": "puVar1"
-    },
-    {
-      "start": 287,
-      "end": 293,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 294,
-      "end": 295,
-      "type": "offset",
-      "offset": 134517332
-    },
-    {
-      "start": 296,
-      "end": 297,
-      "type": "offset",
-      "offset": 134517284
-    },
-    {
-      "start": 297,
-      "end": 312,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 287,
-      "end": 312,
-      "type": "offset",
-      "offset": 134517332
-    },
-    {
-      "start": 322,
-      "end": 328,
-      "type": "offset",
-      "offset": 134517332
-    },
-    {
-      "start": 322,
-      "end": 328,
-      "type": "syntax_highlight",
-      "syntax_highlight": "keyword"
-    },
-    {
-      "start": 329,
-      "end": 336,
-      "type": "function_parameter",
-      "name": "param_1"
-    },
-    {
-      "start": 329,
-      "end": 336,
-      "type": "syntax_highlight",
-      "syntax_highlight": "function_parameter"
-    },
-    {
-      "start": 348,
-      "end": 352,
-      "type": "syntax_highlight",
-      "syntax_highlight": "keyword"
-    },
-    {
-      "start": 364,
-      "end": 368,
-      "type": "syntax_highlight",
-      "syntax_highlight": "keyword"
-    },
-    {
-      "start": 380,
-      "end": 384,
-      "type": "syntax_highlight",
-      "syntax_highlight": "keyword"
-    },
-    {
-      "start": 396,
-      "end": 400,
-      "type": "syntax_highlight",
-      "syntax_highlight": "keyword"
-    },
-    {
-      "start": 412,
-      "end": 416,
-      "type": "syntax_highlight",
-      "syntax_highlight": "keyword"
-    },
-    {
-      "start": 432,
-      "end": 433,
-      "type": "offset",
-      "offset": 134517348
-    },
-    {
-      "start": 434,
-      "end": 435,
-      "type": "offset",
-      "offset": 134517284
-    },
-    {
-      "start": 435,
-      "end": 450,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 451,
-      "end": 452,
-      "type": "offset",
-      "offset": 134517348
-    },
-    {
-      "start": 453,
-      "end": 458,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 460,
-      "end": 461,
-      "type": "offset",
-      "offset": 134517348
-    },
-    {
-      "start": 462,
-      "end": 468,
+      "start": 255,
+      "end": 263,
       "type": "constant_variable",
-      "offset": 134520859
+      "offset": 134520864
     },
     {
-      "start": 462,
-      "end": 468,
+      "start": 255,
+      "end": 263,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 432,
-      "end": 468,
+      "start": 239,
+      "end": 264,
       "type": "offset",
-      "offset": 134517348
+      "offset": 134517371
     },
     {
-      "start": 482,
-      "end": 483,
-      "type": "offset",
-      "offset": 134517353
-    },
-    {
-      "start": 484,
-      "end": 485,
-      "type": "offset",
-      "offset": 134517284
-    },
-    {
-      "start": 485,
-      "end": 500,
+      "start": 278,
+      "end": 283,
       "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
+      "syntax_highlight": "keyword"
     },
     {
-      "start": 501,
-      "end": 502,
+      "start": 278,
+      "end": 284,
       "type": "offset",
-      "offset": 134517353
+      "offset": 134517379
     },
     {
-      "start": 503,
-      "end": 508,
+      "start": 293,
+      "end": 297,
       "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
+      "syntax_highlight": "keyword"
     },
     {
-      "start": 510,
-      "end": 511,
-      "type": "offset",
-      "offset": 134517353
-    },
-    {
-      "start": 512,
-      "end": 521,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 482,
-      "end": 521,
-      "type": "offset",
-      "offset": 134517353
-    },
-    {
-      "start": 535,
-      "end": 550,
+      "start": 313,
+      "end": 328,
       "type": "function_name",
       "name": "",
       "offset": 134516816
     },
     {
-      "start": 535,
-      "end": 550,
+      "start": 313,
+      "end": 328,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 535,
-      "end": 552,
-      "type": "offset",
-      "offset": 134517353
+      "start": 329,
+      "end": 341,
+      "type": "constant_variable",
+      "offset": 134520871
     },
     {
-      "start": 566,
-      "end": 572,
-      "type": "local_variable",
-      "name": "puVar1"
-    },
-    {
-      "start": 566,
-      "end": 572,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 573,
-      "end": 574,
-      "type": "offset",
-      "offset": 134517358
-    },
-    {
-      "start": 575,
-      "end": 576,
-      "type": "offset",
-      "offset": 134517284
-    },
-    {
-      "start": 576,
-      "end": 591,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 592,
-      "end": 593,
-      "type": "offset",
-      "offset": 134517358
-    },
-    {
-      "start": 594,
-      "end": 595,
+      "start": 329,
+      "end": 341,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 566,
-      "end": 595,
+      "start": 313,
+      "end": 342,
       "type": "offset",
-      "offset": 134517358
+      "offset": 134517389
     },
     {
-      "start": 617,
-      "end": 621,
+      "start": 356,
+      "end": 361,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 622,
-      "end": 624,
+      "start": 356,
+      "end": 362,
+      "type": "offset",
+      "offset": 134517397
+    },
+    {
+      "start": 371,
+      "end": 375,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 391,
+      "end": 406,
+      "type": "function_name",
+      "name": "",
+      "offset": 134516816
+    },
+    {
+      "start": 391,
+      "end": 406,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_name"
+    },
+    {
+      "start": 407,
+      "end": 415,
+      "type": "constant_variable",
+      "offset": 134520882
+    },
+    {
+      "start": 407,
+      "end": 415,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 391,
+      "end": 416,
+      "type": "offset",
+      "offset": 134517407
+    },
+    {
+      "start": 430,
+      "end": 435,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 430,
+      "end": 436,
+      "type": "offset",
+      "offset": 134517415
+    },
+    {
+      "start": 445,
+      "end": 449,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 465,
+      "end": 480,
+      "type": "function_name",
+      "name": "",
+      "offset": 134516816
+    },
+    {
+      "start": 465,
+      "end": 480,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_name"
+    },
+    {
+      "start": 481,
+      "end": 487,
+      "type": "constant_variable",
+      "offset": 134520889
+    },
+    {
+      "start": 481,
+      "end": 487,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 465,
+      "end": 488,
+      "type": "offset",
+      "offset": 134517425
+    },
+    {
+      "start": 510,
+      "end": 514,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 515,
+      "end": 517,
       "type": "offset",
       "offset": 134517341
     },
     {
-      "start": 622,
-      "end": 624,
+      "start": 515,
+      "end": 517,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 626,
-      "end": 633,
+      "start": 519,
+      "end": 526,
       "type": "function_parameter",
       "name": "param_1"
     },
     {
-      "start": 626,
-      "end": 633,
+      "start": 519,
+      "end": 526,
       "type": "syntax_highlight",
       "syntax_highlight": "function_parameter"
     },
     {
-      "start": 634,
-      "end": 636,
+      "start": 527,
+      "end": 529,
       "type": "offset",
       "offset": 134517334
     },
     {
-      "start": 637,
-      "end": 644,
+      "start": 530,
+      "end": 537,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 656,
-      "end": 657,
-      "type": "offset",
-      "offset": 134517438
-    },
-    {
-      "start": 658,
-      "end": 659,
-      "type": "offset",
-      "offset": 134517284
-    },
-    {
-      "start": 659,
-      "end": 674,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 675,
-      "end": 676,
-      "type": "offset",
-      "offset": 134517438
-    },
-    {
-      "start": 677,
-      "end": 682,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 684,
-      "end": 685,
-      "type": "offset",
-      "offset": 134517438
-    },
-    {
-      "start": 686,
-      "end": 695,
-      "type": "constant_variable",
-      "offset": 134520894
-    },
-    {
-      "start": 686,
-      "end": 695,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 656,
-      "end": 695,
-      "type": "offset",
-      "offset": 134517438
-    },
-    {
-      "start": 705,
-      "end": 706,
-      "type": "offset",
-      "offset": 134517443
-    },
-    {
-      "start": 707,
-      "end": 708,
-      "type": "offset",
-      "offset": 134517284
-    },
-    {
-      "start": 708,
-      "end": 723,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 724,
-      "end": 725,
-      "type": "offset",
-      "offset": 134517443
-    },
-    {
-      "start": 726,
-      "end": 731,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 733,
-      "end": 734,
-      "type": "offset",
-      "offset": 134517443
-    },
-    {
-      "start": 735,
-      "end": 744,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 705,
-      "end": 744,
-      "type": "offset",
-      "offset": 134517443
-    },
-    {
-      "start": 754,
-      "end": 769,
+      "start": 549,
+      "end": 564,
       "type": "function_name",
       "name": "",
       "offset": 134516816
     },
     {
-      "start": 754,
-      "end": 769,
+      "start": 549,
+      "end": 564,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 754,
-      "end": 771,
+      "start": 565,
+      "end": 574,
+      "type": "constant_variable",
+      "offset": 134520894
+    },
+    {
+      "start": 565,
+      "end": 574,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 549,
+      "end": 575,
       "type": "offset",
       "offset": 134517443
     },
     {
-      "start": 781,
-      "end": 787,
-      "type": "local_variable",
-      "name": "puVar1"
-    },
-    {
-      "start": 781,
-      "end": 787,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 788,
-      "end": 789,
-      "type": "offset",
-      "offset": 134517448
-    },
-    {
-      "start": 790,
-      "end": 791,
-      "type": "offset",
-      "offset": 134517284
-    },
-    {
-      "start": 791,
-      "end": 806,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 807,
-      "end": 808,
-      "type": "offset",
-      "offset": 134517448
-    },
-    {
-      "start": 809,
-      "end": 810,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 781,
-      "end": 810,
-      "type": "offset",
-      "offset": 134517448
-    },
-    {
-      "start": 822,
-      "end": 823,
-      "type": "offset",
-      "offset": 134517457
-    },
-    {
-      "start": 824,
-      "end": 830,
-      "type": "local_variable",
-      "name": "puVar1"
-    },
-    {
-      "start": 824,
-      "end": 830,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 831,
-      "end": 832,
-      "type": "offset",
-      "offset": 134517457
-    },
-    {
-      "start": 833,
-      "end": 838,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 840,
-      "end": 841,
-      "type": "offset",
-      "offset": 134517457
-    },
-    {
-      "start": 842,
-      "end": 844,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 822,
-      "end": 844,
-      "type": "offset",
-      "offset": 134517457
-    },
-    {
-      "start": 850,
-      "end": 851,
-      "type": "offset",
-      "offset": 134517459
-    },
-    {
-      "start": 852,
-      "end": 858,
-      "type": "local_variable",
-      "name": "puVar1"
-    },
-    {
-      "start": 852,
-      "end": 858,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 859,
-      "end": 860,
-      "type": "offset",
-      "offset": 134517459
-    },
-    {
-      "start": 861,
-      "end": 866,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 868,
-      "end": 869,
-      "type": "offset",
-      "offset": 134517459
-    },
-    {
-      "start": 870,
-      "end": 879,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 850,
-      "end": 879,
-      "type": "offset",
-      "offset": 134517459
-    },
-    {
-      "start": 885,
-      "end": 900,
+      "start": 587,
+      "end": 602,
       "type": "function_name",
       "name": "",
       "offset": 134516880
     },
     {
-      "start": 885,
-      "end": 900,
+      "start": 587,
+      "end": 602,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 885,
-      "end": 902,
+      "start": 603,
+      "end": 605,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 587,
+      "end": 606,
       "type": "offset",
       "offset": 134517459
     },
     {
-      "start": 908,
-      "end": 914,
+      "start": 612,
+      "end": 618,
       "type": "offset",
       "offset": 134517469
     },
     {
-      "start": 908,
-      "end": 914,
+      "start": 612,
+      "end": 618,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 908,
-      "end": 914,
+      "start": 612,
+      "end": 618,
       "type": "offset",
       "offset": 134517469
     }
@@ -2228,106 +1305,65 @@ NAME=aeropause32 (many features combined)
 FILE=bins/dectest32
 EXPECT=<<EOF
 
-void sym.Aeropause(uint32_t **param_1,uint32_t param_2,uint32_t param_3)
+void sym.Aeropause(int *param_1,uint param_2,uint param_3)
 
 {
-    uint32_t *puVar1;
+    uint32_t uVar1;
     int iVar2;
-    uchar *puVar3;
-    uint32_t *apuStack_20 [5];
-    uchar auStack_c [8];
     
-    *(*0x10 + -0x1c) = 8;
-    *(*0x10 + -0x20) = 0x80492ee;
-    puVar1 = sym.imp.malloc();
-    *param_1 = puVar1;
+    iVar2 = sym.imp.malloc(8);
+    *param_1 = iVar2;
     **param_1 = param_2;
-    (*param_1)[1] = param_3;
+    *(*param_1 + 4) = param_3;
     if (**param_1 < 2) {
-        param_1[2] = NULL;
-        puVar3 = &stack0xfffffff4;
+        param_1[2] = 0;
     }
     else {
-        param_1[1] = *((*param_1)[1] + 4);
-        puVar1 = param_1[1];
-        *(&stack0xfffffff4 + -0xc) = 0x804a05c;
-        *(&stack0xfffffff4 + -0x10) = puVar1;
-        *(&stack0xfffffff4 + -0x14) = 0x804934d;
-        iVar2 = sym.imp.strcmp();
+        param_1[1] = *(*(*param_1 + 4) + 4);
+        iVar2 = sym.imp.strcmp(param_1[1],0x804a05c);
         if (iVar2 == 0) {
-            param_1[2] = 0x1;
-            puVar3 = &stack0xfffffff4 + 0;
+            param_1[2] = 1;
         }
         else {
-            puVar1 = param_1[1];
-            *(*0x10 + -0x18) = "dark";
-            *(*0x10 + -0x1c) = puVar1;
-            *(*0x10 + -0x20) = 0x8049374;
-            iVar2 = sym.imp.strcmp();
+            iVar2 = sym.imp.strcmp(param_1[1],"dark");
             if (iVar2 == 0) {
-                param_1[2] = 0x2;
-                puVar3 = *0x10 + -0xc;
+                param_1[2] = 2;
             }
             else {
-                apuStack_20[1] = param_1[1];
-                apuStack_20[2] = 0x804a067;
-                apuStack_20[0] = 0x804939b;
-                iVar2 = sym.imp.strcmp();
-                puVar3 = &stack0xfffffff4;
+                iVar2 = sym.imp.strcmp(param_1[1],"third");
                 if (iVar2 == 0) {
-                    param_1[2] = 0x3;
-                    puVar3 = &stack0xfffffff4;
+                    param_1[2] = 3;
                 }
                 else {
-                    param_1[2] = 0xf4240;
+                    param_1[2] = 1000000;
                 }
             }
         }
     }
-    puVar1 = param_1[2];
-    if (puVar1 < 0x5) {
+    uVar1 = param_1[2];
+    if (uVar1 < 5) {
     //switch table (5 cases) at 0x804a070
-        switch(puVar1) {
-        case NULL:
-            *(puVar3 + -0x10) = "pure";
-            *(puVar3 + -0x14) = 0x80493e7;
-            sym.imp.printf();
-            puVar3 = puVar3;
+        switch(uVar1) {
+        case 0:
+            sym.imp.printf("pure");
             break;
-        case 0x1:
-            *(puVar3 + -0x10) = "reason";
-            *(puVar3 + -0x14) = 0x80493f9;
-            sym.imp.printf();
-            puVar3 = puVar3;
+        case 1:
+            sym.imp.printf("reason");
             break;
-        case 0x2:
-            *(puVar3 + -0x10) = "revolution";
-            *(puVar3 + -0x14) = 0x804940b;
-            sym.imp.printf();
-            puVar3 = puVar3;
+        case 2:
+            sym.imp.printf("revolution");
             break;
-        case 0x3:
-            *(puVar3 + -0x10) = "echoes";
-            *(puVar3 + -0x14) = 0x804941d;
-            sym.imp.printf();
-            puVar3 = puVar3;
+        case 3:
+            sym.imp.printf("echoes");
             break;
-        case 0x4:
-            *(puVar3 + -0x10) = "wall";
-            *(puVar3 + -0x14) = 0x804942f;
-            sym.imp.printf();
-            puVar3 = puVar3;
+        case 4:
+            sym.imp.printf("wall");
         }
     }
-    else if (puVar1 == 0xf4240) {
-        *(puVar3 + -0x10) = "million";
-        *(puVar3 + -0x14) = 0x8049441;
-        sym.imp.printf();
-        puVar3 = puVar3;
+    else if (uVar1 == 1000000) {
+        sym.imp.printf("million");
     }
-    *(puVar3 + -0x10) = param_1[2];
-    *(puVar3 + -0x14) = 0x8049456;
-    sym.PrintAmbassador();
+    sym.PrintAmbassador(param_1[2]);
     return;
 }
 
@@ -2347,82 +1383,66 @@ NAME=aeropause64 (many features combined)
 FILE=bins/dectest64
 EXPECT=<<EOF
 
-void sym.Aeropause(uint32_t **param_1,uint32_t param_2,ulong param_3)
+void sym.Aeropause(int64_t *param_1,uint param_2,ulong param_3)
 
 {
     uint32_t uVar1;
-    uint uVar2;
-    int iVar3;
-    uint32_t *puVar4;
-    uchar *puVar5;
-    ulong uStack_30;
-    uchar auStack_28 [8];
-    ulong uStack_20;
-    uint32_t uStack_14;
-    uint32_t **ppuStack_10;
+    int iVar2;
+    int64_t iVar3;
     
-    uStack_20 = param_3;
-    uStack_14 = param_2;
-    ppuStack_10 = param_1;
-    *(*0x20 + -0x30) = 0x40129b;
-    puVar4 = sym.imp.malloc(0x10);
-    *ppuStack_10 = puVar4;
-    **ppuStack_10 = uStack_14;
-    *(*ppuStack_10 + 2) = uStack_20;
-    if (**ppuStack_10 < 2) {
-        *(ppuStack_10 + 2) = 0;
-        puVar5 = &stack0xffffffffffffffd8;
+    iVar3 = sym.imp.malloc(0x10);
+    *param_1 = iVar3;
+    **param_1 = param_2;
+    *(*param_1 + 8) = param_3;
+    if (**param_1 < 2) {
+        *(param_1 + 2) = 0;
     }
     else {
-        ppuStack_10[1] = *(*(*ppuStack_10 + 2) + 8);
-        puVar4 = ppuStack_10[1];
-        *(&stack0xffffffffffffffd8 + -8) = 0x40130a;
-        iVar3 = sym.imp.strcmp(puVar4,"the  ");
-        if (iVar3 == 0) {
-            *(ppuStack_10 + 2) = 1;
-            puVar5 = &stack0xffffffffffffffd8;
+        param_1[1] = *(*(*param_1 + 8) + 8);
+        iVar2 = sym.imp.strcmp(param_1[1],"the  ");
+        if (iVar2 == 0) {
+            *(param_1 + 2) = 1;
         }
         else {
-            puVar4 = ppuStack_10[1];
-            *(&stack0xffffffffffffffd8 + -8) = 0x401330;
-            iVar3 = sym.imp.strcmp(puVar4,"dark");
-            if (iVar3 == 0) {
-                *(ppuStack_10 + 2) = 2;
-                puVar5 = &stack0xffffffffffffffd8;
+            iVar2 = sym.imp.strcmp(param_1[1],"dark");
+            if (iVar2 == 0) {
+                *(param_1 + 2) = 2;
             }
             else {
-                puVar4 = ppuStack_10[1];
-                *(&stack0xffffffffffffffd8 + -8) = 0x401356;
-                iVar3 = sym.imp.strcmp(puVar4,"third");
-                puVar5 = &stack0xffffffffffffffd8;
-                if (iVar3 == 0) {
-                    *(ppuStack_10 + 2) = 3;
-                    puVar5 = &stack0xffffffffffffffd8;
+                iVar2 = sym.imp.strcmp(param_1[1],"third");
+                if (iVar2 == 0) {
+                    *(param_1 + 2) = 3;
                 }
                 else {
-                    *(ppuStack_10 + 2) = 1000000;
+                    *(param_1 + 2) = 1000000;
                 }
             }
         }
     }
-    uVar1 = *(ppuStack_10 + 2);
-    if (3 < uVar1 && uVar1 != 4) {
-        if (uVar1 == 1000000) {
-            *(puVar5 + -8) = 0x4013fc;
-            sym.imp.printf("million");
-            puVar5 = puVar5;
+    uVar1 = *(param_1 + 2);
+    if (uVar1 < 5) {
+    //switch table (5 cases) at 0x402088
+        switch(uVar1) {
+        case 0:
+            sym.imp.printf("pure");
+            break;
+        case 1:
+            sym.imp.printf("reason");
+            break;
+        case 2:
+            sym.imp.printf("revolution");
+            break;
+        case 3:
+            sym.imp.printf("echoes");
+            break;
+        case 4:
+            sym.imp.printf("wall");
         }
     }
-    else if (uVar1 < 5) {
-    //WARNING: Could not recover jumptable at 0x0040138d. Too many branches
-    //WARNING: Treating indirect jump as call
-    //switch table (5 cases) at 0x402088
-        (**(uVar1 * 8 + 0x402088))();
-        return;
+    else if (uVar1 == 1000000) {
+        sym.imp.printf("million");
     }
-    uVar2 = *(ppuStack_10 + 2);
-    *(puVar5 + -8) = 0x40140d;
-    sym.PrintAmbassador(uVar2);
+    sym.PrintAmbassador(param_1[2]);
     return;
 }
 
@@ -2453,316 +1473,193 @@ NAME=typedef
 FILE=bins/dectest32
 EXPECT=<<EOF
 
-void sym.Aeropause(uint32_t **param_1,uint32_t param_2,uint32_t param_3)
+void sym.Aeropause(int *param_1,uint param_2,uint param_3)
 
 {
-    uint32_t *puVar1;
+    uint32_t uVar1;
     int iVar2;
-    uchar *puVar3;
-    uint32_t *apuStack_20 [5];
-    uchar auStack_c [8];
     
-    *(*0x10 + -0x1c) = 8;
-    *(*0x10 + -0x20) = 0x80492ee;
-    puVar1 = sym.imp.malloc();
-    *param_1 = puVar1;
+    iVar2 = sym.imp.malloc(8);
+    *param_1 = iVar2;
     **param_1 = param_2;
-    (*param_1)[1] = param_3;
+    *(*param_1 + 4) = param_3;
     if (**param_1 < 2) {
-        param_1[2] = NULL;
-        puVar3 = &stack0xfffffff4;
+        param_1[2] = 0;
     }
     else {
-        param_1[1] = *((*param_1)[1] + 4);
-        puVar1 = param_1[1];
-        *(&stack0xfffffff4 + -0xc) = 0x804a05c;
-        *(&stack0xfffffff4 + -0x10) = puVar1;
-        *(&stack0xfffffff4 + -0x14) = 0x804934d;
-        iVar2 = sym.imp.strcmp();
+        param_1[1] = *(*(*param_1 + 4) + 4);
+        iVar2 = sym.imp.strcmp(param_1[1],0x804a05c);
         if (iVar2 == 0) {
-            param_1[2] = 0x1;
-            puVar3 = &stack0xfffffff4 + 0;
+            param_1[2] = 1;
         }
         else {
-            puVar1 = param_1[1];
-            *(*0x10 + -0x18) = "dark";
-            *(*0x10 + -0x1c) = puVar1;
-            *(*0x10 + -0x20) = 0x8049374;
-            iVar2 = sym.imp.strcmp();
+            iVar2 = sym.imp.strcmp(param_1[1],"dark");
             if (iVar2 == 0) {
-                param_1[2] = 0x2;
-                puVar3 = *0x10 + -0xc;
+                param_1[2] = 2;
             }
             else {
-                apuStack_20[1] = param_1[1];
-                apuStack_20[2] = 0x804a067;
-                apuStack_20[0] = 0x804939b;
-                iVar2 = sym.imp.strcmp();
-                puVar3 = &stack0xfffffff4;
+                iVar2 = sym.imp.strcmp(param_1[1],"third");
                 if (iVar2 == 0) {
-                    param_1[2] = 0x3;
-                    puVar3 = &stack0xfffffff4;
+                    param_1[2] = 3;
                 }
                 else {
-                    param_1[2] = 0xf4240;
+                    param_1[2] = 1000000;
                 }
             }
         }
     }
-    puVar1 = param_1[2];
-    if (puVar1 < 0x5) {
+    uVar1 = param_1[2];
+    if (uVar1 < 5) {
     //switch table (5 cases) at 0x804a070
-        switch(puVar1) {
-        case NULL:
-            *(puVar3 + -0x10) = "pure";
-            *(puVar3 + -0x14) = 0x80493e7;
-            sym.imp.printf();
-            puVar3 = puVar3;
+        switch(uVar1) {
+        case 0:
+            sym.imp.printf("pure");
             break;
-        case 0x1:
-            *(puVar3 + -0x10) = "reason";
-            *(puVar3 + -0x14) = 0x80493f9;
-            sym.imp.printf();
-            puVar3 = puVar3;
+        case 1:
+            sym.imp.printf("reason");
             break;
-        case 0x2:
-            *(puVar3 + -0x10) = "revolution";
-            *(puVar3 + -0x14) = 0x804940b;
-            sym.imp.printf();
-            puVar3 = puVar3;
+        case 2:
+            sym.imp.printf("revolution");
             break;
-        case 0x3:
-            *(puVar3 + -0x10) = "echoes";
-            *(puVar3 + -0x14) = 0x804941d;
-            sym.imp.printf();
-            puVar3 = puVar3;
+        case 3:
+            sym.imp.printf("echoes");
             break;
-        case 0x4:
-            *(puVar3 + -0x10) = "wall";
-            *(puVar3 + -0x14) = 0x804942f;
-            sym.imp.printf();
-            puVar3 = puVar3;
+        case 4:
+            sym.imp.printf("wall");
         }
     }
-    else if (puVar1 == 0xf4240) {
-        *(puVar3 + -0x10) = "million";
-        *(puVar3 + -0x14) = 0x8049441;
-        sym.imp.printf();
-        puVar3 = puVar3;
+    else if (uVar1 == 1000000) {
+        sym.imp.printf("million");
     }
-    *(puVar3 + -0x10) = param_1[2];
-    *(puVar3 + -0x14) = 0x8049456;
-    sym.PrintAmbassador();
+    sym.PrintAmbassador(param_1[2]);
     return;
 }
 
 --
 
-void sym.Aeropause(uint32_t **param_1,uint32_t param_2,uint32_t param_3)
+void sym.Aeropause(int *param_1,uint param_2,uint param_3)
 
 {
-    uint32_t *puVar1;
+    uint32_t uVar1;
     int iVar2;
-    uchar *puVar3;
-    uint32_t *apuStack_20 [5];
-    uchar auStack_c [8];
     
-    *(*0x10 + -0x1c) = 8;
-    *(*0x10 + -0x20) = 0x80492ee;
-    puVar1 = sym.imp.malloc();
-    *param_1 = puVar1;
+    iVar2 = sym.imp.malloc(8);
+    *param_1 = iVar2;
     **param_1 = param_2;
-    (*param_1)[1] = param_3;
+    *(*param_1 + 4) = param_3;
     if (**param_1 < 2) {
-        param_1[2] = NULL;
-        puVar3 = &stack0xfffffff4;
+        param_1[2] = 0;
     }
     else {
-        param_1[1] = *((*param_1)[1] + 4);
-        puVar1 = param_1[1];
-        *(&stack0xfffffff4 + -0xc) = 0x804a05c;
-        *(&stack0xfffffff4 + -0x10) = puVar1;
-        *(&stack0xfffffff4 + -0x14) = 0x804934d;
-        iVar2 = sym.imp.strcmp();
+        param_1[1] = *(*(*param_1 + 4) + 4);
+        iVar2 = sym.imp.strcmp(param_1[1],0x804a05c);
         if (iVar2 == 0) {
-            param_1[2] = 0x1;
-            puVar3 = &stack0xfffffff4 + 0;
+            param_1[2] = 1;
         }
         else {
-            puVar1 = param_1[1];
-            *(*0x10 + -0x18) = "dark";
-            *(*0x10 + -0x1c) = puVar1;
-            *(*0x10 + -0x20) = 0x8049374;
-            iVar2 = sym.imp.strcmp();
+            iVar2 = sym.imp.strcmp(param_1[1],"dark");
             if (iVar2 == 0) {
-                param_1[2] = 0x2;
-                puVar3 = *0x10 + -0xc;
+                param_1[2] = 2;
             }
             else {
-                apuStack_20[1] = param_1[1];
-                apuStack_20[2] = 0x804a067;
-                apuStack_20[0] = 0x804939b;
-                iVar2 = sym.imp.strcmp();
-                puVar3 = &stack0xfffffff4;
+                iVar2 = sym.imp.strcmp(param_1[1],"third");
                 if (iVar2 == 0) {
-                    param_1[2] = 0x3;
-                    puVar3 = &stack0xfffffff4;
+                    param_1[2] = 3;
                 }
                 else {
-                    param_1[2] = 0xf4240;
+                    param_1[2] = 1000000;
                 }
             }
         }
     }
-    puVar1 = param_1[2];
-    if (puVar1 < 0x5) {
+    uVar1 = param_1[2];
+    if (uVar1 < 5) {
     //switch table (5 cases) at 0x804a070
-        switch(puVar1) {
-        case NULL:
-            *(puVar3 + -0x10) = "pure";
-            *(puVar3 + -0x14) = 0x80493e7;
-            sym.imp.printf();
-            puVar3 = puVar3;
+        switch(uVar1) {
+        case 0:
+            sym.imp.printf("pure");
             break;
-        case 0x1:
-            *(puVar3 + -0x10) = "reason";
-            *(puVar3 + -0x14) = 0x80493f9;
-            sym.imp.printf();
-            puVar3 = puVar3;
+        case 1:
+            sym.imp.printf("reason");
             break;
-        case 0x2:
-            *(puVar3 + -0x10) = "revolution";
-            *(puVar3 + -0x14) = 0x804940b;
-            sym.imp.printf();
-            puVar3 = puVar3;
+        case 2:
+            sym.imp.printf("revolution");
             break;
-        case 0x3:
-            *(puVar3 + -0x10) = "echoes";
-            *(puVar3 + -0x14) = 0x804941d;
-            sym.imp.printf();
-            puVar3 = puVar3;
+        case 3:
+            sym.imp.printf("echoes");
             break;
-        case 0x4:
-            *(puVar3 + -0x10) = "wall";
-            *(puVar3 + -0x14) = 0x804942f;
-            sym.imp.printf();
-            puVar3 = puVar3;
+        case 4:
+            sym.imp.printf("wall");
         }
     }
-    else if (puVar1 == 0xf4240) {
-        *(puVar3 + -0x10) = "million";
-        *(puVar3 + -0x14) = 0x8049441;
-        sym.imp.printf();
-        puVar3 = puVar3;
+    else if (uVar1 == 1000000) {
+        sym.imp.printf("million");
     }
-    *(puVar3 + -0x10) = param_1[2];
-    *(puVar3 + -0x14) = 0x8049456;
-    sym.PrintAmbassador();
+    sym.PrintAmbassador(param_1[2]);
     return;
 }
 
 --
 
-void sym.Aeropause(uint32_t **param_1,uint32_t param_2,uint32_t param_3)
+void sym.Aeropause(int *param_1,uint param_2,uint param_3)
 
 {
-    uint32_t *puVar1;
+    uint32_t uVar1;
     int iVar2;
-    uchar *puVar3;
-    uint32_t *apuStack_20 [5];
-    uchar auStack_c [8];
     
-    *(*0x10 + -0x1c) = 8;
-    *(*0x10 + -0x20) = 0x80492ee;
-    puVar1 = sym.imp.malloc();
-    *param_1 = puVar1;
+    iVar2 = sym.imp.malloc(8);
+    *param_1 = iVar2;
     **param_1 = param_2;
-    (*param_1)[1] = param_3;
+    *(*param_1 + 4) = param_3;
     if (**param_1 < 2) {
-        param_1[2] = NULL;
-        puVar3 = &stack0xfffffff4;
+        param_1[2] = 0;
     }
     else {
-        param_1[1] = *((*param_1)[1] + 4);
-        puVar1 = param_1[1];
-        *(&stack0xfffffff4 + -0xc) = 0x804a05c;
-        *(&stack0xfffffff4 + -0x10) = puVar1;
-        *(&stack0xfffffff4 + -0x14) = 0x804934d;
-        iVar2 = sym.imp.strcmp();
+        param_1[1] = *(*(*param_1 + 4) + 4);
+        iVar2 = sym.imp.strcmp(param_1[1],0x804a05c);
         if (iVar2 == 0) {
-            param_1[2] = 0x1;
-            puVar3 = &stack0xfffffff4 + 0;
+            param_1[2] = 1;
         }
         else {
-            puVar1 = param_1[1];
-            *(*0x10 + -0x18) = "dark";
-            *(*0x10 + -0x1c) = puVar1;
-            *(*0x10 + -0x20) = 0x8049374;
-            iVar2 = sym.imp.strcmp();
+            iVar2 = sym.imp.strcmp(param_1[1],"dark");
             if (iVar2 == 0) {
-                param_1[2] = 0x2;
-                puVar3 = *0x10 + -0xc;
+                param_1[2] = 2;
             }
             else {
-                apuStack_20[1] = param_1[1];
-                apuStack_20[2] = 0x804a067;
-                apuStack_20[0] = 0x804939b;
-                iVar2 = sym.imp.strcmp();
-                puVar3 = &stack0xfffffff4;
+                iVar2 = sym.imp.strcmp(param_1[1],"third");
                 if (iVar2 == 0) {
-                    param_1[2] = 0x3;
-                    puVar3 = &stack0xfffffff4;
+                    param_1[2] = 3;
                 }
                 else {
-                    param_1[2] = 0xf4240;
+                    param_1[2] = 1000000;
                 }
             }
         }
     }
-    puVar1 = param_1[2];
-    if (puVar1 < 0x5) {
+    uVar1 = param_1[2];
+    if (uVar1 < 5) {
     //switch table (5 cases) at 0x804a070
-        switch(puVar1) {
-        case NULL:
-            *(puVar3 + -0x10) = "pure";
-            *(puVar3 + -0x14) = 0x80493e7;
-            sym.imp.printf();
-            puVar3 = puVar3;
+        switch(uVar1) {
+        case 0:
+            sym.imp.printf("pure");
             break;
-        case 0x1:
-            *(puVar3 + -0x10) = "reason";
-            *(puVar3 + -0x14) = 0x80493f9;
-            sym.imp.printf();
-            puVar3 = puVar3;
+        case 1:
+            sym.imp.printf("reason");
             break;
-        case 0x2:
-            *(puVar3 + -0x10) = "revolution";
-            *(puVar3 + -0x14) = 0x804940b;
-            sym.imp.printf();
-            puVar3 = puVar3;
+        case 2:
+            sym.imp.printf("revolution");
             break;
-        case 0x3:
-            *(puVar3 + -0x10) = "echoes";
-            *(puVar3 + -0x14) = 0x804941d;
-            sym.imp.printf();
-            puVar3 = puVar3;
+        case 3:
+            sym.imp.printf("echoes");
             break;
-        case 0x4:
-            *(puVar3 + -0x10) = "wall";
-            *(puVar3 + -0x14) = 0x804942f;
-            sym.imp.printf();
-            puVar3 = puVar3;
+        case 4:
+            sym.imp.printf("wall");
         }
     }
-    else if (puVar1 == 0xf4240) {
-        *(puVar3 + -0x10) = "million";
-        *(puVar3 + -0x14) = 0x8049441;
-        sym.imp.printf();
-        puVar3 = puVar3;
+    else if (uVar1 == 1000000) {
+        sym.imp.printf("million");
     }
-    *(puVar3 + -0x10) = param_1[2];
-    *(puVar3 + -0x14) = 0x8049456;
-    sym.PrintAmbassador();
+    sym.PrintAmbassador(param_1[2]);
     return;
 }
 
@@ -2793,11 +1690,6 @@ EXPECT=<<EOF
 void main(void)
 
 {
-    ulong auStack_20 [2];
-    uint uStack_c;
-    
-    uStack_c = 0;
-    *(*0x20 + -0x18 + -8) = 0x100000f72;
     sym._call();
     return;
 }
@@ -2819,21 +1711,7 @@ EXPECT=<<EOF
 void entry0(void)
 
 {
-    uint unaff_r11;
-    uint in_lr;
-    uint *puVar1;
-    uint auStack_14 [2];
-    uint auStack_c [3];
-    uchar *puVar2;
-    
     //[11] -r-x section size 200 named .text
-    *(*0x54 + -4) = in_lr;
-    puVar1 = *0x54 + -4 + -4;
-    *puVar1 = unaff_r11;
-    puVar2 = puVar1 + -4;
-    *(puVar2 + -4) = *(*0x418 + 0x3f0);
-    *(puVar2 + -8) = *(*0x41c + 0x3fc);
-    *puVar2 = *(*0x420 + 0x408);
     func_0x0000039c();
     //WARNING: Bad instruction - Truncating control flow here
     halt_baddata();
@@ -2854,24 +1732,12 @@ EXPECT=<<EOF
 uint main(void)
 
 {
-    uint32_t uVar1;
-    uchar auStack_8c [16];
     uchar auStack_7c [120];
     
-    uVar1 = *0x10 + -0x8c & 0xfffffff0;
-    *(uVar1 - 0x10) = "IOLI Crackme Level 0x05\n";
-    *(uVar1 - 0x14) = 0x804856b;
-    sym.imp.printf();
-    *(uVar1 - 0x10) = "Password: ";
-    *(uVar1 - 0x14) = 0x8048577;
-    sym.imp.printf();
-    *(uVar1 - 0xc) = &stack0xffffff84;
-    *(uVar1 - 0x10) = 0x80486b2;
-    *(uVar1 - 0x14) = 0x804858a;
-    sym.imp.scanf();
-    *(uVar1 - 0x10) = &stack0xffffff84;
-    *((uVar1 - 0x10) + -4) = 0x8048595;
-    sym.check();
+    sym.imp.printf("IOLI Crackme Level 0x05\n");
+    sym.imp.printf("Password: ");
+    sym.imp.scanf(0x80486b2,auStack_7c);
+    sym.check(auStack_7c);
     return 0;
 }
 
@@ -2880,51 +1746,30 @@ uint main(void)
     0x08048540    |uint main(void)
                   |
                   |{
-                  |    uint32_t uVar1;
-                  |    uchar auStack_8c [16];
                   |    uchar auStack_7c [120];
                   |    
-    0x08048549    |    uVar1 = *0x10 + -0x8c & 0xfffffff0;
-    0x0804855f    |    *(uVar1 - 0x10) = "IOLI Crackme Level 0x05\n";
-    0x08048566    |    *(uVar1 - 0x14) = 0x804856b;
-    0x08048566    |    sym.imp.printf();
-    0x0804856b    |    *(uVar1 - 0x10) = "Password: ";
-    0x08048572    |    *(uVar1 - 0x14) = 0x8048577;
-    0x08048572    |    sym.imp.printf();
-    0x0804857a    |    *(uVar1 - 0xc) = &stack0xffffff84;
-    0x0804857e    |    *(uVar1 - 0x10) = 0x80486b2;
-    0x08048585    |    *(uVar1 - 0x14) = 0x804858a;
-    0x08048585    |    sym.imp.scanf();
-    0x0804858d    |    *(uVar1 - 0x10) = &stack0xffffff84;
-    0x08048590    |    *((uVar1 - 0x10) + -4) = 0x8048595;
-    0x08048590    |    sym.check();
+    0x08048566    |    sym.imp.printf("IOLI Crackme Level 0x05\n");
+    0x08048572    |    sym.imp.printf("Password: ");
+    0x08048585    |    sym.imp.scanf(0x80486b2,auStack_7c);
+    0x08048590    |    sym.check(auStack_7c);
     0x0804859b    |    return 0;
                   |}
                   |
 --
-CCu base64:LQ== @ 0x804855d
-CCu base64:KigodVZhcjEgLSAweDEwKSArIC00KSA9IDB4ODA0ODU5NQ== @ 0x8048590
-CCu base64:Kih1VmFyMSAtIDB4MTApID0gIklPTEkgQ3JhY2ttZSBMZXZlbCAweDA1XG4i @ 0x804855f
-CCu base64:Kih1VmFyMSAtIDB4MTQpID0gMHg4MDQ4NTc3 @ 0x8048572
+CCu base64:c3ltLmltcC5zY2FuZigweDgwNDg2YjIsYXVTdGFja183Yyk= @ 0x8048585
 CCu base64:bWFpbg== @ 0x8048540
-CCu base64:Kih1VmFyMSAtIDB4MTQpID0gMHg4MDQ4NThh @ 0x8048585
-CCu base64:Kw== @ 0x8048543
-CCu base64:Jg== @ 0x8048577
-CCu base64:Kih1VmFyMSAtIDB4MTQpID0gMHg4MDQ4NTZi @ 0x8048566
-CCu base64:Jg== @ 0x804858a
 CCu base64:cmV0dXJuIDA= @ 0x804859b
-CCu base64:Kih1VmFyMSAtIDB4YykgPSAmc3RhY2sweGZmZmZmZjg0 @ 0x804857a
-CCu base64:dVZhcjEgPSAqMHgxMCArIC0weDhjICYgMHhmZmZmZmZmMA== @ 0x8048549
-CCu base64:Kih1VmFyMSAtIDB4MTApID0gIlBhc3N3b3JkOiAi @ 0x804856b
-CCu base64:Kih1VmFyMSAtIDB4MTApID0gJnN0YWNrMHhmZmZmZmY4NA== @ 0x804858d
-CCu base64:Kih1VmFyMSAtIDB4MTApID0gMHg4MDQ4NmIy @ 0x804857e
+CCu base64:c3ltLmltcC5wcmludGYoIlBhc3N3b3JkOiAiKQ== @ 0x8048572
+CCu base64:c3ltLmltcC5wcmludGYoIklPTEkgQ3JhY2ttZSBMZXZlbCAweDA1XG4iKQ== @ 0x8048566
+CCu base64:c3ltLmNoZWNrKGF1U3RhY2tfN2Mp @ 0x8048590
 --
 <result><function>
 <function name="main" size="92">
   <localdb main="stack" lock="false">
       <rangelist>
         <range space="stack" first="0x4" last="0x1f7"/>
-        <range space="stack" first="0xfff0bdc0" last="0xfffffffb"/>
+        <range space="stack" first="0xfff0bdc0" last="0xffffff5f"/>
+        <range space="stack" first="0xffffff68" last="0xfffffffb"/>
       </rangelist>
       <symbollist>
         <mapsym>
@@ -2932,18 +1777,6 @@ CCu base64:Kih1VmFyMSAtIDB4MTApID0gMHg4MDQ4NmIy @ 0x804857e
             </type>
           </symbol>
           <rangelist/>
-        </mapsym>
-        <mapsym>
-            <type name="" size="16" metatype="array" arraysize="16">
-            </type>
-          </symbol>
-          <rangelist/>
-        </mapsym>
-        <mapsym>
-          </symbol>
-          <rangelist>
-            <range space="ram" first="0x8048549" last="0x8048549"/>
-          </rangelist>
         </mapsym>
       </symbollist>
     </scope>
@@ -2956,175 +1789,28 @@ CCu base64:Kih1VmFyMSAtIDB4MTApID0gMHg4MDQ4NmIy @ 0x804857e
         <range space="ram" first="0x8048540" last="0x804859b"/>
       </rangelist>
       <op code="1">
-        <seqnum space="ram" offset="0x8048543" uniq="0xf9"/>
-      </op>
-      <op code="64">
-        <seqnum space="ram" offset="0x8048543" uniq="0xff"/>
-      </op>
-      <op code="19">
-        <seqnum space="ram" offset="0x8048543" uniq="0x6"/>
-      </op>
-      <op code="27">
-        <seqnum space="ram" offset="0x8048549" uniq="0xf"/>
-      </op>
-      <op code="20">
-        <seqnum space="ram" offset="0x804855d" uniq="0xd6"/>
-      </op>
-      <op code="64">
-        <seqnum space="ram" offset="0x804855d" uniq="0x100"/>
-      </op>
-      <op code="20">
-        <seqnum space="ram" offset="0x804855d" uniq="0xef"/>
-      </op>
-      <op code="64">
-        <seqnum space="ram" offset="0x804855d" uniq="0x101"/>
-      </op>
-      <op code="20">
-        <seqnum space="ram" offset="0x804855d" uniq="0xf5"/>
-      </op>
-      <op code="64">
-        <seqnum space="ram" offset="0x804855d" uniq="0x102"/>
-      </op>
-      <op code="20">
-        <seqnum space="ram" offset="0x804855d" uniq="0xf6"/>
-      </op>
-      <op code="64">
-        <seqnum space="ram" offset="0x804855d" uniq="0x103"/>
-      </op>
-      <op code="1">
-        <seqnum space="ram" offset="0x804855f" uniq="0xf7"/>
-      </op>
-      <op code="3">
-        <seqnum space="ram" offset="0x804855f" uniq="0x7d"/>
-        <void/>
-        <spaceid name="ram"/>
-      </op>
-      <op code="20">
-        <seqnum space="ram" offset="0x8048566" uniq="0xd8"/>
-      </op>
-      <op code="64">
-        <seqnum space="ram" offset="0x8048566" uniq="0x104"/>
-      </op>
-      <op code="3">
-        <seqnum space="ram" offset="0x8048566" uniq="0x7f"/>
-        <void/>
-        <spaceid name="ram"/>
+        <seqnum space="ram" offset="0x8048566" uniq="0xe7"/>
       </op>
       <op code="7">
         <seqnum space="ram" offset="0x8048566" uniq="0x80"/>
         <void/>
       </op>
       <op code="1">
-        <seqnum space="ram" offset="0x8048566" uniq="0xda"/>
-      </op>
-      <op code="1">
-        <seqnum space="ram" offset="0x804856b" uniq="0xf8"/>
-      </op>
-      <op code="3">
-        <seqnum space="ram" offset="0x804856b" uniq="0x82"/>
-        <void/>
-        <spaceid name="ram"/>
-      </op>
-      <op code="20">
-        <seqnum space="ram" offset="0x8048572" uniq="0xdc"/>
-      </op>
-      <op code="64">
-        <seqnum space="ram" offset="0x8048572" uniq="0x105"/>
-      </op>
-      <op code="1">
-        <seqnum space="ram" offset="0x8048572" uniq="0xf3"/>
-      </op>
-      <op code="1">
-        <seqnum space="ram" offset="0x8048572" uniq="0xf4"/>
-      </op>
-      <op code="20">
-        <seqnum space="ram" offset="0x8048572" uniq="0xeb"/>
-      </op>
-      <op code="64">
-        <seqnum space="ram" offset="0x8048572" uniq="0x106"/>
-      </op>
-      <op code="3">
-        <seqnum space="ram" offset="0x8048572" uniq="0x84"/>
-        <void/>
-        <spaceid name="ram"/>
+        <seqnum space="ram" offset="0x8048572" uniq="0xe8"/>
       </op>
       <op code="7">
         <seqnum space="ram" offset="0x8048572" uniq="0x85"/>
         <void/>
       </op>
-      <op code="20">
-        <seqnum space="ram" offset="0x8048572" uniq="0xdf"/>
-      </op>
-      <op code="64">
-        <seqnum space="ram" offset="0x8048572" uniq="0x107"/>
-      </op>
-      <op code="1">
-        <seqnum space="ram" offset="0x8048572" uniq="0xec"/>
-      </op>
-      <op code="1">
-        <seqnum space="ram" offset="0x8048572" uniq="0xed"/>
-      </op>
       <op code="66">
-        <seqnum space="ram" offset="0x8048577" uniq="0xfd"/>
-      </op>
-      <op code="20">
-        <seqnum space="ram" offset="0x804857a" uniq="0x88"/>
-      </op>
-      <op code="64">
-        <seqnum space="ram" offset="0x804857a" uniq="0x108"/>
-      </op>
-      <op code="3">
-        <seqnum space="ram" offset="0x804857a" uniq="0x8a"/>
-        <void/>
-        <spaceid name="ram"/>
-      </op>
-      <op code="3">
-        <seqnum space="ram" offset="0x804857e" uniq="0x8c"/>
-        <void/>
-        <spaceid name="ram"/>
-      </op>
-      <op code="1">
-        <seqnum space="ram" offset="0x8048585" uniq="0xe1"/>
-      </op>
-      <op code="3">
-        <seqnum space="ram" offset="0x8048585" uniq="0x8e"/>
-        <void/>
-        <spaceid name="ram"/>
+        <seqnum space="ram" offset="0x8048577" uniq="0xe9"/>
       </op>
       <op code="7">
         <seqnum space="ram" offset="0x8048585" uniq="0x8f"/>
         <void/>
       </op>
-      <op code="64">
-        <seqnum space="ram" offset="0x8048585" uniq="0x109"/>
-      </op>
-      <op code="1">
-        <seqnum space="ram" offset="0x8048585" uniq="0xe3"/>
-      </op>
       <op code="66">
-        <seqnum space="ram" offset="0x804858a" uniq="0xfe"/>
-      </op>
-      <op code="64">
-        <seqnum space="ram" offset="0x804858d" uniq="0x10a"/>
-      </op>
-      <op code="3">
-        <seqnum space="ram" offset="0x804858d" uniq="0x93"/>
-        <void/>
-        <spaceid name="ram"/>
-      </op>
-      <op code="1">
-        <seqnum space="ram" offset="0x8048590" uniq="0xd1"/>
-      </op>
-      <op code="65">
-        <seqnum space="ram" offset="0x8048590" uniq="0x94"/>
-      </op>
-      <op code="64">
-        <seqnum space="ram" offset="0x8048590" uniq="0x10b"/>
-      </op>
-      <op code="3">
-        <seqnum space="ram" offset="0x8048590" uniq="0x95"/>
-        <void/>
-        <spaceid name="ram"/>
+        <seqnum space="ram" offset="0x804858a" uniq="0xea"/>
       </op>
       <op code="7">
         <seqnum space="ram" offset="0x8048590" uniq="0x96"/>
@@ -3144,35 +1830,7 @@ CCu base64:Kih1VmFyMSAtIDB4MTApID0gMHg4MDQ4NmIy @ 0x804857e
     </high>
     <high repref="0x1c1" class="constant">
     </high>
-    <high repref="0x2d2" class="constant">
-    </high>
-    <high repref="0x2f2" class="constant">
-    </high>
-    <high repref="0x2e8" class="constant">
-    </high>
-    <high repref="0x2e9" class="constant">
-    </high>
-    <high repref="0x2ea" class="constant">
-    </high>
-    <high repref="0x2eb" class="constant">
-    </high>
-    <high repref="0x2f0" class="constant">
-    </high>
     <high repref="0x2ed" class="constant">
-    </high>
-    <high repref="0x2ef" class="constant">
-    </high>
-    <high repref="0x2f1" class="constant">
-    </high>
-    <high repref="0x166" class="constant">
-    </high>
-    <high repref="0x173" class="constant">
-    </high>
-    <high repref="0x18d" class="constant">
-    </high>
-    <high repref="0x19f" class="constant">
-    </high>
-    <high repref="0x2ec" class="constant">
       <type name="" size="4" metatype="ptr" core="true">
       </type>
     </high>
@@ -3180,35 +1838,11 @@ CCu base64:Kih1VmFyMSAtIDB4MTApID0gMHg4MDQ4NmIy @ 0x804857e
       <type name="" size="4" metatype="ptr" core="true">
       </type>
     </high>
-    <high repref="0x251" class="constant">
+    <high repref="0x2e2" class="constant">
     </high>
-    <high repref="0x2d9" class="constant">
+    <high repref="0x2e9" class="constant" symref="0x4000010000000008" offset="0">
     </high>
-    <high repref="0x2cd" class="constant">
-    </high>
-    <high repref="0x2d0" class="constant">
-    </high>
-    <high repref="0x2a" class="constant">
-    </high>
-    <high repref="0x257" class="constant">
-    </high>
-    <high repref="0x15e" class="constant">
-    </high>
-    <high repref="0x164" class="constant">
-    </high>
-    <high repref="0x16b" class="constant">
-    </high>
-    <high repref="0x171" class="constant">
-    </high>
-    <high repref="0x180" class="constant">
-    </high>
-    <high repref="0x185" class="constant">
-    </high>
-    <high repref="0x18b" class="constant">
-    </high>
-    <high repref="0x197" class="constant">
-    </high>
-    <high repref="0x19d" class="constant">
+    <high repref="0x2eb" class="constant" symref="0x4000010000000008" offset="0">
     </high>
     <high repref="0x176" class="other">
       <type name="" size="4" metatype="ptr" core="true">
@@ -3218,51 +1852,11 @@ CCu base64:Kih1VmFyMSAtIDB4MTApID0gMHg4MDQ4NmIy @ 0x804857e
       <type name="" size="4" metatype="ptr" core="true">
       </type>
     </high>
-    <high repref="0x17b" class="other">
-      <type name="" size="4" metatype="ptr" core="true">
-        <type name="" size="4" metatype="ptr" core="true">
-        </type>
-      </type>
-    </high>
-    <high repref="0x255" class="other">
-    </high>
-    <high repref="0x2ba" class="other" typelock="true">
+    <high repref="0x2e4" class="other" typelock="true">
       <type name="" size="4" metatype="ptr" core="true">
       </type>
     </high>
-    <high repref="0x2bd" class="other" typelock="true">
-      <type name="" size="4" metatype="ptr" core="true">
-      </type>
-    </high>
-    <high repref="0x2bf" class="other">
-    </high>
-    <high repref="0x2f3" class="other">
-    </high>
-    <high repref="0x2f4" class="other">
-    </high>
-    <high repref="0x2f5" class="other">
-    </high>
-    <high repref="0x2f6" class="other">
-    </high>
-    <high repref="0x2f7" class="other">
-    </high>
-    <high repref="0x2f8" class="other">
-    </high>
-    <high repref="0x2f9" class="other">
-    </high>
-    <high repref="0x2fa" class="other">
-    </high>
-    <high repref="0x2fb" class="other">
-    </high>
-    <high repref="0x2fc" class="other">
-    </high>
-    <high repref="0x2fd" class="other">
-      <type name="" size="4" metatype="ptr" core="true">
-      </type>
-    </high>
-    <high repref="0x2fe" class="other">
-    </high>
-    <high repref="0x2ff" class="other">
+    <high repref="0x2e7" class="other" typelock="true">
       <type name="" size="4" metatype="ptr" core="true">
       </type>
     </high>
@@ -3272,80 +1866,6 @@ CCu base64:Kih1VmFyMSAtIDB4MTApID0gMHg4MDQ4NmIy @ 0x804857e
       <type name="" size="4" metatype="ptr">
         <type name="" size="0" metatype="spacebase" space="stack">
         </type>
-      </type>
-    </high>
-    <high repref="0x10" class="other">
-    </high>
-    <high repref="0x28" class="other" symref="0x4000010000000018">
-    </high>
-    <high repref="0x25d" class="other">
-      <type name="" size="4" metatype="ptr" core="true">
-        <type name="" size="4" metatype="ptr" core="true">
-        </type>
-      </type>
-    </high>
-    <high repref="0x2a3" class="other">
-      <type name="" size="4" metatype="ptr" core="true">
-        <type name="" size="4" metatype="ptr" core="true">
-        </type>
-      </type>
-    </high>
-    <high repref="0x2b5" class="other">
-      <type name="" size="4" metatype="ptr" core="true">
-      </type>
-    </high>
-    <high repref="0x2b7" class="other">
-      <type name="" size="4" metatype="ptr" core="true">
-      </type>
-    </high>
-    <high repref="0x261" class="other">
-      <type name="" size="4" metatype="ptr" core="true">
-        <type name="" size="4" metatype="ptr" core="true">
-        </type>
-      </type>
-    </high>
-    <high repref="0x25f" class="other">
-      <type name="" size="4" metatype="ptr" core="true">
-      </type>
-    </high>
-    <high repref="0x29d" class="other">
-      <type name="" size="4" metatype="ptr" core="true">
-      </type>
-    </high>
-    <high repref="0x29f" class="other">
-      <type name="" size="4" metatype="ptr" core="true">
-      </type>
-    </high>
-    <high repref="0x2ab" class="other">
-      <type name="" size="4" metatype="ptr" core="true">
-      </type>
-    </high>
-    <high repref="0x2ac" class="other">
-      <type name="" size="4" metatype="ptr" core="true">
-      </type>
-    </high>
-    <high repref="0x265" class="other">
-      <type name="" size="4" metatype="ptr" core="true">
-      </type>
-    </high>
-    <high repref="0x29c" class="other">
-      <type name="" size="4" metatype="ptr" core="true">
-      </type>
-    </high>
-    <high repref="0x268" class="other">
-      <type name="" size="4" metatype="ptr" core="true">
-      </type>
-    </high>
-    <high repref="0x26c" class="other">
-      <type name="" size="4" metatype="ptr" core="true">
-      </type>
-    </high>
-    <high repref="0x26e" class="other">
-      <type name="" size="4" metatype="ptr" core="true">
-      </type>
-    </high>
-    <high repref="0x19a" class="other">
-      <type name="" size="4" metatype="ptr" core="true">
       </type>
     </high>
   </highlist>
@@ -3365,46 +1885,26 @@ CCu base64:Kih1VmFyMSAtIDB4MTApID0gMHg4MDQ4NmIy @ 0x804857e
     <syntax> </syntax>
     <funcname color="0x3">main</funcname>
     <syntax></syntax>
-    <syntax open="230">(</syntax>
+    <syntax open="83">(</syntax>
     <syntax></syntax>
     <syntax color="0x0">void</syntax>
     <syntax></syntax>
-    <syntax close="230">)</syntax>
+    <syntax close="83">)</syntax>
   </funcproto>
   <break indent="0"/>
   <syntax></syntax>
   <break indent="0"/>
   <syntax>{</syntax>
   <break indent="4"/>
-  <vardecl symref="0x4000010000000018">
-    <syntax> </syntax>
-    <variable color="0x4">uVar1</variable>
-  </vardecl>
-  <syntax></syntax>
-  <syntax>;</syntax>
-  <break indent="4"/>
-  <vardecl symref="0x4000010000000016">
-    <syntax> </syntax>
-    <variable color="0x4">auStack_8c</variable>
-    <syntax> </syntax>
-    <syntax open="237">[</syntax>
-    <syntax></syntax>
-    <syntax color="0x5">16</syntax>
-    <syntax></syntax>
-    <syntax close="237">]</syntax>
-  </vardecl>
-  <syntax></syntax>
-  <syntax>;</syntax>
-  <break indent="4"/>
-  <vardecl symref="0x4000010000000017">
+  <vardecl symref="0x4000010000000008">
     <syntax> </syntax>
     <variable color="0x4">auStack_7c</variable>
     <syntax> </syntax>
-    <syntax open="241">[</syntax>
+    <syntax open="88">[</syntax>
     <syntax></syntax>
     <syntax color="0x5">120</syntax>
     <syntax></syntax>
-    <syntax close="241">]</syntax>
+    <syntax close="88">]</syntax>
   </vardecl>
   <syntax></syntax>
   <syntax>;</syntax>
@@ -3412,112 +1912,14 @@ CCu base64:Kih1VmFyMSAtIDB4MTApID0gMHg4MDQ4NmIy @ 0x804857e
   <block blockref="0">
     <syntax></syntax>
     <break indent="4"/>
-    <statement opref="0xf">
-      <variable color="0x4" varref="0x28" opref="0xf">uVar1</variable>
-      <syntax> </syntax>
-      <op opref="0xf">=</op>
-      <syntax> </syntax>
-      <op opref="0xff">*</op>
-      <syntax></syntax>
-      <variable color="0x5" varref="0x238" opref="0xff">0x10</variable>
-      <syntax> </syntax>
-      <op opref="0x6">+</op>
-      <syntax> </syntax>
-      <variable color="0x5" varref="0x2d9" opref="0xf9">-0x8c</variable>
-      <syntax> </syntax>
-      <op opref="0xf">&amp;</op>
-      <syntax> </syntax>
-      <variable color="0x5" varref="0x2a" opref="0xf">0xfffffff0</variable>
-    </statement>
-    <syntax></syntax>
-    <syntax>;</syntax>
-    <break indent="4"/>
-    <statement opref="0x7d">
-      <op opref="0x7d">*</op>
-      <syntax></syntax>
-      <syntax open="251">(</syntax>
-      <syntax></syntax>
-      <variable color="0x4" varref="0x28" opref="0xd6">uVar1</variable>
-      <syntax> </syntax>
-      <op opref="0xd6">-</op>
-      <syntax> </syntax>
-      <variable color="0x5" varref="0x2e8" opref="0xd6">0x10</variable>
-      <syntax></syntax>
-      <syntax close="251">)</syntax>
-      <syntax> </syntax>
-      <op opref="0x7d">=</op>
-      <syntax> </syntax>
-      <variable color="0x5" varref="0x2ec" opref="0xf7">&quot;IOLI Crackme Level 0x05\n&quot;</variable>
-    </statement>
-    <syntax></syntax>
-    <syntax>;</syntax>
-    <break indent="4"/>
-    <statement opref="0x7f">
-      <op opref="0x7f">*</op>
-      <syntax></syntax>
-      <syntax open="255">(</syntax>
-      <syntax></syntax>
-      <variable color="0x4" varref="0x28" opref="0xd8">uVar1</variable>
-      <syntax> </syntax>
-      <op opref="0xd8">-</op>
-      <syntax> </syntax>
-      <variable color="0x5" varref="0x2ed" opref="0xd8">0x14</variable>
-      <syntax></syntax>
-      <syntax close="255">)</syntax>
-      <syntax> </syntax>
-      <op opref="0x7f">=</op>
-      <syntax> </syntax>
-      <variable color="0x5" varref="0x166" opref="0x7f">0x804856b</variable>
-    </statement>
-    <syntax></syntax>
-    <syntax>;</syntax>
-    <break indent="4"/>
     <statement opref="0x80">
       <funcname color="0x3" opref="0x80">sym.imp.printf</funcname>
       <syntax></syntax>
-      <syntax open="258">(</syntax>
+      <syntax open="92">(</syntax>
       <syntax></syntax>
-      <syntax close="258">)</syntax>
-    </statement>
-    <syntax></syntax>
-    <syntax>;</syntax>
-    <break indent="4"/>
-    <statement opref="0x82">
-      <op opref="0x82">*</op>
+      <variable color="0x5" varref="0x2ed" opref="0xe7">&quot;IOLI Crackme Level 0x05\n&quot;</variable>
       <syntax></syntax>
-      <syntax open="262">(</syntax>
-      <syntax></syntax>
-      <variable color="0x4" varref="0x28" opref="0xef">uVar1</variable>
-      <syntax> </syntax>
-      <op opref="0xef">-</op>
-      <syntax> </syntax>
-      <variable color="0x5" varref="0x2e9" opref="0xef">0x10</variable>
-      <syntax></syntax>
-      <syntax close="262">)</syntax>
-      <syntax> </syntax>
-      <op opref="0x82">=</op>
-      <syntax> </syntax>
-      <variable color="0x5" varref="0x2ee" opref="0xf8">&quot;Password: &quot;</variable>
-    </statement>
-    <syntax></syntax>
-    <syntax>;</syntax>
-    <break indent="4"/>
-    <statement opref="0x84">
-      <op opref="0x84">*</op>
-      <syntax></syntax>
-      <syntax open="266">(</syntax>
-      <syntax></syntax>
-      <variable color="0x4" varref="0x28" opref="0xdc">uVar1</variable>
-      <syntax> </syntax>
-      <op opref="0xdc">-</op>
-      <syntax> </syntax>
-      <variable color="0x5" varref="0x2ef" opref="0xdc">0x14</variable>
-      <syntax></syntax>
-      <syntax close="266">)</syntax>
-      <syntax> </syntax>
-      <op opref="0x84">=</op>
-      <syntax> </syntax>
-      <variable color="0x5" varref="0x173" opref="0x84">0x8048577</variable>
+      <syntax close="92">)</syntax>
     </statement>
     <syntax></syntax>
     <syntax>;</syntax>
@@ -3525,71 +1927,11 @@ CCu base64:Kih1VmFyMSAtIDB4MTApID0gMHg4MDQ4NmIy @ 0x804857e
     <statement opref="0x85">
       <funcname color="0x3" opref="0x85">sym.imp.printf</funcname>
       <syntax></syntax>
-      <syntax open="269">(</syntax>
+      <syntax open="95">(</syntax>
       <syntax></syntax>
-      <syntax close="269">)</syntax>
-    </statement>
-    <syntax></syntax>
-    <syntax>;</syntax>
-    <break indent="4"/>
-    <statement opref="0x8a">
-      <op opref="0x8a">*</op>
+      <variable color="0x5" varref="0x2ee" opref="0xe8">&quot;Password: &quot;</variable>
       <syntax></syntax>
-      <syntax open="273">(</syntax>
-      <syntax></syntax>
-      <variable color="0x4" varref="0x28" opref="0x88">uVar1</variable>
-      <syntax> </syntax>
-      <op opref="0x88">-</op>
-      <syntax> </syntax>
-      <variable color="0x5" varref="0x2f2" opref="0x88">0xc</variable>
-      <syntax></syntax>
-      <syntax close="273">)</syntax>
-      <syntax> </syntax>
-      <op opref="0x8a">=</op>
-      <syntax> </syntax>
-      <op opref="0xfd">&amp;</op>
-      <syntax></syntax>
-      <variable color="0x4" opref="0xfd">stack0xffffff84</variable>
-    </statement>
-    <syntax></syntax>
-    <syntax>;</syntax>
-    <break indent="4"/>
-    <statement opref="0x8c">
-      <op opref="0x8c">*</op>
-      <syntax></syntax>
-      <syntax open="278">(</syntax>
-      <syntax></syntax>
-      <variable color="0x4" varref="0x28" opref="0xdf">uVar1</variable>
-      <syntax> </syntax>
-      <op opref="0xdf">-</op>
-      <syntax> </syntax>
-      <variable color="0x5" varref="0x2f0" opref="0xdf">0x10</variable>
-      <syntax></syntax>
-      <syntax close="278">)</syntax>
-      <syntax> </syntax>
-      <op opref="0x8c">=</op>
-      <syntax> </syntax>
-      <variable color="0x5" varref="0x251" opref="0x8c">0x80486b2</variable>
-    </statement>
-    <syntax></syntax>
-    <syntax>;</syntax>
-    <break indent="4"/>
-    <statement opref="0x8e">
-      <op opref="0x8e">*</op>
-      <syntax></syntax>
-      <syntax open="282">(</syntax>
-      <syntax></syntax>
-      <variable color="0x4" varref="0x28" opref="0xeb">uVar1</variable>
-      <syntax> </syntax>
-      <op opref="0xeb">-</op>
-      <syntax> </syntax>
-      <variable color="0x5" varref="0x2f1" opref="0xeb">0x14</variable>
-      <syntax></syntax>
-      <syntax close="282">)</syntax>
-      <syntax> </syntax>
-      <op opref="0x8e">=</op>
-      <syntax> </syntax>
-      <variable color="0x5" varref="0x18d" opref="0x8e">0x804858a</variable>
+      <syntax close="95">)</syntax>
     </statement>
     <syntax></syntax>
     <syntax>;</syntax>
@@ -3597,59 +1939,15 @@ CCu base64:Kih1VmFyMSAtIDB4MTApID0gMHg4MDQ4NmIy @ 0x804857e
     <statement opref="0x8f">
       <funcname color="0x3" opref="0x8f">sym.imp.scanf</funcname>
       <syntax></syntax>
-      <syntax open="285">(</syntax>
+      <syntax open="98">(</syntax>
       <syntax></syntax>
-      <syntax close="285">)</syntax>
-    </statement>
-    <syntax></syntax>
-    <syntax>;</syntax>
-    <break indent="4"/>
-    <statement opref="0x93">
-      <op opref="0x93">*</op>
+      <variable color="0x5" varref="0x2e2" opref="0x8f">0x80486b2</variable>
       <syntax></syntax>
-      <syntax open="289">(</syntax>
+      <op opref="0x8f">, </op>
       <syntax></syntax>
-      <variable color="0x4" varref="0x28" opref="0xf5">uVar1</variable>
-      <syntax> </syntax>
-      <op opref="0xf5">-</op>
-      <syntax> </syntax>
-      <variable color="0x5" varref="0x2ea" opref="0xf5">0x10</variable>
+      <variable color="0x4" opref="0xe9">auStack_7c</variable>
       <syntax></syntax>
-      <syntax close="289">)</syntax>
-      <syntax> </syntax>
-      <op opref="0x93">=</op>
-      <syntax> </syntax>
-      <op opref="0xfe">&amp;</op>
-      <syntax></syntax>
-      <variable color="0x4" opref="0xfe">stack0xffffff84</variable>
-    </statement>
-    <syntax></syntax>
-    <syntax>;</syntax>
-    <break indent="4"/>
-    <statement opref="0x95">
-      <op opref="0x95">*</op>
-      <syntax></syntax>
-      <syntax open="294">(</syntax>
-      <syntax></syntax>
-      <syntax open="295">(</syntax>
-      <syntax></syntax>
-      <variable color="0x4" varref="0x28" opref="0xf6">uVar1</variable>
-      <syntax> </syntax>
-      <op opref="0xf6">-</op>
-      <syntax> </syntax>
-      <variable color="0x5" varref="0x2eb" opref="0xf6">0x10</variable>
-      <syntax></syntax>
-      <syntax close="295">)</syntax>
-      <syntax> </syntax>
-      <op opref="0x94">+</op>
-      <syntax> </syntax>
-      <variable color="0x5" varref="0x257" opref="0xd1">-4</variable>
-      <syntax></syntax>
-      <syntax close="294">)</syntax>
-      <syntax> </syntax>
-      <op opref="0x95">=</op>
-      <syntax> </syntax>
-      <variable color="0x5" varref="0x19f" opref="0x95">0x8048595</variable>
+      <syntax close="98">)</syntax>
     </statement>
     <syntax></syntax>
     <syntax>;</syntax>
@@ -3657,9 +1955,11 @@ CCu base64:Kih1VmFyMSAtIDB4MTApID0gMHg4MDQ4NmIy @ 0x804857e
     <statement opref="0x96">
       <funcname color="0x3" opref="0x96">sym.check</funcname>
       <syntax></syntax>
-      <syntax open="298">(</syntax>
+      <syntax open="102">(</syntax>
       <syntax></syntax>
-      <syntax close="298">)</syntax>
+      <variable color="0x4" opref="0xea">auStack_7c</variable>
+      <syntax></syntax>
+      <syntax close="102">)</syntax>
     </statement>
     <syntax></syntax>
     <syntax>;</syntax>
@@ -3679,7 +1979,7 @@ CCu base64:Kih1VmFyMSAtIDB4MTApID0gMHg4MDQ4NmIy @ 0x804857e
 </function></code></result>
 --
 <save_state loadersymbols="false">
-  <typegrp intsize="4" longsize="4" enumsize="4" enumsigned="false"/>
+  <typegrp/>
   <db>
     <property_changepoint space="register" offset="0x1100" val="0x20000000"/>
     <property_changepoint space="register" offset="0x110a" val="0x0"/>
@@ -3704,7 +2004,8 @@ CCu base64:Kih1VmFyMSAtIDB4MTApID0gMHg4MDQ4NmIy @ 0x804857e
             <localdb main="stack" lock="false">
                 <rangelist>
                   <range space="stack" first="0x4" last="0x1f7"/>
-                  <range space="stack" first="0xfff0bdc0" last="0xfffffffb"/>
+                  <range space="stack" first="0xfff0bdc0" last="0xffffff5f"/>
+                  <range space="stack" first="0xffffff68" last="0xfffffffb"/>
                 </rangelist>
                 <symbollist>
                   <mapsym>
@@ -3714,98 +2015,12 @@ CCu base64:Kih1VmFyMSAtIDB4MTApID0gMHg4MDQ4NmIy @ 0x804857e
                     <addr space="stack" offset="0xffffff84"/>
                     <rangelist/>
                   </mapsym>
-                  <mapsym>
-                      <type name="" size="16" metatype="array" arraysize="16">
-                      </type>
-                    </symbol>
-                    <addr space="stack" offset="0xffffff74"/>
-                    <rangelist/>
-                  </mapsym>
-                  <mapsym>
-                    </symbol>
-                    <addr space="register" offset="0x10"/>
-                    <rangelist>
-                      <range space="ram" first="0x8048549" last="0x8048549"/>
-                    </rangelist>
-                  </mapsym>
                 </symbollist>
               </scope>
             </localdb>
             <prototype model="__cdecl" extrapop="4">
               <returnsym>
                 <addr space="register" offset="0x0" size="4"/>
-              </returnsym>
-            </prototype>
-          </function>
-          <addr space="ram" offset="0x8048540"/>
-          <rangelist/>
-        </mapsym>
-        <mapsym>
-            <addr space="ram" offset="0x8048540"/>
-            <localdb main="stack" lock="false">
-                <rangelist>
-                  <range space="stack" first="0x4" last="0x1f7"/>
-                  <range space="stack" first="0xfff0bdc0" last="0xffffffff"/>
-                </rangelist>
-              </scope>
-            </localdb>
-            <prototype model="__cdecl" extrapop="4">
-              <returnsym>
-                <addr space="stack" offset="0x0" size="4"/>
-              </returnsym>
-            </prototype>
-          </function>
-          <addr space="ram" offset="0x8048540"/>
-          <rangelist/>
-        </mapsym>
-        <mapsym>
-            <addr space="ram" offset="0x8048540"/>
-            <localdb main="stack" lock="false">
-                <rangelist>
-                  <range space="stack" first="0x4" last="0x1f7"/>
-                  <range space="stack" first="0xfff0bdc0" last="0xffffffff"/>
-                </rangelist>
-              </scope>
-            </localdb>
-            <prototype model="__cdecl" extrapop="4">
-              <returnsym>
-                <addr space="stack" offset="0x0" size="4"/>
-              </returnsym>
-            </prototype>
-          </function>
-          <addr space="ram" offset="0x8048540"/>
-          <rangelist/>
-        </mapsym>
-        <mapsym>
-            <addr space="ram" offset="0x8048540"/>
-            <localdb main="stack" lock="false">
-                <rangelist>
-                  <range space="stack" first="0x4" last="0x1f7"/>
-                  <range space="stack" first="0xfff0bdc0" last="0xffffffff"/>
-                </rangelist>
-              </scope>
-            </localdb>
-            <prototype model="__cdecl" extrapop="4">
-              <returnsym>
-                <addr space="stack" offset="0x0" size="4"/>
-              </returnsym>
-            </prototype>
-          </function>
-          <addr space="ram" offset="0x8048540"/>
-          <rangelist/>
-        </mapsym>
-        <mapsym>
-            <addr space="ram" offset="0x8048540"/>
-            <localdb main="stack" lock="false">
-                <rangelist>
-                  <range space="stack" first="0x4" last="0x1f7"/>
-                  <range space="stack" first="0xfff0bdc0" last="0xffffffff"/>
-                </rangelist>
-              </scope>
-            </localdb>
-            <prototype model="__cdecl" extrapop="4">
-              <returnsym>
-                <addr space="stack" offset="0x0" size="4"/>
               </returnsym>
             </prototype>
           </function>
@@ -3996,49 +2211,16 @@ EXPECT=<<EOF
                           |{
                           |    int iVar1;
                           |    int iVar2;
-                          |    char *pcVar3;
-                          |    int64_t iVar4;
-                          |    uchar *puVar5;
-                          |    uchar *puVar6;
-                          |    uchar *puVar7;
-                          |    uchar *puVar8;
-                          |    ulong uStack_30;
-                          |    int iStack_28;
-                          |    int iStack_24;
-                          |    char *pcStack_20;
-                          |    char *pcStack_18;
-                          |    int64_t iStack_10;
+                          |    int64_t iVar3;
                           |    
-    0x10000000000007b9    |    pcStack_20 = "Hello";
-    0x10000000000007c4    |    pcStack_18 = " r2-folks";
-    0x10000000000007cf    |    *(*0x20 + -0x30) = 0x10000000000007d4;
-    0x10000000000007cf    |    iStack_28 = sym.imp.strlen("Hello");
-    0x10000000000007d7    |    pcVar3 = pcStack_18;
-    0x10000000000007de    |    puVar5 = *0x20 + -0x28;
-    0x10000000000007de    |    *(*0x20 + -0x28 + -8) = 0x10000000000007e3;
-    0x10000000000007de    |    iStack_24 = sym.imp.strlen(pcVar3);
-    0x10000000000007e6    |    iVar1 = iStack_28;
-    0x10000000000007e9    |    iVar2 = iStack_24;
-    0x10000000000007f6    |    puVar6 = puVar5;
-    0x10000000000007f6    |    *(puVar5 + -8) = 0x10000000000007fb;
-    0x10000000000007f6    |    iStack_10 = sym.imp.malloc(iVar2 + iVar1 + 1);
-    0x1000000000000804    |    if (iStack_10 != 0) {
-    0x1000000000000806    |        pcVar3 = pcStack_20;
-    0x100000000000080a    |        iVar4 = iStack_10;
-    0x1000000000000814    |        puVar7 = puVar6;
-    0x1000000000000814    |        *(puVar6 + -8) = 0x1000000000000819;
-    0x1000000000000814    |        sym.imp.strcpy(iVar4,pcVar3);
-    0x1000000000000819    |        pcVar3 = pcStack_18;
-    0x100000000000081d    |        iVar4 = iStack_10;
-    0x1000000000000827    |        puVar8 = puVar7;
-    0x1000000000000827    |        *(puVar7 + -8) = 0x100000000000082c;
-    0x1000000000000827    |        sym.imp.strcat(iVar4,pcVar3);
-    0x100000000000082c    |        iVar4 = iStack_10;
-    0x1000000000000833    |        *(puVar8 + -8) = 0x1000000000000838;
-    0x1000000000000833    |        sym.imp.puts(iVar4);
-    0x1000000000000838    |        iVar4 = iStack_10;
-    0x100000000000083f    |        *(puVar8 + -8) = 0x1000000000000844;
-    0x100000000000083f    |        sym.imp.free(iVar4);
+    0x10000000000007cf    |    iVar1 = sym.imp.strlen("Hello");
+    0x10000000000007de    |    iVar2 = sym.imp.strlen(" r2-folks");
+    0x10000000000007f6    |    iVar3 = sym.imp.malloc(iVar2 + iVar1 + 1);
+    0x1000000000000804    |    if (iVar3 != 0) {
+    0x1000000000000814    |        sym.imp.strcpy(iVar3,"Hello");
+    0x1000000000000827    |        sym.imp.strcat(iVar3," r2-folks");
+    0x1000000000000833    |        sym.imp.puts(iVar3);
+    0x100000000000083f    |        sym.imp.free(iVar3);
                           |    }
     0x1000000000000846    |    return;
                           |}
@@ -4291,27 +2473,15 @@ EXPECT=<<EOF
 uint main(void)
 
 {
-    uint32_t uVar1;
-    uchar auStack_8c [16];
     uchar auStack_7c [120];
     
     //main starts here
-    uVar1 = *0x10 + -0x8c & 0xfffffff0;
-    *(uVar1 - 0x10) = "IOLI Crackme Level 0x05\n";
     //printf call here
-    *(uVar1 - 0x14) = 0x804856b;
-    sym.imp.printf();
-    *(uVar1 - 0x10) = "Password: ";
-    *(uVar1 - 0x14) = 0x8048577;
-    sym.imp.printf();
-    *(uVar1 - 0xc) = &stack0xffffff84;
-    *(uVar1 - 0x10) = 0x80486b2;
+    sym.imp.printf("IOLI Crackme Level 0x05\n");
+    sym.imp.printf("Password: ");
     //scanf call here
-    *(uVar1 - 0x14) = 0x804858a;
-    sym.imp.scanf();
-    *(uVar1 - 0x10) = &stack0xffffff84;
-    *((uVar1 - 0x10) + -4) = 0x8048595;
-    sym.check();
+    sym.imp.scanf(0x80486b2,auStack_7c);
+    sym.check(auStack_7c);
     //main returns here
     return 0;
 }
@@ -4336,27 +2506,15 @@ EXPECT=<<EOF
     0x08048540    |uint main(void)
                   |
                   |{
-                  |    uint32_t uVar1;
-                  |    uchar auStack_8c [16];
                   |    uchar auStack_7c [120];
                   |    
     0x08048540    |    //main starts here
-    0x08048549    |    uVar1 = *0x10 + -0x8c & 0xfffffff0;
-    0x0804855f    |    *(uVar1 - 0x10) = "IOLI Crackme Level 0x05\n";
     0x08048566    |    //printf call here
-    0x08048566    |    *(uVar1 - 0x14) = 0x804856b;
-    0x08048566    |    sym.imp.printf();
-    0x0804856b    |    *(uVar1 - 0x10) = "Password: ";
-    0x08048572    |    *(uVar1 - 0x14) = 0x8048577;
-    0x08048572    |    sym.imp.printf();
-    0x0804857a    |    *(uVar1 - 0xc) = &stack0xffffff84;
-    0x0804857e    |    *(uVar1 - 0x10) = 0x80486b2;
+    0x08048566    |    sym.imp.printf("IOLI Crackme Level 0x05\n");
+    0x08048572    |    sym.imp.printf("Password: ");
     0x08048585    |    //scanf call here
-    0x08048585    |    *(uVar1 - 0x14) = 0x804858a;
-    0x08048585    |    sym.imp.scanf();
-    0x0804858d    |    *(uVar1 - 0x10) = &stack0xffffff84;
-    0x08048590    |    *((uVar1 - 0x10) + -4) = 0x8048595;
-    0x08048590    |    sym.check();
+    0x08048585    |    sym.imp.scanf(0x80486b2,auStack_7c);
+    0x08048590    |    sym.check(auStack_7c);
     0x0804859b    |    //main returns here
     0x0804859b    |    return 0;
                   |}
@@ -4390,20 +2548,13 @@ void sym.KillList(int64_t param_1)
 
 {
     int64_t iVar1;
-    uchar *puVar2;
-    uchar auStack_28 [8];
-    int64_t iStack_20;
-    int64_t iStack_10;
+    ulong uStack_20;
     
-    puVar2 = *0x20 + -0x28;
-    iStack_20 = param_1;
-    while (iStack_20 != 0) {
-        iStack_10 = *(iStack_20 + 8);
-        iVar1 = iStack_20;
-        *(puVar2 + -8) = 0x4011ad;
-        sym.imp.free(iVar1);
-        puVar2 = puVar2;
-        iStack_20 = iStack_10;
+    uStack_20 = param_1;
+    while (uStack_20 != 0) {
+        iVar1 = *(uStack_20 + 8);
+        sym.imp.free(uStack_20);
+        uStack_20 = iVar1;
     }
     return;
 }
