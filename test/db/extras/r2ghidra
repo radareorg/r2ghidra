@@ -2361,6 +2361,8 @@ SuperH:BE:32:SH-2A
 TI_MSP430:LE:16:default
 TI_MSP430X:LE:32:default
 V850:LE:32:default
+Xtensa:BE:32:default
+Xtensa:LE:32:default
 avr32:BE:32:default
 avr8:LE:16:atmega256
 avr8:LE:16:default
