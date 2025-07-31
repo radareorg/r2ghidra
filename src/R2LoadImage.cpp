@@ -1,8 +1,9 @@
 /* r2ghidra - LGPL - Copyright 2019-2022 - pancake, thestr4ng3r */
 
-#include "R2LoadImage.h"
-#include "R2Utils.h"
 #include "R2Architecture.h"
+#include "R2LoadImage.h"
+
+#include "R2Utils.h"
 
 R2LoadImage::R2LoadImage(RCoreMutex *coreMutex, AddrSpaceManager *addr_space_manager) : LoadImage("radare2_program"),
 	coreMutex(coreMutex),

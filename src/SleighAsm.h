@@ -3,13 +3,16 @@
 #ifndef R2GHIDRA_SLEIGHASM_H
 #define R2GHIDRA_SLEIGHASM_H
 
-#include <string>
-#include <vector>
-#include <r_core.h>
-#include <unordered_map>
 #include "architecture.hh"
 #include "sleigh_arch.hh"
 #include "SleighInstruction.h"
+
+#include <r_core.h>
+
+#include <string>
+#include <vector>
+#include <unordered_map>
+
 
 class AsmLoadImage : public LoadImage {
 private:

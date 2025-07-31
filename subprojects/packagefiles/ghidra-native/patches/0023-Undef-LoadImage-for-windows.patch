@@ -1,5 +1,5 @@
 diff --git a/src/decompiler/loadimage.hh b/src/decompiler/loadimage.hh
-index 59d4c9a..3557744 100644
+index 76dce9b..2df840a 100644
 --- a/src/decompiler/loadimage.hh
 +++ b/src/decompiler/loadimage.hh
 @@ -21,6 +21,10 @@
@@ -10,6 +10,21 @@ index 59d4c9a..3557744 100644
 +#undef LoadImage
 +#endif
 +
+ namespace ghidra {
+ 
  /// \brief Exception indicating data was not available
- ///
- /// This exception is thrown when a request for load image
+diff --git a/src/decompiler/sleigh.hh b/src/decompiler/sleigh.hh
+index 32ef856..f0a7461 100644
+--- a/src/decompiler/sleigh.hh
++++ b/src/decompiler/sleigh.hh
+@@ -21,6 +21,10 @@
+ 
+ #include "sleighbase.hh"
+ 
++#ifdef LoadImage
++#undef LoadImage
++#endif
++
+ namespace ghidra {
+ 
+ class LoadImage;

@@ -1,8 +1,8 @@
 /* r2ghidra - LGPL - Copyright 2019-2022 - thestr4ng3r, pancake */
 
+#include "R2Architecture.h"
 #include "R2LoadImage.h"
 #include "R2Scope.h"
-#include "R2Architecture.h"
 #include "R2TypeFactory.h"
 #include "R2CommentDatabase.h"
 #include "R2Utils.h"

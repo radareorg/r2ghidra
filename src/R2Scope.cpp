@@ -1,8 +1,8 @@
 /* r2ghidra- LGPL - Copyright 2019-2023 - thestr4ng3r, pancake */
 
-#include "R2Scope.h"
 #include "R2Architecture.h"
 #include "R2TypeFactory.h"
+#include "R2Scope.h"
 
 #include <funcdata.hh>
 

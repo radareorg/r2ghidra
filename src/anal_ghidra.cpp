@@ -1,14 +1,16 @@
 /* r2ghidra - LGPL - Copyright 2020-2025 - pancake, FXTi */
 
+#include "SleighAsm.h"
+#include "SleighAnalValue.h"
+#include "ArchMap.h"
+
 #include <r_lib.h>
 #include <r_anal.h>
+
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
 #include <cfenv>
-#include "ArchMap.h"
-#include "SleighAsm.h"
-#include "SleighAnalValue.h"
 
 #if R2_VERSION_NUMBER >= 50709
 #define RAnalEsil REsil

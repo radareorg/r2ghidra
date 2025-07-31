@@ -13,19 +13,19 @@ pugixml_sources = [
 ]
 
 r2ghidra_sources = [
-  'src/ArchMap.cpp',
-  'src/CodeXMLParse.cpp',
   'src/R2Architecture.cpp',
-  'src/R2CommentDatabase.cpp',
-  'src/PcodeFixupPreprocessor.cpp',
   'src/R2LoadImage.cpp',
-  'src/R2PrintC.cpp',
   'src/R2Scope.cpp',
   'src/R2TypeFactory.cpp',
+  'src/R2CommentDatabase.cpp',
+  'src/CodeXMLParse.cpp',
+  'src/ArchMap.cpp',
+  'src/R2PrintC.cpp',
   'src/RCoreMutex.cpp',
   'src/SleighAnalValue.cpp',
   'src/SleighAsm.cpp',
   'src/SleighInstruction.cpp',
+  'src/PcodeFixupPreprocessor.cpp',
 ]
 
 incdirs = [
@@ -121,8 +121,8 @@ sleighc_sources = [
 
 r2ghidra_core_plugin = shared_library('core_r2ghidra',
   r2ghidra_core_sources,
-  dependencies: [r_core, zlib],
   link_with: libdecomp_static,
+  dependencies: [r_core, zlib],
   override_options : ['c_std=c11', 'cpp_std=c++14'],
   include_directories: [ghidra_incs, r2ghidra_incdirs],
   install: true,

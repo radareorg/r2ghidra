@@ -1,0 +1,39 @@
+diff --git a/src/decompiler/slghparse.cc b/src/decompiler/slghparse.cc
+index ec1f76a..01abe32 100644
+--- a/src/decompiler/slghparse.cc
++++ b/src/decompiler/slghparse.cc
+@@ -246,7 +246,7 @@ extern int sleighdebug;
+     ELLIPSIS_KEY = 344,
+     GLOBALSET_KEY = 345,
+     BITRANGE_KEY = 346,
+-    CHAR = 347,
++    CHARVALUE = 347,
+     INTEGER = 348,
+     INTB = 349,
+     STRING = 350,
+diff --git a/src/decompiler/slghparse.hh b/src/decompiler/slghparse.hh
+index 3d615cc..065e1e9 100644
+--- a/src/decompiler/slghparse.hh
++++ b/src/decompiler/slghparse.hh
+@@ -161,7 +161,7 @@ extern int sleighdebug;
+     ELLIPSIS_KEY = 344,
+     GLOBALSET_KEY = 345,
+     BITRANGE_KEY = 346,
+-    CHAR = 347,
++    CHARVALUE = 347,
+     INTEGER = 348,
+     INTB = 349,
+     STRING = 350,
+diff --git a/src/decompiler/slghscan.cc b/src/decompiler/slghscan.cc
+index 82f7e82..4e21247 100644
+--- a/src/decompiler/slghscan.cc
++++ b/src/decompiler/slghscan.cc
+@@ -2138,7 +2138,7 @@ YY_RULE_SETUP
+ 	YY_BREAK
+ case 61:
+ YY_RULE_SETUP
+-{ sleighlval.ch = sleightext[0]; return CHAR; }
++{ sleighlval.ch = sleightext[0]; return CHARVALUE; }
+ 	YY_BREAK
+ case 62:
+ YY_RULE_SETUP

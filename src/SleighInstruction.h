@@ -3,12 +3,15 @@
 #ifndef R2GHIDRA_SLEIGHINSTRUCTION_H
 #define R2GHIDRA_SLEIGHINSTRUCTION_H
 
-#include <vector>
-#include <unordered_set>
-#include "R2LoadImage.h"
 #include "architecture.hh"
 #include "sleigh_arch.hh"
 #include "crc32.hh"
+
+#include "R2LoadImage.h"
+
+#include <vector>
+#include <unordered_set>
+
 #include <unordered_map>
 #include <list>
 
