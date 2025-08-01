@@ -4,8 +4,5 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    commit-message:
-      suffix: " ##ci"
-      suffix-development: " ##ci"
     labels:
       - buildsystem
