@@ -228,7 +228,7 @@ jobs:
     needs:
       - linux-deb
       - macos-pkg
-      - w64
+#      - w64
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
