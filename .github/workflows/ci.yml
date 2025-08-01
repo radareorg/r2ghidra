@@ -180,10 +180,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: macos-pkg-${{ env.ARCH }}
-        path: |
-          radare2/dist/macos/*.pkg
-          dist/macos/*.zip
-          /tmp/r2ghidra-macos-${{ env.ARCH }}.tar.gz
+        path: dist/macos/r2ghidra-${{ env.R2V }}-macos-${{ env.ARCH }}.zip
 
   w64:
     if: ${{ false }}  # disable for now
