@@ -278,14 +278,24 @@ jobs:
           asset_path: dist/artifacts/linux-deb/r2ghidra_${{ steps.r2gv.outputs.branch }}_amd64.deb
           asset_name: r2ghidra_${{ steps.r2gv.outputs.branch }}_amd64.deb
           asset_content_type: application/vnd.debian.binary-package
-      - name: Upload asset for macOS
+      - name: Upload asset for macOS (x86_64)
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/artifacts/macos-pkg/r2ghidra-${{ steps.r2gv.outputs.branch }}-macos.zip
-          asset_name: r2ghidra-${{ steps.r2gv.outputs.branch }}-macos.zip
+          asset_path: dist/artifacts/macos-pkg-x86_64/r2ghidra-${{ steps.r2gv.outputs.branch }}-macos-x86_64.zip
+          asset_name: r2ghidra-${{ steps.r2gv.outputs.branch }}-macos-x86_64.zip
+          asset_content_type: application/zip
+
+      - name: Upload asset for macOS (arm64)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/artifacts/macos-pkg-arm64/r2ghidra-${{ steps.r2gv.outputs.branch }}-macos-arm64.zip
+          asset_name: r2ghidra-${{ steps.r2gv.outputs.branch }}-macos-arm64.zip
           asset_content_type: application/zip
       - name: Upload zip
         uses: actions/upload-release-asset@v1
