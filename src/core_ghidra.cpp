@@ -2,11 +2,15 @@
 
 #include "R2Architecture.h"
 #include "CodeXMLParse.h"
-#include "PcodeFixupPreprocessor.h"
 #include "PrettyXmlEncode.h"
-#include "ArchMap.h"
+#include "R2PrintC.h"
+
 #include "SleighAsm.h"
+#include "ArchMap.h"
+#include "PcodeFixupPreprocessor.h"
+
 #include "r2ghidra.h"
+
 #include <r_core.h>
 
 // Windows clash
@@ -15,8 +19,6 @@
 #endif
 
 #include <libdecomp.hh>
-#include <printc.hh>
-#include "R2PrintC.h"
 
 #include <vector>
 #include <mutex>

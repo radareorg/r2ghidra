@@ -3,8 +3,8 @@
 #ifndef R2GHIDRA_R2ARCHITECTURE_H
 #define R2GHIDRA_R2ARCHITECTURE_H
 
-#include "architecture.hh"
 #include "sleigh_arch.hh"
+#include "architecture.hh"
 
 #include "RCoreMutex.h"
 

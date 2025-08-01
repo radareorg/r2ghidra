@@ -72,7 +72,6 @@ decompiler_sources = [
 ]
 
 libdecomp_sources = [
-  'src/decompiler/sleigh_arch.cc',
   'src/decompiler/libdecomp.cc',
 ]
 
@@ -91,6 +90,7 @@ ghidra_sources = [
 
 slgh_sources = [
   'src/decompiler/sleigh.cc',
+  'src/decompiler/sleigh_arch.cc',
   'src/decompiler/inject_sleigh.cc',
   'src/decompiler/pcodecompile.cc',
   'src/decompiler/sleighbase.cc',

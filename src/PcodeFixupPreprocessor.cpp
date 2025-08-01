@@ -1,20 +1,21 @@
 /* r2ghidra - LGPL - Copyright 2025 - pancake */
 
-#include "R2LoadImage.h"
 #include "PcodeFixupPreprocessor.h"
+#include "R2LoadImage.h"
 
 #include <funcdata.hh>
-#include <r_core.h>
 #include <flow.hh>
 #include <override.hh>
 #include <database.hh>
+
+#include <r_core.h>
 #include <r_anal.h>
 #include <r_core.h>
 #include <r_bin.h>
+
 #include <map>
 #include <string>
 #include <vector>
-#include <strings.h>  // For strcasecmp function
 
 using namespace ghidra;
 

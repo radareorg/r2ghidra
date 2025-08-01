@@ -1,7 +1,7 @@
 /* r2ghidra - LGPL - Copyright 2020-2023 - FXTi, pancake */
 
-#include "SleighAsm.h"
 #include "ArchMap.h"
+#include "SleighAsm.h"
 
 // define it here because sleighc needs to compile without anal_ghidra.cpp
 extern "C" {
