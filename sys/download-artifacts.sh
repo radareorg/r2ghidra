@@ -37,3 +37,14 @@ done
 
 echo "Artifacts downloaded:"
 find "${DESTDIR}" -type f
+
+# Move plugin ZIPs up from nested dist/macos subdirs into the artifact root
+for d in "${DESTDIR}"/macos-pkg-*; do
+  if [ -d "$d/dist/macos" ]; then
+    mv "$d/dist/macos/"*.zip "$d/" 2>/dev/null || true
+    rm -rf "$d/dist"
+  fi
+done
+
+echo "Flattened plugin ZIPs:"
+find "${DESTDIR}" -type f -name '*.zip'
