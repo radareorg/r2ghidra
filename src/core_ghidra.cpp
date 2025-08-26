@@ -310,7 +310,11 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 		case DecompileMode::OFFSET:
 			{
 				RVector *offsets = r_codemeta_line_offsets (code);
-#if R2_VERSION_NUMBER >= 50909
+#if R2_VERSION_NUMBER >= 60003
+				char *s = r_codemeta_print2 (code, offsets, core->anal);
+				r_cons_print (core->cons, s);
+				free (s);
+#elif R2_VERSION_NUMBER >= 50909
 				char *s = r_codemeta_print (code, offsets);
 				r_cons_print (core->cons, s);
 				free (s);
@@ -323,7 +327,11 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 			break;
 		case DecompileMode::DEFAULT:
 			{
-#if R2_VERSION_NUMBER >= 50909
+#if R2_VERSION_NUMBER >= 60003
+				char *s = r_codemeta_print2 (code, nullptr, core->anal);
+				r_cons_print (core->cons, s);
+				free (s);
+#elif R2_VERSION_NUMBER >= 50909
 				char *s = r_codemeta_print (code, nullptr);
 				r_cons_print (core->cons, s);
 				free (s);
