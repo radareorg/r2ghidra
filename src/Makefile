@@ -25,7 +25,7 @@ R2GHIDRA_SRCS+=SleighInstruction.cpp
 R2G_PLUG_SRCS= anal_ghidra.cpp core_ghidra.cpp
 R2G_PLUG_SRCS+= anal_ghidra_plugin.o core_ghidra_plugin.o
 
-PUGIXML_HOME=../third-party/pugixml/src/
+PUGIXML_HOME=../subprojects/pugixml/src/
 PUGIXML_CFLAGS=-I$(PUGIXML_HOME)
 PUGIXML_SRCS= $(PUGIXML_HOME)/pugixml.cpp
 PUGIXML_OBJS= $(PUGIXML_HOME)/pugixml.o

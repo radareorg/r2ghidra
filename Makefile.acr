@@ -3,9 +3,7 @@ DESTDIR?=
 
 GHIDRA_NATIVE_COMMIT=0.5.0
 
-PUGIXML=third-party/pugixml/Makefile
-
-all: ghidra-processors.txt $(PUGIXML)
+all: ghidra-processors.txt
 	$(MAKE) -C src
 	$(MAKE) -C ghidra
 
@@ -44,11 +42,7 @@ install uninstall user-install user-uninstall:
 	$(MAKE) -C src $@
 	$(MAKE) -C ghidra $@
 
-$(PUGIXML):
-	git submodule update --init
-
-mrproper: clean
-	git submodule deinit --all -f
+mrproper: clean	
 
 r2ghidra_sleigh.zip dist:
 	rm -rf tmp && mkdir -p tmp

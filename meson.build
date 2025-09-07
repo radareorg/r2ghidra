@@ -7,11 +7,6 @@ version : '6.0.0',
   default_options : ['c_std=c11', 'cpp_std=c++14']
 )
 
-
-pugixml_sources = [
-  'third-party/pugixml/src/pugixml.cpp'
-]
-
 r2ghidra_sources = [
   'src/R2Architecture.cpp',
   'src/R2LoadImage.cpp',
@@ -30,8 +25,6 @@ r2ghidra_sources = [
 
 incdirs = [
   'src',
-  'third-party/pugixml/src/',
-  #  'ghidra-native/src/decompiler/',
 ]
 
 res = run_command(['radare2','-HR2_LIBR_PLUGINS'], capture:true, check:false)
@@ -99,12 +92,10 @@ ghidra_incs = ghidra.get_variable('incs')
 libdecomp_static = ghidra.get_variable('libdecomp_static')
 slgh_static = ghidra.get_variable('slgh_static')
 
-
-# r2ghidra_incdirs += ghidra_incs
+pugixml = subproject('pugixml').get_variable('pugixml_dep')
 
 r2ghidra_core_sources = [
   r2ghidra_sources,
-  pugixml_sources,
   # ghidra_decompiler_sources,
   'src/anal_ghidra_plugin.c',
   'src/anal_ghidra.cpp',
@@ -114,7 +105,6 @@ r2ghidra_core_sources = [
 
 sleighc_sources = [
   r2ghidra_sources,
-  pugixml_sources,
   # ghidra_slgh_sources,
   # ghidra_decompiler_sources,
 ]
@@ -122,7 +112,7 @@ sleighc_sources = [
 r2ghidra_core_plugin = shared_library('core_r2ghidra',
   r2ghidra_core_sources,
   link_with: libdecomp_static,
-  dependencies: [r_core, zlib],
+  dependencies: [r_core, zlib, pugixml],
   override_options : ['c_std=c11', 'cpp_std=c++14'],
   include_directories: [ghidra_incs, r2ghidra_incdirs],
   install: true,
