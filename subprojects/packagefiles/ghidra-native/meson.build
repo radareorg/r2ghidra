@@ -39,6 +39,7 @@ decompiler_sources = [
   'src/decompiler/emulateutil.cc',
   'src/decompiler/flow.cc',
   'src/decompiler/userop.cc',
+  'src/decompiler/expression.cc',
   'src/decompiler/multiprecision.cc',
   'src/decompiler/funcdata.cc',
   'src/decompiler/funcdata_block.cc',
