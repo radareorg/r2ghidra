@@ -17,4 +17,5 @@ ghidra-processors.txt
 ghidra/sleighc
 
 subprojects/ghidra-native
+subprojects/pugixml
 subprojects/zlib

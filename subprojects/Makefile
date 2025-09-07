@@ -1,4 +1,4 @@
-DEPS=ghidra-native
+DEPS=ghidra-native pugixml
 
 ifeq ($(NEED_ZLIB),1)
   DEPS += zlib
@@ -13,3 +13,4 @@ include ghidra-native.mk
 ifeq ($(NEED_ZLIB),1)
   include zlib.mk
 endif
+include pugixml.mk
