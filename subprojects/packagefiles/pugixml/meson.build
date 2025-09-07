@@ -1,4 +1,4 @@
-project('pugixml', 'cpp', meson_version : '>=0.60.0', version : '0e3f1699ffab5f820060fe99c61f0f9495c0c5b6')
+project('pugixml', 'cpp', meson_version : '>=0.60.0', version : '1.15')
 
 pugixml_sources = [
   'src/pugixml.cpp',
