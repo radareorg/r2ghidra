@@ -11,11 +11,12 @@ ghidra/flex/
 .ccls-cache
 .gdb_history
 dist/artifacts
-
+dist/tarball/r2ghidra-*
 
 ghidra-processors.txt
 ghidra/sleighc
 
+subprojects/.wraplock
 subprojects/ghidra-native
 subprojects/pugixml
 subprojects/zlib

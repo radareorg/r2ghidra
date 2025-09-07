@@ -1,16 +1,17 @@
-DEPS=ghidra-native pugixml
+.PHONY: default all clean
 
+DEPS=ghidra-native pugixml
 ifeq ($(NEED_ZLIB),1)
   DEPS += zlib
 endif
 
-all: $(DEPS)
+ALL=$(basename $(wildcard *.mk))
+
+default: $(DEPS)
+
+all: $(ALL)
 
 clean:
-	rm -rf $(DEPS)
+	rm -rf $(ALL)
 
-include ghidra-native.mk
-ifeq ($(NEED_ZLIB),1)
-  include zlib.mk
-endif
-include pugixml.mk
+include *.mk
