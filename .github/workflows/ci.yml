@@ -1,7 +1,7 @@
 name: ci
 
 env:
-  R2V: 6.0.0
+  R2V: 6.0.2
 
 on:
   push:
@@ -43,8 +43,8 @@ jobs:
       uses: actions/checkout@v5
     - name: Installing radare2 from deb
       run: |
-        wget https://github.com/radareorg/radare2/releases/download/5.9.0/radare2_5.9.0_amd64.deb
-        wget https://github.com/radareorg/radare2/releases/download/5.9.0/radare2-dev_5.9.0_amd64.deb
+        wget https://github.com/radareorg/radare2/releases/download/6.0.2/radare2_6.0.2_amd64.deb
+        wget https://github.com/radareorg/radare2/releases/download/6.0.2/radare2-dev_6.0.2_amd64.deb
         sudo dpkg -i *.deb
     - name: Building r2ghidra with acr
       run: ./preconfigure && ./configure --prefix=/usr && make -j4 ; make user-install
@@ -77,8 +77,8 @@ jobs:
       uses: actions/checkout@v5
     - name: Installing radare2 from deb
       run: |
-        wget https://github.com/radareorg/radare2/releases/download/5.9.8/radare2_5.9.8_amd64.deb
-        wget https://github.com/radareorg/radare2/releases/download/5.9.8/radare2-dev_5.9.8_amd64.deb
+        wget https://github.com/radareorg/radare2/releases/download/6.0.2/radare2_6.0.2_amd64.deb
+        wget https://github.com/radareorg/radare2/releases/download/6.0.2/radare2-dev_6.0.2_amd64.deb
         sudo dpkg -i *.deb
         rm *.deb
     - name: Building tars
