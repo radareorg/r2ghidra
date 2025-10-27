@@ -57,7 +57,7 @@ jobs:
     - name: Packaging r2ghidra for Debian using Dockcross
       run: make -C dist/debian
     - name: Uploading debs
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         # path: radare2/dist/debian/*/*.deb r2ghidra/dist/debian/*.deb
         name: linux-deb
@@ -65,7 +65,7 @@ jobs:
     - name: Precompiling the sleigh
       run: make dist
     - name: Uploading sleigh
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: linux-acr-ok
         path: r2ghidra_sleigh-*.zip
@@ -84,7 +84,7 @@ jobs:
     - name: Building tars
       run: make -C dist/tarball
     - name: Uploading balls
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: tarball
         path: dist/tarball/r2ghidra-*
@@ -177,7 +177,7 @@ jobs:
         r2 -qc 'af;pdg' test/bins/rec | tee a.txt
         grep csu_init a.txt
     - name: Uploading artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: macos-pkg-${{ env.ARCH }}
         path: dist/macos/r2ghidra-${{ env.R2V }}-macos-${{ env.ARCH }}.zip
@@ -211,7 +211,7 @@ jobs:
         call preconfigure.bat
         call configure.bat
         call make.bat
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v5
       with:
         name: w64
         path: destdir/r2ghidra-w64.zip
