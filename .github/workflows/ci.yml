@@ -252,7 +252,7 @@ jobs:
       - name: Prepare release notes
         run: echo Release > ./RELEASE_NOTES.md
       - name: Download artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           path: dist/artifacts
       - name: Create GitHub release and upload assets
