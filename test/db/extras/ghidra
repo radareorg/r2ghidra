@@ -2299,6 +2299,7 @@ ARM:LE:32:v8-m
 ARM:LE:32:v8T
 ARM:LEBE:32:v7LEInstruction
 ARM:LEBE:32:v8LEInstruction
+BPF:LE:32:default
 DATA:BE:64:default
 DATA:LE:64:default
 JVM:BE:32:default
@@ -2370,6 +2371,8 @@ avr8:LE:16:atmega256
 avr8:LE:16:default
 avr8:LE:16:extended
 avr8:LE:24:xmega
+eBPF:BE:64:default
+eBPF:LE:64:default
 hexagon:LE:32:default
 sparc:BE:32:default
 sparc:BE:64:default
@@ -2406,7 +2409,7 @@ add eax, 0xf
 shr eax, 4
 -----
 0x08048540: PUSH EBP
-    (unique,0x9c00,4) = COPY EBP
+    (unique,0x20a80,4) = COPY EBP
     ESP = INT_SUB ESP, 0x4
 0x08048541: MOV EBP,ESP
     EBP = COPY ESP
@@ -2416,20 +2419,20 @@ shr eax, 4
     ESP = INT_SUB ESP, 0x88
     SF = INT_SLESS ESP, 0x0
     ZF = INT_EQUAL ESP, 0x0
-    (unique,0xdd80,4) = INT_AND ESP, 0xff
-    (unique,0xde00,1) = POPCOUNT (unique,0xdd80,4)
-    (unique,0xde80,1) = INT_AND (unique,0xde00,1), 0x1
-    PF = INT_EQUAL (unique,0xde80,1), 0x0
+    (unique,0x24c00,4) = INT_AND ESP, 0xff
+    (unique,0x24c80,1) = POPCOUNT (unique,0x24c00,4)
+    (unique,0x24d00,1) = INT_AND (unique,0x24c80,1), 0x1
+    PF = INT_EQUAL (unique,0x24d00,1), 0x0
 0x08048549: AND ESP,0xfffffff0
     CF = COPY 0x0
     OF = COPY 0x0
     ESP = INT_AND ESP, 0xfffffff0
     SF = INT_SLESS ESP, 0x0
     ZF = INT_EQUAL ESP, 0x0
-    (unique,0xdd80,4) = INT_AND ESP, 0xff
-    (unique,0xde00,1) = POPCOUNT (unique,0xdd80,4)
-    (unique,0xde80,1) = INT_AND (unique,0xde00,1), 0x1
-    PF = INT_EQUAL (unique,0xde80,1), 0x0
+    (unique,0x24c00,4) = INT_AND ESP, 0xff
+    (unique,0x24c80,1) = POPCOUNT (unique,0x24c00,4)
+    (unique,0x24d00,1) = INT_AND (unique,0x24c80,1), 0x1
+    PF = INT_EQUAL (unique,0x24d00,1), 0x0
 0x0804854c: MOV EAX,0x0
     EAX = COPY 0x0
 0x08048551: ADD EAX,0xf
@@ -2438,58 +2441,58 @@ shr eax, 4
     EAX = INT_ADD EAX, 0xf
     SF = INT_SLESS EAX, 0x0
     ZF = INT_EQUAL EAX, 0x0
-    (unique,0xdd80,4) = INT_AND EAX, 0xff
-    (unique,0xde00,1) = POPCOUNT (unique,0xdd80,4)
-    (unique,0xde80,1) = INT_AND (unique,0xde00,1), 0x1
-    PF = INT_EQUAL (unique,0xde80,1), 0x0
+    (unique,0x24c00,4) = INT_AND EAX, 0xff
+    (unique,0x24c80,1) = POPCOUNT (unique,0x24c00,4)
+    (unique,0x24d00,1) = INT_AND (unique,0x24c80,1), 0x1
+    PF = INT_EQUAL (unique,0x24d00,1), 0x0
 0x08048554: ADD EAX,0xf
     CF = INT_CARRY EAX, 0xf
     OF = INT_SCARRY EAX, 0xf
     EAX = INT_ADD EAX, 0xf
     SF = INT_SLESS EAX, 0x0
     ZF = INT_EQUAL EAX, 0x0
-    (unique,0xdd80,4) = INT_AND EAX, 0xff
-    (unique,0xde00,1) = POPCOUNT (unique,0xdd80,4)
-    (unique,0xde80,1) = INT_AND (unique,0xde00,1), 0x1
-    PF = INT_EQUAL (unique,0xde80,1), 0x0
+    (unique,0x24c00,4) = INT_AND EAX, 0xff
+    (unique,0x24c80,1) = POPCOUNT (unique,0x24c00,4)
+    (unique,0x24d00,1) = INT_AND (unique,0x24c80,1), 0x1
+    PF = INT_EQUAL (unique,0x24d00,1), 0x0
 0x08048557: SHR EAX,0x4
-    (unique,0x3ec00,4) = INT_AND 0x4, 0x1f
-    (unique,0x3ec80,4) = COPY EAX
-    EAX = INT_RIGHT EAX, (unique,0x3ec00,4)
-    (unique,0x11280,1) = INT_NOTEQUAL (unique,0x3ec00,4), 0x0
-    (unique,0x11300,4) = INT_SUB (unique,0x3ec00,4), 0x1
-    (unique,0x11380,4) = INT_RIGHT (unique,0x3ec80,4), (unique,0x11300,4)
-    (unique,0x11400,4) = INT_AND (unique,0x11380,4), 0x1
-    (unique,0x11500,1) = INT_NOTEQUAL (unique,0x11400,4), 0x0
-    (unique,0x11580,1) = BOOL_NEGATE (unique,0x11280,1)
-    (unique,0x11600,1) = INT_AND (unique,0x11580,1), CF
-    (unique,0x11680,1) = INT_AND (unique,0x11280,1), (unique,0x11500,1)
-    CF = INT_OR (unique,0x11600,1), (unique,0x11680,1)
-    (unique,0x11800,1) = INT_EQUAL (unique,0x3ec00,4), 0x1
-    (unique,0x11900,1) = INT_SLESS (unique,0x3ec80,4), 0x0
-    (unique,0x11980,1) = BOOL_NEGATE (unique,0x11800,1)
-    (unique,0x11a00,1) = INT_AND (unique,0x11980,1), OF
-    (unique,0x11a80,1) = INT_AND (unique,0x11800,1), (unique,0x11900,1)
-    OF = INT_OR (unique,0x11a00,1), (unique,0x11a80,1)
-    (unique,0xe000,1) = INT_NOTEQUAL (unique,0x3ec00,4), 0x0
-    (unique,0xe100,1) = INT_SLESS EAX, 0x0
-    (unique,0xe180,1) = BOOL_NEGATE (unique,0xe000,1)
-    (unique,0xe200,1) = INT_AND (unique,0xe180,1), SF
-    (unique,0xe280,1) = INT_AND (unique,0xe000,1), (unique,0xe100,1)
-    SF = INT_OR (unique,0xe200,1), (unique,0xe280,1)
-    (unique,0xe400,1) = INT_EQUAL EAX, 0x0
-    (unique,0xe480,1) = BOOL_NEGATE (unique,0xe000,1)
-    (unique,0xe500,1) = INT_AND (unique,0xe480,1), ZF
-    (unique,0xe580,1) = INT_AND (unique,0xe000,1), (unique,0xe400,1)
-    ZF = INT_OR (unique,0xe500,1), (unique,0xe580,1)
-    (unique,0xe680,4) = INT_AND EAX, 0xff
-    (unique,0xe700,1) = POPCOUNT (unique,0xe680,4)
-    (unique,0xe780,1) = INT_AND (unique,0xe700,1), 0x1
-    (unique,0xe880,1) = INT_EQUAL (unique,0xe780,1), 0x0
-    (unique,0xe900,1) = BOOL_NEGATE (unique,0xe000,1)
-    (unique,0xe980,1) = INT_AND (unique,0xe900,1), PF
-    (unique,0xea00,1) = INT_AND (unique,0xe000,1), (unique,0xe880,1)
-    PF = INT_OR (unique,0xe980,1), (unique,0xea00,1)
+    (unique,0x55c80,4) = INT_AND 0x4, 0x1f
+    (unique,0x55d00,4) = COPY EAX
+    EAX = INT_RIGHT EAX, (unique,0x55c80,4)
+    (unique,0x28100,1) = INT_NOTEQUAL (unique,0x55c80,4), 0x0
+    (unique,0x28180,4) = INT_SUB (unique,0x55c80,4), 0x1
+    (unique,0x28200,4) = INT_RIGHT (unique,0x55d00,4), (unique,0x28180,4)
+    (unique,0x28280,4) = INT_AND (unique,0x28200,4), 0x1
+    (unique,0x28380,1) = INT_NOTEQUAL (unique,0x28280,4), 0x0
+    (unique,0x28400,1) = BOOL_NEGATE (unique,0x28100,1)
+    (unique,0x28480,1) = INT_AND (unique,0x28400,1), CF
+    (unique,0x28500,1) = INT_AND (unique,0x28100,1), (unique,0x28380,1)
+    CF = INT_OR (unique,0x28480,1), (unique,0x28500,1)
+    (unique,0x28680,1) = INT_EQUAL (unique,0x55c80,4), 0x1
+    (unique,0x28780,1) = INT_SLESS (unique,0x55d00,4), 0x0
+    (unique,0x28800,1) = BOOL_NEGATE (unique,0x28680,1)
+    (unique,0x28880,1) = INT_AND (unique,0x28800,1), OF
+    (unique,0x28900,1) = INT_AND (unique,0x28680,1), (unique,0x28780,1)
+    OF = INT_OR (unique,0x28880,1), (unique,0x28900,1)
+    (unique,0x24e80,1) = INT_NOTEQUAL (unique,0x55c80,4), 0x0
+    (unique,0x24f80,1) = INT_SLESS EAX, 0x0
+    (unique,0x25000,1) = BOOL_NEGATE (unique,0x24e80,1)
+    (unique,0x25080,1) = INT_AND (unique,0x25000,1), SF
+    (unique,0x25100,1) = INT_AND (unique,0x24e80,1), (unique,0x24f80,1)
+    SF = INT_OR (unique,0x25080,1), (unique,0x25100,1)
+    (unique,0x25280,1) = INT_EQUAL EAX, 0x0
+    (unique,0x25300,1) = BOOL_NEGATE (unique,0x24e80,1)
+    (unique,0x25380,1) = INT_AND (unique,0x25300,1), ZF
+    (unique,0x25400,1) = INT_AND (unique,0x24e80,1), (unique,0x25280,1)
+    ZF = INT_OR (unique,0x25380,1), (unique,0x25400,1)
+    (unique,0x25500,4) = INT_AND EAX, 0xff
+    (unique,0x25580,1) = POPCOUNT (unique,0x25500,4)
+    (unique,0x25600,1) = INT_AND (unique,0x25580,1), 0x1
+    (unique,0x25700,1) = INT_EQUAL (unique,0x25600,1), 0x0
+    (unique,0x25780,1) = BOOL_NEGATE (unique,0x24e80,1)
+    (unique,0x25800,1) = INT_AND (unique,0x25780,1), PF
+    (unique,0x25880,1) = INT_AND (unique,0x24e80,1), (unique,0x25700,1)
+    PF = INT_OR (unique,0x25800,1), (unique,0x25880,1)
 EOF
 CMDS=<<EOF
 s main
