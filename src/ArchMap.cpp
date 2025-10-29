@@ -174,7 +174,8 @@ static const std::map<std::string, ArchMapper> arch_map = {
 		}),
 		false,
 		2, 6
-	}}
+	}},
+	{ "sbpf", { "sBPF", "default", 64, false } }
 };
 
 static const std::map<std::string, std::string> compiler_map = {
@@ -272,7 +273,7 @@ std::string SleighIdFromSleighAsmConfig(RCore *core, const char *cpu, int bits, 
 	for (const auto &lang : langs) {
 		auto proc = lang.getProcessor();
 		if (tolower (proc) == low_cpu) {
-			return proc 
+			return proc
 				+ ":" + (bigendian ? "BE" : "LE")
 				+ ":" + to_string (bits)
 				+ ":" + "default";
