@@ -686,8 +686,12 @@ static void _cmd(RCore *core, const char *input) {
 #if R2_VERSION_NUMBER >= 50909
 extern "C" bool r2ghidra_core_cmd(RCorePluginSession *cps, const char *input) {
 	RCore *core = cps->core;
+	if (r_str_startswith (input, "pdc.ghidra")) {
+		_cmd (core, input + strlen ("pdc.ghidra"));
+		return true;
+	}
 	if (r_str_startswith (input, "pdg")) {
-		_cmd (core, input + 3);
+		_cmd (core, input + strlen ("pdg"));
 		return true;
 	}
 	return false;
