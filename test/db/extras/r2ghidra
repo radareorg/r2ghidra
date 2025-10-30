@@ -2372,6 +2372,7 @@ avr8:LE:24:xmega
 eBPF:BE:64:default
 eBPF:LE:64:default
 hexagon:LE:32:default
+sBPF:LE:64:default
 sparc:BE:32:default
 sparc:BE:64:default
 tricore:LE:32:default

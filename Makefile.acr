@@ -36,13 +36,16 @@ help:
 clean:
 	$(MAKE) -C src clean
 	$(MAKE) -C ghidra clean
+	rm -f ghidra-processors.txt
 	rm -f config.mk
 
 install uninstall user-install user-uninstall:
 	$(MAKE) -C src $@
 	$(MAKE) -C ghidra $@
 
-mrproper: clean	
+mrproper: clean
+	rm -rf subprojects/ghidra-native
+	rm -rf subprojects/pugixml
 
 r2ghidra_sleigh.zip dist:
 	rm -rf tmp && mkdir -p tmp
