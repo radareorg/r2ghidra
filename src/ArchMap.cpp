@@ -175,6 +175,8 @@ static const std::map<std::string, ArchMapper> arch_map = {
 		false,
 		2, 6
 	}},
+	{ "bpf", { "BPF", "default", 32, false } },
+	{ "ebpf", { "eBPF", "default", 32, false } },
 	{ "sbpf", { "sBPF", "default", 64, false } }
 };
 
