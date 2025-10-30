@@ -4,6 +4,9 @@
 8048
 8051
 8085
+BPF
+eBPF
+sBPF
 AARCH64
 ARM
 Atmel
