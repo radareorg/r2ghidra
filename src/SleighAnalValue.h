@@ -20,12 +20,12 @@ public:
 			std::vector<Pcodeop>::const_iterator end_op,
 			const PcodeOperand *arg);
 
-	bool is_valid() const { return absolute != -1; }
+	bool is_valid() const { return absolute; }
 	bool is_imm() const { return type == R_ANAL_VAL_IMM; }
 	bool is_reg() const { return type == R_ANAL_VAL_REG; }
 	bool is_mem() const { return type == R_ANAL_VAL_MEM; }
 
-	void invalid() { absolute = -1; }
+	void invalid() { absolute = false; }
 	void mem(uint4 size);
 	RAnalValue *dup() const;
 

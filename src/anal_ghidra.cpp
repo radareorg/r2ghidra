@@ -2219,6 +2219,7 @@ extern "C" bool r2ghidra_esilcb(RArchSession *as, RArchEsilAction action) {
 		R_LOG_WARN ("Unhandled ArchEsil action");
 		break;
 	}
+	return false;
 }
 #endif
 
