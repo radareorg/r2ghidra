@@ -104,28 +104,28 @@ public:
 	}
 };
 
+static const char* r2ghidra_help[] = {
+	"Usage: " "pdg", "", "# Native Ghidra decompiler plugin",
+	"pd:g", "[?]", "# Decompile current function with the Ghidra decompiler",
+	"pd:g*", "", "# Decompiled code is returned to r2 as comment",
+	"pd:ga", "", "# Side by side two column disasm and decompilation",
+	"pd:gd", "", "# Dump the debug XML Dump",
+	"pd:gj", "", "# Dump the current decompiled function as JSON",
+	"pd:go", "", "# Decompile current function side by side with offsets",
+	"pd:gp", "", "# Switch to RAsm and RAnal plugins driven by SLEIGH from Ghidra",
+	"pd:gs", "", "# Display loaded Sleigh Languages (alias for pdgL)",
+	"pd:gsd", " N", "# Disassemble N instructions with Sleigh and print pcode",
+	"pd:gss", "", "# Display automatically matched Sleigh Language ID",
+	"pd:gx", "", "# Dump the XML of the current decompiled function",
+	"Environment:", "", "",
+	"%SLEIGHHOME" , "", "# Path to ghidra sleigh directory (same as r2ghidra.sleighhome)",
+	NULL
+};
 static void PrintUsage(const RCore *const core) {
-	const char* help[] = {
-		"Usage: " "pdg", "", "# Native Ghidra decompiler plugin",
-		"pdg", "", "# Decompile current function with the Ghidra decompiler",
-		"pdg*", "", "# Decompiled code is returned to r2 as comment",
-		"pdga", "", "# Side by side two column disasm and decompilation",
-		"pdgd", "", "# Dump the debug XML Dump",
-		"pdgj", "", "# Dump the current decompiled function as JSON",
-		"pdgo", "", "# Decompile current function side by side with offsets",
-		"pdgp", "", "# Switch to RAsm and RAnal plugins driven by SLEIGH from Ghidra",
-		"pdgs", "", "# Display loaded Sleigh Languages (alias for pdgL)",
-		"pdgsd", " N", "# Disassemble N instructions with Sleigh and print pcode",
-		"pdgss", "", "# Display automatically matched Sleigh Language ID",
-		"pdgx", "", "# Dump the XML of the current decompiled function",
-		"Environment:", "", "",
-		"%SLEIGHHOME" , "", "# Path to ghidra sleigh directory (same as r2ghidra.sleighhome)",
-		NULL
-	};
 #if R2_VERSION_NUMBER >= 50909
-	r_cons_cmd_help (core->cons, help, core->print->flags & R_PRINT_FLAGS_COLOR);
+	r_cons_cmd_help (core->cons, r2ghidra_help, core->print->flags & R_PRINT_FLAGS_COLOR);
 #else
-	r_cons_cmd_help (help, core->print->flags & R_PRINT_FLAGS_COLOR);
+	r_cons_cmd_help (r2ghidra_help, core->print->flags & R_PRINT_FLAGS_COLOR);
 #endif
 }
 
@@ -686,18 +686,15 @@ static void _cmd(RCore *core, const char *input) {
 #if R2_VERSION_NUMBER >= 50909
 extern "C" bool r2ghidra_core_cmd(RCorePluginSession *cps, const char *input) {
 	RCore *core = cps->core;
-	if (!strcmp (input, "pdc.")) {
-		r_cons_println (core->cons, "pdc.ghidra");
+	if (!strcmp (input, "pd:?")) {
+		r_core_cmd_help_match (core, r2ghidra_help, "pd:g");
 		return false;
 	}
-	if (r_str_startswith (input, "pdc.ghidra")) {
-		_cmd (core, input + strlen ("pdc.ghidra"));
+	if (r_str_startswith (input, "pd:g")) {
+		_cmd (core, input + strlen ("pd:g"));
 		return true;
 	}
-	if (r_str_startswith (input, "pdc.g")) {
-		_cmd (core, input + strlen ("pdc.g"));
-		return true;
-	}
+	// TODO: deprecate at some point
 	if (r_str_startswith (input, "pdg")) {
 		_cmd (core, input + strlen ("pdg"));
 		return true;
