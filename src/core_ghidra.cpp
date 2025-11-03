@@ -687,7 +687,7 @@ static void _cmd(RCore *core, const char *input) {
 extern "C" bool r2ghidra_core_cmd(RCorePluginSession *cps, const char *input) {
 	RCore *core = cps->core;
 	if (!strcmp (input, "pd:?")) {
-		r_core_cmd_help_match (core, r2ghidra_help, "pd:g");
+		r_core_cmd_help_match (core, r2ghidra_help, (char*)"pd:g");
 		return false;
 	}
 	if (r_str_startswith (input, "pd:g")) {

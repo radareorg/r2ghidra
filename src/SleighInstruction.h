@@ -266,7 +266,7 @@ public:
 	void setPrototype(SleighInstructionPrototype *p);
 };
 
-class SleighInstruction;
+struct SleighInstruction;
 class SleighInstructionPrototype;
 class R2Sleigh : public Sleigh {
 	// To export protected member functions to SleighInstructionPrototype

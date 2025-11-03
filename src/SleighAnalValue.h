@@ -9,7 +9,8 @@ struct SleighAnalValue: public RAnalValue {
 public:
 	SleighAnalValue() {
 		// access = RAnalValueAccess(0);
-		absolute = memref = base = delta = imm = mul = 0;
+		memref = base = delta = imm = mul = 0;
+		absolute = false;
 		seg = reg = regdelta = nullptr;
 	}
 
