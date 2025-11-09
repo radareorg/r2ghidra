@@ -119,3 +119,5 @@ r2ghidra_core_plugin = shared_library('core_r2ghidra',
   install_dir: r2_plugdir
 )
 
+sleighc_exe = ghidra.get_variable('sleighc_exe')
+subdir('ghidra')
