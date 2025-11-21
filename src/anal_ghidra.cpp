@@ -507,7 +507,8 @@ static ut32 anal_type_XCMP(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcod
 	in0.invalid(); in1.invalid ();
 	uintb unique_off = 0;
 	PcodeOpType key_pcode = CPUI_MAX;
-	anal_op->type = R_ANAL_OP_TYPE_CMP;
+	bool has_candidate = false;
+	PcodeOpType candidate_pcode = CPUI_MAX;
 	anal_op->val = UT64_MAX;
 	for (auto iter = raw_ops.cbegin(); iter != raw_ops.cend(); iter++) {
 		if (iter->type == CPUI_COPY && anal_op->val == UT64_MAX) {
@@ -527,6 +528,8 @@ static ut32 anal_type_XCMP(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcod
 				if (iter->output && iter->output->is_unique()) {
 					unique_off = iter->output->offset;
 					key_pcode = iter->type;
+					has_candidate = true;
+					candidate_pcode = iter->type;
 				}
 			}
 		}
@@ -557,6 +560,11 @@ static ut32 anal_type_XCMP(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcod
 #endif
 			return anal_op->type;
 		}
+	}
+
+	if (has_candidate) {
+		anal_op->type = candidate_pcode == key_pcode_and? R_ANAL_OP_TYPE_ACMP: R_ANAL_OP_TYPE_CMP;
+		return anal_op->type;
 	}
 
 	return 0;

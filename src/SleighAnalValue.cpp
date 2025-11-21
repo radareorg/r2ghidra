@@ -14,6 +14,7 @@ RAnalValueType SleighAnalValue::type_from_values(const SleighAnalValue &in0, con
 
 SleighAnalValue SleighAnalValue::resolve_arg(RAnal *anal, const PcodeOperand *arg) {
 	SleighAnalValue res;
+	res.absolute = true;
 
 	if (arg->is_const ()) {
 		res.type = R_ANAL_VAL_IMM;
@@ -156,6 +157,7 @@ std::vector<SleighAnalValue> SleighAnalValue::resolve_out(RAnal *anal,
 {
 	std::vector<SleighAnalValue> res;
 	SleighAnalValue tmp;
+	tmp.absolute = true;
 
 	if (arg->is_const()) {
 		tmp.type = R_ANAL_VAL_IMM;
@@ -188,6 +190,7 @@ std::vector<SleighAnalValue> SleighAnalValue::resolve_out(RAnal *anal,
 				if ((iter->input0 && *iter->input0 == *arg) || (iter->input1 && *iter->input1 == *arg)) {
 					if (iter->output && iter->output->is_reg ()) {
 						tmp = SleighAnalValue ();
+						tmp.absolute = true;
 						tmp.type = R_ANAL_VAL_REG;
 #if R2_VERSION_NUMBER >= 50809
 						// XXX this is leaking, we need to share a constant register

@@ -252,3 +252,45 @@ esil: 4,r29,NUM,+,1,32,1,<<,-,&,DUP,[4],r11,=
 family: cpu
 EOF
 RUN
+
+NAME=AARCH64 esil
+FILE=malloc://2048
+CMDS=<<EOF
+e log.level=0
+e asm.cpu=AARCH64:LE:64:v8A:gcc
+e asm.arch=r2ghidra
+wx 298947f9
+ao 1~type
+ao 1~esil
+?e ----
+wx 690200f9
+ao 1~type
+ao 1~esil
+EOF
+EXPECT=<<EOF
+type: load
+esilcost: 8
+esil: 3856,x9,NUM,+,1,64,1,<<,-,&,DUP,[8],x9,=
+----
+type: store
+esilcost: 24
+esil: x19,NUM,x9,NUM,2,PICK,=[8]
+EOF
+RUN
+
+NAME=v850 esil
+FILE=-
+CMDS=<<EOF
+e log.level=0
+e asm.cpu=v850
+e asm.bits=32
+e asm.arch=r2ghidra
+wx e731
+ao 1~type
+ao 1~esilcost
+EOF
+EXPECT=<<EOF
+type: cmp
+esilcost: 0
+EOF
+RUN
