@@ -3,13 +3,13 @@
 #include "RCoreMutex.h"
 #include <r_cons.h>
 
-#include <cassert>
-
 RCoreMutex::RCoreMutex(RCore *core) : caffeine_level(1), bed(nullptr), _core(core) {
 }
 
 void RCoreMutex::sleepEnd() {
-	assert(caffeine_level >= 0);
+	if (caffeine_level < 0) {
+		return;
+	}
 	caffeine_level++;
 	if (caffeine_level == 1) {
 #if R2_VERSION_NUMBER >= 50909
@@ -29,7 +29,9 @@ void RCoreMutex::sleepEndForce() {
 }
 
 void RCoreMutex::sleepBegin() {
-	assert (caffeine_level > 0);
+	if (caffeine_level <= 0) {
+		return;
+	}
 	caffeine_level--;
 	if (caffeine_level == 0) {
 #if R2_VERSION_NUMBER >= 50909

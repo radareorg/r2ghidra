@@ -3,9 +3,10 @@ project(
   ['c', 'cpp'],
   license : 'LGPL3',
   meson_version : '>=0.50.1',
-version : '6.0.6',
+version : '6.0.7',
   default_options : ['c_std=c11', 'cpp_std=c++14']
 )
+
 
 r2ghidra_sources = [
   'src/R2Architecture.cpp',
@@ -44,6 +45,7 @@ if cpp.get_id() == 'msvc'
   add_global_arguments('-D_WINDOWS', language:'cpp')
   add_global_arguments('-D_WIN32', language:'cpp')
   add_global_arguments('-DZLIB_WINAPI', language:'cpp')
+  add_global_arguments('/wd4200', language:'cpp')  # Suppress C4200: zero-sized array in struct
   r2libdir = [
     meson.current_source_dir() + '\\radare2\\lib',
     'C:\\radare2\\lib'
@@ -74,6 +76,8 @@ r_version_h = configure_file(
   output: 'config.h',
   configuration: versionconf
 )
+
+add_global_arguments('-DNDEBUG', language: ['c', 'cpp'])
 
 r2ghidra_incdirs = include_directories(incdirs)
 
@@ -118,4 +122,3 @@ r2ghidra_core_plugin = shared_library('core_r2ghidra',
   install: true,
   install_dir: r2_plugdir
 )
-

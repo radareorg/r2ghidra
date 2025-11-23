@@ -12,7 +12,6 @@
 #include <coreaction.hh>
 
 #include <iostream>
-#include <cassert>
 
 using namespace ghidra;
 
