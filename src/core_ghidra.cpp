@@ -296,6 +296,17 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 		switch (mode) {
 		case DecompileMode::DISASM:
 			{
+#if defined(R2_ABIVERSION) && R2_ABIVERSION >= 40
+				RVecCodeMetaOffset *offsets = r_codemeta_line_offsets (code);
+#if R2_VERSION_NUMBER >= 50909
+				char *s = r_codemeta_print_disasm (code, offsets, core->anal);
+				r_cons_print (core->cons, s);
+				free (s);
+#else
+				r_codemeta_print_disasm (code, offsets, core->anal);
+#endif
+				RVecCodeMetaOffset_free (offsets);
+#else
 				RVector *offsets = r_codemeta_line_offsets (code);
 #if R2_VERSION_NUMBER >= 50909
 				char *s = r_codemeta_print_disasm (code, offsets, core->anal);
@@ -305,10 +316,27 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 				r_codemeta_print_disasm (code, offsets, core->anal);
 #endif
 				r_vector_free (offsets);
+#endif
 			}
 			break;
 		case DecompileMode::OFFSET:
 			{
+#if defined(R2_ABIVERSION) && R2_ABIVERSION >= 40
+				RVecCodeMetaOffset *offsets = r_codemeta_line_offsets (code);
+#if R2_VERSION_NUMBER >= 60003
+				char *s = r_codemeta_print2 (code, offsets, core->anal);
+				r_cons_print (core->cons, s);
+				free (s);
+#elif R2_VERSION_NUMBER >= 50909
+				char *s = r_codemeta_print (code, offsets);
+				r_cons_print (core->cons, s);
+				free (s);
+#else
+				r_codemeta_print (code, offsets);
+				r_cons_flush ();
+#endif
+				RVecCodeMetaOffset_free (offsets);
+#else
 				RVector *offsets = r_codemeta_line_offsets (code);
 #if R2_VERSION_NUMBER >= 60003
 				char *s = r_codemeta_print2 (code, offsets, core->anal);
@@ -323,6 +351,7 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 				r_cons_flush ();
 #endif
 				r_vector_free (offsets);
+#endif
 			}
 			break;
 		case DecompileMode::DEFAULT:
