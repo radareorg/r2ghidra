@@ -174,7 +174,7 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	RList *vars = NULL;
 	
 	if (r_config_get_b (core->config, "r2ghidra.vars")) {
-		r_anal_var_all_list (core->anal, fcn);
+		vars = r_anal_var_all_list (core->anal, fcn);
 	}
 	auto stackSpace = arch->getStackSpace ();
 
