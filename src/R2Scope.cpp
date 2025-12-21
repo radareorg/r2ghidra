@@ -428,8 +428,22 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	auto returnsymElement = child(prototypeElement, "returnsym");
 	childAddr (returnsymElement, "addr", returnAddr);
 
+	// Get return type from radare2 function signature if available
+	const char *ret_type = nullptr;
+	{
+		RCoreLock core_lock (arch->getCore ());
+		Sdb *TDB = core_lock->anal->sdb_types;
+		char *fname = r_type_func_guess (TDB, fcn_name);
+		if (fname && r_type_func_exist (TDB, fname)) {
+			ret_type = r_type_func_ret (TDB, fname);
+		}
+		free (fname);
+	}
+
+	// Use detected return type or fall back to default
+	const char *return_type_name = (ret_type && *ret_type) ? ret_type : "uint";
 	child (returnsymElement, "typeref", {
-		{ "name", "uint" }
+		{ "name", return_type_name }
 	});
 
 	child (&doc, "addr", {
