@@ -183,8 +183,16 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 		case R_ANAL_VAR_KIND_BPV:
 		{
 			uintb off;
-			int delta = var->delta + fcn->bp_off - extraPop; // not 100% sure if extraPop is correct here
-			off = (delta >= 0)? delta: stackSpace->getHighest() + delta + 1;
+			// For arguments passed on stack, delta is positive (based on BP)
+			// For local variables, delta is negative
+			// The stack space coordinates are: 0 = return address, then arguments, then locals below
+			int delta = var->delta + fcn->bp_off - extraPop;
+			// Ensure we don't wrap around with incorrect offset calculation
+			if (delta >= 0) {
+				off = delta;
+			} else {
+				off = stackSpace->getHighest() + delta + 1;
+			}
 			return Address(stackSpace, off);
 		}
 		case R_ANAL_VAR_KIND_REG:
