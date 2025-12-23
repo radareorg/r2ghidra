@@ -433,7 +433,9 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	{
 		RCoreLock core_lock (arch->getCore ());
 		Sdb *TDB = core_lock->anal->sdb_types;
-		char *fname = r_type_func_guess (TDB, fcn_name);
+		char *fcn_name_dup = fcn_name ? r_str_new (fcn_name) : nullptr;
+		char *fname = fcn_name_dup ? r_type_func_guess (TDB, fcn_name_dup) : nullptr;
+		free (fcn_name_dup);
 		if (fname && r_type_func_exist (TDB, fname)) {
 			ret_type = r_type_func_ret (TDB, fname);
 		}
