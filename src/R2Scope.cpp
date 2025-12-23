@@ -1,4 +1,4 @@
-/* r2ghidra- LGPL - Copyright 2019-2023 - thestr4ng3r, pancake */
+/* r2ghidra- LGPL - Copyright 2019-2025 - thestr4ng3r, pancake */
 
 #include "R2Architecture.h"
 #include "R2TypeFactory.h"
@@ -428,23 +428,29 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	auto returnsymElement = child(prototypeElement, "returnsym");
 	childAddr (returnsymElement, "addr", returnAddr);
 
+#if R2_ABIVERSION >= 50
 	// Get return type from radare2 function signature if available
 	const char *ret_type = nullptr;
 	{
 		RCoreLock core_lock (arch->getCore ());
-		Sdb *TDB = core_lock->anal->sdb_types;
-		char *fname = r_type_func_guess (TDB, fcn_name);
-		if (fname && r_type_func_exist (TDB, fname)) {
-			ret_type = r_type_func_ret (TDB, fname);
+		Sdb *tdb = core_lock->anal->sdb_types;
+		char *fname = r_type_func_guess (tdb, fcn_name);
+		if (fname && r_type_func_exist (tdb, fname)) {
+			ret_type = r_type_func_ret (tdb, fname);
 		}
 		free (fname);
 	}
 
 	// Use detected return type or fall back to default
-	const char *return_type_name = (ret_type && *ret_type) ? ret_type : "uint";
+	const char *return_type_name = R_STR_ISNOTEMPTY (ret_type) ? ret_type : "uint";
 	child (returnsymElement, "typeref", {
 		{ "name", return_type_name }
 	});
+#else
+	child (returnsymElement, "typeref", {
+		{ "name", "uint" }
+	});
+#endif
 
 	child (&doc, "addr", {
 		{ "space", arch->getDefaultCodeSpace()->getName() },
