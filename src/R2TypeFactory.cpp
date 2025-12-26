@@ -5,6 +5,12 @@
 
 #include <r_core.h>
 
+// TODO(full-type-resolution):
+// - Enable R2G_USE_CTYPE and wire r_parse_ctype in build files.
+// - Implement fromCType for arrays, function pointers, and qualifier scoping.
+// - Improve base-type signedness/alias mapping (size_t, ssize_t, uintptr_t, etc).
+// - Prefer structured r2 type APIs over raw sdb parsing when available.
+// - Add caching to avoid repeated type parsing/conversion.
 #define R2G_USE_CTYPE 0
 #if R2G_USE_CTYPE
 #include <r_parse.h>
@@ -33,6 +39,50 @@ std::vector<std::string> splitSdbArray(const std::string& str) {
 		r.push_back (token);
 	}
 	return r;
+}
+
+static type_metatype formatToMeta(const char *fmt) {
+	if (!fmt || !fmt[0]) {
+		return TYPE_UNKNOWN;
+	}
+	switch (fmt[0]) {
+	case 'd':
+	case 'i':
+	case 'c':
+		return TYPE_INT;
+	case 'u':
+	case 'x':
+	case 'o':
+	case 'p':
+		return TYPE_UINT;
+	case 'f':
+	case 'F':
+		return TYPE_FLOAT;
+	default:
+		return TYPE_UNKNOWN;
+	}
+}
+
+Datatype *R2TypeFactory::queryR2Base(const string &n) {
+	RCoreLock core(arch->getCore());
+	Sdb *sdb = core->anal->sdb_types;
+	ut64 bits = r_type_get_bitsize(sdb, n.c_str());
+	if (!bits || (bits % 8) != 0) {
+		return nullptr;
+	}
+	int4 size = bits / 8;
+	type_metatype meta = formatToMeta(r_type_format(sdb, n.c_str()));
+	Datatype *base = getBase(size, meta);
+	if (!base && meta != TYPE_UNKNOWN) {
+		base = getBase(size, TYPE_UNKNOWN);
+	}
+	if (!base) {
+		return nullptr;
+	}
+	Datatype *typedefd = getTypedef(base, n, 0, 0);
+	setName(typedefd, n); // ensure typedef shows up by name
+	setName(base, base->getName());
+	return typedefd;
 }
 
 Datatype *R2TypeFactory::queryR2Struct(const string &n, std::set<std::string> &stackTypes) {
@@ -159,6 +209,8 @@ Datatype *R2TypeFactory::queryR2(const string &n, std::set<std::string> &stackTy
 	RCoreLock core (arch->getCore ());
 	int kind = r_type_kind (core->anal->sdb_types, n.c_str ());
 	switch (kind) {
+	case R_TYPE_BASIC:
+		return queryR2Base(n);
 	case R_TYPE_STRUCT:
 		return queryR2Struct (n, stackTypes);
 	case R_TYPE_ENUM:
@@ -175,6 +227,18 @@ Datatype *R2TypeFactory::findById(const string &n, uint8 id, int4 sz, std::set<s
 	Datatype *r = TypeFactory::findById (n, id, sz);
 	if (r == nullptr) {
 		r = queryR2 (n, stackTypes);
+	}
+	if (r == nullptr) {
+		const bool needs_parse =
+			n.find('*') != std::string::npos ||
+			n.rfind("const ", 0) == 0 ||
+			n.rfind("volatile ", 0) == 0 ||
+			n.rfind("struct ", 0) == 0 ||
+			n.rfind("enum ", 0) == 0 ||
+			n.rfind("union ", 0) == 0;
+		if (needs_parse) {
+			r = fromCString (n, nullptr, &stackTypes);
+		}
 	}
 	return r;
 }
@@ -198,15 +262,86 @@ Datatype *R2TypeFactory::fromCString(const string &str, string *error, std::set<
 		return r;
 	}
 #else
-#if 0
-	Datatype *t = stackTypes ? findByName (str.c_str(), *stackTypes) : findByName (str.c_str ());
-	if (t == nullptr) {
-		return findByName("ulong");
+	auto trim = [](const std::string &in) -> std::string {
+		const auto start = in.find_first_not_of(" \t\n\r");
+		if (start == std::string::npos) {
+			return "";
+		}
+		const auto end = in.find_last_not_of(" \t\n\r");
+		return in.substr(start, end - start + 1);
+	};
+	auto normalize = [](const std::string &in) -> std::string {
+		std::stringstream ss(in);
+		std::string token;
+		std::string out;
+		while (ss >> token) {
+			if (!out.empty()) {
+				out += " ";
+			}
+			out += token;
+		}
+		return out;
+	};
+	auto strip_prefix = [](std::string &in, const std::string &prefix) {
+		if (in.rfind(prefix, 0) == 0) {
+			in = in.substr(prefix.size());
+			return true;
+		}
+		return false;
+	};
+
+	std::string type_str = normalize(trim(str));
+	if (type_str.empty()) {
+		return nullptr;
 	}
-	return t;
+
+	int ptr_depth = 0;
+	while (!type_str.empty()) {
+		type_str = trim(type_str);
+		if (!type_str.empty() && type_str.back() == '*') {
+			type_str.pop_back();
+			ptr_depth++;
+			continue;
+		}
+		break;
+	}
+
+	bool stripped = true;
+	while (stripped) {
+		stripped = false;
+		stripped |= strip_prefix(type_str, "const ");
+		stripped |= strip_prefix(type_str, "volatile ");
+	}
+	type_str = normalize(trim(type_str));
+
+	if (type_str.rfind("struct ", 0) == 0) {
+		type_str = trim(type_str.substr(sizeof("struct ") - 1));
+	} else if (type_str.rfind("enum ", 0) == 0) {
+		type_str = trim(type_str.substr(sizeof("enum ") - 1));
+	} else if (type_str.rfind("union ", 0) == 0) {
+		type_str = trim(type_str.substr(sizeof("union ") - 1));
+	}
+
+	Datatype *base = nullptr;
+	if (type_str == "void") {
+		base = getTypeVoid();
+	} else {
+		base = stackTypes ? findByName(type_str, *stackTypes) : findByName(type_str);
+	}
+	if (!base) {
+		if (error) {
+			*error = "Unknown type identifier " + type_str;
+		}
+		return nullptr;
+	}
+
+	auto space = arch->getDefaultCodeSpace();
+	Datatype *result = base;
+	for (int i = 0; i < ptr_depth; i++) {
+		result = getTypePointer(space->getAddrSize(), result, space->getWordSize());
+	}
+	return result;
 #endif
-#endif
-	return nullptr;
 }
 
 #if 0
