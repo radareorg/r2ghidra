@@ -24,7 +24,7 @@ By default r2pm will install stuff in your home, you can use `-g` to use the sys
 
 To build and install r2ghidra you need the following software installed in your system:
 
-* radare2 (preferibly from git, for distro builds ensure the `-dev` package is also installed)
+* radare2 (preferably from git, for distro builds ensure the `-dev` package is also installed)
 * pkg-config - that's how build system find libraries and include files to compile stuff
 * acr/make or meson/ninja - pick the build system you like! all of them are maintained and working
 * msvc/g++/clang++ - basically a C++ compiler (and a C compiler)
@@ -99,7 +99,7 @@ Then run the following command from the radare2/bin/ directory to find out the `
 $ r2 -hh
 ```
 
-Now, download the [latest r2ghidra release](https://github.com/radareorg/r2ghidra/releases) for Windows and copy the `dll file in the `R2_USER_PLUGINS` directory.
+Now, download the [latest r2ghidra release](https://github.com/radareorg/r2ghidra/releases) for Windows and copy the dll file in the `R2_USER_PLUGINS` directory.
 
 You should now be able to do `pdg` while in radare2 to invoke the r2ghidra decompile command.
 
