@@ -81,12 +81,13 @@ static std::string normalize_ws(const std::string &in) {
 	return out;
 }
 
-// Struct to hold builtin type info, wraps r2's RTypeCTypeInfo
+// Struct to hold builtin type info
 struct BuiltinTypeSpec {
 	int4 size = 0;
 	type_metatype meta = TYPE_UNKNOWN;
 };
 
+#if R2_ABIVERSION >= 55
 // Convert r2's RTypeCTypeClass to Ghidra's type_metatype
 static type_metatype ctypeClassToMeta(RTypeCTypeClass tclass) {
 	switch (tclass) {
@@ -105,7 +106,7 @@ static type_metatype ctypeClassToMeta(RTypeCTypeClass tclass) {
 	}
 }
 
-// Use radare2's r_type_parse_ctype API to parse C type specifiers
+// Use radare2's r_type_parse_ctype API to parse C type specifiers (r2 >= 5.9.9)
 static bool get_builtin_spec(const R2TypeFactory *factory, const std::string &name, BuiltinTypeSpec &spec) {
 	RTypeCTypeInfo info;
 	int ptr_size = factory->getSizeOfPointer();
@@ -118,6 +119,14 @@ static bool get_builtin_spec(const R2TypeFactory *factory, const std::string &na
 	}
 	return false;
 }
+
+#else
+// Fallback implementation for older radare2 versions (< ABI 55)
+static bool get_builtin_spec(const R2TypeFactory *factory, const std::string &name, BuiltinTypeSpec &spec) {
+	// Just return false for older versions - types will be looked up from sdb instead
+	return false;
+}
+#endif
 
 static Datatype *make_typedef(R2TypeFactory *factory, Datatype *base, const std::string &name) {
 	Datatype *typedefd = factory->getTypedef(base, name, 0, 0);
