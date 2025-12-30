@@ -27,6 +27,9 @@ struct Bright
 	enum Ambassador ambassador;
 };
 
+void Aeropause(struct Bright *bright, int32_t argc, char **argv);
+void PrintAmbassador(enum Ambassador ambassador);
+
 typedef struct Bright *BrightPtr;
 typedef struct Bright BrightTypedefd;
 typedef struct BrightTypedefd *BrightTypedefdPtr;
