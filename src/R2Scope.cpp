@@ -85,6 +85,32 @@ static std::string to_string(const char *str) {
 	return std::string (str ? str : "(null)");
 }
 
+static bool is_structured_type(Datatype *type) {
+	if (!type) {
+		return false;
+	}
+	if (Datatype *td = type->getTypedef()) {
+		return is_structured_type(td);
+	}
+	if (type->isEnumType()) {
+		return true;
+	}
+	switch (type->getMetatype()) {
+	case TYPE_STRUCT:
+	case TYPE_UNION:
+		return true;
+	default:
+		break;
+	}
+	if (auto ptr = dynamic_cast<TypePointer *>(type)) {
+		return is_structured_type(ptr->getPtrTo());
+	}
+	if (auto arr = dynamic_cast<TypeArray *>(type)) {
+		return is_structured_type(arr->getBase());
+	}
+	return false;
+}
+
 FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	// lol globals
 	RCoreLock core (arch->getCore ());
@@ -231,6 +257,14 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 #else
 	const int default_size = core->anal->bits / 8;
 #endif
+	struct SigArg {
+		std::string name;
+		Datatype *type;
+	};
+	bool have_arg_vars = false;
+	bool used_sig_args = false;
+	bool have_sig_proto = false;
+	PrototypePieces sig_proto;
 
 	if (vars) {
 		r_list_foreach_cpp<RAnalVar>(vars, [&](RAnalVar *var) {
@@ -251,12 +285,17 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 			if (!var->isarg) {
 				return;
 			}
+			have_arg_vars = true;
 			auto addr = addrForVar(var, true);
 			if (addr.isInvalid()) {
 				return;
 			}
-			params.registerTrial(addr, type->getSize());
-			int4 i = params.whichTrial(addr, type->getSize());
+			int4 paramSize = type->getSize();
+			if (var->kind == R_ANAL_VAR_KIND_REG && paramSize < default_size) {
+				paramSize = default_size;
+			}
+			params.registerTrial(addr, paramSize);
+			int4 i = params.whichTrial(addr, paramSize);
 			params.getTrial(i).markActive();
 			params.getTrial(i).markUsed();
 		});
@@ -279,10 +318,159 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 		});
 	};
 
+#if R2_ABIVERSION >= 50
+	if (proto) {
+		std::vector<SigArg> sig_args;
+		int4 sig_first_vararg = -1;
+		Datatype *sig_ret_type = nullptr;
+
+		{
+			RCoreLock core_lock (arch->getCore ());
+			Sdb *tdb = core_lock->anal->sdb_types;
+			char *fcn_name_dup = strdup (fcn_name);
+			char *fname = r_type_func_guess (tdb, fcn_name_dup);
+			if (fname && r_type_func_exist (tdb, fname)) {
+				const char *ret_name = r_type_func_ret (tdb, fname);
+				if (R_STR_ISNOTEMPTY (ret_name)) {
+					std::string typeError;
+					sig_ret_type = arch->getTypeFactory()->fromCString(ret_name, &typeError);
+					if (!sig_ret_type) {
+						arch->addWarning("Failed to match return type " + to_string(ret_name) + " for function " + to_string(fcn_name));
+					}
+				}
+
+				const int argc = r_type_func_args_count (tdb, fname);
+				for (int i = 0; i < argc; i++) {
+					char *arg_type = r_type_func_args_type (tdb, fname, i);
+					if (!arg_type) {
+						continue;
+					}
+					std::string arg_type_str = arg_type;
+					free (arg_type);
+					if (arg_type_str == "...") {
+						sig_first_vararg = i;
+						break;
+					}
+
+					const char *arg_name = r_type_func_args_name (tdb, fname, i);
+					std::string name = (R_STR_ISNOTEMPTY (arg_name))
+						? std::string (arg_name)
+						: ("arg" + to_string(i));
+
+					std::string typeError;
+					Datatype *type = arch->getTypeFactory()->fromCString(arg_type_str.c_str(), &typeError);
+					if (!type) {
+						arch->addWarning("Failed to match arg type " + arg_type_str + " for function " + to_string(fcn_name) + ": " + typeError);
+						type = arch->types->getBase(default_size, TYPE_UNKNOWN);
+					}
+					if (type && type->getSize() > 0) {
+						sig_args.push_back({name, type});
+					}
+				}
+			}
+			free (fcn_name_dup);
+			free (fname);
+		}
+
+		if (!sig_args.empty()) {
+			PrototypePieces protoPieces;
+			protoPieces.model = proto;
+			protoPieces.name = fcn_name;
+			protoPieces.outtype = sig_ret_type ? sig_ret_type : arch->types->getBase(default_size, TYPE_UNKNOWN);
+			protoPieces.firstVarArgSlot = sig_first_vararg;
+			for (const auto &arg : sig_args) {
+				protoPieces.intypes.push_back (arg.type);
+				protoPieces.innames.push_back (arg.name);
+			}
+			bool sig_has_structured = is_structured_type(protoPieces.outtype);
+			if (!sig_has_structured) {
+				for (const auto &arg : sig_args) {
+					if (is_structured_type(arg.type)) {
+						sig_has_structured = true;
+						break;
+					}
+				}
+			}
+			have_sig_proto = sig_has_structured;
+			if (have_sig_proto) {
+				sig_proto = protoPieces;
+			}
+
+			std::vector<ParameterPieces> pieces;
+			try {
+				proto->assignParameterStorage (protoPieces, pieces, true);
+			} catch (const LowlevelError &err) {
+				arch->addWarning("Failed to assign parameter storage for " + to_string(fcn_name) + ": " + err.explain);
+				pieces.clear();
+			}
+
+			bool sig_has_stack = false;
+			for (size_t i = 1; i < pieces.size (); i++) {
+				auto &piece = pieces[i];
+				if (piece.flags & ParameterPieces::hiddenretparm) {
+					continue;
+				}
+				if (piece.addr.isInvalid ()) {
+					continue;
+				}
+				if (piece.addr.getSpace() == arch->translate->getStackSpace()) {
+					sig_has_stack = true;
+					break;
+				}
+			}
+			if (!pieces.empty() && !(sig_has_stack && have_arg_vars)) {
+				used_sig_args = true;
+			}
+			if (used_sig_args) {
+				size_t sig_index = 0;
+				for (size_t i = 1; i < pieces.size () && sig_index < sig_args.size (); i++) {
+					auto &piece = pieces[i];
+					if (piece.flags & ParameterPieces::hiddenretparm) {
+						continue;
+					}
+					if (piece.addr.isInvalid ()) {
+						continue;
+					}
+
+					const auto &arg = sig_args[sig_index++];
+					auto mapsymElement = child(symbollistElement, "mapsym");
+					auto symbolElement = child(mapsymElement, "symbol", {
+						{ "name", arg.name },
+						{ "typelock", "true" },
+						{ "namelock", "true" },
+						{ "readonly", "true" },
+						{ "cat", "0" },
+						{ "index", to_string(sig_index - 1) }
+					});
+
+					childType(symbolElement, arg.type);
+					childAddr(mapsymElement, "addr", piece.addr);
+
+					uintb last = piece.addr.getOffset();
+					if (arg.type && arg.type->getSize() > 0) {
+						last += arg.type->getSize() - 1;
+					}
+					if (last >= piece.addr.getOffset()) {
+						varRanges.insertRange(piece.addr.getSpace(), piece.addr.getOffset(), last);
+					}
+
+					auto rangelist = child(mapsymElement, "rangelist");
+					if (piece.addr.getSpace() != arch->translate->getStackSpace()) {
+						childRegRange(rangelist);
+					}
+				}
+			}
+		}
+	}
+#endif
+
 	if (vars) {
 		std::vector<Element *> argsByIndex;
 
 		r_list_foreach_cpp<RAnalVar>(vars, [&](RAnalVar *var) {
+			if (used_sig_args && var->isarg) {
+				return;
+			}
 			auto type_it = var_types.find(var);
 			if (type_it == var_types.end())
 				return;
@@ -326,13 +514,17 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 
 			int4 paramIndex = -1;
 			if (var->isarg) {
-				if (proto && !proto->possibleInputParam(addr, type->getSize())) {
+				int4 paramSize = type->getSize();
+				if (var->kind == R_ANAL_VAR_KIND_REG && paramSize < default_size) {
+					paramSize = default_size;
+				}
+				if (proto && !proto->possibleInputParam(addr, paramSize)) {
 					// Prevent segfaults in the Decompiler
 					arch->addWarning ("Removing arg " + to_string(var->name) + " because it doesn't fit into ProtoModel");
 					return;
 				}
 
-				int4 paramTrialIndex = params.whichTrial(addr, type->getSize());
+				int4 paramTrialIndex = params.whichTrial(addr, paramSize);
 				if (paramTrialIndex < 0) {
 					arch->addWarning ("Failed to determine arg index of " + to_string(var->name));
 					return;
@@ -434,10 +626,12 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	{
 		RCoreLock core_lock (arch->getCore ());
 		Sdb *tdb = core_lock->anal->sdb_types;
-		char *fname = r_type_func_guess (tdb, fcn_name);
+		char *fcn_name_dup = strdup (fcn_name);
+		char *fname = r_type_func_guess (tdb, fcn_name_dup);
 		if (fname && r_type_func_exist (tdb, fname)) {
 			ret_type = r_type_func_ret (tdb, fname);
 		}
+		free (fcn_name_dup);
 		free (fname);
 	}
 
@@ -461,7 +655,14 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 
 	XmlDecode dec(arch, &doc);
 	auto sym = cache->addMapSym (dec);
-	return dynamic_cast<FunctionSymbol *>(sym);
+	auto funcsym = dynamic_cast<FunctionSymbol *>(sym);
+	if (funcsym && have_sig_proto && sig_proto.model) {
+		Funcdata *fd = funcsym->getFunction();
+		if (fd) {
+			fd->getFuncProto().setPieces(sig_proto);
+		}
+	}
+	return funcsym;
 }
 
 Symbol *R2Scope::registerFlag(RFlagItem *flag) const {
