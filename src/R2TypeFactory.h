@@ -5,11 +5,6 @@
 
 #include <type.hh>
 
-/*
-typedef struct r_parse_ctype_t RParseCType;
-typedef struct r_parse_ctype_type_t RParseCTypeType;
-*/
-
 using namespace ghidra;
 class R2Architecture;
 
@@ -19,8 +14,11 @@ private:
 	// RParseCType *ctype;
 
 	Datatype *queryR2Struct(const string &n, std::set<std::string> &stackTypes);
-	Datatype *queryR2Enum(const string &n);
+	Datatype *queryR2Union(const string &n, std::set<std::string> &stackTypes);
+	Datatype *queryR2Base(const string &n);
+	Datatype *queryR2Enum(const string &n, std::set<std::string> &stackTypes);
 	Datatype *queryR2Typedef(const string &n, std::set<std::string> &stackTypes);
+	Datatype *queryR2Function(const string &n, std::set<std::string> &stackTypes);
 	Datatype *queryR2(const string &n, std::set<std::string> &stackTypes);
 
 protected:
@@ -35,7 +33,6 @@ public:
 	~R2TypeFactory() override;
 
 	Datatype *fromCString(const string &str, string *error = nullptr, std::set<std::string> *stackTypes = nullptr);
-//	Datatype *fromCType(const RParseCTypeType *ctype, string *error = nullptr, std::set<std::string> *stackTypes = nullptr);
 };
 
 #endif //R2GHIDRA_R2TYPEFACTORY_H
