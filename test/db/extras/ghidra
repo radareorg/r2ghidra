@@ -3,15 +3,15 @@ FILE=bins/elf/crackme0x05
 EXPECT=<<EOF
 x86:LE:32:default:gcc
 
-uint main(void)
+uint main(int argc,char **argv,char **envp)
 
 {
-    uchar auStack_7c [120];
+    int32_t var_78h;
     
     sym.imp.printf("IOLI Crackme Level 0x05\n");
     sym.imp.printf("Password: ");
-    sym.imp.scanf(0x80486b2,auStack_7c);
-    sym.check(auStack_7c);
+    sym.imp.scanf(0x80486b2,&var_78h);
+    sym.check(&var_78h);
     return 0;
 }
 
@@ -28,30 +28,30 @@ NAME=x86_32
 FILE=bins/elf/crackme0x05
 EXPECT=<<EOF
                                                 |
-    0x08048540 push ebp                         |uint main(void)
+    0x08048540 push ebp                         |uint main(int argc,char **argv,char **envp)
                                                 |
                                                 |{
-                                                |    uchar auStack_7c [120];
+                                                |    int32_t var_78h;
                                                 |    
     0x08048566 call sym.imp.printf              |    sym.imp.printf("IOLI Crackme Level 0x05\n");
     0x08048572 call sym.imp.printf              |    sym.imp.printf("Password: ");
-    0x08048585 call sym.imp.scanf               |    sym.imp.scanf(0x80486b2,auStack_7c);
-    0x08048590 call sym.check                   |    sym.check(auStack_7c);
+    0x08048585 call sym.imp.scanf               |    sym.imp.scanf(0x80486b2,&var_78h);
+    0x08048590 call sym.check                   |    sym.check(&var_78h);
     0x0804859b ret                              |    return 0;
                                                 |}
                                                 |
 x86
 x86:LE:32:default:gcc
 
-uint main(void)
+uint main(int argc,char **argv,char **envp)
 
 {
-    uchar auStack_7c [120];
+    int32_t var_78h;
     
     sym.imp.printf("IOLI Crackme Level 0x05\n");
     sym.imp.printf("Password: ");
-    sym.imp.scanf(0x80486b2,auStack_7c);
-    sym.check(auStack_7c);
+    sym.imp.scanf(0x80486b2,&var_78h);
+    sym.check(&var_78h);
     return 0;
 }
 
@@ -71,21 +71,25 @@ FILE=bins/elf/hello_world
 EXPECT=<<EOF
 x86:LE:64:default:gcc
 
-void main(void)
+void main(int argc,char **argv,char **envp)
 
 {
     int iVar1;
     int iVar2;
-    int64_t iVar3;
+    char *dest;
+    int64_t var_20h;
+    int64_t var_18h;
+    int64_t var_10h;
+    int64_t var_8h;
     
-    iVar1 = sym.imp.strlen(0x8d4);
-    iVar2 = sym.imp.strlen(0x8da);
-    iVar3 = sym.imp.malloc(iVar2 + iVar1 + 1);
-    if (iVar3 != 0) {
-        sym.imp.strcpy(iVar3,0x8d4);
-        sym.imp.strcat(iVar3,0x8da);
-        sym.imp.puts(iVar3);
-        sym.imp.free(iVar3);
+    iVar1 = sym.imp.strlen("Hello");
+    iVar2 = sym.imp.strlen(" r2-folks");
+    dest = sym.imp.malloc(iVar2 + iVar1 + 1);
+    if (dest != NULL) {
+        sym.imp.strcpy(dest,"Hello");
+        sym.imp.strcat(dest," r2-folks");
+        sym.imp.puts(dest);
+        sym.imp.free(dest);
     }
     return;
 }
@@ -104,34 +108,38 @@ FILE=bins/mz/unzip.exe
 EXPECT=<<EOF
 x86:LE:16:Real Mode:
 
-uint fcn.00001c98(ushort param_1,ushort param_2,ushort param_3,uint param_4,int16_t param_5)
+//WARNING: Variable defined which should be unmapped: var_8h
+//WARNING: Variable defined which should be unmapped: var_4h
+//WARNING: Unknown calling convention -- yet parameter storage is locked
+
+uint fcn.00001c98(int16_t arg_8h,int16_t arg_6h,int16_t arg_eh,int16_t arg_ah)
 
 {
     int16_t *piVar1;
-    int16_t iVar2;
-    ushort uVar3;
     ushort unaff_CS;
     ushort unaff_DS;
-    ushort uStack_a;
-    int16_t iStack_6;
+    int16_t in_stack_00000008;
+    int16_t in_stack_0000000c;
+    int16_t var_8h;
+    int16_t var_6h;
+    int16_t var_4h;
+    int16_t var_2h;
     char cStack_4;
     
-    uStack_a = 0x13da;
+    var_6h = 0x13da;
     do {
-        func_0x0000ec24(unaff_CS,uStack_a,unaff_DS,0x401e);
-        func_0x0000ec24(0xdee,param_2,param_3,0x401e);
+        func_0x0000ec24(unaff_CS,var_6h,unaff_DS,0x401e);
+        func_0x0000ec24(0xdee,arg_8h,arg_ah,0x401e);
         func_0x0000e59a(0xdee,0x401e);
-        iStack_6 = 0;
+        var_2h = 0;
         do {
             cStack_4 = func_0x0000eb82(0xdee);
             if (cStack_4 == '\r') {
                 cStack_4 = '\n';
             }
-            iVar2 = param_4;
-            uVar3 = param_4 >> 0x10;
-            if (iStack_6 < param_5) {
-                *(iVar2 + iStack_6) = cStack_4;
-                iStack_6 = iStack_6 + 1;
+            if (var_2h < in_stack_0000000c) {
+                *(in_stack_00000008 + var_2h) = cStack_4;
+                var_2h = var_2h + 1;
             }
         } while (cStack_4 != '\n');
         piVar1 = 0x4022;
@@ -145,10 +153,10 @@ uint fcn.00001c98(ushort param_1,ushort param_2,ushort param_3,uint param_4,int1
         }
         unaff_CS = 0xdee;
         func_0x0000e59a(0xdee,0x401e);
-        uStack_a = 0x13db;
-    } while (*(iVar2 + iStack_6 + -1) != '\n');
-    *(iVar2 + iStack_6 + -1) = 0;
-    return param_4;
+        var_6h = 0x13db;
+    } while (*(in_stack_00000008 + var_2h + -1) != '\n');
+    *(in_stack_00000008 + var_2h + -1) = 0;
+    return _in_stack_00000008;
 }
 
 EOF
@@ -165,21 +173,25 @@ FILE=bins/elf/hello_world
 EXPECT=<<EOF
 x86:LE:64:default:gcc
 
-void main(void)
+void main(int argc,char **argv,char **envp)
 
 {
     int iVar1;
     int iVar2;
-    int64_t iVar3;
+    char *dest;
+    int64_t var_20h;
+    int64_t var_18h;
+    int64_t var_10h;
+    int64_t var_8h;
     
-    iVar1 = sym.imp.strlen(0x8d4);
-    iVar2 = sym.imp.strlen(0x8da);
-    iVar3 = sym.imp.malloc(iVar2 + iVar1 + 1);
-    if (iVar3 != 0) {
-        sym.imp.strcpy(iVar3,0x8d4);
-        sym.imp.strcat(iVar3,0x8da);
-        sym.imp.puts(iVar3);
-        sym.imp.free(iVar3);
+    iVar1 = sym.imp.strlen("Hello");
+    iVar2 = sym.imp.strlen(" r2-folks");
+    dest = sym.imp.malloc(iVar2 + iVar1 + 1);
+    if (dest != NULL) {
+        sym.imp.strcpy(dest,"Hello");
+        sym.imp.strcat(dest," r2-folks");
+        sym.imp.puts(dest);
+        sym.imp.free(dest);
     }
     return;
 }
@@ -296,7 +308,7 @@ NAME=function variable annotations
 FILE=bins/dectest64
 EXPECT=<<EOF
 {
-  "code": "\nulong main(uint param_1,ulong param_2)\n\n{\n    ulong uVar1;\n    int64_t in_FS_OFFSET;\n    uchar auStack_28 [24];\n    int64_t iStack_10;\n    \n    iStack_10 = *(in_FS_OFFSET + 0x28);\n    sym.Aeropause(auStack_28,param_1,param_2);\n    uVar1 = 0;\n    if (iStack_10 != *(in_FS_OFFSET + 0x28)) {\n        uVar1 = sym.imp.__stack_chk_fail();\n    }\n    return uVar1;\n}\n\n",
+  "code": "\nulong main(int argc,char **argv)\n\n{\n    ulong uVar1;\n    int64_t in_FS_OFFSET;\n    int64_t var_30h;\n    int64_t var_24h;\n    int64_t var_8h;\n    \n    var_8h = *(in_FS_OFFSET + 0x28);\n    var_24h._0_4_ = argc;\n    sym.Aeropause(&var_24h + 4,argc,argv);\n    uVar1 = 0;\n    if (var_8h != *(in_FS_OFFSET + 0x28)) {\n        uVar1 = sym.imp.__stack_chk_fail();\n    }\n    return uVar1;\n}\n\n",
   "annotations": [
     {
       "start": 1,
@@ -325,387 +337,459 @@ EXPECT=<<EOF
     },
     {
       "start": 12,
-      "end": 16,
+      "end": 15,
       "type": "syntax_highlight",
       "syntax_highlight": "datatype"
     },
     {
-      "start": 17,
-      "end": 24,
+      "start": 16,
+      "end": 20,
       "type": "function_parameter",
-      "name": "param_1"
+      "name": "argc"
     },
     {
-      "start": 17,
-      "end": 24,
+      "start": 16,
+      "end": 20,
       "type": "syntax_highlight",
       "syntax_highlight": "function_parameter"
     },
     {
-      "start": 25,
-      "end": 30,
+      "start": 21,
+      "end": 25,
       "type": "syntax_highlight",
       "syntax_highlight": "datatype"
     },
     {
-      "start": 31,
-      "end": 38,
+      "start": 28,
+      "end": 32,
       "type": "function_parameter",
-      "name": "param_2"
+      "name": "argv"
     },
     {
-      "start": 31,
-      "end": 38,
+      "start": 28,
+      "end": 32,
       "type": "syntax_highlight",
       "syntax_highlight": "function_parameter"
+    },
+    {
+      "start": 41,
+      "end": 46,
+      "type": "syntax_highlight",
+      "syntax_highlight": "datatype"
+    },
+    {
+      "start": 47,
+      "end": 52,
+      "type": "local_variable",
+      "name": "uVar1"
     },
     {
       "start": 47,
       "end": 52,
       "type": "syntax_highlight",
-      "syntax_highlight": "datatype"
-    },
-    {
-      "start": 53,
-      "end": 58,
-      "type": "local_variable",
-      "name": "uVar1"
-    },
-    {
-      "start": 53,
-      "end": 58,
-      "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 64,
-      "end": 71,
+      "start": 58,
+      "end": 65,
       "type": "syntax_highlight",
       "syntax_highlight": "datatype"
     },
     {
-      "start": 72,
-      "end": 84,
+      "start": 66,
+      "end": 78,
       "type": "local_variable",
       "name": "in_FS_OFFSET"
     },
     {
-      "start": 72,
-      "end": 84,
+      "start": 66,
+      "end": 78,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 90,
-      "end": 95,
+      "start": 84,
+      "end": 91,
       "type": "syntax_highlight",
       "syntax_highlight": "datatype"
     },
     {
-      "start": 96,
-      "end": 106,
+      "start": 92,
+      "end": 99,
       "type": "local_variable",
-      "name": "auStack_28"
+      "name": "var_30h"
     },
     {
-      "start": 96,
-      "end": 106,
+      "start": 92,
+      "end": 99,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 108,
-      "end": 110,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 117,
-      "end": 124,
+      "start": 105,
+      "end": 112,
       "type": "syntax_highlight",
       "syntax_highlight": "datatype"
     },
     {
-      "start": 125,
-      "end": 134,
+      "start": 113,
+      "end": 120,
       "type": "local_variable",
-      "name": "iStack_10"
+      "name": "var_24h"
     },
     {
-      "start": 125,
-      "end": 134,
+      "start": 113,
+      "end": 120,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 145,
-      "end": 154,
-      "type": "local_variable",
-      "name": "iStack_10"
+      "start": 126,
+      "end": 133,
+      "type": "syntax_highlight",
+      "syntax_highlight": "datatype"
     },
     {
-      "start": 145,
-      "end": 154,
+      "start": 134,
+      "end": 140,
+      "type": "local_variable",
+      "name": "var_8h"
+    },
+    {
+      "start": 134,
+      "end": 140,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 155,
-      "end": 156,
+      "start": 151,
+      "end": 157,
+      "type": "local_variable",
+      "name": "var_8h"
+    },
+    {
+      "start": 151,
+      "end": 157,
+      "type": "syntax_highlight",
+      "syntax_highlight": "local_variable"
+    },
+    {
+      "start": 158,
+      "end": 159,
       "type": "offset",
       "offset": 4198797
     },
     {
-      "start": 157,
-      "end": 158,
+      "start": 160,
+      "end": 161,
       "type": "offset",
       "offset": 4198797
     },
     {
-      "start": 159,
-      "end": 171,
+      "start": 162,
+      "end": 174,
       "type": "local_variable",
       "name": "in_FS_OFFSET"
     },
     {
-      "start": 159,
-      "end": 171,
+      "start": 162,
+      "end": 174,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 172,
-      "end": 173,
+      "start": 175,
+      "end": 176,
       "type": "offset",
       "offset": 4198797
     },
     {
-      "start": 174,
-      "end": 178,
+      "start": 177,
+      "end": 181,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 145,
-      "end": 179,
+      "start": 151,
+      "end": 182,
       "type": "offset",
       "offset": 4198797
     },
     {
-      "start": 185,
-      "end": 198,
+      "start": 188,
+      "end": 195,
+      "type": "local_variable",
+      "name": "var_24h"
+    },
+    {
+      "start": 188,
+      "end": 195,
+      "type": "syntax_highlight",
+      "syntax_highlight": "local_variable"
+    },
+    {
+      "start": 195,
+      "end": 196,
+      "type": "offset",
+      "offset": 4198828
+    },
+    {
+      "start": 202,
+      "end": 203,
+      "type": "offset",
+      "offset": 4198828
+    },
+    {
+      "start": 204,
+      "end": 208,
+      "type": "function_parameter",
+      "name": "argc"
+    },
+    {
+      "start": 204,
+      "end": 208,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_parameter"
+    },
+    {
+      "start": 188,
+      "end": 208,
+      "type": "offset",
+      "offset": 4198828
+    },
+    {
+      "start": 214,
+      "end": 227,
       "type": "function_name",
       "name": "sym.Aeropause",
       "offset": 4199038
     },
     {
-      "start": 185,
-      "end": 198,
+      "start": 214,
+      "end": 227,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 199,
-      "end": 209,
+      "start": 228,
+      "end": 229,
+      "type": "offset",
+      "offset": 4198819
+    },
+    {
+      "start": 229,
+      "end": 236,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 209,
-      "end": 210,
+      "start": 237,
+      "end": 238,
       "type": "offset",
-      "offset": 4198828
+      "offset": 4198819
     },
     {
-      "start": 210,
-      "end": 217,
-      "type": "function_parameter",
-      "name": "param_1"
-    },
-    {
-      "start": 210,
-      "end": 217,
+      "start": 239,
+      "end": 240,
       "type": "syntax_highlight",
-      "syntax_highlight": "function_parameter"
-    },
-    {
-      "start": 217,
-      "end": 218,
-      "type": "offset",
-      "offset": 4198828
-    },
-    {
-      "start": 218,
-      "end": 225,
-      "type": "function_parameter",
-      "name": "param_2"
-    },
-    {
-      "start": 218,
-      "end": 225,
-      "type": "syntax_highlight",
-      "syntax_highlight": "function_parameter"
-    },
-    {
-      "start": 185,
-      "end": 226,
-      "type": "offset",
-      "offset": 4198828
-    },
-    {
-      "start": 232,
-      "end": 237,
-      "type": "local_variable",
-      "name": "uVar1"
-    },
-    {
-      "start": 232,
-      "end": 237,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 238,
-      "end": 239,
-      "type": "offset",
-      "offset": 4198833
+      "syntax_highlight": "constant_variable"
     },
     {
       "start": 240,
       "end": 241,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 232,
-      "end": 241,
       "type": "offset",
-      "offset": 4198833
+      "offset": 4198828
     },
     {
-      "start": 247,
-      "end": 249,
-      "type": "offset",
-      "offset": 4198851
+      "start": 241,
+      "end": 245,
+      "type": "function_parameter",
+      "name": "argc"
     },
     {
-      "start": 247,
-      "end": 249,
+      "start": 241,
+      "end": 245,
       "type": "syntax_highlight",
-      "syntax_highlight": "keyword"
+      "syntax_highlight": "function_parameter"
     },
     {
-      "start": 251,
-      "end": 260,
-      "type": "local_variable",
-      "name": "iStack_10"
-    },
-    {
-      "start": 251,
-      "end": 260,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 261,
-      "end": 263,
+      "start": 245,
+      "end": 246,
       "type": "offset",
-      "offset": 4198842
+      "offset": 4198828
     },
     {
-      "start": 264,
-      "end": 265,
-      "type": "offset",
-      "offset": 4198842
+      "start": 246,
+      "end": 250,
+      "type": "function_parameter",
+      "name": "argv"
     },
     {
-      "start": 266,
-      "end": 278,
-      "type": "local_variable",
-      "name": "in_FS_OFFSET"
-    },
-    {
-      "start": 266,
-      "end": 278,
+      "start": 246,
+      "end": 250,
       "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
+      "syntax_highlight": "function_parameter"
     },
     {
-      "start": 279,
-      "end": 280,
+      "start": 214,
+      "end": 251,
       "type": "offset",
-      "offset": 4198842
+      "offset": 4198828
     },
     {
-      "start": 281,
-      "end": 285,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 298,
-      "end": 303,
+      "start": 257,
+      "end": 262,
       "type": "local_variable",
       "name": "uVar1"
     },
     {
-      "start": 298,
-      "end": 303,
+      "start": 257,
+      "end": 262,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 304,
-      "end": 305,
+      "start": 263,
+      "end": 264,
+      "type": "offset",
+      "offset": 4198833
+    },
+    {
+      "start": 265,
+      "end": 266,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 257,
+      "end": 266,
+      "type": "offset",
+      "offset": 4198833
+    },
+    {
+      "start": 272,
+      "end": 274,
+      "type": "offset",
+      "offset": 4198851
+    },
+    {
+      "start": 272,
+      "end": 274,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 276,
+      "end": 282,
+      "type": "local_variable",
+      "name": "var_8h"
+    },
+    {
+      "start": 276,
+      "end": 282,
+      "type": "syntax_highlight",
+      "syntax_highlight": "local_variable"
+    },
+    {
+      "start": 283,
+      "end": 285,
+      "type": "offset",
+      "offset": 4198842
+    },
+    {
+      "start": 286,
+      "end": 287,
+      "type": "offset",
+      "offset": 4198842
+    },
+    {
+      "start": 288,
+      "end": 300,
+      "type": "local_variable",
+      "name": "in_FS_OFFSET"
+    },
+    {
+      "start": 288,
+      "end": 300,
+      "type": "syntax_highlight",
+      "syntax_highlight": "local_variable"
+    },
+    {
+      "start": 301,
+      "end": 302,
+      "type": "offset",
+      "offset": 4198842
+    },
+    {
+      "start": 303,
+      "end": 307,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 320,
+      "end": 325,
+      "type": "local_variable",
+      "name": "uVar1"
+    },
+    {
+      "start": 320,
+      "end": 325,
+      "type": "syntax_highlight",
+      "syntax_highlight": "local_variable"
+    },
+    {
+      "start": 326,
+      "end": 327,
       "type": "offset",
       "offset": 4198853
     },
     {
-      "start": 306,
-      "end": 330,
+      "start": 328,
+      "end": 352,
       "type": "function_name",
       "name": "sym.imp.__stack_chk_fail",
       "offset": 4198464
     },
     {
-      "start": 306,
-      "end": 330,
+      "start": 328,
+      "end": 352,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 298,
-      "end": 332,
+      "start": 320,
+      "end": 354,
       "type": "offset",
       "offset": 4198853
     },
     {
-      "start": 344,
-      "end": 350,
+      "start": 366,
+      "end": 372,
       "type": "offset",
       "offset": 4198859
     },
     {
-      "start": 344,
-      "end": 350,
+      "start": 366,
+      "end": 372,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 351,
-      "end": 356,
+      "start": 373,
+      "end": 378,
       "type": "local_variable",
       "name": "uVar1"
     },
     {
-      "start": 351,
-      "end": 356,
+      "start": 373,
+      "end": 378,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 344,
-      "end": 356,
+      "start": 366,
+      "end": 378,
       "type": "offset",
       "offset": 4198859
     }
@@ -806,7 +890,7 @@ NAME=constant variable annotation
 FILE=bins/dectest32
 EXPECT=<<EOF
 {
-  "code": "\nvoid sym.PrintAmbassador(uint32_t param_1)\n\n{\n    func_0x08049050(\"Ambassador value: \");\n    if (param_1 < 5) {\n        switch(param_1) {\n        case 0:\n            func_0x08049050(\"pure\");\n            break;\n        case 1:\n            func_0x08049050(\"reason\");\n            break;\n        case 2:\n            func_0x08049050(\"revolution\");\n            break;\n        case 3:\n            func_0x08049050(\"echoes\");\n            break;\n        case 4:\n            func_0x08049050(\"wall\");\n        }\n    }\n    else if (param_1 == 1000000) {\n        func_0x08049050(\"million\");\n    }\n    func_0x08049090(10);\n    return;\n}\n\n",
+  "code": "\nvoid sym.PrintAmbassador(int32_t arg_8h)\n\n{\n    func_0x08049050(\"Ambassador value: \");\n    if (arg_8h < 5) {\n        if (arg_8h < 5) {\n            switch(*(arg_8h * 4 + 0x804a048)) {\n            case 0x8049261:\n                func_0x08049050(\"pure\");\n                break;\n            case 0x8049273:\n                func_0x08049050(\"reason\");\n                break;\n            case 0x8049285:\n                func_0x08049050(\"revolution\");\n                break;\n            case 0x8049297:\n                func_0x08049050(\"echoes\");\n                break;\n            case 0x80492a9:\n                func_0x08049050(\"wall\");\n            }\n        }\n    }\n    else if (arg_8h == 1000000) {\n        func_0x08049050(\"million\");\n    }\n    func_0x08049090(10);\n    return;\n}\n\n",
   "annotations": [
     {
       "start": 1,
@@ -835,459 +919,525 @@ EXPECT=<<EOF
     },
     {
       "start": 26,
-      "end": 34,
+      "end": 33,
       "type": "syntax_highlight",
       "syntax_highlight": "datatype"
     },
     {
-      "start": 35,
-      "end": 42,
+      "start": 34,
+      "end": 40,
       "type": "function_parameter",
-      "name": "param_1"
+      "name": "arg_8h"
     },
     {
-      "start": 35,
-      "end": 42,
+      "start": 34,
+      "end": 40,
       "type": "syntax_highlight",
       "syntax_highlight": "function_parameter"
     },
     {
-      "start": 51,
-      "end": 66,
+      "start": 49,
+      "end": 64,
       "type": "function_name",
       "name": "",
       "offset": 134516816
     },
     {
-      "start": 51,
-      "end": 66,
+      "start": 49,
+      "end": 64,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 67,
-      "end": 87,
+      "start": 65,
+      "end": 85,
       "type": "constant_variable",
       "offset": 134520840
     },
     {
-      "start": 67,
-      "end": 87,
+      "start": 65,
+      "end": 85,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 51,
-      "end": 88,
+      "start": 49,
+      "end": 86,
       "type": "offset",
       "offset": 134517295
     },
     {
-      "start": 94,
-      "end": 96,
+      "start": 92,
+      "end": 94,
       "type": "offset",
       "offset": 134517307
     },
     {
-      "start": 94,
-      "end": 96,
+      "start": 92,
+      "end": 94,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 98,
-      "end": 105,
+      "start": 96,
+      "end": 102,
       "type": "function_parameter",
-      "name": "param_1"
+      "name": "arg_8h"
     },
     {
-      "start": 98,
-      "end": 105,
+      "start": 96,
+      "end": 102,
       "type": "syntax_highlight",
       "syntax_highlight": "function_parameter"
     },
     {
-      "start": 106,
-      "end": 107,
+      "start": 103,
+      "end": 104,
       "type": "offset",
       "offset": 134517307
     },
     {
-      "start": 108,
-      "end": 109,
+      "start": 105,
+      "end": 106,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 121,
-      "end": 127,
+      "start": 118,
+      "end": 120,
+      "type": "offset",
+      "offset": 134517313
+    },
+    {
+      "start": 118,
+      "end": 120,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 122,
+      "end": 128,
+      "type": "function_parameter",
+      "name": "arg_8h"
+    },
+    {
+      "start": 122,
+      "end": 128,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_parameter"
+    },
+    {
+      "start": 129,
+      "end": 130,
+      "type": "offset",
+      "offset": 134517313
+    },
+    {
+      "start": 131,
+      "end": 132,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 148,
+      "end": 154,
       "type": "offset",
       "offset": 134517332
     },
     {
-      "start": 121,
-      "end": 127,
+      "start": 148,
+      "end": 154,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 128,
-      "end": 135,
-      "type": "function_parameter",
-      "name": "param_1"
+      "start": 155,
+      "end": 156,
+      "type": "offset",
+      "offset": 134517330
     },
     {
-      "start": 128,
-      "end": 135,
+      "start": 157,
+      "end": 163,
+      "type": "function_parameter",
+      "name": "arg_8h"
+    },
+    {
+      "start": 157,
+      "end": 163,
       "type": "syntax_highlight",
       "syntax_highlight": "function_parameter"
     },
     {
-      "start": 147,
-      "end": 151,
+      "start": 164,
+      "end": 165,
+      "type": "offset",
+      "offset": 134517322
+    },
+    {
+      "start": 166,
+      "end": 167,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 168,
+      "end": 169,
+      "type": "offset",
+      "offset": 134517325
+    },
+    {
+      "start": 170,
+      "end": 179,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 196,
+      "end": 200,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 167,
-      "end": 182,
+      "start": 228,
+      "end": 243,
       "type": "function_name",
       "name": "",
       "offset": 134516816
     },
     {
-      "start": 167,
-      "end": 182,
+      "start": 228,
+      "end": 243,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 183,
-      "end": 189,
+      "start": 244,
+      "end": 250,
       "type": "constant_variable",
       "offset": 134520859
     },
     {
-      "start": 183,
-      "end": 189,
+      "start": 244,
+      "end": 250,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 167,
-      "end": 190,
+      "start": 228,
+      "end": 251,
       "type": "offset",
       "offset": 134517353
     },
     {
-      "start": 204,
-      "end": 209,
+      "start": 269,
+      "end": 274,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 204,
-      "end": 210,
+      "start": 269,
+      "end": 275,
       "type": "offset",
       "offset": 134517361
     },
     {
-      "start": 219,
-      "end": 223,
+      "start": 288,
+      "end": 292,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 239,
-      "end": 254,
+      "start": 320,
+      "end": 335,
       "type": "function_name",
       "name": "",
       "offset": 134516816
     },
     {
-      "start": 239,
-      "end": 254,
+      "start": 320,
+      "end": 335,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 255,
-      "end": 263,
+      "start": 336,
+      "end": 344,
       "type": "constant_variable",
       "offset": 134520864
     },
     {
-      "start": 255,
-      "end": 263,
+      "start": 336,
+      "end": 344,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 239,
-      "end": 264,
+      "start": 320,
+      "end": 345,
       "type": "offset",
       "offset": 134517371
     },
     {
-      "start": 278,
-      "end": 283,
+      "start": 363,
+      "end": 368,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 278,
-      "end": 284,
+      "start": 363,
+      "end": 369,
       "type": "offset",
       "offset": 134517379
     },
     {
-      "start": 293,
-      "end": 297,
+      "start": 382,
+      "end": 386,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 313,
-      "end": 328,
+      "start": 414,
+      "end": 429,
       "type": "function_name",
       "name": "",
       "offset": 134516816
     },
     {
-      "start": 313,
-      "end": 328,
+      "start": 414,
+      "end": 429,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 329,
-      "end": 341,
+      "start": 430,
+      "end": 442,
       "type": "constant_variable",
       "offset": 134520871
     },
     {
-      "start": 329,
-      "end": 341,
+      "start": 430,
+      "end": 442,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 313,
-      "end": 342,
+      "start": 414,
+      "end": 443,
       "type": "offset",
       "offset": 134517389
     },
     {
-      "start": 356,
-      "end": 361,
+      "start": 461,
+      "end": 466,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 356,
-      "end": 362,
+      "start": 461,
+      "end": 467,
       "type": "offset",
       "offset": 134517397
     },
     {
-      "start": 371,
-      "end": 375,
+      "start": 480,
+      "end": 484,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 391,
-      "end": 406,
+      "start": 512,
+      "end": 527,
       "type": "function_name",
       "name": "",
       "offset": 134516816
     },
     {
-      "start": 391,
-      "end": 406,
+      "start": 512,
+      "end": 527,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 407,
-      "end": 415,
+      "start": 528,
+      "end": 536,
       "type": "constant_variable",
       "offset": 134520882
     },
     {
-      "start": 407,
-      "end": 415,
+      "start": 528,
+      "end": 536,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 391,
-      "end": 416,
+      "start": 512,
+      "end": 537,
       "type": "offset",
       "offset": 134517407
     },
     {
-      "start": 430,
-      "end": 435,
+      "start": 555,
+      "end": 560,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 430,
-      "end": 436,
+      "start": 555,
+      "end": 561,
       "type": "offset",
       "offset": 134517415
     },
     {
-      "start": 445,
-      "end": 449,
+      "start": 574,
+      "end": 578,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 465,
-      "end": 480,
+      "start": 606,
+      "end": 621,
       "type": "function_name",
       "name": "",
       "offset": 134516816
     },
     {
-      "start": 465,
-      "end": 480,
+      "start": 606,
+      "end": 621,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 481,
-      "end": 487,
+      "start": 622,
+      "end": 628,
       "type": "constant_variable",
       "offset": 134520889
     },
     {
-      "start": 481,
-      "end": 487,
+      "start": 622,
+      "end": 628,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 465,
-      "end": 488,
+      "start": 606,
+      "end": 629,
       "type": "offset",
       "offset": 134517425
     },
     {
-      "start": 510,
-      "end": 514,
+      "start": 665,
+      "end": 669,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 515,
-      "end": 517,
+      "start": 670,
+      "end": 672,
       "type": "offset",
       "offset": 134517341
     },
     {
-      "start": 515,
-      "end": 517,
+      "start": 670,
+      "end": 672,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 519,
-      "end": 526,
+      "start": 674,
+      "end": 680,
       "type": "function_parameter",
-      "name": "param_1"
+      "name": "arg_8h"
     },
     {
-      "start": 519,
-      "end": 526,
+      "start": 674,
+      "end": 680,
       "type": "syntax_highlight",
       "syntax_highlight": "function_parameter"
     },
     {
-      "start": 527,
-      "end": 529,
+      "start": 681,
+      "end": 683,
       "type": "offset",
       "offset": 134517334
     },
     {
-      "start": 530,
-      "end": 537,
+      "start": 684,
+      "end": 691,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 549,
-      "end": 564,
+      "start": 703,
+      "end": 718,
       "type": "function_name",
       "name": "",
       "offset": 134516816
     },
     {
-      "start": 549,
-      "end": 564,
+      "start": 703,
+      "end": 718,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 565,
-      "end": 574,
+      "start": 719,
+      "end": 728,
       "type": "constant_variable",
       "offset": 134520894
     },
     {
-      "start": 565,
-      "end": 574,
+      "start": 719,
+      "end": 728,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 549,
-      "end": 575,
+      "start": 703,
+      "end": 729,
       "type": "offset",
       "offset": 134517443
     },
     {
-      "start": 587,
-      "end": 602,
+      "start": 741,
+      "end": 756,
       "type": "function_name",
       "name": "",
       "offset": 134516880
     },
     {
-      "start": 587,
-      "end": 602,
+      "start": 741,
+      "end": 756,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 603,
-      "end": 605,
+      "start": 757,
+      "end": 759,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 587,
-      "end": 606,
+      "start": 741,
+      "end": 760,
       "type": "offset",
       "offset": 134517459
     },
     {
-      "start": 612,
-      "end": 618,
+      "start": 766,
+      "end": 772,
       "type": "offset",
       "offset": 134517469
     },
     {
-      "start": 612,
-      "end": 618,
+      "start": 766,
+      "end": 772,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 612,
-      "end": 618,
+      "start": 766,
+      "end": 772,
       "type": "offset",
       "offset": 134517469
     }
@@ -1305,65 +1455,66 @@ NAME=aeropause32 (many features combined)
 FILE=bins/dectest32
 EXPECT=<<EOF
 
-void sym.Aeropause(int *param_1,uint param_2,uint param_3)
+void sym.Aeropause(Bright *bright,int32_t argc,char **argv)
 
 {
-    uint32_t uVar1;
-    int iVar2;
+    Ambassador AVar1;
+    Morning *pMVar2;
+    int iVar3;
     
-    iVar2 = sym.imp.malloc(8);
-    *param_1 = iVar2;
-    **param_1 = param_2;
-    *(*param_1 + 4) = param_3;
-    if (**param_1 < 2) {
-        param_1[2] = 0;
+    pMVar2 = sym.imp.malloc(8);
+    bright->morning = pMVar2;
+    bright->morning->saved_argc = argc;
+    bright->morning->saved_argv = argv;
+    if (bright->morning->saved_argc < 2) {
+        bright->ambassador = AMBASSADOR_PURE;
     }
     else {
-        param_1[1] = *(*(*param_1 + 4) + 4);
-        iVar2 = sym.imp.strcmp(param_1[1],0x804a05c);
-        if (iVar2 == 0) {
-            param_1[2] = 1;
+        (bright->window).sunlight = bright->morning->saved_argv[1];
+        iVar3 = sym.imp.strcmp((bright->window).sunlight,0x804a05c);
+        if (iVar3 == 0) {
+            bright->ambassador = AMBASSADOR_REASON;
         }
         else {
-            iVar2 = sym.imp.strcmp(param_1[1],"dark");
-            if (iVar2 == 0) {
-                param_1[2] = 2;
+            iVar3 = sym.imp.strcmp((bright->window).sunlight,"dark");
+            if (iVar3 == 0) {
+                bright->ambassador = AMBASSADOR_REVOLUTION;
             }
             else {
-                iVar2 = sym.imp.strcmp(param_1[1],"third");
-                if (iVar2 == 0) {
-                    param_1[2] = 3;
+                iVar3 = sym.imp.strcmp((bright->window).sunlight,"third");
+                if (iVar3 == 0) {
+                    bright->ambassador = AMBASSADOR_ECHOES;
                 }
                 else {
-                    param_1[2] = 1000000;
+                    bright->ambassador = AMBASSADOR_MILLION;
                 }
             }
         }
     }
-    uVar1 = param_1[2];
-    if (uVar1 < 5) {
+    AVar1 = bright->ambassador;
+    if (AVar1 < (AMBASSADOR_WALL|AMBASSADOR_REASON)) {
     //switch table (5 cases) at 0x804a070
-        switch(uVar1) {
-        case 0:
+        switch(AVar1) {
+        case AMBASSADOR_PURE:
             sym.imp.printf("pure");
             break;
-        case 1:
+        case AMBASSADOR_REASON:
             sym.imp.printf("reason");
             break;
-        case 2:
+        case AMBASSADOR_REVOLUTION:
             sym.imp.printf("revolution");
             break;
-        case 3:
+        case AMBASSADOR_ECHOES:
             sym.imp.printf("echoes");
             break;
-        case 4:
+        case AMBASSADOR_WALL:
             sym.imp.printf("wall");
         }
     }
-    else if (uVar1 == 1000000) {
+    else if (AVar1 == AMBASSADOR_MILLION) {
         sym.imp.printf("million");
     }
-    sym.PrintAmbassador(param_1[2]);
+    sym.PrintAmbassador(bright->ambassador);
     return;
 }
 
@@ -1383,44 +1534,46 @@ NAME=aeropause64 (many features combined)
 FILE=bins/dectest64
 EXPECT=<<EOF
 
-void sym.Aeropause(int64_t *param_1,uint param_2,ulong param_3)
+void sym.Aeropause(Bright *bright,int32_t argc,char **argv)
 
 {
-    uint32_t uVar1;
+    uint uVar1;
     int iVar2;
-    int64_t iVar3;
+    Morning *pMVar3;
+    int64_t var_18h;
+    void **var_8h;
     
-    iVar3 = sym.imp.malloc(0x10);
-    *param_1 = iVar3;
-    **param_1 = param_2;
-    *(*param_1 + 8) = param_3;
-    if (**param_1 < 2) {
-        *(param_1 + 2) = 0;
+    pMVar3 = sym.imp.malloc(0x10);
+    bright->morning = pMVar3;
+    bright->morning->saved_argc = argc;
+    bright->morning->saved_argv = argv;
+    if (bright->morning->saved_argc < 2) {
+        bright->ambassador = AMBASSADOR_PURE;
     }
     else {
-        param_1[1] = *(*(*param_1 + 8) + 8);
-        iVar2 = sym.imp.strcmp(param_1[1],"the  ");
+        (bright->window).sunlight = bright->morning->saved_argv[1];
+        iVar2 = sym.imp.strcmp((bright->window).sunlight,"the  ");
         if (iVar2 == 0) {
-            *(param_1 + 2) = 1;
+            bright->ambassador = AMBASSADOR_REASON;
         }
         else {
-            iVar2 = sym.imp.strcmp(param_1[1],"dark");
+            iVar2 = sym.imp.strcmp((bright->window).sunlight,"dark");
             if (iVar2 == 0) {
-                *(param_1 + 2) = 2;
+                bright->ambassador = AMBASSADOR_REVOLUTION;
             }
             else {
-                iVar2 = sym.imp.strcmp(param_1[1],"third");
+                iVar2 = sym.imp.strcmp((bright->window).sunlight,"third");
                 if (iVar2 == 0) {
-                    *(param_1 + 2) = 3;
+                    bright->ambassador = AMBASSADOR_ECHOES;
                 }
                 else {
-                    *(param_1 + 2) = 1000000;
+                    bright->ambassador = AMBASSADOR_MILLION;
                 }
             }
         }
     }
-    uVar1 = *(param_1 + 2);
-    if (uVar1 < 5) {
+    uVar1 = bright->ambassador;
+    if (uVar1 < (AMBASSADOR_WALL|AMBASSADOR_REASON)) {
     //switch table (5 cases) at 0x402088
         switch(uVar1) {
         case 0:
@@ -1439,32 +1592,19 @@ void sym.Aeropause(int64_t *param_1,uint param_2,ulong param_3)
             sym.imp.printf("wall");
         }
     }
-    else if (uVar1 == 1000000) {
+    else if (uVar1 == AMBASSADOR_MILLION) {
         sym.imp.printf("million");
     }
-    sym.PrintAmbassador(param_1[2]);
+    sym.PrintAmbassador(bright->ambassador);
     return;
 }
 
 EOF
 CMDS=<<EOF
 aaa
-
-# TODO: remove these when r2 can do it automatically
-afvr rdi format const char * @ sym.imp.printf
-afvr rdi size size_t @ sym.imp.malloc
-afvr rdi s1 const char * @ sym.imp.strcmp
-afvr rsi s2 const char * @ sym.imp.strcmp
-
 to bins/types.h
-# TODO: remove when parsed struct from r2 is correct
-k analysis/types/struct.Bright.ambassador=enum Ambassador,16,0
-k analysis/types/struct.Bright.window=struct Window,8,0
 
 s sym.Aeropause
-afvr rdi bright Bright *
-afvr rsi argc int32_t
-afvr rdx argv const char **
 pdg
 EOF
 RUN
@@ -1473,193 +1613,196 @@ NAME=typedef
 FILE=bins/dectest32
 EXPECT=<<EOF
 
-void sym.Aeropause(int *param_1,uint param_2,uint param_3)
+void sym.Aeropause(Bright *bright,int32_t argc,char **argv)
 
 {
-    uint32_t uVar1;
-    int iVar2;
+    Ambassador AVar1;
+    Morning *pMVar2;
+    int iVar3;
     
-    iVar2 = sym.imp.malloc(8);
-    *param_1 = iVar2;
-    **param_1 = param_2;
-    *(*param_1 + 4) = param_3;
-    if (**param_1 < 2) {
-        param_1[2] = 0;
+    pMVar2 = sym.imp.malloc(8);
+    bright->morning = pMVar2;
+    bright->morning->saved_argc = argc;
+    bright->morning->saved_argv = argv;
+    if (bright->morning->saved_argc < 2) {
+        bright->ambassador = AMBASSADOR_PURE;
     }
     else {
-        param_1[1] = *(*(*param_1 + 4) + 4);
-        iVar2 = sym.imp.strcmp(param_1[1],0x804a05c);
-        if (iVar2 == 0) {
-            param_1[2] = 1;
+        (bright->window).sunlight = bright->morning->saved_argv[1];
+        iVar3 = sym.imp.strcmp((bright->window).sunlight,0x804a05c);
+        if (iVar3 == 0) {
+            bright->ambassador = AMBASSADOR_REASON;
         }
         else {
-            iVar2 = sym.imp.strcmp(param_1[1],"dark");
-            if (iVar2 == 0) {
-                param_1[2] = 2;
+            iVar3 = sym.imp.strcmp((bright->window).sunlight,"dark");
+            if (iVar3 == 0) {
+                bright->ambassador = AMBASSADOR_REVOLUTION;
             }
             else {
-                iVar2 = sym.imp.strcmp(param_1[1],"third");
-                if (iVar2 == 0) {
-                    param_1[2] = 3;
+                iVar3 = sym.imp.strcmp((bright->window).sunlight,"third");
+                if (iVar3 == 0) {
+                    bright->ambassador = AMBASSADOR_ECHOES;
                 }
                 else {
-                    param_1[2] = 1000000;
+                    bright->ambassador = AMBASSADOR_MILLION;
                 }
             }
         }
     }
-    uVar1 = param_1[2];
-    if (uVar1 < 5) {
+    AVar1 = bright->ambassador;
+    if (AVar1 < (AMBASSADOR_WALL|AMBASSADOR_REASON)) {
     //switch table (5 cases) at 0x804a070
-        switch(uVar1) {
-        case 0:
+        switch(AVar1) {
+        case AMBASSADOR_PURE:
             sym.imp.printf("pure");
             break;
-        case 1:
+        case AMBASSADOR_REASON:
             sym.imp.printf("reason");
             break;
-        case 2:
+        case AMBASSADOR_REVOLUTION:
             sym.imp.printf("revolution");
             break;
-        case 3:
+        case AMBASSADOR_ECHOES:
             sym.imp.printf("echoes");
             break;
-        case 4:
+        case AMBASSADOR_WALL:
             sym.imp.printf("wall");
         }
     }
-    else if (uVar1 == 1000000) {
+    else if (AVar1 == AMBASSADOR_MILLION) {
         sym.imp.printf("million");
     }
-    sym.PrintAmbassador(param_1[2]);
+    sym.PrintAmbassador(bright->ambassador);
     return;
 }
 
 --
 
-void sym.Aeropause(int *param_1,uint param_2,uint param_3)
+void sym.Aeropause(Bright *bright,int32_t argc,char **argv)
 
 {
-    uint32_t uVar1;
-    int iVar2;
+    Ambassador AVar1;
+    Morning *pMVar2;
+    int iVar3;
     
-    iVar2 = sym.imp.malloc(8);
-    *param_1 = iVar2;
-    **param_1 = param_2;
-    *(*param_1 + 4) = param_3;
-    if (**param_1 < 2) {
-        param_1[2] = 0;
+    pMVar2 = sym.imp.malloc(8);
+    bright->morning = pMVar2;
+    bright->morning->saved_argc = argc;
+    bright->morning->saved_argv = argv;
+    if (bright->morning->saved_argc < 2) {
+        bright->ambassador = AMBASSADOR_PURE;
     }
     else {
-        param_1[1] = *(*(*param_1 + 4) + 4);
-        iVar2 = sym.imp.strcmp(param_1[1],0x804a05c);
-        if (iVar2 == 0) {
-            param_1[2] = 1;
+        (bright->window).sunlight = bright->morning->saved_argv[1];
+        iVar3 = sym.imp.strcmp((bright->window).sunlight,0x804a05c);
+        if (iVar3 == 0) {
+            bright->ambassador = AMBASSADOR_REASON;
         }
         else {
-            iVar2 = sym.imp.strcmp(param_1[1],"dark");
-            if (iVar2 == 0) {
-                param_1[2] = 2;
+            iVar3 = sym.imp.strcmp((bright->window).sunlight,"dark");
+            if (iVar3 == 0) {
+                bright->ambassador = AMBASSADOR_REVOLUTION;
             }
             else {
-                iVar2 = sym.imp.strcmp(param_1[1],"third");
-                if (iVar2 == 0) {
-                    param_1[2] = 3;
+                iVar3 = sym.imp.strcmp((bright->window).sunlight,"third");
+                if (iVar3 == 0) {
+                    bright->ambassador = AMBASSADOR_ECHOES;
                 }
                 else {
-                    param_1[2] = 1000000;
+                    bright->ambassador = AMBASSADOR_MILLION;
                 }
             }
         }
     }
-    uVar1 = param_1[2];
-    if (uVar1 < 5) {
+    AVar1 = bright->ambassador;
+    if (AVar1 < (AMBASSADOR_WALL|AMBASSADOR_REASON)) {
     //switch table (5 cases) at 0x804a070
-        switch(uVar1) {
-        case 0:
+        switch(AVar1) {
+        case AMBASSADOR_PURE:
             sym.imp.printf("pure");
             break;
-        case 1:
+        case AMBASSADOR_REASON:
             sym.imp.printf("reason");
             break;
-        case 2:
+        case AMBASSADOR_REVOLUTION:
             sym.imp.printf("revolution");
             break;
-        case 3:
+        case AMBASSADOR_ECHOES:
             sym.imp.printf("echoes");
             break;
-        case 4:
+        case AMBASSADOR_WALL:
             sym.imp.printf("wall");
         }
     }
-    else if (uVar1 == 1000000) {
+    else if (AVar1 == AMBASSADOR_MILLION) {
         sym.imp.printf("million");
     }
-    sym.PrintAmbassador(param_1[2]);
+    sym.PrintAmbassador(bright->ambassador);
     return;
 }
 
 --
 
-void sym.Aeropause(int *param_1,uint param_2,uint param_3)
+void sym.Aeropause(Bright *bright,int32_t argc,char **argv)
 
 {
-    uint32_t uVar1;
-    int iVar2;
+    Ambassador AVar1;
+    Morning *pMVar2;
+    int iVar3;
     
-    iVar2 = sym.imp.malloc(8);
-    *param_1 = iVar2;
-    **param_1 = param_2;
-    *(*param_1 + 4) = param_3;
-    if (**param_1 < 2) {
-        param_1[2] = 0;
+    pMVar2 = sym.imp.malloc(8);
+    bright->morning = pMVar2;
+    bright->morning->saved_argc = argc;
+    bright->morning->saved_argv = argv;
+    if (bright->morning->saved_argc < 2) {
+        bright->ambassador = AMBASSADOR_PURE;
     }
     else {
-        param_1[1] = *(*(*param_1 + 4) + 4);
-        iVar2 = sym.imp.strcmp(param_1[1],0x804a05c);
-        if (iVar2 == 0) {
-            param_1[2] = 1;
+        (bright->window).sunlight = bright->morning->saved_argv[1];
+        iVar3 = sym.imp.strcmp((bright->window).sunlight,0x804a05c);
+        if (iVar3 == 0) {
+            bright->ambassador = AMBASSADOR_REASON;
         }
         else {
-            iVar2 = sym.imp.strcmp(param_1[1],"dark");
-            if (iVar2 == 0) {
-                param_1[2] = 2;
+            iVar3 = sym.imp.strcmp((bright->window).sunlight,"dark");
+            if (iVar3 == 0) {
+                bright->ambassador = AMBASSADOR_REVOLUTION;
             }
             else {
-                iVar2 = sym.imp.strcmp(param_1[1],"third");
-                if (iVar2 == 0) {
-                    param_1[2] = 3;
+                iVar3 = sym.imp.strcmp((bright->window).sunlight,"third");
+                if (iVar3 == 0) {
+                    bright->ambassador = AMBASSADOR_ECHOES;
                 }
                 else {
-                    param_1[2] = 1000000;
+                    bright->ambassador = AMBASSADOR_MILLION;
                 }
             }
         }
     }
-    uVar1 = param_1[2];
-    if (uVar1 < 5) {
+    AVar1 = bright->ambassador;
+    if (AVar1 < (AMBASSADOR_WALL|AMBASSADOR_REASON)) {
     //switch table (5 cases) at 0x804a070
-        switch(uVar1) {
-        case 0:
+        switch(AVar1) {
+        case AMBASSADOR_PURE:
             sym.imp.printf("pure");
             break;
-        case 1:
+        case AMBASSADOR_REASON:
             sym.imp.printf("reason");
             break;
-        case 2:
+        case AMBASSADOR_REVOLUTION:
             sym.imp.printf("revolution");
             break;
-        case 3:
+        case AMBASSADOR_ECHOES:
             sym.imp.printf("echoes");
             break;
-        case 4:
+        case AMBASSADOR_WALL:
             sym.imp.printf("wall");
         }
     }
-    else if (uVar1 == 1000000) {
+    else if (AVar1 == AMBASSADOR_MILLION) {
         sym.imp.printf("million");
     }
-    sym.PrintAmbassador(param_1[2]);
+    sym.PrintAmbassador(bright->ambassador);
     return;
 }
 
@@ -1687,9 +1830,13 @@ NAME=macos args
 FILE=bins/mach0/arg
 EXPECT=<<EOF
 
-void main(void)
+//WARNING: Variable defined which should be unmapped: var_4h
+
+void __stdcall main(int argc,char **argv,char **envp)
 
 {
+    char *var_4h;
+    
     sym._call();
     return;
 }
@@ -1729,39 +1876,41 @@ NAME=code printing
 FILE=bins/elf/crackme0x05
 EXPECT=<<EOF
 
-uint main(void)
+uint main(int argc,char **argv,char **envp)
 
 {
-    uchar auStack_7c [120];
+    int32_t var_78h;
     
     sym.imp.printf("IOLI Crackme Level 0x05\n");
     sym.imp.printf("Password: ");
-    sym.imp.scanf(0x80486b2,auStack_7c);
-    sym.check(auStack_7c);
+    sym.imp.scanf(0x80486b2,&var_78h);
+    sym.check(&var_78h);
     return 0;
 }
 
 --
                   |
-    0x08048540    |uint main(void)
+    0x08048540    |uint main(int argc,char **argv,char **envp)
                   |
                   |{
-                  |    uchar auStack_7c [120];
+                  |    int32_t var_78h;
                   |    
     0x08048566    |    sym.imp.printf("IOLI Crackme Level 0x05\n");
     0x08048572    |    sym.imp.printf("Password: ");
-    0x08048585    |    sym.imp.scanf(0x80486b2,auStack_7c);
-    0x08048590    |    sym.check(auStack_7c);
+    0x08048585    |    sym.imp.scanf(0x80486b2,&var_78h);
+    0x08048590    |    sym.check(&var_78h);
     0x0804859b    |    return 0;
                   |}
                   |
 --
-CCu base64:c3ltLmltcC5zY2FuZigweDgwNDg2YjIsYXVTdGFja183Yyk= @ 0x8048585
+CCu base64:Jg== @ 0x8048577
 CCu base64:bWFpbg== @ 0x8048540
+CCu base64:c3ltLmltcC5zY2FuZigweDgwNDg2YjIsJnZhcl83OGgp @ 0x8048585
+CCu base64:c3ltLmNoZWNrKCZ2YXJfNzhoKQ== @ 0x8048590
 CCu base64:cmV0dXJuIDA= @ 0x804859b
-CCu base64:c3ltLmltcC5wcmludGYoIlBhc3N3b3JkOiAiKQ== @ 0x8048572
 CCu base64:c3ltLmltcC5wcmludGYoIklPTEkgQ3JhY2ttZSBMZXZlbCAweDA1XG4iKQ== @ 0x8048566
-CCu base64:c3ltLmNoZWNrKGF1U3RhY2tfN2Mp @ 0x8048590
+CCu base64:c3ltLmltcC5wcmludGYoIlBhc3N3b3JkOiAiKQ== @ 0x8048572
+CCu base64:Jg== @ 0x804858a
 --
 <result><function>
 <function name="main" size="92">
@@ -1773,8 +1922,32 @@ CCu base64:c3ltLmNoZWNrKGF1U3RhY2tfN2Mp @ 0x8048590
       </rangelist>
       <symbollist>
         <mapsym>
-            <type name="" size="120" metatype="array" arraysize="120">
+          </symbol>
+          <rangelist>
+            <range space="ram" first="0x804853f" last="0x804853f"/>
+          </rangelist>
+        </mapsym>
+        <mapsym>
+            <type name="" size="4" metatype="ptr" core="true">
+              <type name="" size="4" metatype="ptr" core="true">
+              </type>
             </type>
+          </symbol>
+          <rangelist>
+            <range space="ram" first="0x804853f" last="0x804853f"/>
+          </rangelist>
+        </mapsym>
+        <mapsym>
+            <type name="" size="4" metatype="ptr" core="true">
+              <type name="" size="4" metatype="ptr" core="true">
+              </type>
+            </type>
+          </symbol>
+          <rangelist>
+            <range space="ram" first="0x804853f" last="0x804853f"/>
+          </rangelist>
+        </mapsym>
+        <mapsym>
           </symbol>
           <rangelist/>
         </mapsym>
@@ -1789,28 +1962,31 @@ CCu base64:c3ltLmNoZWNrKGF1U3RhY2tfN2Mp @ 0x8048590
         <range space="ram" first="0x8048540" last="0x804859b"/>
       </rangelist>
       <op code="1">
-        <seqnum space="ram" offset="0x8048566" uniq="0xe7"/>
+        <seqnum space="ram" offset="0x8048566" uniq="0xf6"/>
       </op>
       <op code="7">
         <seqnum space="ram" offset="0x8048566" uniq="0x80"/>
         <void/>
       </op>
       <op code="1">
-        <seqnum space="ram" offset="0x8048572" uniq="0xe8"/>
+        <seqnum space="ram" offset="0x8048572" uniq="0xf7"/>
       </op>
       <op code="7">
         <seqnum space="ram" offset="0x8048572" uniq="0x85"/>
         <void/>
       </op>
       <op code="66">
-        <seqnum space="ram" offset="0x8048577" uniq="0xe9"/>
+        <seqnum space="ram" offset="0x8048577" uniq="0xf8"/>
       </op>
       <op code="7">
         <seqnum space="ram" offset="0x8048585" uniq="0x8f"/>
         <void/>
       </op>
       <op code="66">
-        <seqnum space="ram" offset="0x804858a" uniq="0xea"/>
+        <seqnum space="ram" offset="0x804858a" uniq="0xf9"/>
+      </op>
+      <op code="64">
+        <seqnum space="ram" offset="0x8048590" uniq="0xfa"/>
       </op>
       <op code="7">
         <seqnum space="ram" offset="0x8048590" uniq="0x96"/>
@@ -1830,19 +2006,21 @@ CCu base64:c3ltLmNoZWNrKGF1U3RhY2tfN2Mp @ 0x8048590
     </high>
     <high repref="0x1c1" class="constant">
     </high>
-    <high repref="0x2ed" class="constant">
+    <high repref="0x316" class="constant">
       <type name="" size="4" metatype="ptr" core="true">
       </type>
     </high>
-    <high repref="0x2ee" class="constant">
+    <high repref="0x317" class="constant">
       <type name="" size="4" metatype="ptr" core="true">
       </type>
     </high>
-    <high repref="0x2e2" class="constant">
+    <high repref="0x30b" class="constant">
+      <type name="" size="4" metatype="ptr" core="true">
+      </type>
     </high>
-    <high repref="0x2e9" class="constant" symref="0x4000010000000008" offset="0">
+    <high repref="0x312" class="constant" symref="0x4000010000000003" offset="0">
     </high>
-    <high repref="0x2eb" class="constant" symref="0x4000010000000008" offset="0">
+    <high repref="0x314" class="constant" symref="0x4000010000000003" offset="0">
     </high>
     <high repref="0x176" class="other">
       <type name="" size="4" metatype="ptr" core="true">
@@ -1852,24 +2030,40 @@ CCu base64:c3ltLmNoZWNrKGF1U3RhY2tfN2Mp @ 0x8048590
       <type name="" size="4" metatype="ptr" core="true">
       </type>
     </high>
-    <high repref="0x2e4" class="other" typelock="true">
+    <high repref="0x30d" class="other" typelock="true">
       <type name="" size="4" metatype="ptr" core="true">
       </type>
     </high>
-    <high repref="0x2e7" class="other" typelock="true">
+    <high repref="0x310" class="other" typelock="true">
       <type name="" size="4" metatype="ptr" core="true">
       </type>
+    </high>
+    <high repref="0x318" class="other">
     </high>
     <high repref="0x1a2" class="other">
     </high>
-    <high repref="0x238" class="other" typelock="true">
+    <high repref="0x240" class="other" typelock="true">
       <type name="" size="4" metatype="ptr">
         <type name="" size="0" metatype="spacebase" space="stack">
         </type>
       </type>
     </high>
+    <high repref="0x1c2" class="param" symref="0x4000010000000000">
+    </high>
+    <high repref="0x1c3" class="param" symref="0x4000010000000001">
+      <type name="" size="4" metatype="ptr" core="true">
+        <type name="" size="4" metatype="ptr" core="true">
+        </type>
+      </type>
+    </high>
+    <high repref="0x1c4" class="param" symref="0x4000010000000002">
+      <type name="" size="4" metatype="ptr" core="true">
+        <type name="" size="4" metatype="ptr" core="true">
+        </type>
+      </type>
+    </high>
   </highlist>
-  <prototype model="__cdecl" extrapop="4">
+  <prototype model="__cdecl" extrapop="4" modellock="true">
     <returnsym>
     </returnsym>
   </prototype>
@@ -1885,26 +2079,45 @@ CCu base64:c3ltLmNoZWNrKGF1U3RhY2tfN2Mp @ 0x8048590
     <syntax> </syntax>
     <funcname color="0x3">main</funcname>
     <syntax></syntax>
-    <syntax open="83">(</syntax>
+    <syntax open="113">(</syntax>
     <syntax></syntax>
-    <syntax color="0x0">void</syntax>
+    <vardecl symref="0x4000010000000000">
+      <syntax> </syntax>
+      <variable color="0x6">argc</variable>
+    </vardecl>
     <syntax></syntax>
-    <syntax close="83">)</syntax>
+    <syntax>, </syntax>
+    <syntax></syntax>
+    <vardecl symref="0x4000010000000001">
+      <syntax> </syntax>
+      <op>*</op>
+      <syntax></syntax>
+      <op>*</op>
+      <syntax></syntax>
+      <variable color="0x6">argv</variable>
+    </vardecl>
+    <syntax></syntax>
+    <syntax>, </syntax>
+    <syntax></syntax>
+    <vardecl symref="0x4000010000000002">
+      <syntax> </syntax>
+      <op>*</op>
+      <syntax></syntax>
+      <op>*</op>
+      <syntax></syntax>
+      <variable color="0x6">envp</variable>
+    </vardecl>
+    <syntax></syntax>
+    <syntax close="113">)</syntax>
   </funcproto>
   <break indent="0"/>
   <syntax></syntax>
   <break indent="0"/>
   <syntax>{</syntax>
   <break indent="4"/>
-  <vardecl symref="0x4000010000000008">
+  <vardecl symref="0x4000010000000003">
     <syntax> </syntax>
-    <variable color="0x4">auStack_7c</variable>
-    <syntax> </syntax>
-    <syntax open="88">[</syntax>
-    <syntax></syntax>
-    <syntax color="0x5">120</syntax>
-    <syntax></syntax>
-    <syntax close="88">]</syntax>
+    <variable color="0x4">var_78h</variable>
   </vardecl>
   <syntax></syntax>
   <syntax>;</syntax>
@@ -1915,11 +2128,11 @@ CCu base64:c3ltLmNoZWNrKGF1U3RhY2tfN2Mp @ 0x8048590
     <statement opref="0x80">
       <funcname color="0x3" opref="0x80">sym.imp.printf</funcname>
       <syntax></syntax>
-      <syntax open="92">(</syntax>
+      <syntax open="130">(</syntax>
       <syntax></syntax>
-      <variable color="0x5" varref="0x2ed" opref="0xe7">&quot;IOLI Crackme Level 0x05\n&quot;</variable>
+      <variable color="0x5" varref="0x316" opref="0xf6">&quot;IOLI Crackme Level 0x05\n&quot;</variable>
       <syntax></syntax>
-      <syntax close="92">)</syntax>
+      <syntax close="130">)</syntax>
     </statement>
     <syntax></syntax>
     <syntax>;</syntax>
@@ -1927,11 +2140,11 @@ CCu base64:c3ltLmNoZWNrKGF1U3RhY2tfN2Mp @ 0x8048590
     <statement opref="0x85">
       <funcname color="0x3" opref="0x85">sym.imp.printf</funcname>
       <syntax></syntax>
-      <syntax open="95">(</syntax>
+      <syntax open="133">(</syntax>
       <syntax></syntax>
-      <variable color="0x5" varref="0x2ee" opref="0xe8">&quot;Password: &quot;</variable>
+      <variable color="0x5" varref="0x317" opref="0xf7">&quot;Password: &quot;</variable>
       <syntax></syntax>
-      <syntax close="95">)</syntax>
+      <syntax close="133">)</syntax>
     </statement>
     <syntax></syntax>
     <syntax>;</syntax>
@@ -1939,15 +2152,17 @@ CCu base64:c3ltLmNoZWNrKGF1U3RhY2tfN2Mp @ 0x8048590
     <statement opref="0x8f">
       <funcname color="0x3" opref="0x8f">sym.imp.scanf</funcname>
       <syntax></syntax>
-      <syntax open="98">(</syntax>
+      <syntax open="136">(</syntax>
       <syntax></syntax>
-      <variable color="0x5" varref="0x2e2" opref="0x8f">0x80486b2</variable>
+      <variable color="0x5" varref="0x30b" opref="0x8f">0x80486b2</variable>
       <syntax></syntax>
       <op opref="0x8f">, </op>
       <syntax></syntax>
-      <variable color="0x4" opref="0xe9">auStack_7c</variable>
+      <op opref="0xf8">&amp;</op>
       <syntax></syntax>
-      <syntax close="98">)</syntax>
+      <variable color="0x4" opref="0xf8">var_78h</variable>
+      <syntax></syntax>
+      <syntax close="136">)</syntax>
     </statement>
     <syntax></syntax>
     <syntax>;</syntax>
@@ -1955,11 +2170,13 @@ CCu base64:c3ltLmNoZWNrKGF1U3RhY2tfN2Mp @ 0x8048590
     <statement opref="0x96">
       <funcname color="0x3" opref="0x96">sym.check</funcname>
       <syntax></syntax>
-      <syntax open="102">(</syntax>
+      <syntax open="141">(</syntax>
       <syntax></syntax>
-      <variable color="0x4" opref="0xea">auStack_7c</variable>
+      <op opref="0xf9">&amp;</op>
       <syntax></syntax>
-      <syntax close="102">)</syntax>
+      <variable color="0x4" opref="0xf9">var_78h</variable>
+      <syntax></syntax>
+      <syntax close="141">)</syntax>
     </statement>
     <syntax></syntax>
     <syntax>;</syntax>
@@ -2009,8 +2226,35 @@ CCu base64:c3ltLmNoZWNrKGF1U3RhY2tfN2Mp @ 0x8048590
                 </rangelist>
                 <symbollist>
                   <mapsym>
-                      <type name="" size="120" metatype="array" arraysize="120">
+                    </symbol>
+                    <addr space="stack" offset="0x4"/>
+                    <rangelist>
+                      <range space="ram" first="0x804853f" last="0x804853f"/>
+                    </rangelist>
+                  </mapsym>
+                  <mapsym>
+                      <type name="" size="4" metatype="ptr" core="true">
+                        <type name="" size="4" metatype="ptr" core="true">
+                        </type>
                       </type>
+                    </symbol>
+                    <addr space="stack" offset="0x8"/>
+                    <rangelist>
+                      <range space="ram" first="0x804853f" last="0x804853f"/>
+                    </rangelist>
+                  </mapsym>
+                  <mapsym>
+                      <type name="" size="4" metatype="ptr" core="true">
+                        <type name="" size="4" metatype="ptr" core="true">
+                        </type>
+                      </type>
+                    </symbol>
+                    <addr space="stack" offset="0xc"/>
+                    <rangelist>
+                      <range space="ram" first="0x804853f" last="0x804853f"/>
+                    </rangelist>
+                  </mapsym>
+                  <mapsym>
                     </symbol>
                     <addr space="stack" offset="0xffffff84"/>
                     <rangelist/>
@@ -2018,7 +2262,7 @@ CCu base64:c3ltLmNoZWNrKGF1U3RhY2tfN2Mp @ 0x8048590
                 </symbollist>
               </scope>
             </localdb>
-            <prototype model="__cdecl" extrapop="4">
+            <prototype model="__cdecl" extrapop="4" modellock="true">
               <returnsym>
                 <addr space="register" offset="0x0" size="4"/>
               </returnsym>
@@ -2048,9 +2292,26 @@ CCu base64:c3ltLmNoZWNrKGF1U3RhY2tfN2Mp @ 0x8048590
                   <range space="stack" first="0x4" last="0x1f7"/>
                   <range space="stack" first="0xfff0bdc0" last="0xffffffff"/>
                 </rangelist>
+                <symbollist>
+                  <mapsym>
+                    </symbol>
+                    <addr space="stack" offset="0x4"/>
+                    <rangelist/>
+                  </mapsym>
+                  <mapsym>
+                    </symbol>
+                    <addr space="stack" offset="0xfffffff4"/>
+                    <rangelist/>
+                  </mapsym>
+                  <mapsym>
+                    </symbol>
+                    <addr space="stack" offset="0xfffffff0"/>
+                    <rangelist/>
+                  </mapsym>
+                </symbollist>
               </scope>
             </localdb>
-            <prototype model="__cdecl" extrapop="4">
+            <prototype model="__cdecl" extrapop="4" modellock="true">
               <returnsym>
                 <addr space="stack" offset="0x0" size="4"/>
               </returnsym>
@@ -2066,9 +2327,20 @@ CCu base64:c3ltLmNoZWNrKGF1U3RhY2tfN2Mp @ 0x8048590
                   <range space="stack" first="0x4" last="0x1f7"/>
                   <range space="stack" first="0xfff0bdc0" last="0xffffffff"/>
                 </rangelist>
+                <symbollist>
+                  <mapsym>
+                      <type name="" size="4" metatype="ptr" core="true">
+                      </type>
+                    </symbol>
+                    <addr space="stack" offset="0x4"/>
+                    <rangelist>
+                      <range space="ram" first="0x8048393" last="0x8048393"/>
+                    </rangelist>
+                  </mapsym>
+                </symbollist>
               </scope>
             </localdb>
-            <prototype model="__cdecl" extrapop="4">
+            <prototype model="__cdecl" extrapop="4" modellock="true">
               <returnsym>
                 <addr space="stack" offset="0x0" size="4"/>
               </returnsym>
@@ -2084,9 +2356,27 @@ CCu base64:c3ltLmNoZWNrKGF1U3RhY2tfN2Mp @ 0x8048590
                   <range space="stack" first="0x4" last="0x1f7"/>
                   <range space="stack" first="0xfff0bdc0" last="0xffffffff"/>
                 </rangelist>
+                <symbollist>
+                  <mapsym>
+                    </symbol>
+                    <addr space="stack" offset="0x8"/>
+                    <rangelist>
+                      <range space="ram" first="0x8048373" last="0x8048373"/>
+                    </rangelist>
+                  </mapsym>
+                  <mapsym>
+                      <type name="" size="4" metatype="ptr" core="true">
+                      </type>
+                    </symbol>
+                    <addr space="stack" offset="0x4"/>
+                    <rangelist>
+                      <range space="ram" first="0x8048373" last="0x8048373"/>
+                    </rangelist>
+                  </mapsym>
+                </symbollist>
               </scope>
             </localdb>
-            <prototype model="__cdecl" extrapop="4">
+            <prototype model="__cdecl" extrapop="4" modellock="true">
               <returnsym>
                 <addr space="stack" offset="0x0" size="4"/>
               </returnsym>
@@ -2236,21 +2526,25 @@ FILE=bins/elf/hello_world
 ARGS=-B 0x1000000000000000
 EXPECT=<<EOF
                           |
-    0x10000000000007aa    |void main(void)
+    0x10000000000007aa    |void main(int argc,char **argv,char **envp)
                           |
                           |{
                           |    int iVar1;
                           |    int iVar2;
-                          |    int64_t iVar3;
+                          |    char *dest;
+                          |    int64_t var_20h;
+                          |    int64_t var_18h;
+                          |    int64_t var_10h;
+                          |    int64_t var_8h;
                           |    
     0x10000000000007cf    |    iVar1 = sym.imp.strlen("Hello");
     0x10000000000007de    |    iVar2 = sym.imp.strlen(" r2-folks");
-    0x10000000000007f6    |    iVar3 = sym.imp.malloc(iVar2 + iVar1 + 1);
-    0x1000000000000804    |    if (iVar3 != 0) {
-    0x1000000000000814    |        sym.imp.strcpy(iVar3,"Hello");
-    0x1000000000000827    |        sym.imp.strcat(iVar3," r2-folks");
-    0x1000000000000833    |        sym.imp.puts(iVar3);
-    0x100000000000083f    |        sym.imp.free(iVar3);
+    0x10000000000007f6    |    dest = sym.imp.malloc(iVar2 + iVar1 + 1);
+    0x1000000000000804    |    if (dest != NULL) {
+    0x1000000000000814    |        sym.imp.strcpy(dest,"Hello");
+    0x1000000000000827    |        sym.imp.strcat(dest," r2-folks");
+    0x1000000000000833    |        sym.imp.puts(dest);
+    0x100000000000083f    |        sym.imp.free(dest);
                           |    }
     0x1000000000000846    |    return;
                           |}
@@ -2507,18 +2801,18 @@ NAME=comments
 FILE=bins/elf/crackme0x05
 EXPECT=<<EOF
 
-uint main(void)
+uint main(int argc,char **argv,char **envp)
 
 {
-    uchar auStack_7c [120];
+    int32_t var_78h;
     
     //main starts here
     //printf call here
     sym.imp.printf("IOLI Crackme Level 0x05\n");
     sym.imp.printf("Password: ");
     //scanf call here
-    sym.imp.scanf(0x80486b2,auStack_7c);
-    sym.check(auStack_7c);
+    sym.imp.scanf(0x80486b2,&var_78h);
+    sym.check(&var_78h);
     //main returns here
     return 0;
 }
@@ -2540,18 +2834,18 @@ NAME=comment-function_name-offset
 FILE=bins/elf/crackme0x05
 EXPECT=<<EOF
                   |
-    0x08048540    |uint main(void)
+    0x08048540    |uint main(int argc,char **argv,char **envp)
                   |
                   |{
-                  |    uchar auStack_7c [120];
+                  |    int32_t var_78h;
                   |    
     0x08048540    |    //main starts here
     0x08048566    |    //printf call here
     0x08048566    |    sym.imp.printf("IOLI Crackme Level 0x05\n");
     0x08048572    |    sym.imp.printf("Password: ");
     0x08048585    |    //scanf call here
-    0x08048585    |    sym.imp.scanf(0x80486b2,auStack_7c);
-    0x08048590    |    sym.check(auStack_7c);
+    0x08048585    |    sym.imp.scanf(0x80486b2,&var_78h);
+    0x08048590    |    sym.check(&var_78h);
     0x0804859b    |    //main returns here
     0x0804859b    |    return 0;
                   |}
@@ -2581,17 +2875,18 @@ pdg
 EOF
 EXPECT=<<EOF
 
-void sym.KillList(int64_t param_1)
+void sym.KillList(LL arg1)
 
 {
-    int64_t iVar1;
-    ulong uStack_20;
+    LinkedList LVar1;
+    LL ptr;
+    int64_t var_8h;
     
-    uStack_20 = param_1;
-    while (uStack_20 != 0) {
-        iVar1 = *(uStack_20 + 8);
-        sym.imp.free(uStack_20);
-        uStack_20 = iVar1;
+    ptr = arg1;
+    while (ptr != NULL) {
+        LVar1 = ptr[1];
+        sym.imp.free(ptr);
+        ptr = LVar1;
     }
     return;
 }
@@ -2608,7 +2903,7 @@ pdg @ main
 EOF
 EXPECT=<<EOF
 
-ulong main(void)
+ulong main(int argc,char **argv,char **envp)
 
 {
     sym.imp.puts("Hello this is a regular string\n");
@@ -2629,7 +2924,7 @@ pdg @ main
 EOF
 EXPECT=<<EOF
 
-ulong main(void)
+ulong main(int argc,char **argv,char **envp)
 
 {
     sym.imp.puts("Hello this is a regular string\n");
