@@ -5,7 +5,6 @@
 #include "fspec.hh"
 
 #include <r_core.h>
-#include <cctype>
 #include <cstring>
 #include <sstream>
 
@@ -17,12 +16,7 @@
 #define R_TYPE_FUNCTION 5
 #endif
 
-// TODO(full-type-resolution):
-// - Handle declarators that need identifier placement (arrays, function pointers) when wrapping r_anal_cparse.
-// - Improve base-type signedness/alias mapping (size_t, ssize_t, uintptr_t, etc).
-// - Prefer structured r2 type APIs over raw sdb parsing when available.
-// - Add caching to avoid repeated type parsing/conversion.
-// - Drop manual libc arg typing in tests once r2 auto-applies known signatures (printf, malloc, strcmp, ...).
+// Use radare2's C type parsing API (r_type_parse_ctype) for builtin types
 #define R2G_USE_CTYPE 1
 #include "R2Utils.h"
 
@@ -87,214 +81,39 @@ static std::string normalize_ws(const std::string &in) {
 	return out;
 }
 
-static std::string to_lower_ascii(const std::string &in) {
-	std::string out;
-	out.reserve(in.size());
-	for (unsigned char ch : in) {
-		out.push_back(static_cast<char>(std::tolower(ch)));
-	}
-	return out;
-}
-
-static bool ends_with(const std::string &str, const std::string &suffix) {
-	if (suffix.size() > str.size()) {
-		return false;
-	}
-	return str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
-}
-
-static bool parse_bits_suffix(const std::string &name, const std::string &prefix, int4 &size_out) {
-	if (!r_str_startswith(name.c_str(), prefix.c_str())) {
-		return false;
-	}
-	std::string rest = name.substr(prefix.size());
-	if (ends_with(rest, "_t")) {
-		rest = rest.substr(0, rest.size() - 2);
-	}
-	if (rest.empty()) {
-		return false;
-	}
-	for (char ch : rest) {
-		if (!std::isdigit(static_cast<unsigned char>(ch))) {
-			return false;
-		}
-	}
-	int bits = std::stoi(rest);
-	if (bits <= 0 || (bits % 8) != 0) {
-		return false;
-	}
-	size_out = bits / 8;
-	return true;
-}
-
+// Struct to hold builtin type info, wraps r2's RTypeCTypeInfo
 struct BuiltinTypeSpec {
 	int4 size = 0;
 	type_metatype meta = TYPE_UNKNOWN;
 };
 
+// Convert r2's RTypeCTypeClass to Ghidra's type_metatype
+static type_metatype ctypeClassToMeta(RTypeCTypeClass tclass) {
+	switch (tclass) {
+	case R_TYPE_CTYPE_SIGNED:
+		return TYPE_INT;
+	case R_TYPE_CTYPE_UNSIGNED:
+		return TYPE_UINT;
+	case R_TYPE_CTYPE_FLOAT:
+		return TYPE_FLOAT;
+	case R_TYPE_CTYPE_BOOL:
+		return TYPE_BOOL;
+	case R_TYPE_CTYPE_VOID:
+		return TYPE_VOID;
+	default:
+		return TYPE_UNKNOWN;
+	}
+}
+
+// Use radare2's r_type_parse_ctype API to parse C type specifiers
 static bool get_builtin_spec(const R2TypeFactory *factory, const std::string &name, BuiltinTypeSpec &spec) {
-	const std::string lower = to_lower_ascii(name);
-
-	if (lower == "size_t" || lower == "uintptr_t") {
-		spec.size = factory->getSizeOfPointer();
-		spec.meta = TYPE_UINT;
-		return true;
-	}
-	if (lower == "ssize_t" || lower == "intptr_t" || lower == "ptrdiff_t") {
-		spec.size = factory->getSizeOfPointer();
-		spec.meta = TYPE_INT;
-		return true;
-	}
-	if (lower == "bool" || lower == "_bool") {
-		spec.size = 1;
-		spec.meta = TYPE_BOOL;
-		return true;
-	}
-	if (lower == "wchar_t") {
-		spec.size = factory->getSizeOfWChar();
-		spec.meta = TYPE_INT;
-		return true;
-	}
-	if (lower == "uchar") {
-		spec.size = factory->getSizeOfChar();
-		spec.meta = TYPE_UINT;
-		return true;
-	}
-	if (lower == "schar") {
-		spec.size = factory->getSizeOfChar();
-		spec.meta = TYPE_INT;
-		return true;
-	}
-	if (lower == "ulonglong") {
-		spec.size = 8;
-		spec.meta = TYPE_UINT;
-		return true;
-	}
-	if (lower == "longlong") {
-		spec.size = 8;
-		spec.meta = TYPE_INT;
-		return true;
-	}
-
-	int4 size = 0;
-	if (parse_bits_suffix(lower, "uint", size) ||
-		parse_bits_suffix(lower, "ut", size) ||
-		parse_bits_suffix(lower, "u", size)) {
-		spec.size = size;
-		spec.meta = TYPE_UINT;
-		return true;
-	}
-	if (parse_bits_suffix(lower, "int", size) ||
-		parse_bits_suffix(lower, "st", size) ||
-		parse_bits_suffix(lower, "s", size)) {
-		spec.size = size;
-		spec.meta = TYPE_INT;
-		return true;
-	}
-
-	std::stringstream ss(lower);
-	std::string token;
-	bool is_unsigned = false;
-	bool is_signed = false;
-	bool is_short = false;
-	bool is_char = false;
-	bool is_int = false;
-	bool is_float = false;
-	bool is_double = false;
-	bool is_bool = false;
-	bool is_wchar = false;
-	int long_count = 0;
-	while (ss >> token) {
-		if (token == "const" || token == "volatile" || token == "restrict") {
-			continue;
-		}
-		if (token == "unsigned") {
-			is_unsigned = true;
-			continue;
-		}
-		if (token == "signed") {
-			is_signed = true;
-			continue;
-		}
-		if (token == "short") {
-			is_short = true;
-			continue;
-		}
-		if (token == "long") {
-			long_count++;
-			continue;
-		}
-		if (token == "char") {
-			is_char = true;
-			continue;
-		}
-		if (token == "int") {
-			is_int = true;
-			continue;
-		}
-		if (token == "float") {
-			is_float = true;
-			continue;
-		}
-		if (token == "double") {
-			is_double = true;
-			continue;
-		}
-		if (token == "bool" || token == "_bool") {
-			is_bool = true;
-			continue;
-		}
-		if (token == "wchar_t") {
-			is_wchar = true;
-			continue;
-		}
-		return false;
-	}
-
-	if (is_bool) {
-		spec.size = 1;
-		spec.meta = TYPE_BOOL;
-		return true;
-	}
-	if (is_wchar) {
-		spec.size = factory->getSizeOfWChar();
-		spec.meta = TYPE_INT;
-		return true;
-	}
-	if (is_float || is_double) {
-		spec.meta = TYPE_FLOAT;
-		if (is_float) {
-			spec.size = 4;
-		} else if (long_count > 0) {
-			spec.size = 16;
-		} else {
-			spec.size = 8;
-		}
-		return true;
-	}
-	if (is_char) {
-		spec.size = factory->getSizeOfChar();
-		spec.meta = is_unsigned ? TYPE_UINT : TYPE_INT;
-		return true;
-	}
-	if (is_short) {
-		spec.size = 2;
-		spec.meta = is_unsigned ? TYPE_UINT : TYPE_INT;
-		return true;
-	}
-	if (long_count >= 2) {
-		spec.size = 8;
-		spec.meta = is_unsigned ? TYPE_UINT : TYPE_INT;
-		return true;
-	}
-	if (long_count == 1) {
-		spec.size = factory->getSizeOfLong();
-		spec.meta = is_unsigned ? TYPE_UINT : TYPE_INT;
-		return true;
-	}
-	if (is_int || is_unsigned || is_signed) {
-		spec.size = factory->getSizeOfInt();
-		spec.meta = is_unsigned ? TYPE_UINT : TYPE_INT;
+	RTypeCTypeInfo info;
+	int ptr_size = factory->getSizeOfPointer();
+	int long_size = factory->getSizeOfLong();
+	int int_size = factory->getSizeOfInt();
+	if (r_type_parse_ctype(name.c_str(), &info, ptr_size, long_size, int_size)) {
+		spec.size = info.size;
+		spec.meta = ctypeClassToMeta(info.tclass);
 		return true;
 	}
 	return false;
