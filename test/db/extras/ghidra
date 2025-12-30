@@ -110,15 +110,16 @@ x86:LE:16:Real Mode:
 
 //WARNING: Variable defined which should be unmapped: var_8h
 //WARNING: Variable defined which should be unmapped: var_4h
+//WARNING: Type propagation algorithm not settling
 //WARNING: Unknown calling convention -- yet parameter storage is locked
 
-uint fcn.00001c98(int16_t arg_8h,int16_t arg_6h,int16_t arg_eh,int16_t arg_ah)
+char * fcn.00001c98(int16_t arg_8h,int16_t arg_6h,int16_t arg_eh,int16_t arg_ah)
 
 {
     int16_t *piVar1;
     ushort unaff_CS;
     ushort unaff_DS;
-    int16_t in_stack_00000008;
+    char *in_stack_00000008;
     int16_t in_stack_0000000c;
     int16_t var_8h;
     int16_t var_6h;
@@ -138,7 +139,7 @@ uint fcn.00001c98(int16_t arg_8h,int16_t arg_6h,int16_t arg_eh,int16_t arg_ah)
                 cStack_4 = '\n';
             }
             if (var_2h < in_stack_0000000c) {
-                *(in_stack_00000008 + var_2h) = cStack_4;
+                in_stack_00000008[var_2h] = cStack_4;
                 var_2h = var_2h + 1;
             }
         } while (cStack_4 != '\n');
@@ -154,8 +155,8 @@ uint fcn.00001c98(int16_t arg_8h,int16_t arg_6h,int16_t arg_eh,int16_t arg_ah)
         unaff_CS = 0xdee;
         func_0x0000e59a(0xdee,0x401e);
         var_6h = 0x13db;
-    } while (*(in_stack_00000008 + var_2h + -1) != '\n');
-    *(in_stack_00000008 + var_2h + -1) = 0;
+    } while (in_stack_00000008[var_2h + -1] != '\n');
+    in_stack_00000008[var_2h + -1] = '\0';
     return _in_stack_00000008;
 }
 
