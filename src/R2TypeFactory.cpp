@@ -88,42 +88,35 @@ struct BuiltinTypeSpec {
 };
 
 #if R2_ABIVERSION >= 55
-// Convert r2's RTypeCTypeClass to Ghidra's type_metatype
-static type_metatype ctypeClassToMeta(RTypeCTypeClass tclass) {
-	switch (tclass) {
-	case R_TYPE_CTYPE_SIGNED:
-		return TYPE_INT;
-	case R_TYPE_CTYPE_UNSIGNED:
-		return TYPE_UINT;
-	case R_TYPE_CTYPE_FLOAT:
-		return TYPE_FLOAT;
-	case R_TYPE_CTYPE_BOOL:
-		return TYPE_BOOL;
-	case R_TYPE_CTYPE_VOID:
-		return TYPE_VOID;
-	default:
-		return TYPE_UNKNOWN;
-	}
-}
-
-// Use radare2's r_type_parse_ctype API to parse C type specifiers (r2 >= 5.9.9)
+// Use radare2's r_type_parse_ctype API (r2 >= 5.9.9)
 static bool get_builtin_spec(const R2TypeFactory *factory, const std::string &name, BuiltinTypeSpec &spec) {
-	RTypeCTypeInfo info;
 	int ptr_size = factory->getSizeOfPointer();
 	int long_size = factory->getSizeOfLong();
 	int int_size = factory->getSizeOfInt();
-	if (r_type_parse_ctype(name.c_str(), &info, ptr_size, long_size, int_size)) {
-		spec.size = info.size;
-		spec.meta = ctypeClassToMeta(info.tclass);
+	RTypeCTypeInfo *info = r_type_parse_ctype (name.c_str(), ptr_size, long_size, int_size);
+	if (info) {
+		spec.size = info->size;
+		switch (info->base) {
+		case R_TYPE_CTYPE_INT:
+			spec.meta = info->sign ? TYPE_INT : TYPE_UINT;
+			break;
+		case R_TYPE_CTYPE_FLOAT:
+			spec.meta = TYPE_FLOAT;
+			break;
+		case R_TYPE_CTYPE_VOID:
+			spec.meta = TYPE_VOID;
+			break;
+		default:
+			spec.meta = TYPE_UNKNOWN;
+			break;
+		}
+		free (info);
 		return true;
 	}
 	return false;
 }
-
 #else
-// Fallback implementation for older radare2 versions (< ABI 55)
 static bool get_builtin_spec(const R2TypeFactory *factory, const std::string &name, BuiltinTypeSpec &spec) {
-	// Just return false for older versions - types will be looked up from sdb instead
 	return false;
 }
 #endif
