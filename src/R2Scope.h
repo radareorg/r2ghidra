@@ -15,6 +15,18 @@
 
 using namespace ghidra;
 
+	struct FunctionMetadata;
+	struct VariableData;
+	struct SignatureData;
+
+	struct VariableData {
+		VariableData() : params(false), vars(nullptr), have_arg_vars(false) {}
+		RList *vars;
+		std::map<RAnalVar *, Datatype *> var_types;
+		ParamActive params;
+		bool have_arg_vars;
+	};
+
 class R2Architecture;
 typedef struct r_anal_function_t RAnalFunction;
 typedef struct r_flag_item_t RFlagItem;
@@ -28,6 +40,12 @@ private:
 	uint8 makeId() const { return (*next_id)++; }
 
 	FunctionSymbol *registerFunction(RAnalFunction *fcn) const;
+	FunctionMetadata processFunctionMetadata(RAnalFunction *fcn) const;
+	VariableData processVariableData(RAnalFunction *fcn, const FunctionMetadata &meta, RangeList &varRanges) const;
+	SignatureData processSignatureData(RAnalFunction *fcn, const FunctionMetadata &meta, const VariableData &varData) const;
+	Address calculateVariableAddress(RAnalVar *var, RAnalFunction *fcn, int4 extraPop) const;
+	bool checkVariableOverlap(const Address &addr, uint4 size, const RangeList &varRanges) const;
+	int4 calculateParamIndex(const Address &addr, Datatype *type, ParamActive &params, int4 defaultSize) const;
 	Symbol *registerFlag(RFlagItem *flag) const;
 	Symbol *queryR2Absolute(ut64 addr, bool contain) const;
 	Symbol *queryR2(const Address &addr, bool contain) const;

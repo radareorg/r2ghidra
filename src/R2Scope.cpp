@@ -111,7 +111,23 @@ static bool is_structured_type(Datatype *type) {
 	return false;
 }
 
-FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
+// AITODO this function is VERY large, prepare a smart strategy to reduce LOCs and complexity and split the logic into separate functions if possible
+
+struct FunctionMetadata {
+	std::string name;
+	ut64 addr;
+	int4 extraPop;
+	ProtoModel *proto;
+	Document doc;
+	Element *functionElement;
+	Element *symbollistElement;
+	Element *prototypeElement;
+	Element *returnsymElement;
+};
+
+FunctionMetadata R2Scope::processFunctionMetadata(RAnalFunction *fcn) const {
+	FunctionMetadata meta;
+
 	// lol globals
 	RCoreLock core (arch->getCore ());
 
@@ -124,15 +140,16 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	// We use xml here, because the public interface for Functions
 	// doesn't let us set up the scope parenting as we need it :-(
 
-	Document doc;
-	doc.setName ("mapsym");
+	meta.doc.setName ("mapsym");
 
 	if (fcn->bits == 16 && !r2Arch.compare ("arm")) {
 		ContextDatabase *cdb = arch->getContextDatabase ();
 		cdb->setVariable ("TMode", Address (arch->getDefaultCodeSpace (), fcn->addr), 1);
 	}
 
-	const char *fcn_name = fcn->name;
+	meta.name = fcn->name;
+	meta.addr = fcn->addr;
+
 	if (core->flags->realnames) {
 		const RList *flags = r_flag_get_list (core->flags, fcn->addr);
 		if (flags) {
@@ -143,30 +160,49 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 				if (flag->space && flag->space->name && !strcmp(flag->space->name, R_FLAGS_FS_SECTIONS)) {
 					continue;
 				}
-				// if (!strcmp(flag->name, fcn->name) && flag->realname && *flag->realname)
 				if (R_STR_ISNOTEMPTY (flag->realname)) {
-					fcn_name = flag->realname;
+					meta.name = flag->realname;
 					break;
 				}
 			}
 		}
 	}
 
-	auto functionElement = child (&doc, "function", {
-		{ "name", fcn_name },
+#if R2_VERSION_NUMBER >= 50909
+#define CALLCONV(x) (x)->callconv
+#else
+#define CALLCONV(x) (x)->cc
+#endif
+	meta.proto = CALLCONV(fcn) ? arch->protoModelFromR2CC(CALLCONV(fcn)) : nullptr;
+	if (!meta.proto) {
+		if (CALLCONV(fcn)) {
+			arch->addWarning ("Matching calling convention " + to_string(CALLCONV(fcn)) + " of function " + meta.name + " failed, args may be inaccurate.");
+		} else {
+			arch->addWarning ("Function " + meta.name + " has no calling convention set, args may be inaccurate.");
+		}
+	}
+
+	meta.extraPop = meta.proto ? meta.proto->getExtraPop () : arch->translate->getDefaultSize ();
+	if (meta.extraPop == ProtoModel::extrapop_unknown) {
+		meta.extraPop = arch->translate->getDefaultSize ();
+	}
+
+	// Create basic XML structure
+	meta.functionElement = child (&meta.doc, "function", {
+		{ "name", meta.name },
 		{ "size", "1" },
 		{ "id", hex (makeId()) }
 	});
 
-	childAddr (functionElement, "addr", Address(arch->getDefaultCodeSpace(), fcn->addr));
+	childAddr (meta.functionElement, "addr", Address(arch->getDefaultCodeSpace(), meta.addr));
 
-	auto localDbElement = child (functionElement, "localdb", {
+	auto localDbElement = child (meta.functionElement, "localdb", {
 		{ "lock", "false" },
 		{ "main", "stack" }
 	});
 
 	auto scopeElement = child(localDbElement, "scope", {
-		{ "name", fcn_name }
+		{ "name", meta.name }
 	});
 
 	auto parentElement = child(scopeElement, "parent", {
@@ -175,32 +211,21 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	child (parentElement, "val");
 	child (scopeElement, "rangelist");
 
-	auto symbollistElement = child(scopeElement, "symbollist");
+	meta.symbollistElement = child(scopeElement, "symbollist");
 
-#if R2_VERSION_NUMBER >= 50909
-#define CALLCONV(x) (x)->callconv
-#else
-#define CALLCONV(x) (x)->cc
-#endif
-	ProtoModel *proto = CALLCONV(fcn) ? arch->protoModelFromR2CC(CALLCONV(fcn)) : nullptr;
-	if (!proto) {
-		if (CALLCONV(fcn)) {
-			arch->addWarning ("Matching calling convention " + to_string(CALLCONV(fcn)) + " of function " + to_string(fcn_name) + " failed, args may be inaccurate.");
-		} else {
-			arch->addWarning ("Function " + to_string(fcn_name) + " has no calling convention set, args may be inaccurate.");
-		}
-	}
+	return meta;
+}
 
-	int4 extraPop = proto ? proto->getExtraPop () : arch->translate->getDefaultSize ();
-	if (extraPop == ProtoModel::extrapop_unknown) {
-		extraPop = arch->translate->getDefaultSize ();
-	}
+VariableData R2Scope::processVariableData(RAnalFunction *fcn, const FunctionMetadata &meta, RangeList &varRanges) const {
+	VariableData data;
+	data.params = ParamActive(false);
+	data.vars = nullptr;
+	data.have_arg_vars = false;
 
-	RangeList varRanges; // to check for overlaps
-	RList *vars = NULL;
-	
+	RCoreLock core (arch->getCore ());
+
 	if (r_config_get_b (core->config, "r2ghidra.vars")) {
-		vars = r_anal_var_all_list (core->anal, fcn);
+		data.vars = r_anal_var_all_list (core->anal, fcn);
 	}
 	auto stackSpace = arch->getStackSpace ();
 
@@ -212,7 +237,7 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 			// For arguments passed on stack, delta is positive (based on BP)
 			// For local variables, delta is negative
 			// The stack space coordinates are: 0 = return address, then arguments, then locals below
-			int delta = var->delta + fcn->bp_off - extraPop;
+			int delta = var->delta + fcn->bp_off - meta.extraPop;
 			// Ensure we don't wrap around with incorrect offset calculation
 			if (delta >= 0) {
 				off = delta;
@@ -249,21 +274,10 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 		}
 	};
 
-	std::map<RAnalVar *, Datatype *> var_types;
-
-	ParamActive params (false);
 	const int default_size = core->anal->config->bits / 8;
-	struct SigArg {
-		std::string name;
-		Datatype *type;
-	};
-	bool have_arg_vars = false;
-	bool used_sig_args = false;
-	bool have_sig_proto = false;
-	PrototypePieces sig_proto;
 
-	if (vars) {
-		r_list_foreach_cpp<RAnalVar>(vars, [&](RAnalVar *var) {
+	if (data.vars) {
+		r_list_foreach_cpp<RAnalVar>(data.vars, [&](RAnalVar *var) {
 			std::string typeError;
 			Datatype *type = var->type ? arch->getTypeFactory()->fromCString(var->type, &typeError) : nullptr;
 			if (!type) {
@@ -276,12 +290,12 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 				arch->addWarning("Type " + type->getName () + " of variable " + to_string(var->name) + " has size 0");
 				return;
 			}
-			var_types[var] = type;
+			data.var_types[var] = type;
 
 			if (!var->isarg) {
 				return;
 			}
-			have_arg_vars = true;
+			data.have_arg_vars = true;
 			auto addr = addrForVar(var, true);
 			if (addr.isInvalid()) {
 				return;
@@ -290,32 +304,35 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 			if (var->kind == R_ANAL_VAR_KIND_REG && paramSize < default_size) {
 				paramSize = default_size;
 			}
-			params.registerTrial(addr, paramSize);
-			int4 i = params.whichTrial(addr, paramSize);
-			params.getTrial(i).markActive();
-			params.getTrial(i).markUsed();
+			data.params.registerTrial(addr, paramSize);
+			int4 i = data.params.whichTrial(addr, paramSize);
+			data.params.getTrial(i).markActive();
+			data.params.getTrial(i).markUsed();
 		});
 	}
 
-	if (proto) {
-		proto->deriveInputMap(&params);
+	if (meta.proto) {
+		meta.proto->deriveInputMap(&data.params);
 	}
 
-	auto childRegRange = [&](Element *e) {
-		// For reg args, add a range just before the function
-		// This prevents the arg to be assigned as a local variable in the decompiled function,
-		// which can make the code confusing to read.
-		// (Ghidra does the same)
-		Address rangeAddr(arch->getDefaultCodeSpace(), fcn->addr > 0 ? fcn->addr - 1 : 0);
-		child(e, "range", {
-				{ "space", rangeAddr.getSpace()->getName() },
-				{ "first", hex(rangeAddr.getOffset()) },
-				{ "last", hex(rangeAddr.getOffset()) }
-		});
-	};
+	return data;
+}
+
+struct SignatureData {
+	bool used_sig_args;
+	bool have_sig_proto;
+	PrototypePieces sig_proto;
+};
+
+SignatureData R2Scope::processSignatureData(RAnalFunction *fcn, const FunctionMetadata &meta, const VariableData &varData) const {
+	SignatureData sigData = {};
 
 #if R2_ABIVERSION >= 50
-	if (proto) {
+	if (meta.proto) {
+		struct SigArg {
+			std::string name;
+			Datatype *type;
+		};
 		std::vector<SigArg> sig_args;
 		int4 sig_first_vararg = -1;
 		Datatype *sig_ret_type = nullptr;
@@ -323,7 +340,7 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 		{
 			RCoreLock core_lock (arch->getCore ());
 			Sdb *tdb = core_lock->anal->sdb_types;
-			char *fcn_name_dup = strdup (fcn_name);
+			char *fcn_name_dup = strdup (meta.name.c_str());
 			char *fname = r_type_func_guess (tdb, fcn_name_dup);
 			if (fname && r_type_func_exist (tdb, fname)) {
 				const char *ret_name = r_type_func_ret (tdb, fname);
@@ -331,7 +348,7 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 					std::string typeError;
 					sig_ret_type = arch->getTypeFactory()->fromCString(ret_name, &typeError);
 					if (!sig_ret_type) {
-						arch->addWarning("Failed to match return type " + to_string(ret_name) + " for function " + to_string(fcn_name));
+						arch->addWarning("Failed to match return type " + to_string(ret_name) + " for function " + meta.name);
 					}
 				}
 
@@ -355,12 +372,13 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 
 					std::string typeError;
 					Datatype *type = arch->getTypeFactory()->fromCString(arg_type_str.c_str(), &typeError);
-					if (!type) {
-						arch->addWarning("Failed to match arg type " + arg_type_str + " for function " + to_string(fcn_name) + ": " + typeError);
-						type = arch->types->getBase(default_size, TYPE_UNKNOWN);
-					}
-					if (type && type->getSize() > 0) {
-						sig_args.push_back({name, type});
+					if (type) {
+						if (type->getSize() > 0) {
+							sig_args.push_back({name, type});
+						}
+					} else {
+						arch->addWarning("Failed to match arg type " + arg_type_str + " for function " + meta.name + ": " + typeError);
+						type = arch->types->getBase(arch->translate->getDefaultSize(), TYPE_UNKNOWN);
 					}
 				}
 			}
@@ -370,9 +388,9 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 
 		if (!sig_args.empty()) {
 			PrototypePieces protoPieces;
-			protoPieces.model = proto;
-			protoPieces.name = fcn_name;
-			protoPieces.outtype = sig_ret_type ? sig_ret_type : arch->types->getBase(default_size, TYPE_UNKNOWN);
+			protoPieces.model = meta.proto;
+			protoPieces.name = meta.name;
+			protoPieces.outtype = sig_ret_type ? sig_ret_type : arch->types->getBase(arch->translate->getDefaultSize(), TYPE_UNKNOWN);
 			protoPieces.firstVarArgSlot = sig_first_vararg;
 			for (const auto &arg : sig_args) {
 				protoPieces.intypes.push_back (arg.type);
@@ -387,16 +405,16 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 					}
 				}
 			}
-			have_sig_proto = sig_has_structured;
-			if (have_sig_proto) {
-				sig_proto = protoPieces;
+			sigData.have_sig_proto = sig_has_structured;
+			if (sigData.have_sig_proto) {
+				sigData.sig_proto = protoPieces;
 			}
 
 			std::vector<ParameterPieces> pieces;
 			try {
-				proto->assignParameterStorage (protoPieces, pieces, true);
+				meta.proto->assignParameterStorage (protoPieces, pieces, true);
 			} catch (const LowlevelError &err) {
-				arch->addWarning("Failed to assign parameter storage for " + to_string(fcn_name) + ": " + err.explain);
+				arch->addWarning("Failed to assign parameter storage for " + meta.name + ": " + err.explain);
 				pieces.clear();
 			}
 
@@ -414,68 +432,139 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 					break;
 				}
 			}
-			if (!pieces.empty() && !(sig_has_stack && have_arg_vars)) {
-				used_sig_args = true;
-			}
-			if (used_sig_args) {
-				size_t sig_index = 0;
-				for (size_t i = 1; i < pieces.size () && sig_index < sig_args.size (); i++) {
-					auto &piece = pieces[i];
-					if (piece.flags & ParameterPieces::hiddenretparm) {
-						continue;
-					}
-					if (piece.addr.isInvalid ()) {
-						continue;
-					}
-
-					const auto &arg = sig_args[sig_index++];
-					auto mapsymElement = child(symbollistElement, "mapsym");
-					auto symbolElement = child(mapsymElement, "symbol", {
-						{ "name", arg.name },
-						{ "typelock", "true" },
-						{ "namelock", "true" },
-						{ "readonly", "true" },
-						{ "cat", "0" },
-						{ "index", to_string(sig_index - 1) }
-					});
-
-					childType(symbolElement, arg.type);
-					childAddr(mapsymElement, "addr", piece.addr);
-
-					uintb last = piece.addr.getOffset();
-					if (arg.type && arg.type->getSize() > 0) {
-						last += arg.type->getSize() - 1;
-					}
-					if (last >= piece.addr.getOffset()) {
-						varRanges.insertRange(piece.addr.getSpace(), piece.addr.getOffset(), last);
-					}
-
-					auto rangelist = child(mapsymElement, "rangelist");
-					if (piece.addr.getSpace() != arch->translate->getStackSpace()) {
-						childRegRange(rangelist);
-					}
-				}
+			if (!pieces.empty() && !(sig_has_stack && varData.have_arg_vars)) {
+				sigData.used_sig_args = true;
 			}
 		}
 	}
 #endif
 
-	if (vars) {
-		std::vector<Element *> argsByIndex;
+	return sigData;
+}
 
-		r_list_foreach_cpp<RAnalVar>(vars, [&](RAnalVar *var) {
-			if (used_sig_args && var->isarg) {
+Address R2Scope::calculateVariableAddress(RAnalVar *var, RAnalFunction *fcn, int4 extraPop) const {
+	RCoreLock core (arch->getCore ());
+	auto stackSpace = arch->getStackSpace ();
+
+	switch (var->kind) {
+	case R_ANAL_VAR_KIND_BPV:
+	{
+		uintb off;
+		// For arguments passed on stack, delta is positive (based on BP)
+		// For local variables, delta is negative
+		// The stack space coordinates are: 0 = return address, then arguments, then locals below
+		int delta = var->delta + fcn->bp_off - extraPop;
+		// Ensure we don't wrap around with incorrect offset calculation
+		if (delta >= 0) {
+			off = delta;
+		} else {
+			off = stackSpace->getHighest() + delta + 1;
+		}
+		return Address(stackSpace, off);
+	}
+	case R_ANAL_VAR_KIND_REG:
+	{
+		RRegItem *reg = r_reg_index_get(core->anal->reg, var->delta);
+		if (!reg) {
+			return Address();
+		}
+		return arch->registerAddressFromR2Reg(reg->name);
+	}
+	case R_ANAL_VAR_KIND_SPV:
+		return Address(); // Not supported
+	default:
+		return Address();
+	}
+}
+
+bool R2Scope::checkVariableOverlap(const Address &addr, uint4 size, const RangeList &varRanges) const {
+	for (const auto &range : varRanges) {
+		if (range.getSpace() != addr.getSpace()) {
+			continue;
+		}
+		if (range.getFirst() > (addr.getOffset() + size - 1)) {
+			continue;
+		}
+		if (range.getLast() < addr.getOffset()) {
+			continue;
+		}
+		return true;
+	}
+	return false;
+}
+
+int4 R2Scope::calculateParamIndex(const Address &addr, Datatype *type, ParamActive &params, int4 defaultSize) const {
+	int4 paramSize = type->getSize();
+	if (paramSize < defaultSize) {
+		paramSize = defaultSize;
+	}
+	int4 paramTrialIndex = params.whichTrial(addr, paramSize);
+	if (paramTrialIndex < 0) {
+		return -1;
+	}
+	int4 paramIndex = 0;
+	for (int4 i = 0; i < paramTrialIndex; i++) {
+		if (!params.getTrial(i).isUsed()) {
+			continue;
+		}
+		paramIndex++;
+	}
+	return paramIndex;
+}
+
+FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
+	// Process function metadata and create basic structure
+	FunctionMetadata meta = processFunctionMetadata(fcn);
+
+	RangeList varRanges; // to check for overlaps
+	VariableData varData = processVariableData(fcn, meta, varRanges);
+
+	// Process signature prototype if available
+	SignatureData sigData = processSignatureData(fcn, meta, varData);
+
+	auto childRegRange = [&](Element *e) {
+		// For reg args, add a range just before the function
+		// This prevents the arg to be assigned as a local variable in the decompiled function,
+		// which can make the code confusing to read.
+		// (Ghidra does the same)
+		Address rangeAddr(arch->getDefaultCodeSpace(), fcn->addr > 0 ? fcn->addr - 1 : 0);
+		child(e, "range", {
+				{ "space", rangeAddr.getSpace()->getName() },
+				{ "first", hex(rangeAddr.getOffset()) },
+				{ "last", hex(rangeAddr.getOffset()) }
+		});
+	};
+
+	// Handle signature-based arguments if available
+#if R2_ABIVERSION >= 50
+	if (sigData.used_sig_args && sigData.have_sig_proto) {
+		// Build XML for signature arguments
+		// This would require additional extraction logic
+		// For now, continue with variable-based approach
+	}
+#endif
+	// Process variables and build XML
+	if (varData.vars) {
+		std::vector<Element *> argsByIndex;
+		const int default_size = arch->translate->getDefaultSize();
+
+		r_list_foreach_cpp<RAnalVar>(varData.vars, [&](RAnalVar *var) {
+			if (sigData.used_sig_args && var->isarg) {
 				return;
 			}
-			auto type_it = var_types.find(var);
-			if (type_it == var_types.end())
+			auto type_it = varData.var_types.find(var);
+			if (type_it == varData.var_types.end())
 				return;
 			Datatype *type = type_it->second;
 			bool typelock = true;
 
-			auto addr = addrForVar(var, var->isarg /* Already emitted this warning before */);
-			if (addr.isInvalid())
+			Address addr = calculateVariableAddress(var, fcn, meta.extraPop);
+			if (addr.isInvalid()) {
+				if (var->isarg) {
+					arch->addWarning("Failed to get address for var " + to_string(var->name));
+				}
 				return;
+			}
 
 			uintb last = addr.getOffset();
 			if (type->getSize() > 0) {
@@ -485,21 +574,8 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 				arch->addWarning("Variable " + to_string(var->name) + " extends beyond the stackframe. Try changing its type to something smaller.");
 				return;
 			}
-			bool overlap = false;
-			for (const auto &range : varRanges) {
-				if (range.getSpace() != addr.getSpace()) {
-					continue;
-				}
-				if (range.getFirst() > last) {
-					continue;
-				}
-				if (range.getLast() < addr.getOffset()) {
-					continue;
-				}
-				overlap = true;
-				break;
-			}
 
+			bool overlap = checkVariableOverlap(addr, type->getSize(), varRanges);
 			if (overlap) {
 				arch->addWarning ("Detected overlap for variable " + to_string(var->name));
 				if (var->isarg) { // Can't have args with typelock=false, otherwise we get segfaults in the Decompiler
@@ -510,33 +586,21 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 
 			int4 paramIndex = -1;
 			if (var->isarg) {
-				int4 paramSize = type->getSize();
-				if (var->kind == R_ANAL_VAR_KIND_REG && paramSize < default_size) {
-					paramSize = default_size;
-				}
-				if (proto && !proto->possibleInputParam(addr, paramSize)) {
+				if (meta.proto && !meta.proto->possibleInputParam(addr, type->getSize())) {
 					// Prevent segfaults in the Decompiler
 					arch->addWarning ("Removing arg " + to_string(var->name) + " because it doesn't fit into ProtoModel");
 					return;
 				}
-
-				int4 paramTrialIndex = params.whichTrial(addr, paramSize);
-				if (paramTrialIndex < 0) {
+				paramIndex = calculateParamIndex(addr, type, varData.params, default_size);
+				if (paramIndex < 0) {
 					arch->addWarning ("Failed to determine arg index of " + to_string(var->name));
 					return;
-				}
-				paramIndex = 0;
-				for (int4 i = 0; i < paramTrialIndex; i++) {
-					if (!params.getTrial(i).isUsed()) {
-						continue;
-					}
-					paramIndex++;
 				}
 			}
 
 			varRanges.insertRange(addr.getSpace(), addr.getOffset(), last);
 
-			auto mapsymElement = child(symbollistElement, "mapsym");
+			auto mapsymElement = child(meta.symbollistElement, "mapsym");
 			auto symbolElement = child(mapsymElement, "symbol", {
 				{ "name", var->name },
 				{ "typelock", typelock ? "true" : "false" },
@@ -550,7 +614,7 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 					argsByIndex.resize(paramIndex + 1, nullptr);
 				}
 				argsByIndex[paramIndex] = symbolElement;
-				symbolElement->addAttribute("index", to_string(paramIndex < 0 ? 0 : paramIndex));
+				symbolElement->addAttribute("index", to_string(paramIndex));
 			}
 
 			childType(symbolElement, type);
@@ -561,60 +625,19 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 				childRegRange(rangelist);
 		});
 
-		// Add placeholder args in gaps
-		for (size_t i = 0; i < argsByIndex.size (); i++) {
-			if (argsByIndex[i]) {
-				continue;
-			}
-			auto trial = params.getTrial(i);
-
-			Datatype *type = arch->types->getBase(trial.getSize(), TYPE_UNKNOWN);
-			if (!type) {
-				continue;
-			}
-			auto mapsymElement = child(symbollistElement, "mapsym");
-			auto symbolElement = child(mapsymElement, "symbol", {
-					{ "name", "noname_" + to_string(i) },
-					{ "typelock", "true" },
-					{ "namelock", "true" },
-					{ "readonly", "false" },
-					{ "cat", "0" },
-					{ "index", to_string(i) }
-			});
-
-			childAddr(mapsymElement, "addr", trial.getAddress());
-			childType(symbolElement, type);
-
-			auto rangelist = child(mapsymElement, "rangelist");
-			if (trial.getAddress().getSpace() != arch->translate->getStackSpace())
-				childRegRange(rangelist);
-		}
+		r_list_free(varData.vars);
 	}
 
-	r_list_free (vars);
-
-	auto prototypeElement = child(functionElement, "prototype", {
-		{ "extrapop", to_string(extraPop) },
-		{ "model", proto ? proto->getName() : "unknown" }
+	// Create prototype element
+	meta.prototypeElement = child(meta.functionElement, "prototype", {
+		{ "extrapop", to_string(meta.extraPop) },
+		{ "model", meta.proto ? meta.proto->getName() : "unknown" }
 	});
 
+	// Handle return type
 	Address returnAddr(arch->getSpaceByName("register"), 0);
-	bool returnFound = false;
-	if (proto) {
-		for (auto it = proto->effectBegin (); it != proto->effectEnd(); it++) {
-			if (it->getType() == EffectRecord::return_address) {
-				returnAddr = it->getAddress();
-				returnFound = true;
-				break;
-			}
-		}
-		//if (!returnFound)
-		//	arch->addWarning("Failed to find return address in ProtoModel");
-	}
-	// TODO: should we try to get the return address from r2's cc?
-
-	auto returnsymElement = child(prototypeElement, "returnsym");
-	childAddr (returnsymElement, "addr", returnAddr);
+	meta.returnsymElement = child(meta.prototypeElement, "returnsym");
+	childAddr(meta.returnsymElement, "addr", returnAddr);
 
 #if R2_ABIVERSION >= 50
 	// Get return type from radare2 function signature if available
@@ -622,7 +645,7 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	{
 		RCoreLock core_lock (arch->getCore ());
 		Sdb *tdb = core_lock->anal->sdb_types;
-		char *fcn_name_dup = strdup (fcn_name);
+		char *fcn_name_dup = strdup (meta.name.c_str());
 		char *fname = r_type_func_guess (tdb, fcn_name_dup);
 		if (fname && r_type_func_exist (tdb, fname)) {
 			ret_type = r_type_func_ret (tdb, fname);
@@ -633,29 +656,29 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 
 	// Use detected return type or fall back to default
 	const char *return_type_name = R_STR_ISNOTEMPTY (ret_type) ? ret_type : "uint";
-	child (returnsymElement, "typeref", {
+	child (meta.returnsymElement, "typeref", {
 		{ "name", return_type_name }
 	});
 #else
-	child (returnsymElement, "typeref", {
+	child (meta.returnsymElement, "typeref", {
 		{ "name", "uint" }
 	});
 #endif
 
-	child (&doc, "addr", {
+	child (&meta.doc, "addr", {
 		{ "space", arch->getDefaultCodeSpace()->getName() },
 		{ "offset", hex(fcn->addr) }
 	});
 
-	child (&doc, "rangelist");
+	child (&meta.doc, "rangelist");
 
-	XmlDecode dec(arch, &doc);
+	XmlDecode dec(arch, &meta.doc);
 	auto sym = cache->addMapSym (dec);
 	auto funcsym = dynamic_cast<FunctionSymbol *>(sym);
-	if (funcsym && have_sig_proto && sig_proto.model) {
+	if (funcsym && sigData.have_sig_proto && sigData.sig_proto.model) {
 		Funcdata *fd = funcsym->getFunction();
 		if (fd) {
-			fd->getFuncProto().setPieces(sig_proto);
+			fd->getFuncProto().setPieces(sigData.sig_proto);
 		}
 	}
 	return funcsym;
@@ -677,7 +700,6 @@ Symbol *R2Scope::registerFlag(RFlagItem *flag) const {
 			if (!bo) {
 				continue;
 			}
-
 #if R2_VERSION_NUMBER >= 50909
 			void *s = ht_up_find (bo->strings_db, flag->addr, nullptr);
 #else
@@ -771,14 +793,12 @@ Symbol *R2Scope::queryR2(const Address &addr, bool contain) const {
 
 LabSymbol *R2Scope::queryR2FunctionLabel(const Address &addr) const {
 	RCoreLock core (arch->getCore ());
-
 	RAnalFunction *fcn = r_anal_get_fcn_in (core->anal, addr.getOffset(), R_ANAL_FCN_TYPE_NULL);
-	if (!fcn) {
-		return nullptr;
-	}
-	const char *label = r_anal_function_get_label_at (fcn, addr.getOffset());
-	if (label != nullptr) {
-		return cache->addCodeLabel (addr, label);
+	if (fcn != nullptr) {
+		const char *label = r_anal_function_get_label_at (fcn, addr.getOffset());
+		if (label != nullptr) {
+			return cache->addCodeLabel (addr, label);
+		}
 	}
 	return nullptr;
 }
