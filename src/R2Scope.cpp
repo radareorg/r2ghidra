@@ -1,4 +1,4 @@
-/* r2ghidra- LGPL - Copyright 2019-2025 - thestr4ng3r, pancake */
+/* r2ghidra- LGPL - Copyright 2019-2026 - thestr4ng3r, pancake, 0verflowme */
 
 #include "R2Architecture.h"
 #include "R2TypeFactory.h"
@@ -252,11 +252,7 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	std::map<RAnalVar *, Datatype *> var_types;
 
 	ParamActive params (false);
-#if R2_VERSION_NUMBER >= 50609
 	const int default_size = core->anal->config->bits / 8;
-#else
-	const int default_size = core->anal->bits / 8;
-#endif
 	struct SigArg {
 		std::string name;
 		Datatype *type;
@@ -677,12 +673,7 @@ Symbol *R2Scope::registerFlag(RFlagItem *flag) const {
 		void *pos;
 		r_list_foreach (core->bin->binfiles, iter, pos) {
 			auto bf = reinterpret_cast<RBinFile *>(pos);
-			RBinObject *bo = NULL;
-#if R2_VERSION_NUMBER < 50809
-			bo = bf->o;
-#else
-			bo = bf->bo;
-#endif
+			RBinObject *bo = bf->bo;
 			if (!bo) {
 				continue;
 			}
@@ -729,7 +720,7 @@ Symbol *R2Scope::registerFlag(RFlagItem *flag) const {
 	const ut64 at = flag->offset;
 #endif
 	SymbolEntry *entry = cache->addSymbol (name, type, Address (arch->getDefaultCodeSpace(), at), Address());
-	if (!entry) {
+	if (entry == nullptr) {
 		return nullptr;
 	}
 
@@ -743,7 +734,6 @@ Symbol *R2Scope::queryR2Absolute(ut64 addr, bool contain) const {
 	RCoreLock core (arch->getCore ());
 
 	RAnalFunction *fcn = r_anal_get_function_at (core->anal, addr);
-#if 1
 	// This can cause functions to be registered twice (hello-arm test)
 	if (!fcn && contain) {
 		RList *fcns = r_anal_get_functions_in (core->anal, addr);
@@ -752,12 +742,10 @@ Symbol *R2Scope::queryR2Absolute(ut64 addr, bool contain) const {
 		}
 		r_list_free (fcns);
 	}
-#endif
 	if (fcn) {
 		return registerFunction (fcn);
 	}
 	// TODO: register more things
-
 	// TODO: correctly handle contain for flags
 	const RList *flags = r_flag_get_list (core->flags, addr);
 	if (flags) {
@@ -788,12 +776,8 @@ LabSymbol *R2Scope::queryR2FunctionLabel(const Address &addr) const {
 	if (!fcn) {
 		return nullptr;
 	}
-#if R2_VERSION_NUMBER < 40600
-	const char *label = r_anal_fcn_label_at (core->anal, fcn, addr.getOffset());
-#else
 	const char *label = r_anal_function_get_label_at (fcn, addr.getOffset());
-#endif
-	if (label) {
+	if (label != nullptr) {
 		return cache->addCodeLabel (addr, label);
 	}
 	return nullptr;
@@ -842,7 +826,7 @@ Funcdata *R2Scope::findFunction(const Address &addr) const {
 	}
 	auto at = queryR2 (addr, false);
 	FunctionSymbol *sym = dynamic_cast<FunctionSymbol *>(at);
-	if (sym) {
+	if (sym != nullptr) {
 		return sym->getFunction ();
 	}
 	return nullptr;
@@ -863,13 +847,13 @@ ExternRefSymbol *R2Scope::findExternalRef(const Address &addr) const {
 
 LabSymbol *R2Scope::findCodeLabel(const Address &addr) const {
 	LabSymbol *sym = cache->findCodeLabel (addr);
-	if (sym) {
+	if (sym != nullptr) {
 		return sym;
 	}
 	// Check if this address has already been queried,
 	// (returning a symbol other than a code label)
 	SymbolEntry *entry = cache->findAddr (addr, Address());
-	if (entry) {
+	if (entry != nullptr) {
 		return queryR2FunctionLabel (addr);
 	}
 	return nullptr;

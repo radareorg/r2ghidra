@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2019-2023 - thestr4ng3r, pancake */
+/* r2ghidra - LGPL - Copyright 2019-2026 - thestr4ng3r, pancake */
 
 #include "ArchMap.h"
 #include <error.hh>
@@ -31,7 +31,7 @@ template<> class Mapper<std::string> : public BaseMapper<std::string> {
 		Mapper(const char *constant) : BaseMapper<std::string>([constant](RCore *core) { return std::string(constant); }) {}
 };
 
-// Shorthand macros for cleaner map initialization
+// Shorthand macros for cleaner map initialization to please C++20
 #define S(x) Mapper<std::string>(x)
 #define B(x) Mapper<ut64>(x)
 #define E(x) Mapper<bool>(x)
@@ -206,28 +206,19 @@ std::string CompilerFromCore(RCore *core) {
 }
 
 std::string SleighIdFromCore(RCore *core) {
-	if (!core) {
+	if (core == nullptr) {
 		return "gcc";
 	}
-#if 1
 	R2Architecture::collectSpecFiles (std::cerr);
 	auto langs = R2Architecture::getLanguageDescriptions ();
-#else
-	SleighArchitecture::collectSpecFiles (std::cerr);
-	auto langs = SleighArchitecture::getLanguageDescriptions ();
-#endif
 	if (langs.empty ()) {
 		R_LOG_ERROR ("No languages available, make sure r2ghidra.sleighhome is set properly");
 		return "gcc";
 	}
 	const char *arch = r_config_get (core->config, "asm.arch");
 	if (!strcmp (arch, "r2ghidra")) {
-#if R2_VERSION_NUMBER >= 50609
 		RArchConfig *ac = core->rasm->config;
 		return SleighIdFromSleighAsmConfig (core, ac->cpu, ac->bits, ac->big_endian, langs);
-#else
-		return SleighIdFromSleighAsmConfig (core, core->rasm->cpu, core->rasm->bits, core->rasm->big_endian, langs);
-#endif
 	}
 	auto arch_it = arch_map.find (arch);
 	if (arch_it == arch_map.end ()) {

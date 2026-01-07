@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2020-2025 - pancake, FXTi */
+/* r2ghidra - LGPL - Copyright 2020-2026 - pancake, FXTi */
 
 #include "SleighAsm.h"
 #include "SleighAnalValue.h"
@@ -11,18 +11,6 @@
 #include <cfloat>
 #include <cmath>
 #include <cfenv>
-
-#if R2_VERSION_NUMBER >= 50709
-#define RAnalEsil REsil
-#define r_anal_esil_get_parm r_esil_get_parm
-#define r_anal_esil_set_op r_esil_set_op
-#define r_anal_esil_pop r_esil_pop
-#define r_anal_esil_push r_esil_push
-#define r_anal_esil_get_parm_type r_esil_get_parm_type
-#define r_anal_esil_pushnum r_esil_pushnum
-#define R_ANAL_ESIL_PARM_REG R_ESIL_PARM_REG
-#define R_ANAL_ESIL_OP_TYPE_CUSTOM R_ESIL_OP_TYPE_CUSTOM
-#endif
 
 // XXX dont use globals
 static SleighAsm *sanal = nullptr;
@@ -106,15 +94,9 @@ extern "C" int archinfo(RArchSession *as, ut32 query) {
 extern "C" int archinfo(RAnal *anal, int query) {
 	// This is to check if RCore plugin set cpu properly.
 	R_RETURN_VAL_IF_FAIL (anal, -1);
-#if R2_VERSION_NUMBER >= 50609
 	if (R_STR_ISEMPTY (anal->config->cpu)) {
 		return -1;
 	}
-#else
-	if (R_STR_ISEMPTY (anal->cpu)) {
-		return -1;
-	}
-#endif
 	char *arch = slid_arch (anal);
 	switch (query) {
 	case R_ANAL_ARCHINFO_MAX_OP_SIZE:
@@ -148,21 +130,12 @@ static inline bool reg_set_has(const std::unordered_set<std::string> &reg_set, c
 	if (!value.is_reg()) {
 		return false;
 	}
-#if R2_VERSION_NUMBER >= 50809
 	if (value.reg && reg_set.find (value.reg) != reg_set.end()) {
 		return true;
 	}
 	if (value.regdelta && reg_set.find (value.regdelta) != reg_set.end()) {
 		return true;
 	}
-#else
-	if (value.reg && reg_set.find (value.reg->name) != reg_set.end()) {
-		return true;
-	}
-	if (value.regdelta && reg_set.find (value.regdelta->name) != reg_set.end()) {
-		return true;
-	}
-#endif
 	return false;
 }
 
@@ -908,28 +881,25 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 	std::stringstream ss;
 
 	auto print_if_unique = [&esil_stack, &ss](const PcodeOperand *arg, int offset = 0) -> bool {
-		if (arg->is_unique())
-		{
+		if (arg->is_unique()) {
 			int index = index_of_unique(esil_stack, arg);
-			if (-1 == index)
+			if (-1 == index) {
 				throw LowlevelError(
 				    "print_if_unique: Can't find required unique varnodes in stack.");
-
+			}
 			ss << index + offset << ",PICK";
-
 			return true;
 		}
-		else
-			return false;
+		return false;
 	};
 
 	auto print_operand = [&esil_stack, &ss](const PcodeOperand *arg, int offset = 0, bool is_float = false) -> bool {
 		if (arg->is_unique()) {
 			int index = index_of_unique(esil_stack, arg);
-			if (-1 == index)
+			if (-1 == index) {
 				throw LowlevelError(
 				    "print_if_unique: Can't find required unique varnodes in stack.");
-
+			}
 			if (index + offset > 1) {
 				ss << index + offset << ",PICK";
 			} else {
@@ -943,7 +913,6 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 				ss << *arg << ",[" << arg->size << "]";
 			}
 		}
-
 		if (is_float && arg->size != 8) {
 			ss << "," << arg->size << ",SWAP,F2D";
 		}
@@ -951,7 +920,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 	};
 	
 	auto push_stack = [&esil_stack](PcodeOperand *arg = nullptr) {
-		if (!arg) {
+		if (arg == nullptr) {
 			throw LowlevelError("push_stack: arg is nullptr.");
 		}
 		esil_stack.push_back (arg);
@@ -986,7 +955,6 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 			if (iter->input0 && iter->output) {
 				ss << ",";
 				print_operand (iter->input0);
-
 				if (iter->type == CPUI_INT_SEXT) {
 					ss << "," << iter->input0->size * 8 << ",SWAP,~";
 					ss << "," << iter->output->size * 8 << ",1,<<,1,SWAP,-,&";
@@ -1026,12 +994,10 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 			if (iter->input0 && iter->input1 && iter->output) {
 				ss << ",";
 				print_operand (iter->input1);
-
 				if (iter->input0->is_const() &&
 				   ((AddrSpace *)iter->input0->offset)->getWordSize() != 1)
 					ss << "," << ((AddrSpace *)iter->input0->offset)->getWordSize() << ",*";
 				ss << ",[" << iter->output->size << "]";
-
 				if (iter->output->is_unique()) {
 					push_stack(iter->output);
 				} else {
@@ -1740,12 +1706,7 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 			}
 #endif
 		}
-#if R2_VERSION_NUMBER >= 50709
-		if (mask & R_ARCH_OP_MASK_ESIL)
-#else
-		if (mask & R_ANAL_OP_MASK_ESIL)
-#endif
-		{
+		if (mask & R_ARCH_OP_MASK_ESIL) {
 			sleigh_esil (a, anal_op, addr, data, len, pcode_slg.pcodes);
 		}
 		return anal_op->size;
@@ -1755,7 +1716,6 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 	}
 }
 
-#if R2_VERSION_NUMBER >= 50809
 extern "C" bool sleigh_decode(RArchSession *as, RAnalOp *aop, RArchDecodeMask mask) {
 	REsil *esil = as->arch->esil;
 #if R2_VERSION_NUMBER >= 50909
@@ -1774,8 +1734,6 @@ extern "C" bool sleigh_decode(RArchSession *as, RAnalOp *aop, RArchDecodeMask ma
 	}
 	return sleigh_op (anal, aop, aop->addr, aop->bytes, aop->size, (RAnalOpMask)mask) > 0;
 }
-#endif
-
 
 /*
  * By 2020-05-24, there are 17 kinds of group of registers in SLEIGH.
@@ -1820,11 +1778,6 @@ static int get_reg_type(const std::string &name) {
 			case 'g' | 'p' << 8: return R_REG_TYPE_GPR;
 			case 'd' | 'r' << 8: return R_REG_TYPE_DRX;
 			case 'f' | 'p' << 8: return R_REG_TYPE_FPU;
-#if R2_VERSION_NUMBER < 50709
-			case 'm' | 'm' << 8: return R_REG_TYPE_MMX;
-			case 'x' | 'm' << 8: return R_REG_TYPE_XMM;
-			case 'y' | 'm' << 8: return R_REG_TYPE_YMM;
-#else
 			case 'v' | 'e' << 8:
 				switch (curr[3]) {
 				case '6':
@@ -1835,7 +1788,6 @@ static int get_reg_type(const std::string &name) {
 					return R_REG_TYPE_VEC256;
 				}
 				break;
-#endif
 			case 'f' | 'l' << 8: return R_REG_TYPE_FLG;
 			case 's' | 'e' << 8: return R_REG_TYPE_SEG;
 			}
@@ -1970,7 +1922,6 @@ static std::string regtype_name(const char *cpu, const std::string &regname) {
 	return "gpr";
 }
 
-#if R2_VERSION_NUMBER >= 50809
 extern "C" char *r2ghidra_regs(RArchSession *as) {
 	R_RETURN_VAL_IF_FAIL (as, nullptr);
 #if R2_VERSION_NUMBER >= 50909
@@ -2042,116 +1993,40 @@ extern "C" char *r2ghidra_regs(RArchSession *as) {
 	return strdup (res.c_str ());
 }
 
-#else
-extern "C" char *get_reg_profile(RAnal *anal) {
-	R_RETURN_VAL_IF_FAIL (anal, nullptr);
-#if R2_VERSION_NUMBER >= 50609
-	const char *cpu = anal->config->cpu;
-#else
-	const char *cpu = anal->cpu;
-#endif
-	if (R_STR_ISEMPTY (cpu)) {
-		return nullptr;
-	}
-	char *sa = slid_arch (anal);
-	if (!sa) {
-		return nullptr;
-	}
-	free (sa);
+static constexpr int ESIL_PARM_FLOAT = 127; // Avoid conflict
 
-	auto reg_list = sanal->getRegs();
-	std::stringstream buf;
-
-	for (auto p = reg_list.begin(); p != reg_list.end(); p++) {
-		const std::string &group = sanal->reg_group[p->name];
-		const std::string &regname = sanal->reg_mapping[p->name];
-		const std::string &regtype = regtype_name (cpu, regname);
-		if (group.empty()) {
-			buf << regtype << "\t" << regname << "\t." << p->size * 8 << "\t"
-				    << p->offset << "\t" << "0\n";
-				continue;
-			}
-
-			for (size_t i = 0;; i++) {
-				if (!r_reg_type_arr[i]) {
-					R_LOG_WARN ("Unexpected register group(%s) from SLEIGH, abort", group.c_str());
-					return nullptr;
-				}
-				if (group == r_reg_type_arr[i]) {
-					buf << r_reg_string_arr[i] << '\t';
-					break;
-				}
-			}
-			buf << sanal->reg_mapping[p->name] << "\t." << p->size * 8 << "\t" << p->offset << "\t" << "0\n";
-		}
-		if (!sanal->pc_name.empty()) {
-			buf << "=PC\t" << sanal->reg_mapping[sanal->pc_name] << '\n';
-		}
-		if (!sanal->sp_name.empty()) {
-			buf << "=SP\t" << sanal->reg_mapping[sanal->sp_name] << '\n';
-		}
-		for (unsigned i = 0; i != sanal->arg_names.size() && i <= 9; i++) {
-			buf << "=A" << i << '\t' << sanal->reg_mapping[sanal->arg_names[i]] << '\n';
-		}
-		for (unsigned i = 0; i != sanal->ret_names.size() && i <= 3; i++) {
-			buf << "=R" << i << '\t' << sanal->reg_mapping[sanal->ret_names[i]] << '\n';
-		}
-
-	ut64 pp = 0;
-	string arch = sanal->sleigh_id.substr(pp, sanal->sleigh_id.find (':', pp) - pp);
-	pp = sanal->sleigh_id.find (':', pp) + 1;
-	bool little = sanal->sleigh_id.substr(pp, sanal->sleigh_id.find (':', pp) - pp) == "LE";
-	pp = sanal->sleigh_id.find (':', pp) + 1;
-	int bits = std::stoi (sanal->sleigh_id.substr(pp, sanal->sleigh_id.find (':', pp) - pp));
-	pp = sanal->sleigh_id.find (':', pp) + 1;
-
-	append_hardcoded_regs (buf, arch, little, bits);
-
-	const std::string &res = buf.str ();
-	// fprintf(stderr, "%s\n", res.c_str());
-	return strdup (res.c_str ());
-}
-#endif
-
-#define ERR(x)              \
-	if (esil->verbose) { \
-		eprintf ("%s\n", x); \
-	}
-
-constexpr int ESIL_PARM_FLOAT = 127; // Avoid conflict
-
-static bool esil_pushnum_float(RAnalEsil *esil, long double num) {
+static bool esil_pushnum_float(REsil *esil, long double num) {
 	char str[64];
 	snprintf (str, sizeof (str) - 1, "%.*LeF", DECIMAL_DIG, num);
-	return r_anal_esil_push (esil, str);
+	return r_esil_push (esil, str);
 }
 
-static bool sleigh_esil_consts_pick(RAnalEsil *esil) {
+static bool sleigh_esil_consts_pick(REsil *esil) {
 	if (!esil || !esil->stack) {
 		return false;
 	}
-	char *idx = r_anal_esil_pop (esil);
+	char *idx = r_esil_pop (esil);
 	ut64 i;
 	int ret = false;
 
-	if (R_ANAL_ESIL_PARM_REG == r_anal_esil_get_parm_type(esil, idx)) {
-		ERR ("sleigh_esil_consts_pick: argument is consts only.");
+	if (R_ESIL_PARM_REG == r_esil_get_parm_type(esil, idx)) {
+		R_LOG_DEBUG ("sleigh_esil_consts_pick: argument is consts only");
 		goto end;
 	}
-	if (!idx || !r_anal_esil_get_parm(esil, idx, &i)) {
-		ERR ("esil_pick: invalid index number.");
+	if (!idx || !r_esil_get_parm(esil, idx, &i)) {
+		R_LOG_DEBUG ("esil_pick: invalid index number");
 		goto end;
 	}
 	if (esil->stackptr < i) {
-		ERR ("esil_pick: index out of stack bounds.");
+		R_LOG_DEBUG ("esil_pick: index out of stack bounds.");
 		goto end;
 	}
 	if (!esil->stack[esil->stackptr - i]) {
-		ERR ("esil_pick: undefined element.");
+		R_LOG_DEBUG ("esil_pick: undefined element.");
 		goto end;
 	}
-	if (!r_anal_esil_push (esil, esil->stack[esil->stackptr - i])) {
-		ERR ("ESIL stack is full.");
+	if (!r_esil_push (esil, esil->stack[esil->stackptr - i])) {
+		R_LOG_DEBUG ("ESIL stack is full.");
 		esil->trap = 1;
 		esil->trap_code = 1;
 		goto end;
@@ -2162,39 +2037,39 @@ end:
 	return ret;
 }
 
-static bool sleigh_esil_popcount(RAnalEsil *esil) {
+static bool sleigh_esil_popcount(REsil *esil) {
 	bool ret = false;
 	ut64 s, res = 0;
-	char *src = r_anal_esil_pop (esil);
+	char *src = r_esil_pop (esil);
 	if (src) {
-		if (src && r_anal_esil_get_parm (esil, src, &s)) {
+		if (r_esil_get_parm (esil, src, &s)) {
 			while (s) {
 				s &= s - 1;
 				++res;
 			}
-			ret = r_anal_esil_pushnum (esil, res);
+			ret = r_esil_pushnum (esil, res);
 		} else {
-			ERR ("sleigh_esil_popcount: invalid parameters.");
+			R_LOG_DEBUG ("sleigh_esil_popcount: invalid parameters.");
 		}
 		free (src);
 	} else {
-		ERR ("sleigh_esil_popcount: fail to get element from stack.");
+		R_LOG_DEBUG ("sleigh_esil_popcount: fail to get element from stack.");
 	}
 	return ret;
 }
 
 
-extern "C" int esil_sleigh_init(RAnalEsil *esil) {
+extern "C" int esil_sleigh_init(REsil *esil) {
 	if (!esil) {
 		return false;
 	}
 #if R2_VERSION_NUMBER >= 50909
-	r_anal_esil_set_op (esil, "PICK", sleigh_esil_consts_pick, 1, 0, R_ANAL_ESIL_OP_TYPE_CUSTOM, "");
-	r_anal_esil_set_op (esil, "POPCOUNT", sleigh_esil_popcount, 1, 2, R_ANAL_ESIL_OP_TYPE_CUSTOM, "");
+	r_esil_set_op (esil, "PICK", sleigh_esil_consts_pick, 1, 0, R_ESIL_OP_TYPE_CUSTOM, "");
+	r_esil_set_op (esil, "POPCOUNT", sleigh_esil_popcount, 1, 2, R_ESIL_OP_TYPE_CUSTOM, "");
 #else
 	// Only consts-only version PICK will meet my demand
-	r_anal_esil_set_op (esil, "PICK", sleigh_esil_consts_pick, 1, 0, R_ANAL_ESIL_OP_TYPE_CUSTOM);
-	r_anal_esil_set_op (esil, "POPCOUNT", sleigh_esil_popcount, 1, 2, R_ANAL_ESIL_OP_TYPE_CUSTOM);
+	r_esil_set_op (esil, "PICK", sleigh_esil_consts_pick, 1, 0, R_ESIL_OP_TYPE_CUSTOM);
+	r_esil_set_op (esil, "POPCOUNT", sleigh_esil_popcount, 1, 2, R_ESIL_OP_TYPE_CUSTOM);
 #endif
 	return true;
 }
@@ -2206,12 +2081,11 @@ extern "C" bool sanal_init(void *p) {
 	return true;
 }
 
-extern "C" int esil_sleigh_fini(RAnalEsil *esil) {
+extern "C" int esil_sleigh_fini(REsil *esil) {
 	// float_mem.clear();
 	return true;
 }
 
-#if R2_VERSION_NUMBER >= 50809
 extern "C" bool r2ghidra_esilcb(RArchSession *as, RArchEsilAction action) {
 	REsil *esil = as->arch->esil;
 	if (!esil) {
@@ -2229,7 +2103,6 @@ extern "C" bool r2ghidra_esilcb(RArchSession *as, RArchEsilAction action) {
 	}
 	return false;
 }
-#endif
 
 extern "C" bool sanal_fini(void *p) {
 	if (sanal) {
@@ -2239,42 +2112,18 @@ extern "C" bool sanal_fini(void *p) {
 	return true;
 }
 
-#if R2_VERSION_NUMBER >= 50809
 extern "C" RList *r2ghidra_preludes(RArchSession *as) {
 	RListIter *iter;
 	void *_plugin;
 	const char *cpu = as->config->cpu;
 	// reuse r2 preludes
-	if (R_STR_ISEMPTY (cpu)) {
-		return NULL;
-	}
-	r_list_foreach (as->arch->plugins, iter, _plugin) {
-		RArchPlugin *plugin = (RArchPlugin*)_plugin;
-		if (plugin->preludes && plugin->meta.name && !strcmp (plugin->meta.name, cpu)) {
-			return plugin->preludes (as);
+	if (R_STR_ISNOTEMPTY (cpu)) {
+		r_list_foreach (as->arch->plugins, iter, _plugin) {
+			RArchPlugin *plugin = (RArchPlugin*)_plugin;
+			if (plugin->preludes && plugin->meta.name && !strcmp (plugin->meta.name, cpu)) {
+				return plugin->preludes (as);
+			}
 		}
 	}
 	return NULL;
 }
-#else
-extern "C" RList *anal_preludes(RAnal *anal) {
-	RListIter *iter;
-	void *_plugin;
-#if R2_VERSION_NUMBER >= 50609
-	const char *cpu = anal->config->cpu;
-#else
-	const char *cpu = anal->cpu;
-#endif
-	// reuse r2 preludes
-	if (R_STR_ISEMPTY (cpu)) {
-		return NULL;
-	}
-	r_list_foreach (anal->plugins, iter, _plugin) {
-		RAnalPlugin *plugin = (RAnalPlugin*)_plugin;
-		if (plugin->name && !strcmp (plugin->name, cpu)) {
-			return plugin->preludes (anal);
-		}
-	}
-	return NULL;
-}
-#endif

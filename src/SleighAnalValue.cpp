@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2020-2024 - FXTi, pancake */
+/* r2ghidra - LGPL - Copyright 2020-2026 - FXTi, pancake */
 
 #include "SleighAnalValue.h"
 
@@ -21,11 +21,7 @@ SleighAnalValue SleighAnalValue::resolve_arg(RAnal *anal, const PcodeOperand *ar
 		res.imm = arg->number;
 	} else if (arg->is_reg()) {
 		res.type = R_ANAL_VAL_REG;
-#if R2_VERSION_NUMBER >= 50809
 		res.reg = arg->name.c_str();
-#else
-		res.reg = r_reg_get(anal->reg, arg->name.c_str(), R_REG_TYPE_ALL);
-#endif
 	} else if (arg->is_ram()) {
 		res.type = R_ANAL_VAL_MEM;
 		res.base = arg->offset;
@@ -165,11 +161,7 @@ std::vector<SleighAnalValue> SleighAnalValue::resolve_out(RAnal *anal,
 		res.push_back(tmp);
 	} else if (arg->is_reg()) {
 		tmp.type = R_ANAL_VAL_REG;
-#if R2_VERSION_NUMBER >= 50809
 		tmp.reg = arg->name.c_str();
-#else
-		tmp.reg = r_reg_get (anal->reg, arg->name.c_str(), R_REG_TYPE_ALL);
-#endif
 		res.push_back (tmp);
 	} else if (arg->is_ram()) {
 		tmp.type = R_ANAL_VAL_MEM;
@@ -192,12 +184,8 @@ std::vector<SleighAnalValue> SleighAnalValue::resolve_out(RAnal *anal,
 						tmp = SleighAnalValue ();
 						tmp.absolute = true;
 						tmp.type = R_ANAL_VAL_REG;
-#if R2_VERSION_NUMBER >= 50809
 						// XXX this is leaking, we need to share a constant register
 						tmp.reg = iter->output->name.c_str();
-#else
-						tmp.reg = r_reg_get(anal->reg, iter->output->name.c_str(), R_REG_TYPE_ALL);
-#endif
 						res.push_back(tmp);
 					}
 				}

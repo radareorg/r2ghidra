@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2020-2023 - FXTi, pancake */
+/* r2ghidra - LGPL - Copyright 2020-2026 - FXTi, pancake */
 
 #include "ArchMap.h"
 #include "SleighAsm.h"
@@ -40,11 +40,7 @@ void SleighAsm::initInner(RIO *io, std::string sleigh_id) {
 	parseProcConfig (docstorage);
 	parseCompConfig (docstorage);
 	alignment = trans.getAlignment ();
-#if R2_VERSION_NUMBER >= 50609
 	RCore *core = (RCore *)io->coreb.core;
-#else
-	RCore *core = (RCore *)io->corebind.core;
-#endif
 #if R2_VERSION_NUMBER >= 50909
 	minopsz = ai (core, sleigh_id, R_ARCH_INFO_MINOP_SIZE);
 	maxopsz = ai (core, sleigh_id, R_ARCH_INFO_MAXOP_SIZE);
@@ -408,7 +404,6 @@ RConfig *SleighAsm::getConfig(RAnal *a) {
 
 std::string SleighAsm::getSleighHome(RConfig * R_NULLABLE cfg) {
 	const char varname[] = "r2ghidra.sleighhome";
-	char *path = nullptr;
 
 	// user-set, for example from .radare2rc
 	if (cfg != nullptr) {
@@ -428,13 +423,7 @@ std::string SleighAsm::getSleighHome(RConfig * R_NULLABLE cfg) {
 		return res;
 	}
 
-#if R2_VERSION_NUMBER >= 50809
-	path = r_xdg_datadir ("radare2/plugins/r2ghidra_sleigh");
-#elif R2_VERSION_NUMBER >= 50709
-	path = r_xdg_datadir ("radare2/r2pm/git/ghidra");
-#else
-	path = r_str_home (".local/share/radare2/r2pm/git/ghidra");
-#endif
+	char *path = r_xdg_datadir ("radare2/plugins/r2ghidra_sleigh");
 	if (r_file_is_directory (path)) {
 		if (cfg) {
 			r_config_set (cfg, varname, path);
@@ -476,15 +465,6 @@ int SleighAsm::disassemble(RAnalOp *op, unsigned long long offset) {
 		r_str_case (d, false);
 		free (op->mnemonic);
 		op->mnemonic = d;
-#if 0
-		auto *ins = trans.getInstruction(addr);
-		stringstream ss;
-		ss << assem.str << " " << ins->printFlowType(ins->getFlowType());
-		for (auto p: ins->getFlows()) {
-		    ss << " " << p;
-		}
-		r_strbuf_set(&op->buf_asm, ss.str().c_str ());
-#endif
 	} catch (BadDataError &err) {
 		/* Meet unknown data -> invalid opcode */
 		free (op->mnemonic);

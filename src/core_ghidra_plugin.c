@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2019-2025 - thestr4ng3r, pancake */
+/* r2ghidra - LGPL - Copyright 2019-2026 - thestr4ng3r, pancake */
 
 #include <r_core.h>
 #include "../config.h"
@@ -14,7 +14,6 @@ extern int r2ghidra_core_cmd(void *user, const char *input);
 #endif
 
 RCorePlugin r_core_plugin_ghidra = {
-#if R2_VERSION_NUMBER > 50808
 	.meta = {
 		.name = "r2ghidra",
 		.desc = "Ghidra decompiler with pdg command",
@@ -22,12 +21,6 @@ RCorePlugin r_core_plugin_ghidra = {
 		.author = "thestr4ng3r, pancake",
 		.version = R2GHIDRA_VERSION,
 	},
-#else
-	.name = "r2ghidra",
-	.desc = "Ghidra decompiler with pdg command",
-	.license = "GPL3",
-	.author = "thestr4ng3r, pancake",
-#endif
 	.call = r2ghidra_core_cmd,
 	.init = r2ghidra_core_init,
 	.fini = r2ghidra_core_fini
@@ -45,8 +38,6 @@ R_API RLibStruct radare_plugin = {
 #if R2_VERSION_NUMBER >= 50909
 	.abiversion = R2_ABIVERSION,
 #endif
-#if R2_VERSION_NUMBER >= 40200
 	.pkgname = "r2ghidra"
-#endif
 };
 #endif
