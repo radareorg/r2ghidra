@@ -28,7 +28,7 @@ template<> class Mapper<int> : public BaseMapper<int> { public: using BaseMapper
 template<> class Mapper<std::string> : public BaseMapper<std::string> {
 	public:
 		using BaseMapper<std::string>::BaseMapper;
-		Mapper<std::string>(const char *constant) : BaseMapper<std::string>([constant](RCore *core) { return std::string(constant); }) {}
+		Mapper(const char *constant) : BaseMapper<std::string>([constant](RCore *core) { return std::string(constant); }) {}
 };
 
 // Shorthand macros for cleaner map initialization
