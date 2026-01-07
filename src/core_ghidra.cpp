@@ -1,16 +1,13 @@
-/* r2ghidra - LGPL - Copyright 2019-2025 - thestr4ng3r, pancake */
+/* r2ghidra - LGPL - Copyright 2019-2026 - thestr4ng3r, pancake */
 
 #include "R2Architecture.h"
 #include "CodeXMLParse.h"
 #include "PrettyXmlEncode.h"
 #include "R2PrintC.h"
-
 #include "SleighAsm.h"
 #include "ArchMap.h"
 #include "PcodeFixupPreprocessor.h"
-
 #include "r2ghidra.h"
-
 #include <r_core.h>
 
 // Windows clash
@@ -752,11 +749,7 @@ bool SleighHomeConfig(void */* user */, void *data) {
 	return true;
 }
 
-#if R2_VERSION_NUMBER >= 50809
 extern "C" RArchPlugin r_arch_plugin_ghidra;
-#else
-extern "C" RAnalPlugin r_anal_plugin_ghidra;
-#endif
 
 #if R2_VERSION_NUMBER >= 50909
 extern "C" bool r2ghidra_core_init(RCorePluginSession *cps) {
@@ -783,11 +776,7 @@ extern "C" int r2ghidra_core_init(void *user, const char *cmd) {
 	RCmd *rcmd = reinterpret_cast<RCmd *>(user);
 	RCore *core = reinterpret_cast<RCore *>(rcmd->data);
 	Gcore = core;
-#if R2_VERSION_NUMBER >= 50809
 	r_arch_plugin_add (core->anal->arch, &r_arch_plugin_ghidra);
-#else
-	r_anal_add (core->anal, &r_anal_plugin_ghidra);
-#endif
 	RConfig *cfg = core->config;
 	r_config_lock (cfg, false);
 	for (const auto var : ConfigVar::GetAll ()) {
