@@ -4,7 +4,7 @@ project(
   license : 'LGPL3',
   meson_version : '>=0.50.1',
 version : '6.0.8',
-  default_options : ['c_std=c11', 'cpp_std=c++14']
+  default_options : ['c_std=c11', 'cpp_std=c++20']
 )
 
 
@@ -117,7 +117,7 @@ r2ghidra_core_plugin = shared_library('core_r2ghidra',
   r2ghidra_core_sources,
   link_with: libdecomp_static,
   dependencies: [r_core, zlib, pugixml],
-  override_options : ['c_std=c11', 'cpp_std=c++14'],
+  override_options : ['c_std=c11', 'cpp_std=c++20'],
   include_directories: [ghidra_incs, r2ghidra_incdirs],
   install: true,
   install_dir: r2_plugdir
