@@ -46,7 +46,7 @@ if cpp.get_id() == 'msvc'
   add_global_arguments('-D_WIN32', language:'cpp')
   add_global_arguments('-DZLIB_WINAPI', language:'cpp')
   add_global_arguments('-DR_ARENA_H=1', language:'cpp')
-  add_global_arguments('-DR_BIN_H=1', language:'cpp')
+  add_global_arguments('-DR2_BIN_H=1', language:'cpp')
   add_global_arguments('/wd4200', language:'cpp')  # Suppress C4200: zero-sized array in struct
   r2libdir = [
     meson.current_source_dir() + '\\radare2\\lib',
