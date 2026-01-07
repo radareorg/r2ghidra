@@ -51,7 +51,7 @@ CFLAGS+=-I.
 #LDFLAGS+=-g -ggdb
 #CXXFLAGS+=-g -ggdb
 
-CXXFLAGS+=-std=c++11
+CXXFLAGS+=-std=c++20
 CFLAGS+=$(R2_CFLAGS)
 
 CXXFLAGS+=$(CFLAGS)

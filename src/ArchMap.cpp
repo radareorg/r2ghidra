@@ -28,8 +28,13 @@ template<> class Mapper<int> : public BaseMapper<int> { public: using BaseMapper
 template<> class Mapper<std::string> : public BaseMapper<std::string> {
 	public:
 		using BaseMapper<std::string>::BaseMapper;
-		Mapper<std::string>(const char *constant) : BaseMapper([constant](RCore *core) { return constant; }) {}
+		Mapper<std::string>(const char *constant) : BaseMapper<std::string>([constant](RCore *core) { return std::string(constant); }) {}
 };
+
+// Shorthand macros for cleaner map initialization
+#define S(x) Mapper<std::string>(x)
+#define B(x) Mapper<ut64>(x)
+#define E(x) Mapper<bool>(x)
 
 static const Mapper<bool> big_endian_mapper_default = std::function<bool(RCore *)>([](RCore *core) {
 	return core? r_config_get_b (core->config, "cfg.bigendian"): false;
@@ -51,7 +56,7 @@ class ArchMapper {
 	public:
 		ArchMapper (
 				const Mapper<std::string> arch,
-				const Mapper<std::string> flavor = "default",
+				const Mapper<std::string> flavor = S("default"),
 				const Mapper<ut64> bits = bits_mapper_default,
 				const Mapper<bool> big_endian = big_endian_mapper_default,
 				const int minopsz = 0,
@@ -85,36 +90,34 @@ static const std::map<std::string, ArchMapper> arch_map = {
 		"x86",
 		CUSTOM_FLAVOR((RCore *core) {
 			return (BITS == 16)? "Real Mode": "default";
-		}), bits_mapper_default, false, 1, 16
+		}), bits_mapper_default, E(false), 1, 16
 	}},
-	{ "mips", { "MIPS", "default",
-		bits_mapper_default, big_endian_mapper_default, 4, 4
-	}},
-	{ "dalvik", { "Dalvik", "default", 32, false, 2, 10 }},
-	{ "tricore", { "tricore", "default", 32, true } },
-	{ "hexagon", { "hexagon", "default", 32, false } },
-	{ "wasm", { "wasm", "default", 32 } },
-	{ "6502", { "6502", "default", 16 } },
-	{ "65c02", { "65c02", "default", 16 } },
-	{ "java", { "JVM", "default", bits_mapper_default, true } },
-	{ "hppa", { "pa-risc" } },
-	{ "riscv", { "RISCV" } },
-	{ "toy", { "Toy" } },
-	{ "ppc", { "PowerPC" } },
-	{ "8051", { "8051", "default", 16, true }},
-	{ "6805", { "6805" } },
-	{ "cr16", { "CR16C" } },
-	{ "mcs96", { "MCS96", "default", 16 } },
-	{ "m8c", { "M8C", "default", 16 } },
-	{ "pic24", { "PIC-24F", "default", 24 } },
-	{ "z80", { "z80", "default", 8 } },
-	{ "xtensa", { "Xtensa", "default", 32 } },
-	{ "sparc", { "sparc" } },
-	{ "stm8", { "STM8", "default", 16, true } },
-	{ "sh", { "SuperH4" } },
-	{ "msp430", { "TI_MSP430" } },
+	{ "mips", { S("MIPS"), S("default"), bits_mapper_default, big_endian_mapper_default, 4, 4 }},
+	{ "dalvik", { S("Dalvik"), S("default"), B(32), E(false), 2, 10 }},
+	{ "tricore", { S("tricore"), S("default"), B(32), E(true) } },
+	{ "hexagon", { S("hexagon"), S("default"), B(32), E(false) } },
+	{ "wasm", { S("wasm"), S("default"), B(32) } },
+	{ "6502", { S("6502"), S("default"), B(16) } },
+	{ "65c02", { S("65c02"), S("default"), B(16) } },
+	{ "java", { S("JVM"), S("default"), bits_mapper_default, E(true) } },
+	{ "hppa", { S("pa-risc") } },
+	{ "riscv", { S("RISCV") } },
+	{ "toy", { S("Toy") } },
+	{ "ppc", { S("PowerPC") } },
+	{ "8051", { S("8051"), S("default"), B(16), E(true) }},
+	{ "6805", { S("6805") } },
+	{ "cr16", { S("CR16C") } },
+	{ "mcs96", { S("MCS96"), S("default"), B(16) } },
+	{ "m8c", { S("M8C"), S("default"), B(16) } },
+	{ "pic24", { S("PIC-24F"), S("default"), B(24) } },
+	{ "z80", { S("z80"), S("default"), B(8) } },
+	{ "xtensa", { S("Xtensa"), S("default"), B(32) } },
+	{ "sparc", { S("sparc") } },
+	{ "stm8", { S("STM8"), S("default"), B(16), E(true) } },
+	{ "sh", { S("SuperH4") } },
+	{ "msp430", { S("TI_MSP430") } },
 	{ "m68k", {
-		"68000",
+		S("68000"),
 		CUSTOM_FLAVOR ((RCore *core) {
 			const char *cpu = r_config_get (core->config, "asm.cpu");
 			if (cpu != nullptr) {
@@ -130,9 +133,9 @@ static const std::map<std::string, ArchMapper> arch_map = {
 			}
 			return "default";
 		}),
-		32 } },
+		B(32) } },
 	{ "tricore", {
-		"tricore",
+		S("tricore"),
 		CUSTOM_FLAVOR ((RCore *core) {
 			const char *cpu = r_config_get(core->config, "asm.cpu");
 			if (cpu != nullptr) {
@@ -142,7 +145,7 @@ static const std::map<std::string, ArchMapper> arch_map = {
 			}
 			return "default";
 		}),
-		32 } },
+		B(32) } },
 	{ "arm", {
 	 	CUSTOM_BASEID ((RCore *core) {
 			return BITS == 64 ? "AARCH64" : "ARM";
@@ -159,7 +162,7 @@ static const std::map<std::string, ArchMapper> arch_map = {
 		CUSTOM_BASEID ((RCore *core) {
 			return BITS == 32 ? "avr32a" : "avr8";
 		}),
-		"default",
+		S("default"),
 		CUSTOM_BITS ((RCore *core) {
 			return BITS == 32 ? 32 : 16;
 		})}},
@@ -168,16 +171,16 @@ static const std::map<std::string, ArchMapper> arch_map = {
 		CUSTOM_BASEID ((RCore *core) {
 			return "V850";
 		}),
-		"default",
+		S("default"),
 		CUSTOM_BITS((RCore *core) {
 			return 32;
 		}),
-		false,
+		E(false),
 		2, 6
 	}},
-	{ "bpf", { "BPF", "default", 32, false } },
-	{ "ebpf", { "eBPF", "default", 32, false } },
-	{ "sbpf", { "sBPF", "default", 64, false } }
+	{ "bpf", { S("BPF"), S("default"), B(32), E(false) } },
+	{ "ebpf", { S("eBPF"), S("default"), B(32), E(false) } },
+	{ "sbpf", { S("sBPF"), S("default"), B(64), E(false) } }
 };
 
 static const std::map<std::string, std::string> compiler_map = {
