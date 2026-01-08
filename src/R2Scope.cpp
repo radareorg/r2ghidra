@@ -4,6 +4,7 @@
 #include "R2TypeFactory.h"
 #include "R2Scope.h"
 
+#include <functional>
 #include <funcdata.hh>
 
 #include <r_version.h>
