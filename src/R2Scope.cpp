@@ -751,6 +751,66 @@ Symbol *R2Scope::registerFlag(RFlagItem *flag) const {
 	return symbol;
 }
 
+static Datatype *formatCharToType(TypeFactory *types, char fmt, int default_size) {
+	switch (fmt) {
+	case 'b': return types->getBase (1, TYPE_UINT);
+	case 'c': return types->getBase (1, TYPE_INT);
+	case 'w': return types->getBase (2, TYPE_UINT);
+	case 'W': return types->getBase (2, TYPE_INT);
+	case 'd': return types->getBase (4, TYPE_INT);
+	case 'x': return types->getBase (4, TYPE_UINT);
+	case 'i': return types->getBase (4, TYPE_INT);
+	case 'q': return types->getBase (8, TYPE_INT);
+	case 'Q': return types->getBase (8, TYPE_UINT);
+	case 'f': return types->getBase (4, TYPE_FLOAT);
+	case 'F': return types->getBase (8, TYPE_FLOAT);
+	case 'p':
+	case '*':
+		return types->getBase (default_size, TYPE_UINT);
+	default:
+		return nullptr;
+	}
+}
+
+Symbol *R2Scope::registerGlobalVar(RFlagItem *glob, const char *type_str) const {
+	RCoreLock core (arch->getCore ());
+	uint4 attr = Varnode::namelock | Varnode::typelock;
+
+#if R2_VERSION_NUMBER >= 50909
+	ut64 addr = glob->addr;
+#else
+	ut64 addr = glob->offset;
+#endif
+
+	Datatype *type = nullptr;
+	std::string typeError;
+	const int default_size = core->anal->config->bits / 8;
+
+	type = arch->getTypeFactory ()->fromCString (type_str, &typeError);
+	if (!type && type_str && type_str[0]) {
+		type = formatCharToType (arch->types, type_str[0], default_size);
+	}
+	if (!type) {
+		arch->addWarning ("Failed to create type for global variable "
+			+ to_string (glob->name) + ", using default int");
+		type = arch->types->getBase (default_size, TYPE_INT);
+	}
+	if (!type) {
+		return nullptr;
+	}
+
+	const char *name = (core->flags->realnames && glob->realname)
+		? glob->realname : glob->name;
+	SymbolEntry *entry = cache->addSymbol (name, type,
+		Address (arch->getDefaultCodeSpace (), addr), Address ());
+	if (!entry) {
+		return nullptr;
+	}
+	auto symbol = entry->getSymbol ();
+	cache->setAttribute (symbol, attr);
+	return symbol;
+}
+
 Symbol *R2Scope::queryR2Absolute(ut64 addr, bool contain) const {
 	RCoreLock core (arch->getCore ());
 
@@ -766,7 +826,15 @@ Symbol *R2Scope::queryR2Absolute(ut64 addr, bool contain) const {
 	if (fcn) {
 		return registerFunction (fcn);
 	}
-	// TODO: register more things
+
+	RFlagItem *glob = r_anal_global_get (core->anal, addr);
+	if (glob) {
+		const char *type_str = r_anal_global_get_type (core->anal, addr);
+		if (type_str) {
+			return registerGlobalVar (glob, type_str);
+		}
+	}
+
 	// TODO: correctly handle contain for flags
 	const RList *flags = r_flag_get_list (core->flags, addr);
 	if (flags) {
