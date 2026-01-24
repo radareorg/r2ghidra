@@ -18,6 +18,11 @@ SleighInstructionPrototype *R2Sleigh::getPrototype(SleighInstruction *context) {
 	return new_proto;
 }
 
+void R2Sleigh::reset(LoadImage *ld,ContextDatabase *c_db) {
+	R2loader = ld;
+	Sleigh::reset(ld, c_db);
+}
+
 SleighInstruction *R2Sleigh::getInstruction(Address &addr) {
 	SleighInstruction *inst = nullptr;
 #if 1
@@ -556,6 +561,7 @@ void R2Sleigh::clearCache() {
 	for (auto p = proto_cache.begin(); p != proto_cache.end(); p++) {
 		delete p->second;
 	}
+	proto_cache.clear();
 }
 
 FlowType SleighInstruction::getFlowType() {

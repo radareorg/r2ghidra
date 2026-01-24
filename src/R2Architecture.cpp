@@ -45,6 +45,14 @@ R2Architecture::R2Architecture(RCore *core, const std::string &sleigh_id)
 #endif
 }
 
+void R2Architecture::collectSpecFiles(std::ostream &errs) {
+	SleighArchitecture::collectSpecFiles(errs);
+}
+
+const std::vector<LanguageDescription> &R2Architecture::getLanguageDescriptions() {
+	return SleighArchitecture::getLanguageDescriptions();
+}
+
 ProtoModel *R2Architecture::protoModelFromR2CC(const char *cc) {
 	auto it = cc_map.find (cc);
 	if (it == cc_map.end ()) {

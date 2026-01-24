@@ -284,7 +284,7 @@ public:
 	R2Sleigh(LoadImage *ld, ContextDatabase *c_db): R2loader(ld), Sleigh(ld, c_db) {}
 	~R2Sleigh() { clearCache(); }
 	
-	void reset(LoadImage *ld,ContextDatabase *c_db) { R2loader = ld; Sleigh::reset(ld, c_db); }
+	void reset(LoadImage *ld,ContextDatabase *c_db);
 	void reconstructContext(ParserContext &protoContext);
 	SleighParserContext *newSleighParserContext(Address &addr, SleighInstructionPrototype *proto);
 	SleighParserContext *getParserContext(Address &addr, SleighInstructionPrototype *proto);

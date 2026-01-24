@@ -663,6 +663,9 @@ Datatype *R2TypeFactory::queryR2Typedef(const string &n, std::set<std::string> &
 }
 
 Datatype *R2TypeFactory::queryR2(const string &n, std::set<std::string> &stackTypes) {
+	if (n.empty()) {
+		return nullptr;
+	}
 	if (stackTypes.find (n) != stackTypes.end ()) {
 		arch->addWarning("Recursion detected while creating type " + n);
 		return nullptr;
@@ -692,6 +695,10 @@ Datatype *R2TypeFactory::queryR2(const string &n, std::set<std::string> &stackTy
 Datatype *R2TypeFactory::findById(const string &n, uint8 id, int4 sz, std::set<std::string> &stackTypes) {
 	// resolve basic types
 	Datatype *r = TypeFactory::findById (n, id, sz);
+	if (r == nullptr && n.empty()) {
+		int4 fallback_size = (sz > 0) ? sz : 1;
+		return getBase(fallback_size, TYPE_UNKNOWN);
+	}
 	if (r == nullptr) {
 		r = queryR2 (n, stackTypes);
 	}
