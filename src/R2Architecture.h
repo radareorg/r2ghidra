@@ -38,6 +38,8 @@ public:
 	void addWarning(const std::string &warning)	{ warnings.push_back(warning); }
 	const std::vector<std::string> getWarnings() const { return warnings; }
 	ContextDatabase *getContextDatabase();
+	static void collectSpecFiles(std::ostream &errs);
+	static const std::vector<LanguageDescription> &getLanguageDescriptions();
 
 	void setRawPtr(bool rawptr) { this->rawptr = rawptr; }
 
