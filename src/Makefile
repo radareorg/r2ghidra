@@ -1,4 +1,4 @@
-all: plugins
+all: subprojects-zlib plugins
 
 -include ../config.mk
 include ../ghidra/deps.mk
@@ -46,6 +46,7 @@ CFLAGS+=-fPIC
 CFLAGS+=-Wshadow
 CFLAGS+=-I$(GHIDRA_DECOMPILER)
 CFLAGS+=-I.
+CFLAGS+=$(ZLIB_CFLAGS)
 
 #CFLAGS+=-g -ggdb
 #LDFLAGS+=-g -ggdb
@@ -66,6 +67,9 @@ ifeq ($(R2_LIBEXT),)
 Cannot run r2
 endif
 
+subprojects-zlib:
+	$(MAKE) -C ../subprojects zlib-static
+
 clean:
 	rm -f *.o $(PUGIXML_HOME)/*.o
 	rm -f *.o $(GHIDRA_DECOMPILER)/*.o
@@ -82,11 +86,11 @@ asan:
 
 $(R2G_CORE_PLUGIN): $(deps)
 	$(CXX) -shared -o $@ $(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(PUGIXML_OBJS) core_ghidra.o \
-		anal_ghidra.o core_ghidra_plugin.o anal_ghidra_plugin.o $(R2_LDFLAGS) $(LDFLAGS) $(CXXFLAGS)
+		anal_ghidra.o core_ghidra_plugin.o anal_ghidra_plugin.o $(R2_LDFLAGS) $(ZLIB_LDFLAGS) $(LDFLAGS) $(CXXFLAGS)
 
 $(R2G_ANAL_PLUGIN): $(deps)
 	$(CXX) -shared $(GHIDRA_OBJS) $(PUGIXML_OBJS) anal_ghidra.o anal_ghidra_plugin.o \
-		 $(R2GHIDRA_OBJS) $(R2_LDFLAGS) $(LDFLAGS) $(CXXFLAGS) -o $@
+		 $(R2GHIDRA_OBJS) $(R2_LDFLAGS) $(ZLIB_LDFLAGS) $(LDFLAGS) $(CXXFLAGS) -o $@
 
 ifneq (,$(wildcard /usr/bin/codesign))
 sign macsign:

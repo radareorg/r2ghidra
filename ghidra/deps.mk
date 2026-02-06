@@ -1,8 +1,9 @@
 # hardcoded for now
 USE_BISON=0
 
-
-LDFLAGS+=-lz
+# Use static zlib to avoid symbol conflicts with radare2's zlib
+ZLIB_LDFLAGS=../subprojects/zlib/libz.a
+ZLIB_CFLAGS=-I../subprojects/zlib -DLOCAL_ZLIB
 
 # GHIDRA_HOME=../ghidra/ghidra/
 # GHIDRA_DECOMPILER=$(GHIDRA_HOME)/Ghidra/Features/Decompiler/src/decompile/cpp
@@ -106,7 +107,7 @@ sleigh: sleighc
 SLEIGHTC_OBJS=$(GHIDRA_DECOMPILER)/slgh_compile.o $(GHIDRA_DECOMPILER)/slghscan.o $(GHIDRA_DECOMPILER)/slghparse.o
 
 sleighc: $(SLEIGHTC_OBJS) $(GHIDRA_OBJS)
-	$(CXX) $(CXXFLAGS) -o sleighc $(SLEIGHTC_OBJS) $(GHIDRA_OBJS) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o sleighc $(SLEIGHTC_OBJS) $(GHIDRA_OBJS) $(ZLIB_LDFLAGS) $(LDFLAGS)
 
 GHIDRA_SLEIGH_HOME=$(GHIDRA_HOME)/src/Processors
 GHIDRA_SLEIGH_SLASPECS=$(GHIDRA_SLEIGH_HOME)/*.slaspec
