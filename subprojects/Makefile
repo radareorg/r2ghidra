@@ -7,7 +7,7 @@ endif
 
 ALL=$(basename $(wildcard *.mk))
 
-default: $(DEPS)
+default: zlib-static $(DEPS)
 
 all: $(ALL)
 
@@ -15,3 +15,4 @@ clean:
 	rm -rf $(ALL)
 
 include *.mk
+include zlib-deps.mk
