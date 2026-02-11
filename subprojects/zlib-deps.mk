@@ -2,8 +2,9 @@
 
 zlib/libz.a:
 	$(MAKE) zlib
-	cd zlib && ./configure --static
+	cd zlib && CFLAGS="-fPIC" ./configure --static
 	$(MAKE) -C zlib libz.a
 
-.PHONY: zlib-static
+.PHONY: zlib-static zlib-deps
 zlib-static: zlib/libz.a
+zlib-deps:

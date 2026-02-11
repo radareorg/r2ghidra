@@ -5,7 +5,7 @@ ifeq ($(NEED_ZLIB),1)
   DEPS += zlib
 endif
 
-ALL=$(basename $(wildcard *.mk))
+ALL=$(filter-out zlib-deps,$(basename $(wildcard *.mk)))
 
 default: zlib-static $(DEPS)
 
