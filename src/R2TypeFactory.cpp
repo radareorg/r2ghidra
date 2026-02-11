@@ -715,6 +715,16 @@ Datatype *R2TypeFactory::findById(const string &n, uint8 id, int4 sz, std::set<s
 			r = fromCString (n, nullptr, &stackTypes);
 		}
 	}
+	// Fallback to a basic type if the type cannot be resolved
+	if (r == nullptr) {
+		int4 fallback_size = (sz > 0) ? sz : getSizeOfInt();
+		r = getBase(fallback_size, TYPE_INT);
+		if (r) {
+			std::stringstream ss;
+			ss << "Unable to resolve type '" << n << "', using int" << (fallback_size * 8) << "_t instead";
+			arch->addWarning(ss.str());
+		}
+	}
 	return r;
 }
 
