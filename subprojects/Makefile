@@ -14,5 +14,4 @@ all: $(ALL)
 clean:
 	rm -rf $(ALL)
 
-include *.mk
-include zlib-deps.mk
+include ghidra-native.mk pugixml.mk zlib.mk zlib-deps.mk
