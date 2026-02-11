@@ -35,7 +35,9 @@ static const char* extractLibcFuncName(const char *importName) {
 	return nullptr;
 }
 
+#if R2_VERSION_NUMBER < 60008
 R_VEC_TYPE (RVecAnalRef, RAnalRef);
+#endif
 
 void PcodeFixupPreprocessor::fixupSharedReturnJumpToRelocs(RAnalFunction *r2Func, Funcdata *ghFunc, RCore *core, R2Architecture &arch) {
 	RVecAnalRef *refs = r_anal_function_get_refs (r2Func);
