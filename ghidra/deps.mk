@@ -2,8 +2,14 @@
 USE_BISON=0
 
 # Use static zlib to avoid symbol conflicts with radare2's zlib
+# On Linux, use -Bsymbolic to prevent symbol interposition
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+ZLIB_LDFLAGS=-Wl,-Bsymbolic ../subprojects/zlib/libz.a
+else
 ZLIB_LDFLAGS=../subprojects/zlib/libz.a
-ZLIB_CFLAGS=-I../subprojects/zlib -DLOCAL_ZLIB
+endif
+ZLIB_CFLAGS=-I../subprojects/zlib
 
 # GHIDRA_HOME=../ghidra/ghidra/
 # GHIDRA_DECOMPILER=$(GHIDRA_HOME)/Ghidra/Features/Decompiler/src/decompile/cpp
