@@ -35,7 +35,7 @@ static const char* extractLibcFuncName(const char *importName) {
 	return nullptr;
 }
 
-#if R2_VERSION_NUMBER < 60008
+#if !defined(R2_ABIVERSION) || R2_ABIVERSION < 69
 R_VEC_TYPE (RVecAnalRef, RAnalRef);
 #endif
 
