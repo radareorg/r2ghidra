@@ -1,0 +1,5 @@
+# Distribution Makefile
+.PHONY: default
+
+default:
+	@echo "Distribution tarball, nothing to download."

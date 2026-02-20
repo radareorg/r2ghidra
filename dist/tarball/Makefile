@@ -23,7 +23,7 @@ all:
 	make -C $(DSTDIR)/subprojects all
 	rm -rf $(DSTDIR)/subprojects/*/.git
 	mv $(DSTDIR)/subprojects/Makefile $(DSTDIR)/subprojects/Makefile.orig
-	echo "default:" > $(DSTDIR)/subprojects/Makefile
+	mv $(DSTDIR)/subprojects/Makefile.dist $(DSTDIR)/subprojects/Makefile
 
 # Cleanup
 	rm -rf $(DSTDIR)/preconfigure* $(DSTDIR)/.github

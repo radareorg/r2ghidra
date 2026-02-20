@@ -67,8 +67,12 @@ ifeq ($(R2_LIBEXT),)
 Cannot run r2
 endif
 
-subprojects-zlib:
-	$(MAKE) -C ../subprojects zlib-static
+# zlib static build
+../subprojects/zlib/libz.a:
+	cd ../subprojects/zlib && CFLAGS="-fPIC" ./configure --static
+	$(MAKE) -C ../subprojects/zlib libz.a
+
+subprojects-zlib: ../subprojects/zlib/libz.a
 
 clean:
 	rm -f *.o $(PUGIXML_HOME)/*.o
