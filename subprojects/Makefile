@@ -1,17 +1,14 @@
+# Development Makefile: Remember that distribution tarballs use Makefile.dist instead
 .PHONY: default all clean
 
-DEPS=ghidra-native pugixml
-ifeq ($(NEED_ZLIB),1)
-  DEPS += zlib
-endif
+DEPS=ghidra-native pugixml zlib
+ALL=$(basename $(wildcard *.mk))
 
-ALL=$(filter-out zlib-deps,$(basename $(wildcard *.mk)))
-
-default: zlib-static $(DEPS)
+default: $(DEPS)
 
 all: $(ALL)
 
 clean:
 	rm -rf $(ALL)
 
-include ghidra-native.mk pugixml.mk zlib.mk zlib-deps.mk
+include *.mk

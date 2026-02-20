@@ -46,6 +46,7 @@ install uninstall user-install user-uninstall:
 mrproper: clean
 	rm -rf subprojects/ghidra-native
 	rm -rf subprojects/pugixml
+	rm -rf subprojects/zlib
 
 r2ghidra_sleigh.zip dist:
 	rm -rf tmp && mkdir -p tmp
