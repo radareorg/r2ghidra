@@ -11,6 +11,10 @@ on:
       - '[0-9]*.*.*'
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   r2git:
     runs-on: ubuntu-22.04
