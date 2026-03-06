@@ -1,4 +1,4 @@
-/* r2ghidra - LGPL - Copyright 2025 - pancake */
+/* r2ghidra - LGPL - Copyright 2025-2026 - pancake */
 
 #include "PcodeFixupPreprocessor.h"
 #include "R2LoadImage.h"
@@ -55,6 +55,9 @@ void PcodeFixupPreprocessor::fixupSharedReturnJumpToRelocs(RAnalFunction *r2Func
 		if (f) {
 			if (is_import_name (f->name)) {
 				RAnalOp *op = r_core_anal_op (core, refi->at, 0);
+				if (!op) {
+					continue;
+				}
 				bool isCallRet = (op->type == R_ANAL_OP_TYPE_JMP);
 				// isCallRet = true;
 				if (isCallRet) {
