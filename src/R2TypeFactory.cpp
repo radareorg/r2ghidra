@@ -8,6 +8,7 @@
 #include <cctype>
 #include <cstring>
 #include <sstream>
+#include <limits>
 
 // Compatibility for older radare2 versions that don't have these type kinds
 #ifndef R_TYPE_BASIC
@@ -103,6 +104,23 @@ static bool ends_with(const std::string &str, const std::string &suffix) {
 	return str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
 
+static int4 parse_int_or_default(const std::string &value, int4 default_value) {
+	size_t parsed_chars = 0;
+	long long parsed = 0;
+	try {
+		parsed = std::stoll(value, &parsed_chars, 10);
+	} catch (const std::exception &) {
+		return default_value;
+	}
+	if (parsed_chars != value.size()) {
+		return default_value;
+	}
+	if (parsed < std::numeric_limits<int4>::min() || parsed > std::numeric_limits<int4>::max()) {
+		return default_value;
+	}
+	return static_cast<int4>(parsed);
+}
+
 static bool parse_bits_suffix(const std::string &name, const std::string &prefix, int4 &size_out) {
 	if (!r_str_startswith(name.c_str(), prefix.c_str())) {
 		return false;
@@ -114,19 +132,7 @@ static bool parse_bits_suffix(const std::string &name, const std::string &prefix
 	if (rest.empty()) {
 		return false;
 	}
-	for (char ch : rest) {
-		if (!std::isdigit(static_cast<unsigned char>(ch))) {
-			return false;
-		}
-	}
-	int bits = 0;
-	try {
-		bits = std::stoi(rest);
-	} catch (const std::out_of_range &) {
-		return false;
-	} catch (const std::invalid_argument &) {
-		return false;
-	}
+	const int4 bits = parse_int_or_default(rest, -1);
 	if (bits <= 0 || (bits % 8) != 0) {
 		return false;
 	}
@@ -385,8 +391,12 @@ Datatype *R2TypeFactory::queryR2Struct(const string &n, std::set<std::string> &s
 			for (size_t i = 1; i < memberTokens.size () - 2; i++) {
 				memberTypeName += "," + memberTokens[i];
 			}
-			int4 offset = std::stoi (memberTokens[memberTokens.size () - 2]);
-			int4 elements = std::stoi (memberTokens[memberTokens.size () - 1]);
+			int4 offset = parse_int_or_default(memberTokens[memberTokens.size () - 2], -1);
+			int4 elements = parse_int_or_default(memberTokens[memberTokens.size () - 1], -1);
+			if (offset < 0 || elements < 0) {
+				arch->addWarning ("Failed to parse member metadata for " + memberName + " in struct " + n);
+				continue;
+			}
 			Datatype *memberType = fromCString (memberTypeName, nullptr, &stackTypes);
 			if (!memberType) {
 				arch->addWarning ("Failed to match type " + memberTypeName + " of member " + memberName + " in struct " + n);
@@ -501,8 +511,12 @@ Datatype *R2TypeFactory::queryR2Union(const string &n, std::set<std::string> &st
 			for (size_t i = 1; i < memberTokens.size () - 2; i++) {
 				memberTypeName += "," + memberTokens[i];
 			}
-			int4 offset = std::stoi (memberTokens[memberTokens.size () - 2]);
-			int4 elements = std::stoi (memberTokens[memberTokens.size () - 1]);
+			int4 offset = parse_int_or_default(memberTokens[memberTokens.size () - 2], -1);
+			int4 elements = parse_int_or_default(memberTokens[memberTokens.size () - 1], -1);
+			if (offset < 0 || elements < 0) {
+				arch->addWarning ("Failed to parse member metadata for " + memberName + " in union " + n);
+				continue;
+			}
 			Datatype *memberType = fromCString (memberTypeName, nullptr, &stackTypes);
 			if (!memberType) {
 				arch->addWarning ("Failed to match type " + memberTypeName + " of member " + memberName + " in union " + n);
