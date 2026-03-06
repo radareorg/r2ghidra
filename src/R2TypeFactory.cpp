@@ -119,7 +119,14 @@ static bool parse_bits_suffix(const std::string &name, const std::string &prefix
 			return false;
 		}
 	}
-	int bits = std::stoi(rest);
+	int bits = 0;
+	try {
+		bits = std::stoi(rest);
+	} catch (const std::out_of_range &) {
+		return false;
+	} catch (const std::invalid_argument &) {
+		return false;
+	}
 	if (bits <= 0 || (bits % 8) != 0) {
 		return false;
 	}
