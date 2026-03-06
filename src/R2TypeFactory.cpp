@@ -104,7 +104,7 @@ static bool ends_with(const std::string &str, const std::string &suffix) {
 	return str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
 
-static int4 parse_int_or_default(const std::string &value, int4 default_value) {
+static int4 atoi_or(const std::string &value, int4 default_value) {
 	size_t parsed_chars = 0;
 	long long parsed = 0;
 	try {
@@ -132,7 +132,7 @@ static bool parse_bits_suffix(const std::string &name, const std::string &prefix
 	if (rest.empty()) {
 		return false;
 	}
-	const int4 bits = parse_int_or_default(rest, -1);
+	const int4 bits = atoi_or(rest, -1);
 	if (bits <= 0 || (bits % 8) != 0) {
 		return false;
 	}
@@ -391,8 +391,8 @@ Datatype *R2TypeFactory::queryR2Struct(const string &n, std::set<std::string> &s
 			for (size_t i = 1; i < memberTokens.size () - 2; i++) {
 				memberTypeName += "," + memberTokens[i];
 			}
-			int4 offset = parse_int_or_default(memberTokens[memberTokens.size () - 2], -1);
-			int4 elements = parse_int_or_default(memberTokens[memberTokens.size () - 1], -1);
+			int4 offset = atoi_or(memberTokens[memberTokens.size () - 2], -1);
+			int4 elements = atoi_or(memberTokens[memberTokens.size () - 1], -1);
 			if (offset < 0 || elements < 0) {
 				arch->addWarning ("Failed to parse member metadata for " + memberName + " in struct " + n);
 				continue;
@@ -511,8 +511,8 @@ Datatype *R2TypeFactory::queryR2Union(const string &n, std::set<std::string> &st
 			for (size_t i = 1; i < memberTokens.size () - 2; i++) {
 				memberTypeName += "," + memberTokens[i];
 			}
-			int4 offset = parse_int_or_default(memberTokens[memberTokens.size () - 2], -1);
-			int4 elements = parse_int_or_default(memberTokens[memberTokens.size () - 1], -1);
+			int4 offset = atoi_or(memberTokens[memberTokens.size () - 2], -1);
+			int4 elements = atoi_or(memberTokens[memberTokens.size () - 1], -1);
 			if (offset < 0 || elements < 0) {
 				arch->addWarning ("Failed to parse member metadata for " + memberName + " in union " + n);
 				continue;
