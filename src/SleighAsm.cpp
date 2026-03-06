@@ -446,6 +446,7 @@ std::string SleighAsm::getSleighHome(RConfig * R_NULLABLE cfg) {
 				r_config_set (cfg, varname, R2GHIDRA_SLEIGHHOME_DEFAULT);
 			}
 			std::string res (R2GHIDRA_SLEIGHHOME_DEFAULT);
+			free (path);
 			return res;
 		}
 #endif
