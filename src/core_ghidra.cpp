@@ -17,6 +17,11 @@
 
 #include <libdecomp.hh>
 
+#if __UNIX__
+#include <errno.h>
+#include <sys/wait.h>
+#endif
+
 #include <vector>
 #include <mutex>
 
@@ -680,6 +685,7 @@ static void _cmd(RCore *core, const char *input) {
 		} else {
 			fd_set rfds;
 			struct timeval tv;
+			int wstatus = 0;
 			tv.tv_sec = timeout / 1000;
 			tv.tv_usec = (timeout - (tv.tv_sec * 1000)) * 1000;
 			FD_ZERO (&rfds);
@@ -694,6 +700,8 @@ static void _cmd(RCore *core, const char *input) {
 			} else {
 				eprintf ("Timeout\n");
 				kill (pid, 9);
+			}
+			while (waitpid (pid, &wstatus, 0) == -1 && errno == EINTR) {
 			}
 			fflush (stderr);
 			fflush (stdout);
