@@ -8,7 +8,8 @@
 #include <cctype>
 #include <cstring>
 #include <sstream>
-#include <limits>
+#include <charconv>
+#include <string_view>
 
 // Compatibility for older radare2 versions that don't have these type kinds
 #ifndef R_TYPE_BASIC
@@ -104,21 +105,10 @@ static bool ends_with(const std::string &str, const std::string &suffix) {
 	return str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
 
-static int4 atoi_or(const std::string &value, int4 default_value) {
-	size_t parsed_chars = 0;
-	long long parsed = 0;
-	try {
-		parsed = std::stoll(value, &parsed_chars, 10);
-	} catch (const std::exception &) {
-		return default_value;
-	}
-	if (parsed_chars != value.size()) {
-		return default_value;
-	}
-	if (parsed < std::numeric_limits<int4>::min() || parsed > std::numeric_limits<int4>::max()) {
-		return default_value;
-	}
-	return static_cast<int4>(parsed);
+static int4 atoi_or(std::string_view s, int4 fallback) {
+	int4 n{};
+	const auto [p, ec] = std::from_chars(s.data(), s.data() + s.size(), n);
+	return ec == std::errc{} && p == s.data() + s.size() ? n : fallback;
 }
 
 static bool parse_bits_suffix(const std::string &name, const std::string &prefix, int4 &size_out) {
