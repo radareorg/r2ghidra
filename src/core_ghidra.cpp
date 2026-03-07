@@ -17,7 +17,7 @@
 
 #include <libdecomp.hh>
 
-#if __UNIX__
+#if R2__UNIX__
 #include <errno.h>
 #include <sys/wait.h>
 #endif
@@ -660,7 +660,7 @@ static void runcmd(RCore *core, const char *input) {
 static void _cmd(RCore *core, const char *input) {
 	int timeout = r_config_get_i (core->config, "r2ghidra.timeout");
 	if (timeout > 0) {
-#if __UNIX__
+#if R2__UNIX__
 		// TODO: note that first execution is slower than the rest. and forking loses the cache
 		int fds[2];
 		if (pipe (fds) != 0) {
