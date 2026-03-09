@@ -118,6 +118,27 @@ struct SigArg {
 	Datatype *type;
 };
 
+static Datatype *resolveFunctionSignatureReturnType(R2Architecture *arch, const char *fcn_name) {
+	Datatype *sig_ret_type = nullptr;
+
+	RCoreLock core_lock (arch->getCore ());
+	Sdb *tdb = core_lock->anal->sdb_types;
+	char *fname = r_type_func_guess (tdb, fcn_name);
+	if (fname && r_type_func_exist (tdb, fname)) {
+		const char *ret_name = r_type_func_ret (tdb, fname);
+		if (R_STR_ISNOTEMPTY (ret_name)) {
+			std::string typeError;
+			sig_ret_type = arch->getTypeFactory ()->fromCString (ret_name, &typeError);
+			if (!sig_ret_type) {
+				arch->addWarning ("Failed to match return type " + to_string (ret_name) + " for function " + to_string (fcn_name) + ": " + typeError);
+			}
+		}
+	}
+	free (fname);
+
+	return sig_ret_type;
+}
+
 // Helper function to process function signature from radare2's type database
 // and emit parameter symbols to the decompiler
 static void processFunctionSignature(
@@ -125,6 +146,7 @@ static void processFunctionSignature(
 	const char *fcn_name,
 	ProtoModel *proto,
 	int default_size,
+	Datatype *sig_ret_type,
 	bool have_arg_vars,
 	Element *symbollistElement,
 	RangeList &varRanges,
@@ -135,22 +157,12 @@ static void processFunctionSignature(
 {
 	std::vector<SigArg> sig_args;
 	int4 sig_first_vararg = -1;
-	Datatype *sig_ret_type = nullptr;
 
 	{
 		RCoreLock core_lock (arch->getCore ());
 		Sdb *tdb = core_lock->anal->sdb_types;
 		char *fname = r_type_func_guess (tdb, fcn_name);
 		if (fname && r_type_func_exist (tdb, fname)) {
-			const char *ret_name = r_type_func_ret (tdb, fname);
-			if (R_STR_ISNOTEMPTY (ret_name)) {
-				std::string typeError;
-				sig_ret_type = arch->getTypeFactory ()->fromCString (ret_name, &typeError);
-				if (!sig_ret_type) {
-					arch->addWarning ("Failed to match return type " + to_string (ret_name) + " for function " + to_string (fcn_name));
-				}
-			}
-
 			const int argc = r_type_func_args_count (tdb, fname);
 			for (int i = 0; i < argc; i++) {
 				char *arg_type = r_type_func_args_type (tdb, fname, i);
@@ -477,8 +489,9 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	};
 
 #if R2_ABIVERSION >= 50
+	Datatype *sig_ret_type = resolveFunctionSignatureReturnType (arch, fcn_name);
 	if (proto) {
-		processFunctionSignature (arch, fcn_name, proto, default_size, have_arg_vars,
+		processFunctionSignature (arch, fcn_name, proto, default_size, sig_ret_type, have_arg_vars,
 			symbollistElement, varRanges, used_sig_args, have_sig_proto, sig_proto, childRegRange);
 	}
 #endif
@@ -640,20 +653,7 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	childAddr (returnsymElement, "addr", returnAddr);
 
 #if R2_ABIVERSION >= 50
-	// Get return type from radare2 function signature if available
-	const char *ret_type = nullptr;
-	{
-		RCoreLock core_lock (arch->getCore ());
-		Sdb *tdb = core_lock->anal->sdb_types;
-		char *fname = r_type_func_guess (tdb, fcn_name);
-		if (fname && r_type_func_exist (tdb, fname)) {
-			ret_type = r_type_func_ret (tdb, fname);
-		}
-		free (fname);
-	}
-
-	// Use detected return type or fall back to default
-	const char *return_type_name = R_STR_ISNOTEMPTY (ret_type) ? ret_type : "uint";
+	std::string return_type_name = sig_ret_type ? sig_ret_type->getName () : "uint";
 	child (returnsymElement, "typeref", {
 		{ "name", return_type_name }
 	});
