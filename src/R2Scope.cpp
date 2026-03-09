@@ -652,8 +652,17 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 		free (fname);
 	}
 
-	// Use detected return type or fall back to default
-	const char *return_type_name = R_STR_ISNOTEMPTY (ret_type) ? ret_type : "uint";
+	// Use detected return type when it can be resolved, otherwise fall back to default
+	std::string return_type_name = "uint";
+	if (R_STR_ISNOTEMPTY (ret_type)) {
+		std::string typeError;
+		Datatype *return_type = arch->getTypeFactory ()->fromCString (ret_type, &typeError);
+		if (return_type) {
+			return_type_name = return_type->getName ();
+		} else {
+			arch->addWarning ("Failed to match return type " + to_string (ret_type) + " for function " + to_string (fcn_name) + ": " + typeError);
+		}
+	}
 	child (returnsymElement, "typeref", {
 		{ "name", return_type_name }
 	});
