@@ -21,8 +21,8 @@ template<typename T, typename F> void r_interval_tree_foreach_cpp(RIntervalTree 
 }
 
 static inline std::string tolower(std::string str) {
-	std::transform (str.begin (), str.end (), str.begin (), [](int c) {
-		return tolower (c);
+	std::transform (str.begin (), str.end (), str.begin (), [](unsigned char c) {
+		return static_cast<char>(std::tolower (c));
 	});
 	return str;
 }
