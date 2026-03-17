@@ -70,25 +70,32 @@ extern "C" int archinfo(RArchSession *as, ut32 query) {
 	RCore *Gcore = (RCore *)io->coreb.core;
 #endif
 	char *arch = slid_arch (Gcore->anal); // is this initializing sanal global ptr?
+	int ret = 1;
 	if (sanal != nullptr) {
 		switch (query) {
 #if R2_VERSION_NUMBER >= 50909
 		case R_ARCH_INFO_MAXOP_SIZE:
-			return sanal->maxopsz;
+			ret = sanal->maxopsz;
+			break;
 		case R_ARCH_INFO_MINOP_SIZE:
-			return sanal->minopsz;
+			ret = sanal->minopsz;
+			break;
 #else
 		case R_ARCH_INFO_MAX_OP_SIZE:
-			return sanal->maxopsz;
+			ret = sanal->maxopsz;
+			break;
 		case R_ARCH_INFO_MIN_OP_SIZE:
-			return sanal->minopsz;
+			ret = sanal->minopsz;
+			break;
 #endif
 		case R_ARCH_INFO_CODE_ALIGN:
 		case R_ARCH_INFO_DATA_ALIGN:
-			return sanal->alignment;
+			ret = sanal->alignment;
+			break;
 		}
 	}
-	return 1;
+	R_FREE (arch);
+	return ret;
 }
 #else
 extern "C" int archinfo(RAnal *anal, int query) {
@@ -98,16 +105,20 @@ extern "C" int archinfo(RAnal *anal, int query) {
 		return -1;
 	}
 	char *arch = slid_arch (anal);
+	int ret = -1;
 	switch (query) {
 	case R_ANAL_ARCHINFO_MAX_OP_SIZE:
-		return sanal->maxopsz;
+		ret = sanal->maxopsz;
+		break;
 	case R_ANAL_ARCHINFO_MIN_OP_SIZE:
-		return sanal->minopsz;
+		ret = sanal->minopsz;
+		break;
 	case R_ANAL_ARCHINFO_ALIGN:
-		return sanal->alignment;
+		ret = sanal->alignment;
+		break;
 	}
-
-	return -1;
+	R_FREE (arch);
+	return ret;
 }
 #endif
 
