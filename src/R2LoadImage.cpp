@@ -4,6 +4,8 @@
 #include "R2LoadImage.h"
 #include "R2Utils.h"
 
+#include <cstring>
+
 R2LoadImage::R2LoadImage(RCoreMutex *coreMutex, AddrSpaceManager *addr_space_manager) : LoadImage("radare2_program"),
 	coreMutex(coreMutex),
 	addr_space_manager(addr_space_manager)
@@ -23,12 +25,27 @@ string R2LoadImage::getArchType() const {
 void R2LoadImage::adjustVma(long adjust) {
 	throw LowlevelError("Cannot adjust radare2 virtual memory");
 }
-static bool isptr(ut64 *p) {
-	//if (!*p) return false;
-	if (*p < 0x1000) {
+static bool isptr(const ut8 *p, size_t remain, int ptrSize) {
+	if (ptrSize == 4) {
+		if (remain < sizeof(ut32)) {
+			return false;
+		}
+		ut32 ptr = 0;
+		memcpy (&ptr, p, sizeof(ptr));
+		if (ptr < 0x1000) {
+			return false;
+		}
+		return ptr != UT32_MAX;
+	}
+	if (remain < sizeof(ut64)) {
 		return false;
 	}
-	return (*p != UT64_MAX);
+	ut64 ptr = 0;
+	memcpy (&ptr, p, sizeof(ptr));
+	if (ptr < 0x1000) {
+		return false;
+	}
+	return ptr != UT64_MAX;
 }
 
 static void addRangesWithPointers(RCoreLock &core, RangeList &list, AddrSpace *space) {
@@ -58,9 +75,9 @@ static void addRangesWithPointers(RCoreLock &core, RangeList &list, AddrSpace *s
 		ut8 *data = buf;
 		bool hasdata = false;
 		int inc = (core->rasm->config->bits == 64)? 8: 4;
-		for (int i = 0; i < fin; i += inc) {
+		for (ut64 i = 0; i < fin; i += inc) {
 			basefin = begin + i;
-			if (isptr ((ut64 *)(data + i))) {
+			if (isptr (data + i, fin - i, inc)) {
 				// eprintf ("valid %llx\n", data[i]);
 				hasdata = true;
 			} else {
