@@ -190,6 +190,7 @@ class R2Sleigh;
 class SleighAsm {
 private:
 	AsmLoadImage loader;
+	RIO *current_io = nullptr;
 	ContextInternal context;
 	DocumentStorage docstorage;
 	FileManage specpaths;
