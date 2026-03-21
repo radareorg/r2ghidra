@@ -25,27 +25,16 @@ string R2LoadImage::getArchType() const {
 void R2LoadImage::adjustVma(long adjust) {
 	throw LowlevelError("Cannot adjust radare2 virtual memory");
 }
-static bool isptr(const ut8 *p, size_t remain, int ptrSize) {
-	if (ptrSize == 4) {
-		if (remain < sizeof(ut32)) {
-			return false;
-		}
-		ut32 ptr = 0;
-		memcpy (&ptr, p, sizeof(ptr));
-		if (ptr < 0x1000) {
-			return false;
-		}
-		return ptr != UT32_MAX;
-	}
-	if (remain < sizeof(ut64)) {
+static bool isptr(const ut8 *p, size_t remain) {
+	if (remain < sizeof(ut32)) {
 		return false;
 	}
-	ut64 ptr = 0;
+	ut32 ptr = 0;
 	memcpy (&ptr, p, sizeof(ptr));
 	if (ptr < 0x1000) {
 		return false;
 	}
-	return ptr != UT64_MAX;
+	return ptr != UT32_MAX;
 }
 
 static void addRangesWithPointers(RCoreLock &core, RangeList &list, AddrSpace *space) {
@@ -77,7 +66,7 @@ static void addRangesWithPointers(RCoreLock &core, RangeList &list, AddrSpace *s
 		int inc = (core->rasm->config->bits == 64)? 8: 4;
 		for (ut64 i = 0; i < fin; i += inc) {
 			basefin = begin + i;
-			if (isptr (data + i, fin - i, inc)) {
+			if (isptr (data + i, fin - i)) {
 				// eprintf ("valid %llx\n", data[i]);
 				hasdata = true;
 			} else {
