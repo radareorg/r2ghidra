@@ -22,7 +22,7 @@ void SleighAsm::init(const char *cpu, int bits, bool bigendian, RIO *io, RConfig
 		collectSpecfiles ();
 	}
 	std::string new_sleigh_id = SleighIdFromSleighAsmConfig (Gcore, cpu, bits, bigendian, description);
-	if (!sleigh_id.empty() && sleigh_id == new_sleigh_id) {
+	if (!sleigh_id.empty() && sleigh_id == new_sleigh_id && current_io == io) {
 		return;
 	}
 	initInner (io, new_sleigh_id);
@@ -51,6 +51,7 @@ void SleighAsm::initInner(RIO *io, std::string sleigh_id) {
 	trans.clearCache ();
 	initRegMapping ();
 	this->sleigh_id = sleigh_id;
+	current_io = io;
 }
 
 static void parseProto(const Element *el, std::vector<std::string> &arg_names, std::vector<std::string> &ret_names) {
