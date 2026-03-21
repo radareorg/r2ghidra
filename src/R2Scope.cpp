@@ -948,6 +948,24 @@ LabSymbol *R2Scope::findCodeLabel(const Address &addr) const {
 	return nullptr;
 }
 
+
+bool R2Scope::isNameUsed(const string &name, const Scope *op2) const {
+	(void)op2;
+	if (cache->isNameUsed(name)) {
+		return true;
+	}
+
+	RCoreLock core(arch->getCore());
+	if (r_flag_get(core->flags, name.c_str())) {
+		return true;
+	}
+	if (r_anal_get_function_byname(core->anal, name.c_str())) {
+		return true;
+	}
+
+	return false;
+}
+
 Funcdata *R2Scope::resolveExternalRefFunction(ExternRefSymbol *sym) const {
 	return sym? queryFunction (sym->getRefAddr()): nullptr;
 }

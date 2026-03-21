@@ -61,7 +61,7 @@ public:
 	Funcdata *findFunction(const Address &addr) const override;
 	ExternRefSymbol *findExternalRef(const Address &addr) const override;
 	LabSymbol *findCodeLabel(const Address &addr) const override;
-	bool isNameUsed(const string &name, const Scope *op2) const override { throw LowlevelError("isNameUsed unimplemented"); }
+	bool isNameUsed(const string &name, const Scope *op2) const override;
 	Funcdata *resolveExternalRefFunction(ExternRefSymbol *sym) const override;
 
 	SymbolEntry *findOverlap(const Address &addr,int4 size) const override { throw LowlevelError("findOverlap unimplemented"); }
