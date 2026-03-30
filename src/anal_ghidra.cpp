@@ -967,8 +967,8 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 				ss << ",";
 				print_operand (iter->input0);
 				if (iter->type == CPUI_INT_SEXT) {
-					ss << "," << iter->input0->size * 8 << ",SWAP,~";
-					ss << "," << iter->output->size * 8 << ",1,<<,1,SWAP,-,&";
+					ss << "," << iter->input0->size * 8 << ",~";
+					ss << ",1," << iter->output->size * 8 << ",<<,1,-,&";
 				}
 
 				if (iter->output->is_unique()) {
@@ -1110,10 +1110,10 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 				print_operand (iter->input0);
 				if (!iter->input1->is_const ())
 					throw LowlevelError ("sleigh_esil: input1 is not consts in SUBPIECE.");
-				ss << "," << iter->input1->number * 8 << ",SWAP,>>";
+				ss << "," << iter->input1->number * 8 << ",>>";
 
 				if (iter->output->size < iter->input0->size + iter->input1->number) {
-					ss << ",1," << iter->output->size * 8 << ",1,<<,-,&";
+					ss << ",1," << iter->output->size * 8 << ",<<,1,-,&";
 				}
 				if (iter->output->is_unique()) {
 					push_stack(iter->output);
@@ -1134,10 +1134,10 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 		case CPUI_FLOAT_DIV:
 			if (iter->input0 && iter->input1 && iter->output) {
 				ss << ",";
-				print_operand (iter->input1, 0, true);
+				print_operand (iter->input0, 0, true);
 
 				ss << ",";
-				print_operand (iter->input0, 1, true);
+				print_operand (iter->input1, 1, true);
 
 				ss << ",";
 				switch (iter->type)
@@ -1173,21 +1173,21 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 			if (iter->input0 && iter->input1 && iter->output)
 			{
 				ss << ",";
-				print_operand (iter->input1);
+				print_operand (iter->input0);
 
 				ss << ",";
-				print_operand (iter->input0, 1);
+				print_operand (iter->input1, 1);
 
 				ss << ",";
 				switch (iter->type)
 				{
 					case CPUI_INT_SLESS:
-						ss << iter->input0->size * 8 << ",SWAP,~,SWAP,"
-						   << iter->input1->size * 8 << ",SWAP,~,SWAP,";
+						ss << iter->input1->size * 8 << ",~,SWAP,"
+						   << iter->input0->size * 8 << ",~,SWAP,";
 					case CPUI_INT_LESS: ss << "<"; break;
 					case CPUI_INT_SLESSEQUAL:
-						ss << iter->input0->size * 8 << ",SWAP,~,SWAP,"
-						   << iter->input1->size * 8 << ",SWAP,~,SWAP,";
+						ss << iter->input1->size * 8 << ",~,SWAP,"
+						   << iter->input0->size * 8 << ",~,SWAP,";
 					case CPUI_INT_LESSEQUAL: ss << "<="; break;
 					case CPUI_INT_NOTEQUAL: ss << "-,!,!"; break;
 					case CPUI_INT_EQUAL: ss << "-,!"; break;
@@ -1220,26 +1220,26 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 		case CPUI_INT_ADD:
 			if (iter->input0 && iter->input1 && iter->output) {
 				ss << ",";
-				print_operand (iter->input1);
+				print_operand (iter->input0);
 
 				ss << ",";
-				print_operand (iter->input0, 1);
+				print_operand (iter->input1, 1);
 				ss << ",";
 				switch (iter->type)
 				{
 					case CPUI_INT_MULT: ss << "*"; break;
 					// If divide by zero happen, give out 0
-					case CPUI_INT_DIV: ss << "SWAP,DUP,!,?{,1,|,SWAP,0,&,},/"; break;
-					case CPUI_INT_REM: ss << "SWAP,DUP,!,?{,1,|,SWAP,0,&,},%"; break;
-					case CPUI_INT_SDIV: 
-						ss << iter->input0->size * 8 << ",SWAP,~"; 
-						ss << ",SWAP," << iter->input1->size * 8 << ",SWAP,~"; 
-						ss << ",DUP,!,?{,1,|,SWAP,0,&,},~/"; 
+					case CPUI_INT_DIV: ss << "DUP,!,?{,1,|,SWAP,0,&,},/"; break;
+					case CPUI_INT_REM: ss << "DUP,!,?{,1,|,SWAP,0,&,},%"; break;
+					case CPUI_INT_SDIV:
+						ss << iter->input1->size * 8 << ",~,SWAP,"
+						   << iter->input0->size * 8 << ",~,SWAP,"
+						   << "DUP,!,?{,1,|,SWAP,0,&,},~/";
 						break;
 					case CPUI_INT_SREM:
-						ss << iter->input0->size * 8 << ",SWAP,~"; 
-						ss << ",SWAP," << iter->input1->size * 8 << ",SWAP,~"; 
-						ss << ",DUP,!,?{,1,|,SWAP,0,&,},~%"; 
+						ss << iter->input1->size * 8 << ",~,SWAP,"
+						   << iter->input0->size * 8 << ",~,SWAP,"
+						   << "DUP,!,?{,1,|,SWAP,0,&,},~%";
 						break;
 					case CPUI_INT_SUB: ss << "-"; break;
 					case CPUI_INT_ADD: ss << "+"; break;
@@ -1252,10 +1252,10 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 					case CPUI_INT_LEFT: ss << "<<"; break;
 					case CPUI_INT_RIGHT: ss << ">>"; break;
 					case CPUI_INT_SRIGHT:
-						ss << iter->input0->size * 8 << ",SWAP,~,>>>>";
+						ss << "SWAP," << iter->input0->size * 8 << ",~,SWAP,>>>>";
 						break;
 				}
-				ss << ",1," << iter->output->size * 8 << ",1,<<,-,&";
+				ss << ",1," << iter->output->size * 8 << ",<<,1,-,&";
 
 				if (iter->output->is_unique())
 					push_stack(iter->output);
@@ -1273,12 +1273,12 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 				ss << ",";
 				print_operand (iter->input1, 1);
 
-				ss << ",+," << iter->input0->size * 8 << ",1,<<,1,SWAP,-,&";
+				ss << ",+,1," << iter->input0->size * 8 << ",<<,1,-,&";
 
 				ss << ",";
 				print_operand (iter->input0, 1);
 
-				ss << ",>";
+				ss << ",<";
 
 				if (iter->output->is_unique()) {
 					push_stack(iter->output);
@@ -1293,11 +1293,11 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 			if (iter->input0 && iter->input1 && iter->output) {
 				ss << ",";
 				print_operand (iter->input0);
-				ss << "," << iter->input0->size * 8 - 1 << ",SWAP,>>,1,&";
+				ss << "," << iter->input0->size * 8 - 1 << ",>>,1,&";
 				ss << ",DUP,";
 				print_operand (iter->input1, 2);
 
-				ss << "," << iter->input1->size * 8 - 1 << ",SWAP,>>,1,&";
+				ss << "," << iter->input1->size * 8 - 1 << ",>>,1,&";
 
 				ss << ",^,1,^,SWAP";
 
@@ -1305,8 +1305,8 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 				print_operand (iter->input0, 2);
 
 				ss << ",";
-				print_operand (iter->input0, 3);
-				ss << ",+," << iter->input0->size * 8 - 1 << ",SWAP,>>,1,&"; // (a^b^1), a, c
+				print_operand (iter->input1, 3);
+				ss << ",+," << iter->input0->size * 8 - 1 << ",>>,1,&"; // (a^b^1), a, c
 				ss << ",^,&";
 				if (iter->output->is_unique()) {
 					push_stack(iter->output);
@@ -1320,24 +1320,24 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 		case CPUI_INT_SBORROW:
 			if (iter->input0 && iter->input1 && iter->output) {
 				ss << ",";
-				print_operand (iter->input1);
+				print_operand (iter->input0);
 
 				ss << ",";
-				print_operand (iter->input0, 1);
+				print_operand (iter->input1, 1);
 
-				ss << ",-," << iter->input0->size * 8 - 1 << ",SWAP,>>,1,&";
+				ss << ",-," << iter->input0->size * 8 - 1 << ",>>,1,&";
 
 				ss << ",DUP,";
 				print_operand (iter->input1, 2);
 
-				ss << "," << iter->input1->size * 8 - 1 << ",SWAP,>>,1,&";
+				ss << "," << iter->input1->size * 8 - 1 << ",>>,1,&";
 
 				ss << ",^,1,^,SWAP";
 
 				ss << ",";
 				print_operand (iter->input0, 2);
 
-				ss << "," << iter->input0->size * 8 - 1 << ",SWAP,>>,1,&"; // (r^b^1), a, r
+				ss << "," << iter->input0->size * 8 - 1 << ",>>,1,&"; // (r^b^1), a, r
 
 				ss << ",^,&";
 
@@ -1360,7 +1360,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 				if (iter->type == CPUI_BOOL_NEGATE) {
 					ss << ",!";
 				} else {
-					ss << ",1," << iter->output->size * 8 << ",1,<<,-,^";
+					ss << ",1," << iter->output->size * 8 << ",<<,1,-,^";
 					ss << ((iter->type == CPUI_INT_2COMP)? ",1,+": "");
 				}
 				if (iter->output->is_unique()) {
@@ -1421,7 +1421,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 			switch (iter->type) {
 			case CPUI_FLOAT_NAN: ss << ",NAN"; break;
 			case CPUI_FLOAT_TRUNC:
-				     ss << ",D2I,1," << iter->output->size * 8 << ",1,<<,-,&";
+				     ss << ",D2I,1," << iter->output->size * 8 << ",<<,1,-,&";
 				     break;
 			case CPUI_FLOAT_CEIL: ss << ",CEIL"; break;
 			case CPUI_FLOAT_FLOOR: ss << ",FLOOR"; break;
