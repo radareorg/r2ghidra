@@ -180,7 +180,7 @@ public:
 		case 2: in1 = parse_vardata (vars[1]);
 		case 1: in0 = parse_vardata (vars[0]);
 		case 0: break;
-		default: throw LowlevelError ("Unexpexted isize in PcodeSlg::dump()");
+		default: throw LowlevelError ("Unexpected isize in PcodeSlg::dump()");
 		}
 
 		if (outvar) {
