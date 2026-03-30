@@ -562,7 +562,8 @@ ostream &operator<<(ostream &s, const PcodeOperand &arg) {
 }
 
 ostream &operator<<(ostream &s, const Pcodeop &op) {
-	if (op.output) {
+	bool is_store = (op.type == CPUI_STORE);
+	if (op.output && !is_store) {
 		s << *op.output << " = ";
 	}
 	s << get_opname (op.type);
@@ -571,6 +572,9 @@ ostream &operator<<(ostream &s, const Pcodeop &op) {
 	}
 	if (op.input1) {
 		s << " " << *op.input1;
+	}
+	if (is_store && op.output) {
+		s << " = " << *op.output;
 	}
 	return s;
 }
