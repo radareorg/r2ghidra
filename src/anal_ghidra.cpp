@@ -1294,7 +1294,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 				print_operand (iter->input0, 2);
 
 				ss << ",";
-				print_operand (iter->input0, 3);
+				print_operand (iter->input1, 3);
 				ss << ",+," << iter->input0->size * 8 - 1 << ",SWAP,>>,1,&"; // (a^b^1), a, c
 				ss << ",^,&";
 				if (iter->output->is_unique()) {
