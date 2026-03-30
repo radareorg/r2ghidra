@@ -485,11 +485,7 @@ public:
 
 	void dump(const Address &addr, OpCode opc, VarnodeData *outvar, VarnodeData *vars, int4 isize) override {
 		std::stringstream ss;
-		if (opc == CPUI_STORE && isize == 3) {
-			print_vardata (ss, vars[2]);
-			ss << " = ";
-			isize = 2;
-		}
+		bool is_store = (opc == CPUI_STORE && isize == 3);
 		if (outvar) {
 			print_vardata (ss,*outvar);
 			ss << " = ";
@@ -497,24 +493,29 @@ public:
 		ss << get_opname(opc);
 		// Possibly check for a code reference or a space reference
 		ss << ' ';
+		int4 print_isize = is_store ? 2 : isize;
 		// For indirect case in SleighBuilder::dump(OpTpl *op)'s "vn->isDynamic(*walker)" branch.
-		if (isize > 1 && vars[0].size == sizeof(AddrSpace *) && vars[0].space->getName() == "const"
+		if (print_isize > 1 && vars[0].size == sizeof(AddrSpace *) && vars[0].space->getName() == "const"
 				&& (vars[0].offset >> 24) == ((uintb)vars[1].space >> 24) && trans == ((AddrSpace*)vars[0].offset)->getTrans())
 		{
 			ss << ((AddrSpace*)vars[0].offset)->getName();
 			ss << '[';
 			print_vardata (ss, vars[1]);
 			ss << ']';
-			for (int4 i = 2; i < isize; i++) {
+			for (int4 i = 2; i < print_isize; i++) {
 				ss << ", ";
 				print_vardata (ss, vars[i]);
 			}
 		} else {
 			print_vardata (ss, vars[0]);
-			for (int4 i = 1; i < isize; i++) {
+			for (int4 i = 1; i < print_isize; i++) {
 				ss << ", ";
 				print_vardata (ss, vars[i]);
 			}
+		}
+		if (is_store) {
+			ss << " = ";
+			print_vardata (ss, vars[2]);
 		}
 #if R2_VERSION_NUMBER >= 50909
 		r_cons_gprintf ("    %s\n", ss.str().c_str ());
