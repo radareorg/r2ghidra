@@ -77,12 +77,30 @@ struct PcodeOperand {
 		size = rhs.size;
 
 		switch (type) {
-		case REGISTER: name = rhs.name; break;
+		case REGISTER: new (&name) std::string(rhs.name); break;
 		case UNIQUE: /* Same as RAM */
 		case RAM: offset = rhs.offset; break;
 		case CONSTANT: number = rhs.number; break;
-		default: throw LowlevelError("Unexpected type of PcodeOperand found in operator==.");
+		default: throw LowlevelError("Unexpected type of PcodeOperand found in copy ctor.");
 		}
+	}
+
+	PcodeOperand &operator=(const PcodeOperand &rhs) {
+		if (this != &rhs) {
+			if (type == REGISTER) {
+				name.~string();
+			}
+			type = rhs.type;
+			size = rhs.size;
+			switch (type) {
+			case REGISTER: new (&name) std::string(rhs.name); break;
+			case UNIQUE:
+			case RAM: offset = rhs.offset; break;
+			case CONSTANT: number = rhs.number; break;
+			default: throw LowlevelError("Unexpected type of PcodeOperand found in operator=.");
+			}
+		}
+		return *this;
 	}
 
 	bool operator==(const PcodeOperand &rhs) const {

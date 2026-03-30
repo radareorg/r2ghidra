@@ -432,6 +432,7 @@ std::string SleighAsm::getSleighHome(RConfig * R_NULLABLE cfg) {
 			r_config_set (cfg, varname, path);
 		}
 		std::string res (path);
+		free (path);
 		return res;
 	}
 	free ((void *)path);
