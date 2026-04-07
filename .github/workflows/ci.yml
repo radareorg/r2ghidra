@@ -214,10 +214,13 @@ jobs:
         call preconfigure.bat
         call configure.bat
         call make.bat
+    - name: Rename artifact with version
+      shell: bash
+      run: mv destdir/r2ghidra-w64.zip destdir/r2ghidra-${{env.R2V}}-w64.zip
     - uses: actions/upload-artifact@v7
       with:
         name: w64
-        path: destdir/r2ghidra-w64.zip
+        path: destdir/r2ghidra-${{env.R2V}}-w64.zip
 
   check_release:
     # Run on tag pushes; filter tags starting with a digit in the release step
@@ -228,7 +231,7 @@ jobs:
     needs:
       - linux-deb
       - macos-pkg
-#      - w64
+      - w64
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
@@ -272,6 +275,7 @@ jobs:
             dist/artifacts/linux-deb/r2ghidra_${{ steps.r2gv.outputs.branch }}_amd64.deb
             dist/artifacts/macos-pkg-x86_64/r2ghidra-${{ steps.r2gv.outputs.branch }}-macos-x86_64.zip
             dist/artifacts/macos-pkg-arm64/r2ghidra-${{ steps.r2gv.outputs.branch }}-macos-arm64.zip
+            dist/artifacts/w64/r2ghidra-${{ steps.r2gv.outputs.branch }}-w64.zip
             dist/artifacts/tarball/r2ghidra-${{ steps.r2gv.outputs.branch }}.zip
             dist/artifacts/tarball/r2ghidra-${{ steps.r2gv.outputs.branch }}.tar.xz
             dist/artifacts/linux-acr-ok/r2ghidra_sleigh-${{ steps.r2gv.outputs.branch }}.zip
