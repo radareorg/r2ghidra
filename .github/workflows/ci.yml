@@ -194,7 +194,7 @@ jobs:
       with:
         python-version: 3.12.x
     - name: Preparing msvc toolchain
-      uses: ilammy/msvc-dev-cmd@v1
+      uses: TheMrMilchmann/setup-msvc-dev@v4
       with:
         arch: x64
     - name: dependencies

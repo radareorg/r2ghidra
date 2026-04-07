@@ -3,6 +3,8 @@
 # Check out the 'acr' tool in: https://github.com/radareorg/acr
 #
 # -- pancake
+#
+[ -z "${EDITOR}" ] && EDITOR=vim
 
 r2pm -h >/dev/null 2>&1
 if [ $? = 0 ]; then
@@ -25,5 +27,6 @@ if [ -n "$1" ]; then
 	echo "./configure $*"
 	./configure $*
 fi
-vim .github/workflows/ci.yml
+$EDITOR .github/workflows/ci.yml
+$EDITOR dist/windows/r2pm/r2pm-i.ps1
 # sed -i -e "s,^R2V:.*,R2V: $V" .github/workflows/ci.yml
