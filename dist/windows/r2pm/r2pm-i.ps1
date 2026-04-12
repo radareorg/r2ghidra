@@ -1,6 +1,6 @@
 # powershell -executionpolicy unrestricted -command r2pm.ps1
 $R2_USER_PLUGINS=(radare2 -H R2_USER_PLUGINS)
-$V="6.1.2"
+$V="6.1.4"
 Remove-Item r2ghidra-${V}-w64.zip
 Remove-Item r2ghidra_sleigh-${V}.zip
 echo "Downloading blobs"
