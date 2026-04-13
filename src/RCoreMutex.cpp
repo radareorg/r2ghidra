@@ -12,11 +12,7 @@ void RCoreMutex::sleepEnd() {
 	}
 	caffeine_level++;
 	if (caffeine_level == 1) {
-#if R2_VERSION_NUMBER >= 50909
 		r_cons_sleep_end (_core->cons, bed);
-#else
-		r_cons_sleep_end (bed);
-#endif
 		bed = nullptr;
 	}
 }
@@ -34,10 +30,6 @@ void RCoreMutex::sleepBegin() {
 	}
 	caffeine_level--;
 	if (caffeine_level == 0) {
-#if R2_VERSION_NUMBER >= 50909
 		bed = r_cons_sleep_begin (_core->cons);
-#else
-		bed = r_cons_sleep_begin ();
-#endif
 	}
 }

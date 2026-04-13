@@ -14,9 +14,6 @@
 
 // XXX dont use globals
 static SleighAsm *sanal = nullptr;
-#if R2_VERSION_NUMBER < 50909
-extern "C" RCore *Gcore;
-#endif
 
 static char *slid(RCore *core, const char *cpu, int bits, bool be) {
 	R_LOG_DEBUG ("slid (%s:%d:%d)", cpu, bits, be);
@@ -36,16 +33,9 @@ static char *slid(RCore *core, const char *cpu, int bits, bool be) {
 }
 
 static char *slid_arch(RAnal *anal) {
-#if R2_VERSION_NUMBER >= 50609
-	// const char *cp = anal->config->cpu;
 	const char *cp = anal->config->cpu;
 	int bi = anal->config->bits;
 	bool be = anal->config->big_endian;
-#else
-	const char *cp = anal->cpu;
-	int bi = anal->bits;
-	bool be = anal->big_endian;
-#endif
 	if (R_STR_ISEMPTY (cp)) {
 		return nullptr;
 	}
@@ -60,34 +50,21 @@ static char *slid_arch(RAnal *anal) {
 	return cpu;
 }
 
-#if R2_VERSION_NUMBER >= 50809
-
 extern "C" int archinfo(RArchSession *as, ut32 query) {
 	R_RETURN_VAL_IF_FAIL (as, 1);
-#if R2_VERSION_NUMBER >= 50909
 	RBin *bin = (RBin*)as->arch->binb.bin;
 	RIO *io = (RIO*)bin->iob.io;
 	RCore *Gcore = (RCore *)io->coreb.core;
-#endif
 	char *arch = slid_arch (Gcore->anal); // is this initializing sanal global ptr?
 	int ret = 1;
 	if (sanal != nullptr) {
 		switch (query) {
-#if R2_VERSION_NUMBER >= 50909
 		case R_ARCH_INFO_MAXOP_SIZE:
 			ret = sanal->maxopsz;
 			break;
 		case R_ARCH_INFO_MINOP_SIZE:
 			ret = sanal->minopsz;
 			break;
-#else
-		case R_ARCH_INFO_MAX_OP_SIZE:
-			ret = sanal->maxopsz;
-			break;
-		case R_ARCH_INFO_MIN_OP_SIZE:
-			ret = sanal->minopsz;
-			break;
-#endif
 		case R_ARCH_INFO_CODE_ALIGN:
 		case R_ARCH_INFO_DATA_ALIGN:
 			ret = sanal->alignment;
@@ -97,30 +74,6 @@ extern "C" int archinfo(RArchSession *as, ut32 query) {
 	R_FREE (arch);
 	return ret;
 }
-#else
-extern "C" int archinfo(RAnal *anal, int query) {
-	// This is to check if RCore plugin set cpu properly.
-	R_RETURN_VAL_IF_FAIL (anal, -1);
-	if (R_STR_ISEMPTY (anal->config->cpu)) {
-		return -1;
-	}
-	char *arch = slid_arch (anal);
-	int ret = -1;
-	switch (query) {
-	case R_ANAL_ARCHINFO_MAX_OP_SIZE:
-		ret = sanal->maxopsz;
-		break;
-	case R_ANAL_ARCHINFO_MIN_OP_SIZE:
-		ret = sanal->minopsz;
-		break;
-	case R_ANAL_ARCHINFO_ALIGN:
-		ret = sanal->alignment;
-		break;
-	}
-	R_FREE (arch);
-	return ret;
-}
-#endif
 
 static std::vector<std::string> string_split(const std::string &s) {
 	std::vector<std::string> tokens;
@@ -189,12 +142,6 @@ static ut32 anal_type_MOV(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcode
 				}
 				if (in0.is_valid() && (in0.is_imm() || reg_set_has(reg_set, in0))) {
 					anal_op->type = this_type;
-#if R2_VERSION_NUMBER >= 50709
-#pragma message("anal srcs/dsts is disabled from now on")
-#else
-					anal_op->src[0] = in0.dup ();
-					anal_op->dst = out.dup ();
-#endif
 					return this_type;
 				}
 			}
@@ -209,12 +156,6 @@ static ut32 anal_type_MOV(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcode
 			if (in0.is_valid() && out.is_valid() && in0.is_imm()) {
 				out.mem(iter->output->size);
 				anal_op->type = this_type;
-#if R2_VERSION_NUMBER >= 50709
-#pragma warning("anal srcs/dsts is disabled from now on")
-#else
-				anal_op->src[0] = in0.dup ();
-				anal_op->dst = out.dup ();
-#endif
 				return this_type;
 			}
 		}
@@ -258,12 +199,6 @@ static ut32 anal_type_LOAD(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcod
 
 				if (in0.is_valid() && in0.is_mem()) {
 					anal_op->type = this_type;
-#if R2_VERSION_NUMBER >= 50709
-#pragma warning("anal srcs/dsts is disabled from now on")
-#else
-					anal_op->src[0] = in0.dup ();
-					anal_op->dst = out.dup ();
-#endif
 					return this_type;
 				}
 			}
@@ -302,12 +237,6 @@ static ut32 anal_type_STORE(RAnal *anal, RAnalOp *anal_op, const std::vector<Pco
 			if (out.is_valid()) {
 				out.mem(iter->output->size);
 				anal_op->type = this_type;
-#if R2_VERSION_NUMBER >= 50709
-#pragma warning("anal srcs/dsts is disabled from now on")
-#else
-				anal_op->src[0] = in0.dup ();
-				anal_op->dst = out.dup ();
-#endif
 				return this_type;
 			}
 		}
@@ -326,12 +255,6 @@ static ut32 anal_type_STORE(RAnal *anal, RAnalOp *anal_op, const std::vector<Pco
 				out = *p;
 				if (out.is_valid() && out.is_mem()) {
 					anal_op->type = this_type;
-#if R2_VERSION_NUMBER >= 50709
-#pragma warning("anal srcs/dsts is disabled from now on")
-#else
-					anal_op->src[0] = in0.dup ();
-					anal_op->dst = out.dup ();
-#endif
 					return this_type;
 				}
 			}
@@ -381,13 +304,8 @@ static ut32 anal_type_XPUSH(RAnal *anal, RAnalOp *anal_op, const std::vector<Pco
 				continue;
 			}
 			out.mem (iter->output->size);
-#if R2_VERSION_NUMBER >= 50809
 			if ((out.reg && sanal->reg_mapping[sanal->sp_name] == out.reg) ||
 			   (out.regdelta && sanal->reg_mapping[sanal->sp_name] == out.regdelta))
-#else
-			if ((out.reg && sanal->reg_mapping[sanal->sp_name] == out.reg->name) ||
-			   (out.regdelta && sanal->reg_mapping[sanal->sp_name] == out.regdelta->name))
-#endif
 			{
 				anal_op->type = R_ANAL_OP_TYPE_UPUSH;
 				anal_op->stackop = R_ANAL_STACK_INC;
@@ -401,12 +319,6 @@ static ut32 anal_type_XPUSH(RAnal *anal, RAnalOp *anal_op, const std::vector<Pco
 				if (reg_set_has(reg_set, in)) {
 					anal_op->type = R_ANAL_OP_TYPE_RPUSH;
 				}
-#if R2_VERSION_NUMBER >= 50709
-#pragma warning("anal srcs/dsts is disabled from now on")
-#else
-				anal_op->src[0] = in.dup ();
-				anal_op->dst = out.dup ();
-#endif
 				return anal_op->type;
 			}
 		}
@@ -432,26 +344,13 @@ static ut32 anal_type_POP(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcode
 				continue;
 			}
 			// dispose 0x0,  { lp }, [lp]
-#if R2_VERSION_NUMBER >= 50809
 			if (in0.reg && !strcmp ("lp", in0.reg))
-#else
-			if (in0.reg && !strcmp ("lp", in0.reg->name))
-#endif
 			{
 				anal_op->type = R_ANAL_OP_TYPE_RET;
-#if R2_VERSION_NUMBER >= 50709
-#pragma warning("anal srcs/dsts is disabled from now on")
-#else
-				anal_op->src[0] = in0.dup ();
-#endif
 				return this_type;
 			}
 
-#if R2_VERSION_NUMBER >= 50809
 			if ((in0.reg && std::string("lr") == in0.reg) || (in0.regdelta && sanal->reg_mapping[sanal->sp_name] == in0.regdelta))
-#else
-			if ((in0.reg && std::string("lr") == in0.reg->name) || (in0.regdelta && sanal->reg_mapping[sanal->sp_name] == in0.regdelta->name))
-#endif
 			{
 				if (iter->output) {
 					outs = SleighAnalValue::resolve_out (anal, iter, raw_ops.cend(), iter->output);
@@ -466,12 +365,6 @@ static ut32 anal_type_POP(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcode
 
 				anal_op->type = this_type;
 				anal_op->stackop = R_ANAL_STACK_INC;
-#if R2_VERSION_NUMBER >= 50709
-#pragma warning("anal srcs/dsts is disabled from now on")
-#else
-				anal_op->dst = out.dup ();
-				anal_op->src[0] = in0.dup ();
-#endif
 				return this_type;
 			}
 		}
@@ -536,12 +429,6 @@ static ut32 anal_type_XCMP(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcod
 			anal_op->type = key_pcode == key_pcode_sub? R_ANAL_OP_TYPE_CMP: R_ANAL_OP_TYPE_ACMP;
 			// anal_op->cond = R_ANAL_COND_EQ; Should I enable this? I think sub can judge equal and
 			// less or more.
-#if R2_VERSION_NUMBER >= 50709
-#pragma warning("anal srcs/dsts is disabled from now on")
-#else
-			anal_op->src[0] = in0.dup ();
-			anal_op->src[1] = in1.dup ();
-#endif
 			return anal_op->type;
 		}
 	}
@@ -615,13 +502,6 @@ static ut32 anal_type_XXX(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcode
 					case CPUI_INT_SRIGHT: anal_op->type = R_ANAL_OP_TYPE_SAR; break;
 					default: break;
 					}
-#if R2_VERSION_NUMBER >= 50709
-#pragma warning("anal srcs/dsts is disabled from now on")
-#else
-					anal_op->src[0] = in0.dup ();
-					anal_op->src[1] = in1.dup ();
-					anal_op->dst = out.dup ();
-#endif
 					return anal_op->type;
 				}
 			}
@@ -671,13 +551,6 @@ static ut32 anal_type_NOR(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcode
 				if (p != outs.cend()) {
 					out = *p;
 					anal_op->type = this_type;
-#if R2_VERSION_NUMBER >= 50709
-#pragma warning("anal srcs/dsts is disabled from now on")
-#else
-					anal_op->src[0] = in0.dup ();
-					anal_op->src[1] = in1.dup ();
-					anal_op->dst = out.dup ();
-#endif
 					return this_type;
 				}
 			}
@@ -710,12 +583,6 @@ static ut32 anal_type_NOT(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcode
 				if (p != outs.cend()) {
 					out = *p;
 					anal_op->type = this_type;
-#if R2_VERSION_NUMBER >= 50709
-#pragma warning("anal srcs/dsts is disabled from now on")
-#else
-					anal_op->src[0] = in0.dup ();
-					anal_op->dst = out.dup ();
-#endif
 					return this_type;
 				}
 			}
@@ -747,12 +614,6 @@ static ut32 anal_type_XCHG(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcod
 			goto fail;
 		}
 		anal_op->type = this_type;
-#if R2_VERSION_NUMBER >= 50709
-#pragma warning("anal srcs/dsts is disabled from now on");
-#else
-		anal_op->src[0] = SleighAnalValue::resolve_arg (anal, copy_vec[0]->input0).dup ();
-		anal_op->dst = SleighAnalValue::resolve_arg (anal, copy_vec[2]->output).dup ();
-#endif
 		return this_type;
 	}
 
@@ -1479,11 +1340,7 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 		return -1;
 	}
 	try {
-#if R2_VERSION_NUMBER >= 50609
 		sanal->init (arch, a->config->bits, a->config->big_endian, a? a->iob.io : nullptr, SleighAsm::getConfig(a));
-#else
-		sanal->init (arch, a->bits, a->big_endian, a? a->iob.io : nullptr, SleighAsm::getConfig(a));
-#endif
 		R_FREE (arch);
 
 		AssemblySlg assem(sanal);
@@ -1691,28 +1548,6 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 			if (anal_op->val && anal_op->val != -1) {
 				std::cerr << " val: " << anal_op->val << std::endl;
 			} else {
-#if R2_VERSION_NUMBER >= 50709
-#pragma warning("anal srcs/dsts is disabled from now on")
-#else
-				if (anal_op->dst) {
-					std::cerr << " dst: ";
-					char *tmp = r_anal_value_to_string (anal_op->dst);
-					std::cerr << tmp;
-					free (tmp);
-				}
-				if (anal_op->src[0]) {
-					std::cerr << " in0: ";
-					char *tmp = r_anal_value_to_string (anal_op->src[0]);
-					std::cerr << tmp;
-					free (tmp);
-				}
-				if (anal_op->src[1]) {
-					std::cerr << " in1: ";
-					char *tmp = r_anal_value_to_string (anal_op->src[1]);
-					std::cerr << tmp;
-					free (tmp);
-				}
-#endif
 				std::cerr << std::endl;
 			}
 #endif
@@ -1729,14 +1564,9 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 
 extern "C" bool sleigh_decode(RArchSession *as, RAnalOp *aop, RArchDecodeMask mask) {
 	REsil *esil = as->arch->esil;
-#if R2_VERSION_NUMBER >= 50909
 	RBin *bin = (RBin*)as->arch->binb.bin;
 	RIO *io = (RIO*)bin->iob.io;
 	RCore *Gcore = (RCore *)io->coreb.core;
-#else
-	RIO *io = Gcore->io;
-	RBin *bin = Gcore->bin;
-#endif
 	RAnal *anal = Gcore->anal;
 	if (bin != nullptr && esil != nullptr) {
 		io = bin->iob.io;
@@ -1935,11 +1765,9 @@ static std::string regtype_name(const char *cpu, const std::string &regname) {
 
 extern "C" char *r2ghidra_regs(RArchSession *as) {
 	R_RETURN_VAL_IF_FAIL (as, nullptr);
-#if R2_VERSION_NUMBER >= 50909
 	RBin *bin = (RBin*)as->arch->binb.bin;
 	RIO *io = (RIO*)bin->iob.io;
 	RCore *Gcore = (RCore *)io->coreb.core;
-#endif
 	const char *cpu = r_config_get (Gcore->config, "asm.cpu"); // (as->config != nullptr)? as->config->cpu: "arm";
 
 	if (R_STR_ISEMPTY (cpu)) {
@@ -2074,14 +1902,8 @@ extern "C" int esil_sleigh_init(REsil *esil) {
 	if (!esil) {
 		return false;
 	}
-#if R2_VERSION_NUMBER >= 50909
 	r_esil_set_op (esil, "PICK", sleigh_esil_consts_pick, 1, 0, R_ESIL_OP_TYPE_CUSTOM, "");
 	r_esil_set_op (esil, "POPCOUNT", sleigh_esil_popcount, 1, 2, R_ESIL_OP_TYPE_CUSTOM, "");
-#else
-	// Only consts-only version PICK will meet my demand
-	r_esil_set_op (esil, "PICK", sleigh_esil_consts_pick, 1, 0, R_ESIL_OP_TYPE_CUSTOM);
-	r_esil_set_op (esil, "POPCOUNT", sleigh_esil_popcount, 1, 2, R_ESIL_OP_TYPE_CUSTOM);
-#endif
 	return true;
 }
 

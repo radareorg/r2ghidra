@@ -27,10 +27,6 @@
 
 #undef DEBUG_EXCEPTIONS
 
-#if R2_VERSION_NUMBER < 50909
-extern "C" RCore *Gcore;
-#endif
-
 typedef bool (*ConfigVarCb)(void *user, void *data);
 
 struct ConfigVar {
@@ -89,15 +85,9 @@ private:
 public:
 	DecompilerLock(RCore *core) : _core (core) {
 		if (!decompiler_mutex.try_lock()) {
-#if R2_VERSION_NUMBER >= 50909
 			void *bed = r_cons_sleep_begin (_core->cons);
 			decompiler_mutex.lock ();
 			r_cons_sleep_end (_core->cons, bed);
-#else
-			void *bed = r_cons_sleep_begin ();
-			decompiler_mutex.lock ();
-			r_cons_sleep_end (bed);
-#endif
 		}
 	}
 
@@ -124,11 +114,7 @@ static const char* r2ghidra_help[] = {
 	NULL
 };
 static void PrintUsage(const RCore *const core) {
-#if R2_VERSION_NUMBER >= 50909
 	r_cons_cmd_help (core->cons, r2ghidra_help, core->print->flags & R_PRINT_FLAGS_COLOR);
-#else
-	r_cons_cmd_help (r2ghidra_help, core->print->flags & R_PRINT_FLAGS_COLOR);
-#endif
 }
 
 enum class DecompileMode {
@@ -290,33 +276,21 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 #endif
 		RCodeMeta *code = nullptr;
 		std::stringstream out_stream;
-#if R2_VERSION_NUMBER >= 50909
 		Decompile (core, core->addr, mode, out_stream, &code);
-#else
-		Decompile (core, core->offset, mode, out_stream, &code);
-#endif
 		switch (mode) {
 		case DecompileMode::DISASM:
 			{
 #if defined(R2_ABIVERSION) && R2_ABIVERSION >= 40
 				RVecCodeMetaOffset *offsets = r_codemeta_line_offsets (code);
-#if R2_VERSION_NUMBER >= 50909
 				char *s = r_codemeta_print_disasm (code, offsets, core->anal);
 				r_cons_print (core->cons, s);
 				free (s);
-#else
-				r_codemeta_print_disasm (code, offsets, core->anal);
-#endif
 				RVecCodeMetaOffset_free (offsets);
 #else
 				RVector *offsets = r_codemeta_line_offsets (code);
-#if R2_VERSION_NUMBER >= 50909
 				char *s = r_codemeta_print_disasm (code, offsets, core->anal);
 				r_cons_print (core->cons, s);
 				free (s);
-#else
-				r_codemeta_print_disasm (code, offsets, core->anal);
-#endif
 				r_vector_free (offsets);
 #endif
 			}
@@ -327,31 +301,21 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 				RVecCodeMetaOffset *offsets = r_codemeta_line_offsets (code);
 #if R2_VERSION_NUMBER >= 60003
 				char *s = r_codemeta_print2 (code, offsets, core->anal);
-				r_cons_print (core->cons, s);
-				free (s);
-#elif R2_VERSION_NUMBER >= 50909
-				char *s = r_codemeta_print (code, offsets);
-				r_cons_print (core->cons, s);
-				free (s);
 #else
-				r_codemeta_print (code, offsets);
-				r_cons_flush ();
+				char *s = r_codemeta_print (code, offsets);
 #endif
+				r_cons_print (core->cons, s);
+				free (s);
 				RVecCodeMetaOffset_free (offsets);
 #else
 				RVector *offsets = r_codemeta_line_offsets (code);
 #if R2_VERSION_NUMBER >= 60003
 				char *s = r_codemeta_print2 (code, offsets, core->anal);
-				r_cons_print (core->cons, s);
-				free (s);
-#elif R2_VERSION_NUMBER >= 50909
-				char *s = r_codemeta_print (code, offsets);
-				r_cons_print (core->cons, s);
-				free (s);
 #else
-				r_codemeta_print (code, offsets);
-				r_cons_flush ();
+				char *s = r_codemeta_print (code, offsets);
 #endif
+				r_cons_print (core->cons, s);
+				free (s);
 				r_vector_free (offsets);
 #endif
 			}
@@ -360,48 +324,32 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 			{
 #if R2_VERSION_NUMBER >= 60003
 				char *s = r_codemeta_print2 (code, nullptr, core->anal);
-				r_cons_print (core->cons, s);
-				free (s);
-#elif R2_VERSION_NUMBER >= 50909
-				char *s = r_codemeta_print (code, nullptr);
-				r_cons_print (core->cons, s);
-				free (s);
 #else
-				r_codemeta_print (code, nullptr);
+				char *s = r_codemeta_print (code, nullptr);
 #endif
+				r_cons_print (core->cons, s);
+				free (s);
 			}
 			break;
 		case DecompileMode::STATEMENTS:
-#if R2_VERSION_NUMBER >= 50909
 			{
 				char *s = r_codemeta_print_comment_cmds (code);
 				r_cons_print (core->cons, s);
 				free (s);
 			}
-#else
-			r_codemeta_print_comment_cmds (code);
-#endif
 			break;
 		case DecompileMode::JSON:
 			{
-#if R2_VERSION_NUMBER >= 50909
 				char *s = r_codemeta_print_json (code);
 				r_cons_println (core->cons, s);
 				free (s);
-#else
-				r_codemeta_print_json (code);
-#endif
 			}
 			break;
 		case DecompileMode::XML:
 			out_stream << "</code></result>";
 			// fallthrough
 		default:
-#if R2_VERSION_NUMBER >= 50909
 			r_cons_printf (core->cons, "%s\n", out_stream.str().c_str ());
-#else
-			r_cons_printf ("%s\n", out_stream.str().c_str ());
-#endif
 			break;
 		}
 		r_codemeta_free (code);
@@ -417,11 +365,7 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 				pj_s (pj, s.c_str ());
 				pj_end (pj);
 				pj_end (pj);
-#if R2_VERSION_NUMBER >= 50909
 				r_cons_printf (core->cons, "%s\n", pj_string (pj));
-#else
-				r_cons_printf ("%s\n", pj_string (pj));
-#endif
 				pj_free (pj);
 			}
 		} else {
@@ -438,11 +382,7 @@ public:
 		std::stringstream ss;
 		addr.printRaw (ss);
 		ss << ": " << mnem << ' ' << body;
-#if R2_VERSION_NUMBER >= 50909
 		r_cons_gprintf ("%s\n", ss.str().c_str ());
-#else
-		r_cons_printf ("%s\n", ss.str().c_str ());
-#endif
 	}
 };
 
@@ -517,11 +457,7 @@ public:
 			ss << " = ";
 			print_vardata (ss, vars[2]);
 		}
-#if R2_VERSION_NUMBER >= 50909
 		r_cons_gprintf ("    %s\n", ss.str().c_str ());
-#else
-		r_cons_printf ("    %s\n", ss.str().c_str ());
-#endif
 	}
 };
 
@@ -537,11 +473,7 @@ static void Disassemble(RCore *core, ut64 ops) {
 	PcodeRawOut emit (arch.translate);
 	AssemblyRaw assememit;
 
-#if R2_VERSION_NUMBER >= 50909
 	Address addr (trans->getDefaultCodeSpace(), core->addr);
-#else
-	Address addr (trans->getDefaultCodeSpace(), core->offset);
-#endif
 	for (ut64 i = 0; i < ops; i++) {
 		try {
 			trans->printAssembly (assememit, addr);
@@ -582,11 +514,7 @@ static void ListSleighLangs(RCore *core) {
 	});
 	std::sort (ids.begin (), ids.end ());
 	std::for_each (ids.begin (), ids.end (), [core](const std::string &id) {
-#if R2_VERSION_NUMBER >= 50909
 		r_cons_printf (core->cons, "%s\n", id.c_str ());
-#else
-		r_cons_printf ("%s\n", id.c_str ());
-#endif
 	});
 }
 
@@ -594,11 +522,7 @@ static void PrintAutoSleighLang(RCore *core) {
 	DecompilerLock lock (core);
 	try {
 		auto id = SleighIdFromCore (core);
-#if R2_VERSION_NUMBER >= 50909
 		r_cons_printf (core->cons, "%s\n", id.c_str ());
-#else
-		r_cons_printf ("%s\n", id.c_str ());
-#endif
 	} catch (LowlevelError &e) {
 		R_LOG_WARN ("%s", e.explain.c_str ());
 	}
@@ -675,11 +599,7 @@ static void _cmd(RCore *core, const char *input) {
 		}
 		if (pid == 0) {
 			runcmd (core, input);
-#if R2_VERSION_NUMBER >= 50909
 			r_cons_flush (core->cons);
-#else
-			r_cons_flush ();
-#endif
 			fflush (stdout);
 			write (fds[1], "\x12", 1);
 			exit (0);
@@ -718,7 +638,6 @@ static void _cmd(RCore *core, const char *input) {
 	}
 }
 
-#if R2_VERSION_NUMBER >= 50909
 extern "C" bool r2ghidra_core_cmd(RCorePluginSession *cps, const char *input) {
 	RCore *core = cps->core;
 	if (!strcmp (input, "pd:?")) {
@@ -736,16 +655,6 @@ extern "C" bool r2ghidra_core_cmd(RCorePluginSession *cps, const char *input) {
 	}
 	return false;
 }
-#else
-extern "C" int r2ghidra_core_cmd(void *user, const char *input) {
-	RCore *core = (RCore *) user;
-	if (r_str_startswith (input, "pdg")) {
-		_cmd (core, input + 3);
-		return true;
-	}
-	return false;
-}
-#endif
 
 bool SleighHomeConfig(void */* user */, void *data) {
 	std::lock_guard<std::recursive_mutex> lock(decompiler_mutex);
@@ -760,7 +669,6 @@ bool SleighHomeConfig(void */* user */, void *data) {
 
 extern "C" RArchPlugin r_arch_plugin_ghidra;
 
-#if R2_VERSION_NUMBER >= 50909
 extern "C" bool r2ghidra_core_init(RCorePluginSession *cps) {
 	std::lock_guard<std::recursive_mutex> lock(decompiler_mutex);
 	startDecompilerLibrary (nullptr);
@@ -778,38 +686,9 @@ extern "C" bool r2ghidra_core_init(RCorePluginSession *cps) {
 	SetInitialSleighHome (cfg);
 	return true;
 }
-#else
-extern "C" int r2ghidra_core_init(void *user, const char *cmd) {
-	std::lock_guard<std::recursive_mutex> lock(decompiler_mutex);
-	startDecompilerLibrary (nullptr);
-	RCmd *rcmd = reinterpret_cast<RCmd *>(user);
-	RCore *core = reinterpret_cast<RCore *>(rcmd->data);
-	Gcore = core;
-	r_arch_plugin_add (core->anal->arch, &r_arch_plugin_ghidra);
-	RConfig *cfg = core->config;
-	r_config_lock (cfg, false);
-	for (const auto var : ConfigVar::GetAll ()) {
-		RConfigNode *node = var->GetCallback()
-			? r_config_set_cb (cfg, var->GetName (), var->GetDefault (), var->GetCallback ())
-			: r_config_set (cfg, var->GetName (), var->GetDefault ());
-		r_config_node_desc (node, var->GetDesc ());
-	}
-	r_config_lock (cfg, true);
-	SetInitialSleighHome (cfg);
-	return true;
-}
-#endif
 
-#if R2_VERSION_NUMBER >= 50909
 extern "C" bool r2ghidra_core_fini(RCorePluginSession *cps, const char *cmd) {
 	std::lock_guard<std::recursive_mutex> lock (decompiler_mutex);
 	shutdownDecompilerLibrary ();
 	return true;
 }
-#else
-extern "C" int r2ghidra_core_fini(void *user, const char *cmd) {
-	std::lock_guard<std::recursive_mutex> lock (decompiler_mutex);
-	shutdownDecompilerLibrary ();
-	return true;
-}
-#endif
