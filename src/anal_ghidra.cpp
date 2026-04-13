@@ -2129,7 +2129,11 @@ extern "C" RList *r2ghidra_preludes(RArchSession *as) {
 	const char *cpu = as->config->cpu;
 	// reuse r2 preludes
 	if (R_STR_ISNOTEMPTY (cpu)) {
+#if R2_ABIVERSION >= 84
+		r_list_foreach (as->arch->libstore->plugins, iter, _plugin) {
+#else
 		r_list_foreach (as->arch->plugins, iter, _plugin) {
+#endif
 			RArchPlugin *plugin = (RArchPlugin*)_plugin;
 			if (plugin->preludes && plugin->meta.name && !strcmp (plugin->meta.name, cpu)) {
 				return plugin->preludes (as);
