@@ -1837,13 +1837,46 @@ static constexpr int ESIL_PARM_FLOAT = 127; // Avoid conflict
 static bool esil_pushnum_float(REsil *esil, long double num) {
 	char str[64];
 	snprintf (str, sizeof (str) - 1, "%.*LeF", DECIMAL_DIG, num);
+#if R2_ABIVERSION >= 87
+	return r_esil_push (esil, r_strs_from (str));
+#else
 	return r_esil_push (esil, str);
+#endif
 }
 
 static bool sleigh_esil_consts_pick(REsil *esil) {
 	if (!esil || !esil->stack) {
 		return false;
 	}
+#if R2_ABIVERSION >= 87
+	RStrs idx = r_esil_pop (esil);
+	ut64 i;
+
+	if (R_ESIL_PARM_REG == r_esil_get_parm_type (esil, idx)) {
+		R_LOG_DEBUG ("sleigh_esil_consts_pick: argument is consts only");
+		return false;
+	}
+	if (r_strs_empty (idx) || !r_esil_get_parm (esil, idx, &i)) {
+		R_LOG_DEBUG ("esil_pick: invalid index number");
+		return false;
+	}
+	if ((ut64)esil->stackptr < i) {
+		R_LOG_DEBUG ("esil_pick: index out of stack bounds.");
+		return false;
+	}
+	RStrs slot = esil->stack[esil->stackptr - i];
+	if (r_strs_empty (slot)) {
+		R_LOG_DEBUG ("esil_pick: undefined element.");
+		return false;
+	}
+	if (!r_esil_push (esil, slot)) {
+		R_LOG_DEBUG ("ESIL stack is full.");
+		esil->trap = 1;
+		esil->trap_code = 1;
+		return false;
+	}
+	return true;
+#else
 	char *idx = r_esil_pop (esil);
 	ut64 i;
 	int ret = false;
@@ -1874,11 +1907,28 @@ static bool sleigh_esil_consts_pick(REsil *esil) {
 end:
 	free (idx);
 	return ret;
+#endif
 }
 
 static bool sleigh_esil_popcount(REsil *esil) {
 	bool ret = false;
 	ut64 s, res = 0;
+#if R2_ABIVERSION >= 87
+	RStrs src = r_esil_pop (esil);
+	if (!r_strs_empty (src)) {
+		if (r_esil_get_parm (esil, src, &s)) {
+			while (s) {
+				s &= s - 1;
+				++res;
+			}
+			ret = r_esil_pushnum (esil, res);
+		} else {
+			R_LOG_DEBUG ("sleigh_esil_popcount: invalid parameters.");
+		}
+	} else {
+		R_LOG_DEBUG ("sleigh_esil_popcount: fail to get element from stack.");
+	}
+#else
 	char *src = r_esil_pop (esil);
 	if (src) {
 		if (r_esil_get_parm (esil, src, &s)) {
@@ -1894,6 +1944,7 @@ static bool sleigh_esil_popcount(REsil *esil) {
 	} else {
 		R_LOG_DEBUG ("sleigh_esil_popcount: fail to get element from stack.");
 	}
+#endif
 	return ret;
 }
 
