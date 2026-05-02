@@ -112,6 +112,226 @@ static bool is_structured_type(Datatype *type) {
 	return false;
 }
 
+struct FunctionVars {
+	RCore *core;
+	R2Architecture *arch;
+	RAnalFunction *fcn;
+	ProtoModel *proto;
+	int4 extraPop;
+	int default_size;
+	ParamActive params;
+	RangeList ranges;
+	std::map<RAnalVar *, Datatype *> types;
+	bool have_arg_vars = false, enabled;
+
+	FunctionVars(RCore *core, R2Architecture *arch, RAnalFunction *fcn, ProtoModel *proto, int4 extraPop, int default_size)
+		: core (core), arch (arch), fcn (fcn), proto (proto), extraPop (extraPop), default_size (default_size),
+		  params (false), enabled (r_config_get_b (core->config, "r2ghidra.vars")) {
+		collect ();
+	}
+	int4 paramSize(RAnalVar *var, Datatype *type) const {
+		int4 size = type->getSize ();
+		return var->kind == R_ANAL_VAR_KIND_REG && size < default_size ? default_size : size;
+	}
+	Datatype *varType(RAnalVar *var) {
+		std::string typeError;
+		Datatype *type = var->type ? arch->getTypeFactory ()->fromCString (var->type, &typeError) : nullptr;
+		if (!type) {
+			arch->addWarning ("Failed to match type " + to_string (var->type) + " for variable " + to_string (var->name) + " to Decompiler type: " + typeError);
+			type = arch->types->getBase (default_size, TYPE_UNKNOWN);
+		}
+		if (type && type->getSize () < 1) {
+			arch->addWarning ("Type " + type->getName () + " of variable " + to_string (var->name) + " has size 0");
+			return nullptr;
+		}
+		return type;
+	}
+	Address addr(RAnalVar *var, bool warn_on_fail) {
+		switch (var->kind) {
+		case R_ANAL_VAR_KIND_BPV:
+		{
+			auto stackSpace = arch->getStackSpace ();
+			int delta = var->delta + fcn->bp_off - extraPop;
+			uintb off = delta >= 0 ? delta : stackSpace->getHighest () + delta + 1;
+			return Address (stackSpace, off);
+		}
+		case R_ANAL_VAR_KIND_REG:
+		{
+			RRegItem *reg = r_reg_index_get (core->anal->reg, var->delta);
+			if (!reg) {
+				if (warn_on_fail) {
+					arch->addWarning ("Register for arg " + to_string (var->name) + " not found");
+				}
+				return Address ();
+			}
+			auto ret = arch->registerAddressFromR2Reg (reg->name);
+			if (ret.isInvalid () && warn_on_fail) {
+				arch->addWarning ("Failed to match register " + to_string (var->name) + " for arg " + to_string (var->name));
+			}
+			return ret;
+		}
+		case R_ANAL_VAR_KIND_SPV:
+			if (warn_on_fail) {
+				arch->addWarning ("Var " + to_string (var->name) + " is stack pointer based, which is not supported for decompilation.");
+			}
+			return Address ();
+		default:
+			if (warn_on_fail) {
+				arch->addWarning ("Failed to get address for var " + to_string (var->name));
+			}
+			return Address ();
+		}
+	}
+	template<typename Callback>
+	void foreachVar(Callback cb) {
+		if (!enabled) {
+			return;
+		}
+		for (RAnalVarKind kind : { R_ANAL_VAR_KIND_REG, R_ANAL_VAR_KIND_BPV, R_ANAL_VAR_KIND_SPV }) {
+			RAnalVar **it;
+			R_VEC_FOREACH (&fcn->vars, it) {
+				RAnalVar *var = *it;
+				if (var && var->kind == kind) {
+					cb (var);
+				}
+			}
+		}
+	}
+	void collect() {
+		foreachVar ([&](RAnalVar *var) {
+			Datatype *type = varType (var);
+			if (!type) {
+				return;
+			}
+			types[var] = type;
+			if (!var->isarg) {
+				return;
+			}
+			have_arg_vars = true;
+			Address a = addr (var, true);
+			if (a.isInvalid ()) {
+				return;
+			}
+			int4 size = paramSize (var, type);
+			params.registerTrial (a, size);
+			int4 i = params.whichTrial (a, size);
+			params.getTrial (i).markActive ();
+			params.getTrial (i).markUsed ();
+		});
+	}
+	bool overlaps(Address &a, uintb last) const {
+		for (const auto &range : ranges) {
+			if (range.getSpace () == a.getSpace () && range.getFirst () <= last && range.getLast () >= a.getOffset ()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	int4 paramIndex(Address &a, int4 size, RAnalVar *var) {
+		if (proto && !proto->possibleInputParam (a, size)) {
+			arch->addWarning ("Removing arg " + to_string (var->name) + " because it doesn't fit into ProtoModel");
+			return -1;
+		}
+		int4 trialIndex = params.whichTrial (a, size);
+		if (trialIndex < 0) {
+			arch->addWarning ("Failed to determine arg index of " + to_string (var->name));
+			return -1;
+		}
+		int4 index = 0;
+		for (int4 i = 0; i < trialIndex; i++) {
+			if (params.getTrial (i).isUsed ()) {
+				index++;
+			}
+		}
+		return index;
+	}
+	Element *emitSymbol(Element *symbollistElement, const std::string &name, Datatype *type, const Address &a,
+			const char *typelock, const char *readonly, const char *cat, int4 index,
+			bool add_reg_range, const std::function<void(Element *)> &childRegRange) {
+		auto mapsymElement = child (symbollistElement, "mapsym");
+		auto symbolElement = child (mapsymElement, "symbol", {
+			{ "name", name },
+			{ "typelock", typelock },
+			{ "namelock", "true" },
+			{ "readonly", readonly },
+			{ "cat", cat }
+		});
+		if (index >= 0) {
+			symbolElement->addAttribute ("index", to_string (index));
+		}
+		childType (symbolElement, type);
+		childAddr (mapsymElement, "addr", a);
+		auto rangelist = child (mapsymElement, "rangelist");
+		if (add_reg_range) {
+			childRegRange (rangelist);
+		}
+		return symbolElement;
+	}
+	void emit(Element *symbollistElement, bool used_sig_args, const std::function<void(Element *)> &childRegRange) {
+		std::vector<Element *> argsByIndex;
+		foreachVar ([&](RAnalVar *var) {
+			if (used_sig_args && var->isarg) {
+				return;
+			}
+			auto it = types.find (var);
+			if (it == types.end ()) {
+				return;
+			}
+			Datatype *type = it->second;
+			Address a = addr (var, var->isarg);
+			if (a.isInvalid ()) {
+				return;
+			}
+			uintb last = a.getOffset () + type->getSize () - 1;
+			if (last < a.getOffset ()) {
+				arch->addWarning ("Variable " + to_string (var->name) + " extends beyond the stackframe. Try changing its type to something smaller.");
+				return;
+			}
+			bool typelock = true;
+			if (overlaps (a, last)) {
+				arch->addWarning ("Detected overlap for variable " + to_string (var->name));
+				if (var->isarg) {
+					return;
+				}
+				typelock = false;
+			}
+
+			int4 index = var->isarg ? paramIndex (a, paramSize (var, type), var) : -1;
+			if (var->isarg && index < 0) {
+				return;
+			}
+			ranges.insertRange (a.getSpace (), a.getOffset (), last);
+
+			Element *symbolElement = emitSymbol (symbollistElement, var->name, type, a,
+				typelock ? "true" : "false", "true", var->isarg ? "0" : "-1", index,
+				var->isarg && var->kind == R_ANAL_VAR_KIND_REG, childRegRange);
+			if (var->isarg) {
+				if (argsByIndex.size () < index + 1) {
+					argsByIndex.resize (index + 1, nullptr);
+				}
+				argsByIndex[index] = symbolElement;
+			}
+		});
+		emitPlaceholders (symbollistElement, argsByIndex, childRegRange);
+	}
+	void emitPlaceholders(Element *symbollistElement, const std::vector<Element *> &argsByIndex,
+			const std::function<void(Element *)> &childRegRange) {
+		for (size_t i = 0; i < argsByIndex.size (); i++) {
+			if (argsByIndex[i]) {
+				continue;
+			}
+			auto trial = params.getTrial (i);
+			Datatype *type = arch->types->getBase (trial.getSize (), TYPE_UNKNOWN);
+			if (!type) {
+				continue;
+			}
+			emitSymbol (symbollistElement, "noname_" + to_string (i), type, trial.getAddress (),
+				"true", "false", "0", i, trial.getAddress ().getSpace () != arch->translate->getStackSpace (),
+				childRegRange);
+		}
+	}
+};
+
 #if R2_ABIVERSION >= 50
 struct SigArg {
 	std::string name;
@@ -370,105 +590,15 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 		extraPop = arch->translate->getDefaultSize ();
 	}
 
-	RangeList varRanges; // to check for overlaps
-	RList *vars = NULL;
-	
-	if (r_config_get_b (core->config, "r2ghidra.vars")) {
-		vars = r_anal_var_all_list (core->anal, fcn);
-	}
-	auto stackSpace = arch->getStackSpace ();
-
-	auto addrForVar = [&](RAnalVar *var, bool warn_on_fail) {
-		switch (var->kind) {
-		case R_ANAL_VAR_KIND_BPV:
-		{
-			uintb off;
-			// For arguments passed on stack, delta is positive (based on BP)
-			// For local variables, delta is negative
-			// The stack space coordinates are: 0 = return address, then arguments, then locals below
-			int delta = var->delta + fcn->bp_off - extraPop;
-			// Ensure we don't wrap around with incorrect offset calculation
-			if (delta >= 0) {
-				off = delta;
-			} else {
-				off = stackSpace->getHighest() + delta + 1;
-			}
-			return Address(stackSpace, off);
-		}
-		case R_ANAL_VAR_KIND_REG:
-		{
-			RRegItem *reg = r_reg_index_get(core->anal->reg, var->delta);
-			if (!reg) {
-				if (warn_on_fail) {
-					arch->addWarning("Register for arg " + to_string(var->name) + " not found");
-				}
-				return Address();
-			}
-			auto ret = arch->registerAddressFromR2Reg(reg->name);
-			if (ret.isInvalid() && warn_on_fail) {
-				arch->addWarning ("Failed to match register " + to_string(var->name) + " for arg " + to_string(var->name));
-			}
-			return ret;
-		}
-		case R_ANAL_VAR_KIND_SPV:
-			if (warn_on_fail) {
-				arch->addWarning("Var " + to_string(var->name) + " is stack pointer based, which is not supported for decompilation.");
-			}
-			return Address();
-		default:
-			if (warn_on_fail) {
-				arch->addWarning("Failed to get address for var " + to_string(var->name));
-			}
-			return Address();
-		}
-	};
-
-	std::map<RAnalVar *, Datatype *> var_types;
-
-	ParamActive params (false);
 	const int default_size = core->anal->config->bits / 8;
-	bool have_arg_vars = false;
 	bool used_sig_args = false;
 	bool have_sig_proto = false;
 	PrototypePieces sig_proto;
 
-	if (vars) {
-		r_list_foreach_cpp<RAnalVar>(vars, [&](RAnalVar *var) {
-			std::string typeError;
-			Datatype *type = var->type ? arch->getTypeFactory()->fromCString(var->type, &typeError) : nullptr;
-			if (!type) {
-				arch->addWarning("Failed to match type " + to_string(var->type) + " for variable " + to_string(var->name) + " to Decompiler type: " + typeError);
-				type = arch->types->getBase(default_size, TYPE_UNKNOWN);
-				if (!type)
-					return;
-			}
-			if (type->getSize() < 1) {
-				arch->addWarning("Type " + type->getName () + " of variable " + to_string(var->name) + " has size 0");
-				return;
-			}
-			var_types[var] = type;
-
-			if (!var->isarg) {
-				return;
-			}
-			have_arg_vars = true;
-			auto addr = addrForVar(var, true);
-			if (addr.isInvalid()) {
-				return;
-			}
-			int4 paramSize = type->getSize();
-			if (var->kind == R_ANAL_VAR_KIND_REG && paramSize < default_size) {
-				paramSize = default_size;
-			}
-			params.registerTrial(addr, paramSize);
-			int4 i = params.whichTrial(addr, paramSize);
-			params.getTrial(i).markActive();
-			params.getTrial(i).markUsed();
-		});
-	}
+	FunctionVars vars (core, arch, fcn, proto, extraPop, default_size);
 
 	if (proto) {
-		proto->deriveInputMap(&params);
+		proto->deriveInputMap(&vars.params);
 	}
 
 	auto childRegRange = [&](Element *e) {
@@ -487,143 +617,12 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 #if R2_ABIVERSION >= 50
 	Datatype *sig_ret_type = resolveFunctionSignatureReturnType (arch, fcn_name);
 	if (proto) {
-		processFunctionSignature (arch, fcn_name, proto, default_size, sig_ret_type, have_arg_vars,
-			symbollistElement, varRanges, used_sig_args, have_sig_proto, sig_proto, childRegRange);
+		processFunctionSignature (arch, fcn_name, proto, default_size, sig_ret_type, vars.have_arg_vars,
+			symbollistElement, vars.ranges, used_sig_args, have_sig_proto, sig_proto, childRegRange);
 	}
 #endif
 
-	if (vars) {
-		std::vector<Element *> argsByIndex;
-
-		r_list_foreach_cpp<RAnalVar>(vars, [&](RAnalVar *var) {
-			if (used_sig_args && var->isarg) {
-				return;
-			}
-			auto type_it = var_types.find(var);
-			if (type_it == var_types.end())
-				return;
-			Datatype *type = type_it->second;
-			bool typelock = true;
-
-			auto addr = addrForVar(var, var->isarg /* Already emitted this warning before */);
-			if (addr.isInvalid())
-				return;
-
-			uintb last = addr.getOffset();
-			if (type->getSize() > 0) {
-				last += type->getSize() - 1;
-			}
-			if (last < addr.getOffset()) {
-				arch->addWarning("Variable " + to_string(var->name) + " extends beyond the stackframe. Try changing its type to something smaller.");
-				return;
-			}
-			bool overlap = false;
-			for (const auto &range : varRanges) {
-				if (range.getSpace() != addr.getSpace()) {
-					continue;
-				}
-				if (range.getFirst() > last) {
-					continue;
-				}
-				if (range.getLast() < addr.getOffset()) {
-					continue;
-				}
-				overlap = true;
-				break;
-			}
-
-			if (overlap) {
-				arch->addWarning ("Detected overlap for variable " + to_string(var->name));
-				if (var->isarg) { // Can't have args with typelock=false, otherwise we get segfaults in the Decompiler
-					return;
-				}
-				typelock = false;
-			}
-
-			int4 paramIndex = -1;
-			if (var->isarg) {
-				int4 paramSize = type->getSize();
-				if (var->kind == R_ANAL_VAR_KIND_REG && paramSize < default_size) {
-					paramSize = default_size;
-				}
-				if (proto && !proto->possibleInputParam(addr, paramSize)) {
-					// Prevent segfaults in the Decompiler
-					arch->addWarning ("Removing arg " + to_string(var->name) + " because it doesn't fit into ProtoModel");
-					return;
-				}
-
-				int4 paramTrialIndex = params.whichTrial(addr, paramSize);
-				if (paramTrialIndex < 0) {
-					arch->addWarning ("Failed to determine arg index of " + to_string(var->name));
-					return;
-				}
-				paramIndex = 0;
-				for (int4 i = 0; i < paramTrialIndex; i++) {
-					if (!params.getTrial(i).isUsed()) {
-						continue;
-					}
-					paramIndex++;
-				}
-			}
-
-			varRanges.insertRange(addr.getSpace(), addr.getOffset(), last);
-
-			auto mapsymElement = child(symbollistElement, "mapsym");
-			auto symbolElement = child(mapsymElement, "symbol", {
-				{ "name", var->name },
-				{ "typelock", typelock ? "true" : "false" },
-				{ "namelock", "true" },
-				{ "readonly", "true" },
-				{ "cat", var->isarg ? "0" : "-1" }
-			});
-
-			if (var->isarg) {
-				if (argsByIndex.size() < paramIndex + 1) {
-					argsByIndex.resize(paramIndex + 1, nullptr);
-				}
-				argsByIndex[paramIndex] = symbolElement;
-				symbolElement->addAttribute("index", to_string(paramIndex < 0 ? 0 : paramIndex));
-			}
-
-			childType(symbolElement, type);
-			childAddr(mapsymElement, "addr", addr);
-
-			auto rangelist = child(mapsymElement, "rangelist");
-			if (var->isarg && var->kind == R_ANAL_VAR_KIND_REG)
-				childRegRange(rangelist);
-		});
-
-		// Add placeholder args in gaps
-		for (size_t i = 0; i < argsByIndex.size (); i++) {
-			if (argsByIndex[i]) {
-				continue;
-			}
-			auto trial = params.getTrial(i);
-
-			Datatype *type = arch->types->getBase(trial.getSize(), TYPE_UNKNOWN);
-			if (!type) {
-				continue;
-			}
-			auto mapsymElement = child(symbollistElement, "mapsym");
-			auto symbolElement = child(mapsymElement, "symbol", {
-					{ "name", "noname_" + to_string(i) },
-					{ "typelock", "true" },
-					{ "namelock", "true" },
-					{ "readonly", "false" },
-					{ "cat", "0" },
-					{ "index", to_string(i) }
-			});
-
-			childAddr(mapsymElement, "addr", trial.getAddress());
-			childType(symbolElement, type);
-
-			auto rangelist = child(mapsymElement, "rangelist");
-			if (trial.getAddress().getSpace() != arch->translate->getStackSpace())
-				childRegRange(rangelist);
-		}
-	}
-
-	r_list_free (vars);
+	vars.emit (symbollistElement, used_sig_args, childRegRange);
 
 	auto prototypeElement = child(functionElement, "prototype", {
 		{ "extrapop", to_string(extraPop) },
