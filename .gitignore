@@ -20,7 +20,7 @@ subprojects/.wraplock
 subprojects/ghidra-native
 subprojects/pugixml
 subprojects/zlib
-Makefile
+./Makefile
 config.h
 src/core_ghidra.dylib
 config.mk
