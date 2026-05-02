@@ -158,8 +158,7 @@ static void ParseNodeRxml(RXmlNode *node, ParseCodeXMLContext *ctx, std::ostream
 	const char *name = rxml_dom_name(node);
 	if (name && !strcmp(name, "break")) {
 		stream << "\n";
-		const char* indent_str = rxml_dom_get_attribute(node, "indent");
-		int indent = indent_str ? atoi(indent_str) : 0;
+		int indent = rxml_dom_attr_int(node, "indent", 0);
 		stream << std::string(indent, ' ');
 	} else if (name) {
 		auto it = annotators_rxml.find(name);
@@ -272,11 +271,7 @@ void AnnotateCommentOffset(ANNOTATOR_PARAMS) {
  **/
 #if R2GHIDRA_USE_RXML
 void AnnotateColorRxml(ANNOTATOR_RXML_PARAMS) {
-	const char* color_str = rxml_dom_get_attribute(node, "color");
-	if (!color_str) {
-		return;
-	}
-	int color = atoi(color_str);
+	int color = rxml_dom_attr_int(node, "color", -1);
 #else
 void AnnotateColor(ANNOTATOR_PARAMS) {
 	pugi::xml_attribute attr = node.attribute("color");
