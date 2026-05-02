@@ -25,7 +25,7 @@ R2GHIDRA_SRCS+=SleighInstruction.cpp
 R2G_PLUG_SRCS= anal_ghidra.cpp core_ghidra.cpp
 R2G_PLUG_SRCS+= anal_ghidra_plugin.o core_ghidra_plugin.o
 
-R2GHIDRA_USE_RXML?=1
+#R2GHIDRA_USE_RXML?=1
 CXXFLAGS+=-DR2GHIDRA_USE_RXML=$(R2GHIDRA_USE_RXML)
 
 ifeq ($(R2GHIDRA_USE_RXML),0)
