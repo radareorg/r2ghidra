@@ -25,6 +25,10 @@ R2GHIDRA_SRCS+=SleighInstruction.cpp
 R2G_PLUG_SRCS= anal_ghidra.cpp core_ghidra.cpp
 R2G_PLUG_SRCS+= anal_ghidra_plugin.o core_ghidra_plugin.o
 
+R2GHIDRA_USE_RXML?=1
+CXXFLAGS+=-DR2GHIDRA_USE_RXML=$(R2GHIDRA_USE_RXML)
+
+ifeq ($(R2GHIDRA_USE_RXML),0)
 PUGIXML_HOME=../subprojects/pugixml/src/
 PUGIXML_CFLAGS=-I$(PUGIXML_HOME)
 PUGIXML_SRCS= $(PUGIXML_HOME)/pugixml.cpp
@@ -35,6 +39,7 @@ $(PUGIXML_OBJS): $(PUGIXML_SRCS)
 	$(CXX) -c $(R2_LDFLAGS) $(CXXFLAGS) -o $@ $<
 
 CXXFLAGS+=$(PUGIXML_CFLAGS)
+endif
 # CXXFLAGS+=-DR2GHIDRA_SLEIGHHOME_DEFAULT=\"$(GHIDRA_HOME)\"
 
 R2GHIDRA_OBJS=$(subst .cpp,.o,$(R2GHIDRA_SRCS))
@@ -75,7 +80,7 @@ endif
 subprojects-zlib: ../subprojects/zlib/libz.a
 
 clean:
-	rm -f *.o $(PUGIXML_HOME)/*.o
+	rm -f *.o $(PUGIXML_OBJS)
 	rm -f *.o $(GHIDRA_DECOMPILER)/*.o
 	rm -f $(R2G_CORE_PLUGIN) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
 

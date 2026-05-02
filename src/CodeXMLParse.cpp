@@ -7,12 +7,15 @@
 #endif
 
 #define TEST_UNKNOWN_NODES 0
-#define USE_RXML 1 /* only for r2-5.8 */
+
+#ifndef R2GHIDRA_USE_RXML
+#define R2GHIDRA_USE_RXML 1
+#endif
 
 #include <funcdata.hh>
 #include <r_util.h>
-#if USE_RXML
-#include "rxml_dom.h"
+#if R2GHIDRA_USE_RXML
+#include "r_util/r_xml.h"
 #else
 #include <pugixml.hpp>
 #endif
@@ -46,12 +49,12 @@ struct ParseCodeXMLContext {
 	}
 };
 
-#if USE_RXML
+#if R2GHIDRA_USE_RXML
 #define ANNOTATOR_RXML_PARAMS RXmlNode *node, ParseCodeXMLContext *ctx, std::vector<RCodeMetaItem> *out
 #define ANNOTATOR_RXML [](ANNOTATOR_RXML_PARAMS) -> void
 
 void AnnotateOprefRxml(ANNOTATOR_RXML_PARAMS) {
-	const char *opref_str = node->get_attribute("opref");
+	const char *opref_str = rxml_dom_get_attribute(node, "opref");
 	if (!opref_str) {
 		return;
 	}
@@ -73,13 +76,13 @@ void AnnotateOprefRxml(ANNOTATOR_RXML_PARAMS) {
 }
 
 void AnnotateFunctionNameRxml(ANNOTATOR_RXML_PARAMS) {
-	const char *func_name = node->child_value();
+	const char *func_name = rxml_dom_child_value(node);
 	if (!func_name) {
 		return;
 	}
 	RCodeMetaItem annotation = {};
 	annotation.type = R_CODEMETA_TYPE_FUNCTION_NAME;
-	const char *opref_str = node->get_attribute("opref");
+	const char *opref_str = rxml_dom_get_attribute(node, "opref");
 	if (!opref_str) {
 		if (ctx->func->getName() == func_name) {
 			annotation.reference.name = strdup(ctx->func->getName().c_str());
@@ -111,7 +114,7 @@ void AnnotateFunctionNameRxml(ANNOTATOR_RXML_PARAMS) {
 }
 
 void AnnotateCommentOffsetRxml(ANNOTATOR_RXML_PARAMS) {
-	const char *off_str = node->get_attribute("off");
+	const char *off_str = rxml_dom_get_attribute(node, "off");
 	if (!off_str) {
 		return;
 	}
@@ -140,8 +143,8 @@ static const std::map<std::string, std::vector<void (*)(ANNOTATOR_RXML_PARAMS)>>
 };
 
 static void ParseNodeRxml(RXmlNode *node, ParseCodeXMLContext *ctx, std::ostream &stream, RCodeMeta *code) {
-	if (node->type == RXML_NODE_TYPE_TEXT) {
-		char* cleaned = strdup(node->text.c_str());
+	if (rxml_dom_is_text(node)) {
+		char* cleaned = strdup(node->text ? node->text : "");
 		if (strlen(cleaned) > 1) {
 			r_str_trim(cleaned);
 		}
@@ -152,13 +155,14 @@ static void ParseNodeRxml(RXmlNode *node, ParseCodeXMLContext *ctx, std::ostream
 
 	std::vector<RCodeMetaItem> annotations;
 
-	if (node->get_name() == "break") {
+	const char *name = rxml_dom_name(node);
+	if (name && !strcmp(name, "break")) {
 		stream << "\n";
-		const char* indent_str = node->get_attribute("indent");
+		const char* indent_str = rxml_dom_get_attribute(node, "indent");
 		int indent = indent_str ? atoi(indent_str) : 0;
 		stream << std::string(indent, ' ');
-	} else {
-		auto it = annotators_rxml.find(node->get_name());
+	} else if (name) {
+		auto it = annotators_rxml.find(name);
 		if (it != annotators_rxml.end()) {
 			auto &callbacks = it->second;
 			for (auto &callback : callbacks) {
@@ -170,7 +174,7 @@ static void ParseNodeRxml(RXmlNode *node, ParseCodeXMLContext *ctx, std::ostream
 		}
 	}
 
-	for (RXmlNode *child : node->get_children()) {
+	for (RXmlNode *child = rxml_dom_first_child(node); child; child = rxml_dom_next_sibling(child)) {
 		ParseNodeRxml(child, ctx, stream, code);
 	}
 
@@ -266,9 +270,9 @@ void AnnotateCommentOffset(ANNOTATOR_PARAMS) {
  * Translate Ghidra's color annotations, which are essentially
  * loose token classes of the high level decompiled source code.
  **/
-#if USE_RXML
+#if R2GHIDRA_USE_RXML
 void AnnotateColorRxml(ANNOTATOR_RXML_PARAMS) {
-	const char* color_str = node->get_attribute("color");
+	const char* color_str = rxml_dom_get_attribute(node, "color");
 	if (!color_str) {
 		return;
 	}
@@ -351,13 +355,14 @@ void AnnotateLocalVariable(Symbol *symbol, std::vector<RCodeMetaItem> *out) {
 	out->push_back (annotation);
 }
 
-#if USE_RXML
+#if R2GHIDRA_USE_RXML
 void AnnotateVariableRxml(ANNOTATOR_RXML_PARAMS) {
-	const char* varref_str = node->get_attribute("varref");
+	const char* varref_str = rxml_dom_get_attribute(node, "varref");
 	if (!varref_str) {
-		RXmlNode* parent = node->get_parent();
-		if (parent && parent->get_name() == "vardecl") {
-			const char* symref_str = parent->get_attribute("symref");
+		RXmlNode* parent = rxml_dom_parent(node);
+		const char *parent_name = rxml_dom_name(parent);
+		if (parent_name && !strcmp(parent_name, "vardecl")) {
+			const char* symref_str = rxml_dom_get_attribute(parent, "symref");
 			if (symref_str) {
 				ut64 symref = r_num_get(NULL, symref_str);
 				Symbol *symbol = ctx->symbols[symref];
@@ -405,7 +410,7 @@ void AnnotateVariable(ANNOTATOR_PARAMS) {
 	}
 }
 
-#if !USE_RXML
+#if !R2GHIDRA_USE_RXML
 static const std::map<std::string, std::vector <void (*)(ANNOTATOR_PARAMS)> > annotators = {
 	{ "statement", { AnnotateOpref } },
 	{ "op", { AnnotateOpref, AnnotateColor } },
@@ -490,7 +495,7 @@ static void ParseNode(pugi::xml_node node, ParseCodeXMLContext *ctx, std::ostrea
 #endif
 
 R_API RCodeMeta *ParseCodeXML(ghidra::Funcdata *func, const char *xml) {
-#if USE_RXML
+#if R2GHIDRA_USE_RXML
 	RXmlNode *doc = rxml_dom_parse(xml);
 	if (!doc) {
 		return nullptr;
@@ -504,14 +509,14 @@ R_API RCodeMeta *ParseCodeXML(ghidra::Funcdata *func, const char *xml) {
 	std::stringstream ss;
 	RCodeMeta *code = r_codemeta_new("");
 	if (!code) {
-#if USE_RXML
+#if R2GHIDRA_USE_RXML
 		rxml_dom_free(doc);
 #endif
 		return nullptr;
 	}
 	ParseCodeXMLContext ctx (func);
-#if USE_RXML
-	ParseNodeRxml (doc->children[0], &ctx, ss, code);
+#if R2GHIDRA_USE_RXML
+	ParseNodeRxml (rxml_dom_first_child(doc), &ctx, ss, code);
 	rxml_dom_free(doc);
 #else
 	ParseNode (doc.child ("function"), &ctx, ss, code);

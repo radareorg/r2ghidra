@@ -101,7 +101,15 @@ ghidra_incs = ghidra.get_variable('incs')
 libdecomp_static = ghidra.get_variable('libdecomp_static')
 slgh_static = ghidra.get_variable('slgh_static')
 
-pugixml = subproject('pugixml').get_variable('pugixml_dep')
+r2ghidra_deps = [r_core, zlib]
+r2ghidra_cpp_args = []
+if get_option('rxml')
+  r2ghidra_cpp_args += ['-DR2GHIDRA_USE_RXML=1']
+else
+  pugixml = subproject('pugixml').get_variable('pugixml_dep')
+  r2ghidra_deps += pugixml
+  r2ghidra_cpp_args += ['-DR2GHIDRA_USE_RXML=0']
+endif
 
 r2ghidra_core_sources = [
   r2ghidra_sources,
@@ -121,7 +129,8 @@ sleighc_sources = [
 r2ghidra_core_plugin = shared_library('core_r2ghidra',
   r2ghidra_core_sources,
   link_with: libdecomp_static,
-  dependencies: [r_core, zlib, pugixml],
+  dependencies: r2ghidra_deps,
+  cpp_args: r2ghidra_cpp_args,
   override_options : ['c_std=c11', 'cpp_std=c++20'],
   include_directories: [ghidra_incs, r2ghidra_incdirs],
   install: true,
