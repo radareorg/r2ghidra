@@ -677,6 +677,13 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	return funcsym;
 }
 
+FunctionSymbol *R2Scope::registerFunctionFlag(RFlagItem *flag) const {
+	RCoreLock core (arch->getCore ());
+	const char *name = (core->flags->realnames && flag->realname)
+		? flag->realname : flag->name;
+	return cache->addFunction (Address (arch->getDefaultCodeSpace (), flag->addr), name);
+}
+
 Symbol *R2Scope::registerFlag(RFlagItem *flag) const {
 	RCoreLock core (arch->getCore ());
 
@@ -808,6 +815,21 @@ Symbol *R2Scope::queryR2Absolute(ut64 addr, bool contain) const {
 	}
 	if (fcn) {
 		return registerFunction (fcn);
+	}
+
+	if (r_io_is_valid_offset (core->io, addr, R_PERM_X)) {
+		const RList *flags = r_flag_get_list (core->flags, addr);
+		if (flags) {
+			RListIter *iter;
+			void *pos;
+			r_list_foreach (flags, iter, pos) {
+				auto flag = reinterpret_cast<RFlagItem *>(pos);
+				if (flag->space && flag->space->name && !strcmp (flag->space->name, R_FLAGS_FS_SECTIONS)) {
+					continue;
+				}
+				return registerFunctionFlag (flag);
+			}
+		}
 	}
 
 	RFlagItem *glob = r_anal_global_get (core->anal, addr);

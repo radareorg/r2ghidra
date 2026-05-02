@@ -176,6 +176,7 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	if (cfg_var_fixups.GetBool (core->config)) {
 		PcodeFixupPreprocessor::fixupSharedReturnJumpToRelocs(function, func, core, arch);
 	}
+	PcodeFixupPreprocessor::fixupResolvedIndirectCalls(function, func, core, arch);
 
 	int res;
 #ifndef DEBUG_EXCEPTIONS

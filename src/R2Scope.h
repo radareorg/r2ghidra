@@ -28,6 +28,7 @@ private:
 	uint8 makeId() const { return (*next_id)++; }
 
 	FunctionSymbol *registerFunction(RAnalFunction *fcn) const;
+	FunctionSymbol *registerFunctionFlag(RFlagItem *flag) const;
 	Symbol *registerFlag(RFlagItem *flag) const;
 	Symbol *registerGlobalVar(RFlagItem *glob, const char *type_str) const;
 	Symbol *queryR2Absolute(ut64 addr, bool contain) const;
