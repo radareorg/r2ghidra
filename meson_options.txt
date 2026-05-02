@@ -1,0 +1,1 @@
+option('rxml', type: 'boolean', value: true, description: 'Use radare2 rxml APIs instead of pugixml')
