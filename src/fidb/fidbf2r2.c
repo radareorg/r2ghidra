@@ -1175,15 +1175,13 @@ static void print_c_header(FidDb *db, int limit, bool emit_fid_types) {
 		bool cxx_only = false;
 		bool needs_cxx_types = false;
 		char *decl = sig0? signature_declaration (sig0, f->key, &cxx_only, &needs_cxx_types): NULL;
-#if 0
 		printf ("/* fidb: fid=0x%016"PFMT64x" full_hash=0x%016"PFMT64x" specific_hash=0x%016"PFMT64x" code_unit_size=%u specific_hash_additional_size=%u entry=0x%016"PFMT64x" flags=0x%02x library=\"%s %s %s\" name=\"%s\" signature=\"%s\" path=\"%s\" */\n",
 			f->key, f->full_hash, f->specific_hash, f->code_unit_size,
 			f->specific_hash_additional_size, f->entry_point, f->flags,
 			family? family: "", version? version: "", variant? variant: "",
 			name? name: "", sig? sig: "", path? path: "");
-#endif
 		if (emit_fid_types && decl) {
-			if (0&&cxx_only) {
+			if (cxx_only) {
 				if (needs_cxx_types) {
 					printf ("#if defined(__cplusplus) && defined(GHIDRA_FIDB_DECLARE_CXX_MEMBERS)\n%s\n#endif\n", decl);
 				} else {
