@@ -4,21 +4,21 @@ CC ?= cc
 CFLAGS += -Wall -Wextra -g $(shell $(PKG_CONFIG) --cflags r_util r_bin)
 LDFLAGS += $(shell $(PKG_CONFIG) --libs r_util r_bin)
 
-all: fidbf2r2
+all: r2fidb
 
-fidbf2r2: r2fidb.c
+r2fidb: r2fidb.c
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
-run: fidbf2r2
-	./fidbf2r2 vs2019_x86.fidbf
+run: r2fidb
+	./r2fidb vs2019_x86.fidbf
 
-script: fidbf2r2
-	./fidbf2r2 -r vs2019_x86.fidbf > vs2019_x86.r2
+script: r2fidb
+	./r2fidb -r vs2019_x86.fidbf > vs2019_x86.r2
 
-types: fidbf2r2
-	./fidbf2r2 -c vs2019_x86.fidbf > vs2019_x86_fid.h
+types: r2fidb
+	./r2fidb -c vs2019_x86.fidbf > vs2019_x86_fid.h
 
 clean:
-	rm -f fidbf2r2 vs2019_x86.r2 vs2019_x86_fid.h
+	rm -f r2fidb vs2019_x86.r2 vs2019_x86_fid.h
 
 .PHONY: all run script clean
