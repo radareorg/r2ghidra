@@ -1252,7 +1252,7 @@ static void print_r2_script(FidDb *db, int limit) {
 }
 
 static void usage(const char *argv0) {
-	printf ("Usage: %s [-r|-F|-c] [-f] [-n limit] [file.fidbf]\n", argv0);
+	printf ("Usage: %s [-r|-F|-c] [-f] [-n limit] file.fidbf\n", argv0);
 	printf ("  -r        emit an r2 script with za/zs commands\n");
 	printf ("  -F        enumerate functions as TSV\n");
 	printf ("  -c        emit a compiler-readable .h with recovered signatures and FID comments\n");
@@ -1261,34 +1261,46 @@ static void usage(const char *argv0) {
 }
 
 int main(int argc, char **argv) {
-	const char *file = "vs2019_x86.fidbf";
 	bool emit_r2 = false;
 	bool emit_tsv = false;
 	bool emit_c = false;
 	bool emit_fid_types = false;
 	int limit = -1;
-	for (int i = 1; i < argc; i++) {
-		if (!strcmp (argv[i], "-r")) {
+	RGetopt opt;
+	int c;
+
+	r_getopt_init (&opt, argc, (const char **)argv, "rFcfhn:");
+	while ((c = r_getopt_next (&opt)) != -1) {
+		switch (c) {
+		case 'r':
 			emit_r2 = true;
-		} else if (!strcmp (argv[i], "-F")) {
+			break;
+		case 'F':
 			emit_tsv = true;
-		} else if (!strcmp (argv[i], "-c")) {
+			break;
+		case 'c':
 			emit_c = true;
-		} else if (!strcmp (argv[i], "-f")) {
+			break;
+		case 'f':
 			emit_fid_types = true;
-		} else if (!strcmp (argv[i], "-n")) {
-			if (++i >= argc) {
-				usage (argv[0]);
-				return 1;
-			}
-			limit = atoi (argv[i]);
-		} else if (!strcmp (argv[i], "-h")) {
+			break;
+		case 'n':
+			limit = atoi (opt.arg);
+			break;
+		case 'h':
+		case 0:
 			usage (argv[0]);
 			return 0;
-		} else {
-			file = argv[i];
+		default:
+			usage (argv[0]);
+			return 1;
 		}
 	}
+	if (opt.ind + 1 != argc) {
+		usage (argv[0]);
+		return 1;
+	}
+	const char *file = argv[opt.ind];
 	FidFile ff = {0};
 	FidDb db = {0};
 	if (!fid_load_file (file, &ff)) {
