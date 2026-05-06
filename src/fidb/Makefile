@@ -6,7 +6,7 @@ LDFLAGS += $(shell $(PKG_CONFIG) --libs r_util r_bin)
 
 all: fidbf2r2
 
-fidbf2r2: fidbf2r2.c
+fidbf2r2: r2fidb.c
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
 run: fidbf2r2
