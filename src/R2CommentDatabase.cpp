@@ -5,8 +5,6 @@
 
 #include <r_core.h>
 
-#include "R2Utils.h"
-
 R2CommentDatabase::R2CommentDatabase(R2Architecture *arch) : arch (arch), cache_filled (false) {
 }
 
@@ -24,16 +22,29 @@ void R2CommentDatabase::fillCache(const Address &fad) const {
 			return;
 		}
 	}
-	r_interval_tree_foreach_cpp<RAnalMetaItem>(&core->anal->meta, [fad, fcn, this](RIntervalNode *node, RAnalMetaItem *meta) {
-		if (!meta || meta->type != R_META_TYPE_COMMENT || !meta->str) {
-			return;
+	ut64 min_addr = r_anal_function_min_addr (fcn);
+	ut64 size = r_anal_function_linear_size (fcn);
+	if (size < 1) {
+		return;
+	}
+	RVecIntervalNodePtr *nodes = r_meta_get_all_intersect (core->anal, min_addr, size, R_META_TYPE_COMMENT);
+	if (nodes) {
+		RIntervalNode **it;
+		R_VEC_FOREACH (nodes, it) {
+			RIntervalNode *node = *it;
+			RAnalMetaItem *meta = reinterpret_cast<RAnalMetaItem *>(node->data);
+			if (!meta || !meta->str) {
+				continue;
+			}
+			if (!r_anal_function_contains (fcn, node->start)) {
+				continue;
+			}
+			cache.addCommentNoDuplicate (
+				Comment::user2, fad, Address (arch->getDefaultCodeSpace (), node->start), meta->str);
+			// cache.addComment (Comment::header, fad, Address (arch->getDefaultCodeSpace (), node->start), meta->str);
 		}
-		if (!r_anal_function_contains (fcn, node->start)) {
-			return;
-		}
-		cache.addComment (Comment::user2, fad, Address(arch->getDefaultCodeSpace(), node->start), meta->str);
-		// cache.addComment (Comment::header, fad, Address(arch->getDefaultCodeSpace(), node->start), meta->str);
-	});
+		RVecIntervalNodePtr_free (nodes);
+	}
 	cache_filled = true;
 }
 
