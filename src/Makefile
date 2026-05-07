@@ -80,6 +80,7 @@ endif
 subprojects-zlib: ../subprojects/zlib/libz.a
 
 clean:
+	$(MAKE) -C fidb clean
 	rm -f *.o $(PUGIXML_OBJS)
 	rm -f *.o $(GHIDRA_DECOMPILER)/*.o
 	rm -f $(R2G_CORE_PLUGIN) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
@@ -116,6 +117,7 @@ PLUGDIR?=$(R2_LIBR_PLUGINS)
 install:
 	mkdir -p $(DESTDIR)$(BINDIR)
 	cp -f sleighc $(DESTDIR)$(BINDIR)
+	cp -f fidb/r2fidb $(DESTDIR)$(BINDIR)
 	mkdir -p $(DESTDIR)$(PLUGDIR)
 	for a in *.$(R2_LIBEXT) ; do rm -f "$(DESTDIR)/$(PLUGDIR)/$$a" ; done
 	cp -f *.$(R2_LIBEXT) $(DESTDIR)$(PLUGDIR)
@@ -128,6 +130,7 @@ endif
 uninstall:
 	rm -f $(PLUGDIR)/*ghidra*.$(R2_LIBEXT)
 	rm -f $(DESTDIR)/$(BINDIR)/sleighc
+	rm -f $(DESTDIR)/$(BINDIR)/r2fidb
 
 user-install:
 	rm -f $(PLUGDIR)/asm*ghidra*.$(R2_LIBEXT)
