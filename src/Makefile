@@ -83,10 +83,11 @@ clean:
 	$(MAKE) -C fidb clean
 	rm -f *.o $(PUGIXML_OBJS)
 	rm -f *.o $(GHIDRA_DECOMPILER)/*.o
-	rm -f $(R2G_CORE_PLUGIN) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc
+	rm -f $(R2G_CORE_PLUGIN) $(R2G_ASM_PLUGIN) $(R2G_ANAL_PLUGIN) sleighc fidb/r2fidb
 
 plugins: $(R2G_CORE_PLUGIN) sleighc
 	$(MAKE) sign
+	$(MAKE) -C fidb
 
 deps=$(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(R2G_PLUGIN_OBJS) $(PUGIXML_OBJS)
 
