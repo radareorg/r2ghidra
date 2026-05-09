@@ -215,6 +215,10 @@ struct FunctionVars {
 			int4 size = paramSize (var, type);
 			params.registerTrial (a, size);
 			int4 i = params.whichTrial (a, size);
+			if (i < 0) {
+				arch->addWarning ("Failed to register trial for arg " + to_string (var->name));
+				return;
+			}
 			params.getTrial (i).markActive ();
 			params.getTrial (i).markUsed ();
 		});

@@ -1,0 +1,22 @@
+Fix out-of-bounds when ParamActive::whichTrial is called with sz<=1.
+
+The original logic returned -1 as soon as the first registered trial did
+not overlap, whenever the queried range was 1 byte or less.  That's wrong:
+when sz<=1 the endaddr overlap check is trivially redundant (endaddr ==
+addr), so we should simply continue to the next trial instead of bailing
+out.  Returning -1 prematurely makes callers index a vector with -1,
+crashing under _GLIBCXX_ASSERTIONS (or causing UB / heap corruption
+otherwise).  See rizinorg/rz-ghidra#385.
+
+diff --git a/src/decompiler/fspec.cc b/src/decompiler/fspec.cc
+--- a/src/decompiler/fspec.cc
++++ b/src/decompiler/fspec.cc
+@@ -1984,7 +1984,7 @@ int4 ParamActive::whichTrial(const Address &addr,int4 sz) const
+ {
+   for(int4 i=0;i<trial.size();++i) {
+     if (addr.overlap(0,trial[i].getAddress(),trial[i].getSize())>=0) return i;
+-    if (sz<=1) return -1;
++    if (sz<=1) continue;
+     Address endaddr = addr + (sz-1);
+     if (endaddr.overlap(0,trial[i].getAddress(),trial[i].getSize())>=0) return i;
+   }
