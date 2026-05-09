@@ -1447,13 +1447,23 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 			}
 			case FlowType::CONDITIONAL_JUMP:
 				anal_op->type = R_ANAL_OP_TYPE_CJMP;
-				anal_op->jump = ins->getFlows().begin()->getOffset();
+				{
+					auto flows = ins->getFlows();
+					if (!flows.empty()) {
+						anal_op->jump = flows.begin()->getOffset();
+					}
+				}
 				anal_op->fail = ins->getFallThrough().getOffset();
 				break;
 			case FlowType::CALL_TERMINATOR: anal_op->eob = true;
 			case FlowType::UNCONDITIONAL_CALL:
 				anal_op->type = R_ANAL_OP_TYPE_CALL;
-				anal_op->jump = ins->getFlows().begin()->getOffset();
+				{
+					auto flows = ins->getFlows();
+					if (!flows.empty()) {
+						anal_op->jump = flows.begin()->getOffset();
+					}
+				}
 				anal_op->fail = ins->getFallThrough().getOffset();
 				break;
 			case FlowType::CONDITIONAL_COMPUTED_CALL:
@@ -1472,7 +1482,12 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 			}
 			case FlowType::CONDITIONAL_CALL:
 				anal_op->type |= R_ANAL_OP_TYPE_CCALL;
-				anal_op->jump = ins->getFlows().begin()->getOffset();
+				{
+					auto flows = ins->getFlows();
+					if (!flows.empty()) {
+						anal_op->jump = flows.begin()->getOffset();
+					}
+				}
 				anal_op->fail = ins->getFallThrough().getOffset();
 				break;
 			case FlowType::COMPUTED_CALL_TERMINATOR:

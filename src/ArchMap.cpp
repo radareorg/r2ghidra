@@ -255,7 +255,6 @@ std::string SleighIdFromSleighAsmConfig(RCore *core, const char *cpu, int bits, 
 	if (arch_it != arch_map.end()) {
 		return arch_it->second.Map (core);
 	}
-	const ArchMapper *am = &arch_it->second;
 	// short form if possible
 	std::string low_cpu = tolower (cpu);
 	for (const auto &lang : langs) {

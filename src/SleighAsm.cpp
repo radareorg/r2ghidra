@@ -61,7 +61,11 @@ static void parseProto(const Element *el, std::vector<std::string> &arg_names, s
 			const List &flist(subnode->getChildren());
 			for (auto fiter = flist.begin(); fiter != flist.end (); ++fiter) {
 				const Element *subel = *fiter;
-				const Element *reg = *subel->getChildren().begin();
+				const auto &subchildren = subel->getChildren();
+				if (subchildren.empty()) {
+					continue;
+				}
+				const Element *reg = *subchildren.begin();
 				if (subel->getName() == "pentry" && reg->getName() == "register") {
 					int4 num = subel->getNumAttributes(), i = 0;
 					for (; i < num; i++) {
@@ -517,6 +521,9 @@ std::vector<R2Reg> SleighAsm::getRegs(void) {
 	std::vector<R2Reg> r2_reglist;
 	trans.getAllRegisters(reglist);
 
+	if (reglist.empty()) {
+		return r2_reglist;
+	}
 	size_t offset = 0, offset_last = reglist.begin()->first.size;
 	size_t sleigh_offset = reglist.begin()->first.offset;
 	size_t sleigh_last = reglist.begin()->first.size + sleigh_offset;
