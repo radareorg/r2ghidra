@@ -2,7 +2,6 @@
 
 #include "R2Architecture.h"
 #include "CodeXMLParse.h"
-#include "PrettyXmlEncode.h"
 #include "R2PrintC.h"
 #include "SleighAsm.h"
 #include "ArchMap.h"
