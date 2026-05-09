@@ -35,7 +35,6 @@ G_DECOMPILER+=paramid.cc signature.cc transform.cc string_ghidra.cc
 G_DECOMPILER+=ghidra_arch.cc inject_ghidra.cc ghidra_translate.cc
 G_DECOMPILER+=loadimage_ghidra.cc typegrp_ghidra.cc database_ghidra.cc
 G_DECOMPILER+=ghidra_context.cc cpool_ghidra.cc comment_ghidra.cc
-G_DECOMPILER+=signature_ghidra.cc
 #  G_DECOMPILER+=ghidra_process.cc
 
 G_DECOMPILER+= $(GHIDRA_LIBDECOMP_SRCS)
