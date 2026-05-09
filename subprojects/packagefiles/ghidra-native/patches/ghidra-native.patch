@@ -1,0 +1,12 @@
+diff --git a/src/decompiler/fspec.cc b/src/decompiler/fspec.cc
+--- a/src/decompiler/fspec.cc
++++ b/src/decompiler/fspec.cc
+@@ -1984,7 +1984,7 @@ int4 ParamActive::whichTrial(const Address &addr,int4 sz) const
+ {
+   for(int4 i=0;i<trial.size();++i) {
+     if (addr.overlap(0,trial[i].getAddress(),trial[i].getSize())>=0) return i;
+-    if (sz<=1) return -1;
++    if (sz<=1) continue;
+     Address endaddr = addr + (sz-1);
+     if (endaddr.overlap(0,trial[i].getAddress(),trial[i].getSize())>=0) return i;
+   }
