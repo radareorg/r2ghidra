@@ -2597,6 +2597,19 @@ ARM:LEBE:32:v8LEInstruction
 BPF:LE:32:default
 DATA:BE:64:default
 DATA:LE:64:default
+Dalvik:LE:32:DEX_Android10
+Dalvik:LE:32:DEX_Android11
+Dalvik:LE:32:DEX_Android12
+Dalvik:LE:32:DEX_Android13
+Dalvik:LE:32:DEX_Base
+Dalvik:LE:32:DEX_KitKat
+Dalvik:LE:32:DEX_Lollipop
+Dalvik:LE:32:DEX_Nougat
+Dalvik:LE:32:DEX_Oreo
+Dalvik:LE:32:DEX_Pie
+Dalvik:LE:32:Marshmallow
+Dalvik:LE:32:ODEX_KitKat
+Dalvik:LE:32:default
 JVM:BE:32:default
 MCS96:LE:16:default
 MIPS:BE:32:R6
@@ -2689,6 +2702,17 @@ z8401x:LE:16:default
 EOF
 CMDS=<<EOF
 pdgs
+EOF
+RUN
+
+NAME=dalvik_sleigh_id
+FILE=-
+EXPECT=<<EOF
+Dalvik:LE:32:DEX_Base:
+EOF
+CMDS=<<EOF
+e asm.arch=dalvik
+pdgss
 EOF
 RUN
 
