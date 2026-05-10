@@ -15,6 +15,8 @@
 
 using namespace ghidra;
 
+#include "Dalvik.inc.cpp"
+
 // maps radare2 calling conventions to decompiler proto models
 static const std::map<std::string, std::string> cc_map = {
 	{ "cdecl", "__cdecl" },
@@ -99,11 +101,17 @@ Translate *R2Architecture::buildTranslator(DocumentStorage &store) {
 	return ret;
 }
 
+PcodeInjectLibrary *R2Architecture::buildPcodeInjectLibrary() {
+	// Dalvik-only dynamic inject handling lives in Dalvik.inc.cpp; non-Dalvik payloads delegate normally.
+	return buildR2DalvikPcodeInjectLibrary (this);
+}
+
 ContextDatabase *R2Architecture::getContextDatabase() {
 	return context;
 }
 
 void R2Architecture::postSpecFile() {
+	registerR2DalvikPostSpecInjects (this);
 	RCoreLock core(getCore());
 	r_list_foreach_cpp<RAnalFunction>(core->anal->fcns, [&](RAnalFunction *func) {
 		if (func->is_noreturn) {

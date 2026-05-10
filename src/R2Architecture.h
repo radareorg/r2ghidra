@@ -47,6 +47,7 @@ protected:
 	Translate *buildTranslator(DocumentStorage &store) override;
 	void buildLoader(DocumentStorage &store) override;
 	Scope *buildDatabase(DocumentStorage &store) override;
+	PcodeInjectLibrary *buildPcodeInjectLibrary() override;
 	void buildTypegrp(DocumentStorage &store) override;
 	void buildCoreTypes(DocumentStorage &store) override;
 	void buildCommentDB(DocumentStorage &store) override;
