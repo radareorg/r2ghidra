@@ -98,16 +98,60 @@ static const std::map<std::string, ArchMapper> arch_map = {
 	{ "wasm", { S("wasm"), S("default"), B(32) } },
 	{ "6502", { S("6502"), S("default"), B(16) } },
 	{ "65c02", { S("65c02"), S("default"), B(16) } },
+	{ "loongarch", {
+		S("Loongarch"),
+		CUSTOM_FLAVOR ((RCore *core) {
+			return BITS == 32 ? "ilp32d" : "lp64d";
+		}),
+		CUSTOM_BITS ((RCore *core) {
+			return BITS == 32 ? 32 : 64;
+		}),
+		E(false), 4, 4
+	}},
 	{ "java", { S("JVM"), S("default"), bits_mapper_default, E(true) } },
 	{ "hppa", { S("pa-risc") } },
 	{ "riscv", { S("RISCV") } },
 	{ "toy", { S("Toy") } },
 	{ "ppc", { S("PowerPC") } },
 	{ "8051", { S("8051"), S("default"), B(16), E(true) }},
-	{ "6805", { S("6805") } },
+	{ "6800", { S("6809"), S("default"), B(16), E(true) } },
+	{ "6801", { S("6809"), S("default"), B(16), E(true) } },
+	{ "6803", { S("6809"), S("default"), B(16), E(true) } },
+	{ "6805", { S("6805"), S("default"), B(16), E(true) } },
+	{ "6808", { S("6809"), S("default"), B(16), E(true) } },
+	{ "6809", { S("6809"), S("default"), B(16), E(true) } },
+	{ "6309", { S("H6309"), S("default"), B(16), E(true) } },
+	{ "h6309", { S("H6309"), S("default"), B(16), E(true) } },
+	{ "m680x", {
+		CUSTOM_BASEID ((RCore *core) {
+			const char *cpu = core? r_config_get (core->config, "asm.cpu"): nullptr;
+			std::string cpuname = cpu? tolower (cpu): std::string ();
+			if (cpuname == "6805") {
+				return "6805";
+			}
+			if (cpuname == "6309" || cpuname == "h6309") {
+				return "H6309";
+			}
+			return "6809";
+		}),
+		S("default"), B(16), E(true)
+	}},
 	{ "cr16", { S("CR16C") } },
+	{ "m16c", {
+		CUSTOM_BASEID ((RCore *core) {
+			const char *cpu = core? r_config_get (core->config, "asm.cpu"): nullptr;
+			std::string cpuname = cpu? tolower (cpu): std::string ();
+			if (cpuname == "m16c80" || cpuname == "m16c_80" || cpuname == "m16c/80") {
+				return "M16C/80";
+			}
+			return "M16C/60";
+		}),
+		S("default"), B(16), E(false)
+	}},
+	{ "m16c60", { S("M16C/60"), S("default"), B(16), E(false) } },
+	{ "m16c80", { S("M16C/80"), S("default"), B(16), E(false) } },
 	{ "mcs96", { S("MCS96"), S("default"), B(16) } },
-	{ "m8c", { S("M8C"), S("default"), B(16) } },
+	{ "m8c", { S("M8C"), S("default"), B(16), E(true) } },
 	{ "pic24", { S("PIC-24F"), S("default"), B(24) } },
 	{ "z80", { S("z80"), S("default"), B(8) } },
 	{ "xtensa", { S("Xtensa"), S("default"), B(32) } },

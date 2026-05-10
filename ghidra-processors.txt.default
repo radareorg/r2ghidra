@@ -6,6 +6,10 @@ sBPF
 Atmel
 AARCH64
 ARM
+Loongarch
+M16C
+M8C
+MC6800
 MIPS
 MCS96
 PowerPC
