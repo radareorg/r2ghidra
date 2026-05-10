@@ -4,6 +4,7 @@
 #include <error.hh>
 #include "R2Architecture.h"
 #include "R2Utils.h"
+#include <cstring>
 #include <map>
 #include <functional>
 
@@ -84,6 +85,36 @@ class ArchMapper {
 #define CUSTOM_MINOPSZ(lambda) std::function<int(RCore *)>([]lambda)
 #define CUSTOM_MAXOPSZ(lambda) std::function<int(RCore *)>([]lambda)
 
+static std::string DalvikFlavorFromCore(RCore *core) {
+	if (!core) {
+		return "DEX_Base";
+	}
+	RBinInfo *info = r_bin_get_info (core->bin);
+	if (!info || !info->arch || strcmp (info->arch, "dalvik")) {
+		return "DEX_Base";
+	}
+	const char *version = info->bclass;
+	if (!version) {
+		return "DEX_Base";
+	}
+	if (!strncmp (version, "041", 3)) {
+		return "DEX_Android13";
+	}
+	if (!strncmp (version, "040", 3)) {
+		return "DEX_Android10";
+	}
+	if (!strncmp (version, "039", 3)) {
+		return "DEX_Pie";
+	}
+	if (!strncmp (version, "038", 3)) {
+		return "DEX_Oreo";
+	}
+	if (!strncmp (version, "037", 3)) {
+		return "DEX_Nougat";
+	}
+	return "DEX_Base";
+}
+
 // keys = asm.arch values
 static const std::map<std::string, ArchMapper> arch_map = {
 	{ "x86", {
@@ -93,7 +124,9 @@ static const std::map<std::string, ArchMapper> arch_map = {
 		}), bits_mapper_default, E(false), 1, 16
 	}},
 	{ "mips", { S("MIPS"), S("default"), bits_mapper_default, big_endian_mapper_default, 4, 4 }},
-	{ "dalvik", { S("Dalvik"), S("default"), B(32), E(false), 2, 10 }},
+	{ "dalvik", { S("Dalvik"), CUSTOM_FLAVOR((RCore *core) {
+		return DalvikFlavorFromCore (core);
+	}), B(32), E(false), 2, 10 }},
 	{ "hexagon", { S("hexagon"), S("default"), B(32), E(false) } },
 	{ "wasm", { S("wasm"), S("default"), B(32) } },
 	{ "6502", { S("6502"), S("default"), B(16) } },
