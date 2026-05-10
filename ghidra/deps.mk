@@ -121,7 +121,7 @@ GHIDRA_SLEIGH_FILES=$(GHIDRA_SLEIGH_HOME)/*.cspec
 GHIDRA_SLEIGH_FILES+=$(GHIDRA_SLEIGH_HOME)/*.ldefs
 GHIDRA_SLEIGH_FILES+=$(GHIDRA_SLEIGH_HOME)/*.pspec
 
-../ghidra-processors.txt:
+../ghidra-processors.txt: ../ghidra-processors.txt.default
 	cp -f ../ghidra-processors.txt.default ../ghidra-processors.txt
 
 sleigh-build: sleighc ../ghidra-processors.txt
@@ -129,7 +129,7 @@ sleigh-build: sleighc ../ghidra-processors.txt
 
 GHIDRA_PROCS=$(GHIDRA_SLEIGH_HOME)/*/*/*
 
-sleigh-install:
+sleigh-install: ../ghidra-processors.txt
 	mkdir -p "$(D)"
 	for a in DATA $(shell cat ../ghidra-processors.txt) ; do \
 		for b in cspec ldefs sla pspec ; do \

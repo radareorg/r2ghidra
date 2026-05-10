@@ -14,7 +14,7 @@ purge: clean
 	$(MAKE) uninstall
 	$(MAKE) user-uninstall
 
-ghidra-processors.txt:
+ghidra-processors.txt: ghidra-processors.txt.default
 	cp -f ghidra-processors.txt.default ghidra-processors.txt
 
 asan: ghidra-processors.txt
@@ -48,7 +48,7 @@ mrproper: clean
 	rm -rf subprojects/pugixml
 	rm -rf subprojects/zlib
 
-r2ghidra_sleigh.zip dist:
+r2ghidra_sleigh.zip dist: ghidra-processors.txt
 	rm -rf tmp && mkdir -p tmp
 	$(MAKE) -C ghidra user-install DH=$(shell pwd)/tmp/r2ghidra_sleigh-$(VERSION)
 	cd tmp && zip -r ../r2ghidra_sleigh-$(VERSION).zip *

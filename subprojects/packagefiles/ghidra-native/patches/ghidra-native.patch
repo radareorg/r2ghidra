@@ -1,4 +1,25 @@
+diff --git a/src/Processors/Dalvik/data/languages/Dalvik_Base.cspec b/src/Processors/Dalvik/data/languages/Dalvik_Base.cspec
+index ba8bb33..aa7aee1 100644
+--- a/src/Processors/Dalvik/data/languages/Dalvik_Base.cspec
++++ b/src/Processors/Dalvik/data/languages/Dalvik_Base.cspec
+@@ -47,13 +47,11 @@
+ 				<register name="fp"/>
+ 				<varnode space="register" offset="0x1000" size="0x400"/>
+ 			</unaffected>
+-            <pcode inject="uponentry" dynamic="true"/>  <!-- Dynamically generate p-code to map input to registers -->
++			<!-- The native decompiler cannot service Ghidra's Java-side Dalvik dynamic injects. -->
+ 		</prototype>
+ 	</default_proto>
+ 
+-   <callotherfixup targetop="moveRangeToIV">
+-    <pcode dynamic="true"/>
+-   </callotherfixup>
++	<!-- Leave moveRangeToIV as an unresolved userop instead of failing on a missing dynamic inject. -->
+    
+ </compiler_spec>
+ 
 diff --git a/src/decompiler/fspec.cc b/src/decompiler/fspec.cc
+index d87eb2f..b3a11e5 100644
 --- a/src/decompiler/fspec.cc
 +++ b/src/decompiler/fspec.cc
 @@ -1984,7 +1984,7 @@ int4 ParamActive::whichTrial(const Address &addr,int4 sz) const
