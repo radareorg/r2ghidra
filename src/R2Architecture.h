@@ -51,6 +51,7 @@ protected:
 	void buildTypegrp(DocumentStorage &store) override;
 	void buildCoreTypes(DocumentStorage &store) override;
 	void buildCommentDB(DocumentStorage &store) override;
+	void buildConstantPool(DocumentStorage &store) override;
 	void postSpecFile() override;
 	void buildAction(DocumentStorage &store) override;
 };

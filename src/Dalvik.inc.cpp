@@ -1,14 +1,337 @@
 /* r2ghidra - LGPL - Copyright 2019-2026 - pancake */
 
 #include <inject_sleigh.hh>
+#include <marshal.hh>
 #include <userop.hh>
 
+#include <iomanip>
+#include <sstream>
+
 namespace {
+
+enum R2DalvikCpoolTag {
+	R2_DALVIK_CPOOL_METHOD = 0,
+	R2_DALVIK_CPOOL_FIELD = 1,
+	R2_DALVIK_CPOOL_STATIC_FIELD = 2,
+	R2_DALVIK_CPOOL_STATIC_METHOD = 3,
+	R2_DALVIK_CPOOL_STRING = 4,
+	R2_DALVIK_CPOOL_CLASSREF = 5,
+	R2_DALVIK_CPOOL_ARRAYLENGTH = 6,
+	R2_DALVIK_CPOOL_SUPER = 7,
+	R2_DALVIK_CPOOL_INSTANCEOF = 8,
+};
 
 // Dalvik-only: detect whether this r2ghidra architecture is using a Dalvik SLEIGH id.
 static bool isR2DalvikArchitecture(const Architecture *arch) {
 	const R2Architecture *r2arch = dynamic_cast<const R2Architecture *> (arch);
 	return r2arch && r2arch->getTarget ().rfind ("Dalvik:", 0) == 0;
+}
+
+// Dalvik-only: keep decompiler tokens printable in C-like output.
+static std::string r2DalvikToken(const std::string &name) {
+	std::string result;
+	result.reserve (name.size ());
+	for (char ch : name) {
+		unsigned char uch = static_cast<unsigned char> (ch);
+		if (isalnum (uch) || ch == '_') {
+			result.push_back (ch);
+		} else {
+			result.push_back ('_');
+		}
+	}
+	if (result.empty ()) {
+		return "dex_ref";
+	}
+	if (isdigit (static_cast<unsigned char> (result[0]))) {
+		result.insert (result.begin (), '_');
+	}
+	return result;
+}
+
+// Dalvik-only: turn a DEX type descriptor into a stable C token.
+static std::string r2DalvikDescriptorToken(const std::string &descriptor) {
+	if (descriptor.size () > 2 && descriptor[0] == 'L' && descriptor.back () == ';') {
+		return r2DalvikToken (descriptor.substr (1, descriptor.size () - 2));
+	}
+	return r2DalvikToken (descriptor);
+}
+
+class R2DalvikConstantPool : public ConstantPoolInternal {
+	R2Architecture *arch;
+
+	// Dalvik-only: use the current rbin plugin just like r2's Dalvik disassembler does.
+	std::string r2BinName(int type, uint4 index) const {
+		std::string result;
+		RCoreLock core (arch->getCore ());
+		if (!core || !core->bin || !core->bin->cur) {
+			return result;
+		}
+		RBinFile *bf = core->bin->cur;
+		RBinPlugin *plugin = r_bin_file_cur_plugin (bf);
+		if (!plugin || !plugin->get_name) {
+			return result;
+		}
+		const char *name = plugin->get_name (bf, type, index, false);
+		if (name) {
+			result = name;
+			if (plugin->meta.name && !strcmp (plugin->meta.name, "dex") && type != 'p') {
+				free (const_cast<char *> (name));
+			}
+		}
+		return result;
+	}
+
+	// Dalvik-only: use rbin's indexed offset resolver for DEX strings and fields.
+	ut64 r2BinOffset(int type, uint4 index) const {
+		RCoreLock core (arch->getCore ());
+		if (!core || !core->bin || !core->bin->cur) {
+			return UT64_MAX;
+		}
+		RBinFile *bf = core->bin->cur;
+		RBinPlugin *plugin = r_bin_file_cur_plugin (bf);
+		if (!plugin || !plugin->get_offset) {
+			return UT64_MAX;
+		}
+		return plugin->get_offset (bf, type, index);
+	}
+
+	// Dalvik-only: read a DEX string payload from an offset already resolved by rbin.
+	std::string stringAtOffset(ut64 offset) const {
+		uint1 uleb[6] = {};
+		{
+			RCoreLock core (arch->getCore ());
+			if (!core || !core->io || !r_io_read_at (core->io, offset, uleb, sizeof (uleb))) {
+				return std::string ();
+			}
+		}
+		ut64 dataOffset = offset;
+		uint4 shift = 0;
+		for (uint4 i = 0; i < sizeof (uleb); i++) {
+			dataOffset++;
+			if (!(uleb[i] & 0x80)) {
+				std::string result;
+				for (uint4 total = 0; total < 0x10000; ) {
+					uint1 buffer[256] = {};
+					RCoreLock core (arch->getCore ());
+					if (!core || !core->io || !r_io_read_at (core->io, dataOffset + total, buffer, sizeof (buffer))) {
+						return result;
+					}
+					for (uint4 j = 0; j < sizeof (buffer) && total < 0x10000; j++, total++) {
+						if (!buffer[j]) {
+							return result;
+						}
+						result.push_back (static_cast<char> (buffer[j]));
+					}
+				}
+				return result;
+			}
+			shift += 7;
+			if (shift >= 35) {
+				break;
+			}
+		}
+		return std::string ();
+	}
+
+	Datatype *descriptorType(const std::string &descriptor) {
+		if (descriptor == "V") {
+			return arch->types->getTypeVoid ();
+		}
+		if (descriptor == "Z") {
+			return arch->types->getBase (1, TYPE_BOOL);
+		}
+		if (descriptor == "B") {
+			return arch->types->getBase (1, TYPE_INT);
+		}
+		if (descriptor == "S") {
+			return arch->types->getBase (2, TYPE_INT);
+		}
+		if (descriptor == "C") {
+			return arch->types->getBase (2, TYPE_UINT);
+		}
+		if (descriptor == "I") {
+			return arch->types->getBase (4, TYPE_INT);
+		}
+		if (descriptor == "J") {
+			return arch->types->getBase (8, TYPE_INT);
+		}
+		if (descriptor == "F") {
+			return arch->types->getBase (4, TYPE_FLOAT);
+		}
+		if (descriptor == "D") {
+			return arch->types->getBase (8, TYPE_FLOAT);
+		}
+		std::string token = r2DalvikDescriptorToken (descriptor);
+		Datatype *base = arch->types->getBase (1, TYPE_UNKNOWN, token);
+		return arch->types->getTypePointer (4, base, 1);
+	}
+
+	// Dalvik-only: extract a DEX field descriptor from rbin's field name string.
+	std::string fieldDescriptor(uint4 index) {
+		std::string name = r2BinName ('f', index);
+		size_t space = name.rfind (' ');
+		if (space != std::string::npos && space + 1 < name.size ()) {
+			return name.substr (space + 1);
+		}
+		return std::string ();
+	}
+
+	Datatype *fieldPointerType(uint4 index) {
+		Datatype *fieldType = descriptorType (fieldDescriptor (index));
+		return arch->types->getTypePointer (4, fieldType, 1);
+	}
+
+	Datatype *methodPointerType() {
+		return arch->types->getTypePointer (4, arch->types->getTypeCode (), 1);
+	}
+
+	Datatype *classReferenceType(const std::string &token) {
+		Datatype *base = arch->types->getBase (1, TYPE_UNKNOWN, token);
+		return arch->types->getTypePointer (4, base, 1);
+	}
+
+	// Dalvik-only: resolve method table names through rbin.
+	std::string methodToken(uint4 index) {
+		std::string name = r2BinName ('m', index);
+		if (!name.empty ()) {
+			return r2DalvikToken (name);
+		}
+		return "method_" + std::to_string (index);
+	}
+
+	// Dalvik-only: resolve field table names through rbin.
+	std::string fieldToken(uint4 index, bool includeClass) {
+		std::string name = r2BinName ('f', index);
+		if (!name.empty ()) {
+			size_t space = name.find (' ');
+			if (space != std::string::npos) {
+				name.resize (space);
+			}
+			size_t arrow = name.find ("->");
+			if (arrow != std::string::npos && arrow + 2 < name.size ()) {
+				if (includeClass) {
+					name = name.substr (0, arrow) + "_" + name.substr (arrow + 2);
+				} else {
+					name = name.substr (arrow + 2);
+				}
+			}
+			return r2DalvikToken (name);
+		}
+		return "field_" + std::to_string (index);
+	}
+
+	// Dalvik-only: resolve type table names through rbin.
+	std::string classToken(uint4 index) {
+		std::string name = r2BinName ('c', index);
+		if (!name.empty ()) {
+			return r2DalvikDescriptorToken (name);
+		}
+		return "type_" + std::to_string (index);
+	}
+
+	// Dalvik-only: use r2 metadata first, then read at the rbin-resolved DEX string offset.
+	std::string stringLiteral(uint4 index) {
+		ut64 offset = r2BinOffset ('s', index);
+		if (offset != UT64_MAX) {
+			{
+				RCoreLock core (arch->getCore ());
+				if (core && core->anal) {
+					const char *meta = r_meta_get_string (core->anal, R_META_TYPE_STRING, offset);
+					if (meta && *meta) {
+						return meta;
+					}
+				}
+				if (core && core->bin && core->bin->cur && core->bin->cur->bo && core->bin->cur->bo->strings_db) {
+					RBinString *binstr = reinterpret_cast<RBinString *> (
+						ht_up_find (core->bin->cur->bo->strings_db, offset, nullptr));
+					if (binstr && binstr->string && *binstr->string) {
+						return binstr->string;
+					}
+				}
+			}
+			return stringAtOffset (offset);
+		}
+		return std::string ();
+	}
+
+	void putStringRecord(const std::vector<uintb> &refs, const std::string &value) {
+		std::ostringstream xml;
+		xml << "<cpoolrec tag=\"string\"><data length=\"" << value.size () << "\">";
+		for (unsigned char ch : value) {
+			xml << std::setfill ('0') << std::setw (2) << std::hex << static_cast<unsigned int> (ch) << ' ';
+		}
+		xml << "</data><type name=\"uint8_t\" size=\"1\" metatype=\"uint\" core=\"true\"/></cpoolrec>";
+		std::istringstream stream (xml.str ());
+		XmlDecode decoder (arch);
+		decoder.ingestStream (stream);
+		decodeRecord (refs, decoder, *arch->types);
+	}
+
+	void resolveRecord(const std::vector<uintb> &refs) {
+		if (refs.size () < 2) {
+			return;
+		}
+		uint4 index = static_cast<uint4> (refs[0]);
+		uint4 tag = static_cast<uint4> (refs[1]);
+		switch (tag) {
+		case R2_DALVIK_CPOOL_METHOD:
+		case R2_DALVIK_CPOOL_STATIC_METHOD:
+			putRecord (refs, CPoolRecord::pointer_method, methodToken (index), methodPointerType ());
+			break;
+		case R2_DALVIK_CPOOL_FIELD:
+			putRecord (refs, CPoolRecord::pointer_field, fieldToken (index, false), fieldPointerType (index));
+			break;
+		case R2_DALVIK_CPOOL_STATIC_FIELD:
+			putRecord (refs, CPoolRecord::pointer_field, fieldToken (index, true), fieldPointerType (index));
+			break;
+		case R2_DALVIK_CPOOL_STRING:
+			putStringRecord (refs, stringLiteral (index));
+			break;
+		case R2_DALVIK_CPOOL_CLASSREF:
+			{
+				std::string token = classToken (index);
+				putRecord (refs, CPoolRecord::class_reference, token, classReferenceType (token));
+			}
+			break;
+		case R2_DALVIK_CPOOL_ARRAYLENGTH:
+			putRecord (refs, CPoolRecord::array_length, "length", arch->types->getBase (4, TYPE_INT));
+			break;
+		case R2_DALVIK_CPOOL_SUPER:
+			putRecord (refs, CPoolRecord::class_reference, "super", arch->types->getBase (4, TYPE_UNKNOWN));
+			break;
+		case R2_DALVIK_CPOOL_INSTANCEOF:
+			{
+				std::string token = classToken (index);
+				putRecord (refs, CPoolRecord::instance_of, "instanceof", classReferenceType (token));
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+public:
+	// Dalvik-only: resolve SLEIGH cpool(index, tag) references against the loaded DEX tables.
+	explicit R2DalvikConstantPool(R2Architecture *a) : arch (a) {
+	}
+
+	// Dalvik-only: lazily materialize CPoolRecords so PrintC stops emitting UNKNOWNREF.
+	const CPoolRecord *getRecord(const std::vector<uintb> &refs) const override {
+		const CPoolRecord *record = ConstantPoolInternal::getRecord (refs);
+		if (record) {
+			return record;
+		}
+		const_cast<R2DalvikConstantPool *> (this)->resolveRecord (refs);
+		return ConstantPoolInternal::getRecord (refs);
+	}
+};
+
+// Dalvik-only: install the DEX-aware pool for Dalvik and keep the standard empty pool elsewhere.
+static ConstantPool *buildR2DalvikConstantPool(R2Architecture *arch) {
+	if (isR2DalvikArchitecture (arch)) {
+		return new R2DalvikConstantPool (arch);
+	}
+	return new ConstantPoolInternal ();
 }
 
 // Dalvik-only: emit Ghidra's Java-side moveRangeToIV dynamic inject as native p-code.

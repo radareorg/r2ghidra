@@ -110,6 +110,10 @@ ContextDatabase *R2Architecture::getContextDatabase() {
 	return context;
 }
 
+void R2Architecture::buildConstantPool(DocumentStorage &store) {
+	cpool = buildR2DalvikConstantPool (this);
+}
+
 void R2Architecture::postSpecFile() {
 	registerR2DalvikPostSpecInjects (this);
 	RCoreLock core(getCore());
