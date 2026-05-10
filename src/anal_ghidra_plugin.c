@@ -24,7 +24,7 @@ RArchPlugin r_arch_plugin_ghidra = {
 	},
 	.arch = "sleigh",
 	.endian = R_SYS_ENDIAN_LITTLE | R_SYS_ENDIAN_BIG,
-	.cpus = "6502,6805,8051,arm,avr,cr16,dalvik,hppa,java,m68k,m8c,mips,mcs96,msp430,pic24,ppc,sh,sparc,stm8,tricore,toy,v850,wasm,x86,z80,xtensa",
+	.cpus = "6502,6309,6805,6809,8051,arm,avr,cr16,dalvik,hppa,java,loongarch,m16c,m16c60,m16c80,m680x,m68k,m8c,mips,mcs96,msp430,pic24,ppc,sh,sparc,stm8,tricore,toy,v850,wasm,x86,z80,xtensa",
 	.bits = 0,
 	.init = &sanal_init,
 	.fini = &sanal_fini,
