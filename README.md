@@ -141,4 +141,20 @@ make           # compile and zip the result (run ninja)
 
 ## License
 
-See `LICENSE.md` for more details. but it's basically **LGPLv3**.
+r2ghidra itself is **LGPL-3.0-only**. See [`LICENSE.md`](LICENSE.md)
+for the full statement; the actual license texts live in
+[`LESSER.md`](LESSER.md) (LGPLv3) and [`COPYING`](COPYING) (GPLv3,
+referenced by the LGPLv3).
+
+### Third-party licenses
+
+r2ghidra statically links / bundles a few third-party components, each
+under its own license:
+
+* [ghidra-native](https://github.com/radareorg/ghidra-native) — Apache
+  License 2.0 (statically linked; this is the native portion of the
+  Ghidra decompiler that r2ghidra is built around).
+* [pugixml](https://pugixml.org/) — MIT License (vendored under
+  `subprojects/pugixml`).
+* [zlib](https://zlib.net/) — zlib License (vendored under
+  `subprojects/zlib`).

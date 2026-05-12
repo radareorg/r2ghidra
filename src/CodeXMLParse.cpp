@@ -1,4 +1,5 @@
-/* r2ghidra - LGPL - Copyright 2019-2022 - pancake */
+// SPDX-FileCopyrightText: 2019-2022 pancake
+// SPDX-License-Identifier: LGPL-3.0-only
 
 #include "CodeXMLParse.h"
 

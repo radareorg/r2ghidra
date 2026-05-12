@@ -1,4 +1,5 @@
-/* r2ghidra - LGPL - Copyright 2020-2026 - pancake */
+// SPDX-FileCopyrightText: 2020-2026 pancake
+// SPDX-License-Identifier: LGPL-3.0-only
 
 #include <r_lib.h>
 #include <r_anal.h>
@@ -18,7 +19,7 @@ RArchPlugin r_arch_plugin_ghidra = {
 	.meta = {
 		.name = "r2ghidra",
 		.desc = "SLEIGH Disassembler from Ghidra",
-		.license = "GPL3",
+		.license = "LGPL-3.0-only",
 		.author = "FXTi, pancake",
 		.version = R2_VERSION,
 	},

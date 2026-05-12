@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025-2026 pancake
+// SPDX-License-Identifier: LGPL-3.0-only
+
 #ifndef PCODE_PREPROCESSOR_H
 #define PCODE_PREPROCESSOR_H
 

@@ -1,4 +1,5 @@
-/* r2ghidra - LGPL - Copyright 2020-2021 - FXTi, pancake */
+// SPDX-FileCopyrightText: 2020-2021 FXTi, pancake
+// SPDX-License-Identifier: LGPL-3.0-only
 
 #ifndef R2GHIDRA_SLEIGHANALVALUE_H
 #define R2GHIDRA_SLEIGHANALVALUE_H

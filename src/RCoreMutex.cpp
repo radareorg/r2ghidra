@@ -1,4 +1,5 @@
-/* r2ghidra - LGPL - Copyright 2019-2025 - thestr4ng3r, pancake */
+// SPDX-FileCopyrightText: 2019-2025 thestr4ng3r, pancake
+// SPDX-License-Identifier: LGPL-3.0-only
 
 #include "RCoreMutex.h"
 #include <r_cons.h>

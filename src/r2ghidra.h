@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2019-2026 thestr4ng3r, pancake
+// SPDX-License-Identifier: LGPL-3.0-only
+
 #ifndef R2GHIDRA_H
 #define R2GHIDRA_H
 

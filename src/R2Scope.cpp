@@ -1,4 +1,5 @@
-/* r2ghidra- LGPL - Copyright 2019-2026 - thestr4ng3r, pancake, 0verflowme */
+// SPDX-FileCopyrightText: 2019-2026 thestr4ng3r, pancake, 0verflowme
+// SPDX-License-Identifier: LGPL-3.0-only
 
 #include "R2Architecture.h"
 #include "R2TypeFactory.h"

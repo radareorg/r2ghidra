@@ -1,4 +1,5 @@
-/* r2ghidra - LGPL - Copyright 2019-2024 - pancake */
+// SPDX-FileCopyrightText: 2019-2024 pancake
+// SPDX-License-Identifier: LGPL-3.0-only
 
 #ifndef R2GHIDRA_R2PRINTC_H
 #define R2GHIDRA_R2PRINTC_H

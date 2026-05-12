@@ -1,4 +1,5 @@
-/* r2ghidra - LGPL - Copyright 2019-2026 - pancake */
+// SPDX-FileCopyrightText: 2019-2026 pancake
+// SPDX-License-Identifier: LGPL-3.0-only
 
 #include "R2Architecture.h"
 #include "R2LoadImage.h"
