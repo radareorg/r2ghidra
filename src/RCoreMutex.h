@@ -1,4 +1,5 @@
-/* r2ghidra - LGPL - Copyright 2020-2025 - thestr4ng3r */
+// SPDX-FileCopyrightText: 2020-2025 thestr4ng3r
+// SPDX-License-Identifier: LGPL-3.0-only
 
 #ifndef R2GHIDRA_RCOREMUTEX_H
 #define R2GHIDRA_RCOREMUTEX_H

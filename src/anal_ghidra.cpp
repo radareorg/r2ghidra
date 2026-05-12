@@ -1,4 +1,5 @@
-/* r2ghidra - LGPL - Copyright 2020-2026 - pancake, FXTi */
+// SPDX-FileCopyrightText: 2020-2026 pancake, FXTi
+// SPDX-License-Identifier: LGPL-3.0-only
 
 #include "SleighAsm.h"
 #include "SleighAnalValue.h"

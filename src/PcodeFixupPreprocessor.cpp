@@ -1,4 +1,5 @@
-/* r2ghidra - LGPL - Copyright 2025-2026 - pancake */
+// SPDX-FileCopyrightText: 2025-2026 pancake
+// SPDX-License-Identifier: LGPL-3.0-only
 
 #include "PcodeFixupPreprocessor.h"
 #include "R2LoadImage.h"

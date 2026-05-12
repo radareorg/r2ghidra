@@ -1,4 +1,5 @@
-/* r2ghidra - LGPL - Copyright 2019-2021 - thestr4ng3r, pancake */
+// SPDX-FileCopyrightText: 2019-2021 thestr4ng3r, pancake
+// SPDX-License-Identifier: LGPL-3.0-only
 
 #ifndef R2GHIDRA_R2SCOPE_H
 #define R2GHIDRA_R2SCOPE_H

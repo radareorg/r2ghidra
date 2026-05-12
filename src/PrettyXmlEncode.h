@@ -1,6 +1,6 @@
 
 // SPDX-FileCopyrightText: 2023 Florian Märkl <info@florianmaerkl.de>
-// SPDX-License-Identifier: LGPL-3.0-or-later
+// SPDX-License-Identifier: LGPL-3.0-only
 
 #ifndef PRETTY_XML_ENCODE_H
 #define PRETTY_XML_ENCODE_H
