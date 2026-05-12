@@ -11,7 +11,7 @@ RCorePlugin r_core_plugin_ghidra = {
 	.meta = {
 		.name = "r2ghidra",
 		.desc = "Ghidra decompiler with pdg command",
-		.license = "GPL3",
+		.license = "LGPL-3.0-only",
 		.author = "thestr4ng3r, pancake",
 		.version = R2GHIDRA_VERSION,
 	},

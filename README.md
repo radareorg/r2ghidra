@@ -141,4 +141,4 @@ make           # compile and zip the result (run ninja)
 
 ## License
 
-See `LICENSE.md` for more details. but it's basically **LGPLv3**.
+See `LICENSE.md` for more details. but it's basically **LGPLv3-only**.
