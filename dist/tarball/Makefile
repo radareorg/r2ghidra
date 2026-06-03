@@ -21,7 +21,20 @@ all:
 
 # Subprojects
 	make -C $(DSTDIR)/subprojects all
-	rm -rf $(DSTDIR)/subprojects/*/.git
+	set -e; \
+	stage="$(DSTDIR)/../.r2ghidra-stage.$$$$"; \
+	trash="$(DSTDIR)/../.r2ghidra-trash.$$$$"; \
+	rm -rf "$$stage" "$$trash"; \
+	mkdir "$$stage" "$$trash"; \
+	for d in $(DSTDIR)/subprojects/*; do \
+		if [ ! -e "$$d/.git" ]; then continue; fi; \
+		name=$$(basename "$$d"); \
+		mkdir "$$stage/$$name"; \
+		tar --exclude .git -C "$$d" -cf - . | tar -C "$$stage/$$name" -xf -; \
+		mv "$$d" "$$trash/$$name"; \
+		mv "$$stage/$$name" "$$d"; \
+	done; \
+	rm -rf "$$stage" "$$trash" 2>/dev/null || true
 	mv $(DSTDIR)/subprojects/Makefile $(DSTDIR)/subprojects/Makefile.orig
 	mv $(DSTDIR)/subprojects/Makefile.dist $(DSTDIR)/subprojects/Makefile
 
@@ -35,3 +48,4 @@ all:
 
 clean:
 	rm -rf r2ghidra-$(VERSION).zip r2ghidra-$(VERSION).tar* r2ghidra-$(VERSION)
+	-rm -rf .r2ghidra-stage.* .r2ghidra-trash.*
