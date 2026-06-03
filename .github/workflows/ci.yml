@@ -1,7 +1,7 @@
 name: ci
 
 env:
-  R2V: 6.1.4
+  R2V: 6.1.6
 
 on:
   push:
@@ -231,6 +231,7 @@ jobs:
     needs:
       - linux-deb
       - macos-pkg
+      - tarball
       - w64
     runs-on: ubuntu-22.04
     steps:
