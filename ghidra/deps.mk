@@ -23,14 +23,14 @@ G_DECOMPILER+=capability.cc architecture.cc options.cc graph.cc
 G_DECOMPILER+=cover.cc block.cc cast.cc typeop.cc database.cc
 G_DECOMPILER+=cpool.cc comment.cc stringmanage.cc modelrules.cc fspec.cc action.cc loadimage.cc
 G_DECOMPILER+=varnode.cc op.cc type.cc variable.cc varmap.cc
-G_DECOMPILER+=jumptable.cc emulate.cc emulateutil.cc flow.cc userop.cc expression.cc
+G_DECOMPILER+=jumptable.cc emulate.cc emulateutil.cc flow.cc userop.cc
 G_DECOMPILER+=multiprecision.cc funcdata.cc funcdata_block.cc funcdata_varnode.cc
 G_DECOMPILER+=funcdata_op.cc unionresolve.cc pcodeinject.cc heritage.cc prefersplit.cc
 G_DECOMPILER+=rangeutil.cc ruleaction.cc subflow.cc blockaction.cc
 G_DECOMPILER+=merge.cc double.cc coreaction.cc condexe.cc override.cc
 G_DECOMPILER+=dynamic.cc crc32.cc prettyprint.cc printlanguage.cc
 G_DECOMPILER+=printc.cc printjava.cc memstate.cc opbehavior.cc
-G_DECOMPILER+=paramid.cc transform.cc string_ghidra.cc constseq.cc
+G_DECOMPILER+=paramid.cc signature.cc transform.cc string_ghidra.cc
 
 G_DECOMPILER+=ghidra_arch.cc inject_ghidra.cc ghidra_translate.cc
 G_DECOMPILER+=loadimage_ghidra.cc typegrp_ghidra.cc database_ghidra.cc
