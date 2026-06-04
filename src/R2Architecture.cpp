@@ -29,7 +29,9 @@ static const std::map<std::string, std::string> cc_map = {
 	{ "amd64", "__stdcall" },
 	{ "arm64", "__cdecl" },
 	{ "arm32", "__stdcall" },
-	{ "arm16", "__stdcall" } /* not actually __stdcall */
+	{ "arm16", "__stdcall" }, /* not actually __stdcall */
+	{ "ppc-32", "__stdcall" }, /* PPC cspec default_proto: r3-r10 GPR / f1-f13 FP */
+	{ "ppc-64", "__stdcall" }
 };
 
 std::string FilenameFromCore(RCore *core) {
