@@ -806,6 +806,15 @@ Symbol *R2Scope::registerGlobalVar(RFlagItem *glob, const char *type_str) const 
 	return symbol;
 }
 
+// Flags that name an external callable symbol (imports and relocation targets).
+static bool is_reloc_or_import_flag(const RFlagItem *flag) {
+	const char *n = flag->name;
+	return n && (r_str_startswith (n, "reloc.")
+		|| r_str_startswith (n, "sym.imp.")
+		|| r_str_startswith (n, "imp.")
+		|| r_str_startswith (n, "plt."));
+}
+
 Symbol *R2Scope::queryR2Absolute(ut64 addr, bool contain) const {
 	RCoreLock core (arch->getCore ());
 
@@ -822,9 +831,10 @@ Symbol *R2Scope::queryR2Absolute(ut64 addr, bool contain) const {
 		return registerFunction (fcn);
 	}
 
-	if (r_io_is_valid_offset (core->io, addr, R_PERM_X)) {
+	{
 		const RList *flags = r_flag_get_list (core->flags, addr);
 		if (flags) {
+			const bool execok = r_io_is_valid_offset (core->io, addr, R_PERM_X);
 			RListIter *iter;
 			void *pos;
 			r_list_foreach (flags, iter, pos) {
@@ -832,7 +842,9 @@ Symbol *R2Scope::queryR2Absolute(ut64 addr, bool contain) const {
 				if (flag->space && flag->space->name && !strcmp (flag->space->name, R_FLAGS_FS_SECTIONS)) {
 					continue;
 				}
-				return registerFunctionFlag (flag);
+				if (execok || is_reloc_or_import_flag (flag)) {
+					return registerFunctionFlag (flag);
+				}
 			}
 		}
 	}
