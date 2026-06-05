@@ -153,6 +153,15 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	if (!function) {
 		throw LowlevelError ("No function at this offset");
 	}
+	// Apply relocs for PPC ET_REL so self-referential REL24 calls resolve.
+	RBinInfo *bininfo = r_bin_get_info (core->bin);
+	RBinObject *binobj = r_bin_cur_object (core->bin);
+	if (bininfo && bininfo->arch && !strcmp (bininfo->arch, "ppc")
+			&& bininfo->type && r_str_startswith (bininfo->type, "REL")
+			&& binobj && !binobj->is_reloc_patched) {
+		r_config_set_b (core->config, "bin.relocs.apply", true);
+		free (r_core_cmd_str (core, "ir"));
+	}
 	R2Architecture arch (core, cfg_var_sleighid.GetString (core->config));
 	DocumentStorage store = DocumentStorage ();
 	arch.max_implied_ref = cfg_var_maximplref.GetInt (core->config);
