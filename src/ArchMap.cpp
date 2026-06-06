@@ -116,6 +116,75 @@ static std::string DalvikFlavorFromCore(RCore *core) {
 	return "DEX_Base";
 }
 
+static bool ppc_uses_isel(RCore *core) {
+	if (!core || !core->bin || !core->io) {
+		return false;
+	}
+	RVecRBinSection *sections = r_bin_get_sections_vec (core->bin);
+	if (!sections) {
+		return false;
+	}
+	const ut32 isel_mask = 0xfc00003f;
+	const ut32 isel_op = 0x7c00001e;
+	const bool be = core->config? r_config_get_b (core->config, "cfg.bigendian"): true;
+	const ut64 scan_cap = 4 * 1024 * 1024;
+	ut64 scanned = 0;
+	ut8 buf[0x10000];
+	RBinSection *s;
+	R_VEC_FOREACH (sections, s) {
+		if (!(s->perm & R_PERM_X) || s->is_segment || s->vsize < 4) {
+			continue;
+		}
+		ut64 va = s->vaddr;
+		ut64 remaining = s->vsize;
+		while (remaining >= 4 && scanned < scan_cap) {
+			const int n = (int)R_MIN (remaining, (ut64)sizeof (buf));
+			if (!r_io_read_at (core->io, va, buf, n)) {
+				break;
+			}
+			for (int i = 0; i + 4 <= n; i += 4) {
+				if ((r_read_ble32 (buf + i, be) & isel_mask) == isel_op) {
+					return true;
+				}
+			}
+			va += n;
+			remaining -= n;
+			scanned += n;
+		}
+		if (scanned >= scan_cap) {
+			break;
+		}
+	}
+	return false;
+}
+
+static std::string PpcFlavorFromCore(RCore *core) {
+	if (!core) {
+		return "default";
+	}
+	const int bits = r_config_get_i (core->config, "asm.bits");
+	const char *cpu = r_config_get (core->config, "asm.cpu");
+	const std::string lc = (cpu && *cpu)? tolower (cpu): std::string ();
+	if (bits == 64) {
+		if (lc == "a2" || lc == "a2-32addr" || lc == "isa") {
+			return "A2-32addr";
+		}
+		if (lc == "a2alt" || lc == "a2alt-32addr" || lc == "altivec") {
+			return "A2ALT-32addr";
+		}
+		return ppc_uses_isel (core)? "A2-32addr": "default";
+	}
+	if (lc == "e500" || lc == "e500mc" || lc == "4xx") {
+		return lc;
+	}
+	RBinInfo *info = r_bin_get_info (core->bin);
+	if (info && info->cpu
+		&& (!strcmp (info->cpu, "e500") || !strcmp (info->cpu, "e500mc"))) {
+		return info->cpu;
+	}
+	return "default";
+}
+
 // keys = asm.arch values
 static const std::map<std::string, ArchMapper> arch_map = {
 	{ "x86", {
@@ -146,7 +215,12 @@ static const std::map<std::string, ArchMapper> arch_map = {
 	{ "hppa", { S("pa-risc") } },
 	{ "riscv", { S("RISCV") } },
 	{ "toy", { S("Toy") } },
-	{ "ppc", { S("PowerPC") } },
+	{ "ppc", {
+		S("PowerPC"),
+		CUSTOM_FLAVOR ((RCore *core) {
+			return PpcFlavorFromCore (core);
+		})
+	} },
 	{ "8051", { S("8051"), S("default"), B(16), E(true) }},
 	{ "6800", { S("6809"), S("default"), B(16), E(true) } },
 	{ "6801", { S("6809"), S("default"), B(16), E(true) } },
