@@ -1986,8 +1986,12 @@ extern "C" int esil_sleigh_fini(REsil *esil) {
 	return true;
 }
 
+#if R2_ABIVERSION >= 109
+extern "C" bool r2ghidra_esilcb(RArchSession *as, REsil *esil, RArchEsilAction action) {
+#else
 extern "C" bool r2ghidra_esilcb(RArchSession *as, RArchEsilAction action) {
 	REsil *esil = as->arch->esil;
+#endif
 	if (!esil) {
 		R_LOG_ERROR ("esil is null");
 		return false;

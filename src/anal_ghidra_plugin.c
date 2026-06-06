@@ -11,7 +11,11 @@ extern bool sanal_fini(RArchSession *as);
 extern RList *r2ghidra_preludes(RArchSession *as);
 extern int archinfo(RArchSession *as, ut32 query);
 extern char *r2ghidra_regs(RArchSession *as);
+#if R2_ABIVERSION >= 109
+extern bool r2ghidra_esilcb(RArchSession *as, REsil *esil, RArchEsilAction action);
+#else
 extern bool r2ghidra_esilcb(RArchSession *as, RArchEsilAction action);
+#endif
 extern char *get_reg_profile(RAnal *anal);
 bool sleigh_decode(RArchSession *as, RAnalOp *op, RArchDecodeMask mask);
 
