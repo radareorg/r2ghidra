@@ -189,10 +189,9 @@ struct FunctionVars {
 			return;
 		}
 		for (RAnalVarKind kind : { R_ANAL_VAR_KIND_REG, R_ANAL_VAR_KIND_BPV, R_ANAL_VAR_KIND_SPV }) {
-			RAnalVar **it;
-			R_VEC_FOREACH (&fcn->vars, it) {
-				RAnalVar *var = *it;
-				if (var && var->kind == kind) {
+			RAnalVar *var;
+			R_VEC_FOREACH (&fcn->vars, var) {
+				if (var->kind == kind) {
 					cb (var);
 				}
 			}
