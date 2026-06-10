@@ -183,15 +183,21 @@ struct FunctionVars {
 			return Address ();
 		}
 	}
+	static RAnalVar *analVarFromIter(RAnalVar *var) {
+		return var;
+	}
+	static RAnalVar *analVarFromIter(RAnalVar **it) {
+		return it? *it: nullptr;
+	}
 	template<typename Callback>
 	void foreachVar(Callback cb) {
 		if (!enabled) {
 			return;
 		}
 		for (RAnalVarKind kind : { R_ANAL_VAR_KIND_REG, R_ANAL_VAR_KIND_BPV, R_ANAL_VAR_KIND_SPV }) {
-			RAnalVar **it;
+			decltype (fcn->vars._start) it;
 			R_VEC_FOREACH (&fcn->vars, it) {
-				RAnalVar *var = *it;
+				RAnalVar *var = analVarFromIter (it);
 				if (var && var->kind == kind) {
 					cb (var);
 				}
