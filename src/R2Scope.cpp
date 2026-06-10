@@ -188,14 +188,16 @@ struct FunctionVars {
 		if (!enabled) {
 			return;
 		}
-		for (RAnalVarKind kind : { R_ANAL_VAR_KIND_REG, R_ANAL_VAR_KIND_BPV, R_ANAL_VAR_KIND_SPV }) {
-			RAnalVar **it;
-			R_VEC_FOREACH (&fcn->vars, it) {
-				RAnalVar *var = *it;
-				if (var && var->kind == kind) {
-					cb (var);
-				}
+		RList *vars = r_anal_var_all_list (core->anal, fcn);
+		if (vars) {
+			for (RAnalVarKind kind : { R_ANAL_VAR_KIND_REG, R_ANAL_VAR_KIND_BPV, R_ANAL_VAR_KIND_SPV }) {
+				r_list_foreach_cpp<RAnalVar> (vars, [&](RAnalVar *var) {
+					if (var && var->kind == kind) {
+						cb (var);
+					}
+				});
 			}
+			r_list_free (vars);
 		}
 	}
 	void collect() {
