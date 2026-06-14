@@ -2917,14 +2917,33 @@ void sym.KillList(LL arg1)
 EOF
 RUN
 
-NAME=mips gp indirect call imports
+NAME=mips gp-relative import argument resolves under pdg
 FILE=bins/elf/boa-mips
 CMDS=<<EOF
-0x00408af4;af;pdg~sym.imp.umask,sym.imp.time,sym.websAspInit
+0x00408af4;af;pdg~sym.imp.umask,sym.imp.time
 EOF
 EXPECT=<<EOF
     sym.imp.umask(0x3f);
-    sym.imp.time(*(in_t9 + 0xec710));
-    sym.websAspInit(argc,argv);
+    sym.imp.time(*0x4f5204);
+EOF
+RUN
+
+NAME=mips t9 seed removes phantom gp args under pdg
+FILE=bins/elf/boa-mips
+CMDS=<<EOF
+0x43e43c;af;pdg
+EOF
+EXPECT=<<EOF
+
+uint32_t sym.isFileExist(uint param_1)
+
+{
+    uint32_t uVar1;
+    uchar auStack_a0 [152];
+    
+    uVar1 = sym.imp.stat(param_1,auStack_a0);
+    return ~uVar1 >> 0x1f;
+}
+
 EOF
 RUN

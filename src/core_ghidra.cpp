@@ -8,6 +8,7 @@
 #include "SleighAsm.h"
 #include "ArchMap.h"
 #include "PcodeFixupPreprocessor.h"
+#include "R2Utils.h"
 #include "r2ghidra.h"
 #include <r_core.h>
 
@@ -148,6 +149,38 @@ static void ApplyPrintCConfig(RConfig *cfg, PrintC *print_c) {
 	print_c->setMaxLineSize (cfg_var_linelen.GetInt (cfg));
 }
 
+static void seedGlobalPointerRegister(R2Architecture &arch, RCore *core, RAnalFunction *function) {
+	RArchConfig *acfg = core->rasm->config;
+	const char *regname = NULL;
+	ut64 value = r_config_get_i (core->config, "anal.gp");
+	if (r_str_startswith (acfg->arch, "mips")) {
+		// mips recomputes gp from t9 in the PIC prologue, so seed t9 (callee entry by ABI), not =GP
+		regname = "t9";
+		value = function->addr;
+	} else {
+		regname = r_reg_alias_getname (core->anal->reg, R_REG_ALIAS_GP);
+		if (!regname && r_str_startswith (acfg->arch, "ppc")
+				&& acfg->bits == 64 && R_ARCH_CONFIG_IS_BIG_ENDIAN (acfg)) {
+			regname = "r2";
+		}
+	}
+	if (!regname || !value || value == UT64_MAX) {
+		return;
+	}
+	VarnodeData reg;
+	try {
+		reg = arch.translate->getRegister (regname);
+	} catch (const LowlevelError &) {
+		return;
+	}
+	AddrSpace *space = arch.getDefaultCodeSpace ();
+	ContextDatabase *cdb = arch.getContextDatabase ();
+	r_list_foreach_cpp<RAnalBlock> (function->bbs, [&](RAnalBlock *bb) {
+		TrackedSet &tset = cdb->createSet (Address (space, bb->addr), Address (space, bb->addr + bb->size));
+		tset.push_back ({ reg, value });
+	});
+}
+
 static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstream &out_stream, RCodeMeta **out_code) {
 	RAnalFunction *function = r_anal_get_fcn_in (core->anal, addr, R_ANAL_FCN_TYPE_NULL);
 	if (!function) {
@@ -171,6 +204,7 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	if (func == nullptr) {
 		throw LowlevelError ("No function in Scope");
 	}
+	seedGlobalPointerRegister (arch, core, function);
 	arch.getCore()->sleepBegin ();
 	auto action = arch.allacts.getCurrent ();
 
