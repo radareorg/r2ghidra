@@ -148,6 +148,32 @@ static void ApplyPrintCConfig(RConfig *cfg, PrintC *print_c) {
 	print_c->setMaxLineSize (cfg_var_linelen.GetInt (cfg));
 }
 
+static void seedPpcTocRegister(R2Architecture &arch, RCore *core, RAnalFunction *function) {
+	RArchConfig *acfg = core->rasm->config;
+	if (!acfg || !r_str_startswith (acfg->arch, "ppc")
+			|| acfg->bits != 64 || !R_ARCH_CONFIG_IS_BIG_ENDIAN (acfg)) {
+		return;
+	}
+	ut64 toc = r_config_get_i (core->config, "anal.gp");
+	if (!toc || toc == UT64_MAX) {
+		return;
+	}
+	VarnodeData reg;
+	try {
+		reg = arch.translate->getRegister ("r2");
+	} catch (const LowlevelError &) {
+		return;
+	}
+	ut64 start = function->addr;
+	ut64 end = r_anal_function_max_addr (function);
+	if (end <= start) {
+		end = start + 1;
+	}
+	AddrSpace *space = arch.getDefaultCodeSpace ();
+	TrackedSet &tset = arch.getContextDatabase ()->createSet (Address (space, start), Address (space, end));
+	tset.push_back ({ reg, toc });
+}
+
 static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstream &out_stream, RCodeMeta **out_code) {
 	RAnalFunction *function = r_anal_get_fcn_in (core->anal, addr, R_ANAL_FCN_TYPE_NULL);
 	if (!function) {
@@ -171,6 +197,7 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	if (func == nullptr) {
 		throw LowlevelError ("No function in Scope");
 	}
+	seedPpcTocRegister (arch, core, function);
 	arch.getCore()->sleepBegin ();
 	auto action = arch.allacts.getCurrent ();
 
