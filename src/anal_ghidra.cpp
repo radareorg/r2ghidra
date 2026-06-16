@@ -1579,16 +1579,10 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 }
 
 extern "C" bool sleigh_decode(RArchSession *as, RAnalOp *aop, RArchDecodeMask mask) {
-	REsil *esil = as->arch->esil;
 	RBin *bin = (RBin*)as->arch->binb.bin;
 	RIO *io = (RIO*)bin->iob.io;
 	RCore *Gcore = (RCore *)io->coreb.core;
 	RAnal *anal = Gcore->anal;
-	if (bin != nullptr && esil != nullptr) {
-		io = bin->iob.io;
-		anal = esil->anal;
-		// sanal->init (cpu, bi, be, anal? anal->iob.io: nullptr, SleighAsm::getConfig (anal));
-	}
 	return sleigh_op (anal, aop, aop->addr, aop->bytes, aop->size, (RAnalOpMask)mask) > 0;
 }
 
