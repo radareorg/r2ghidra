@@ -4,7 +4,11 @@ project(
   license : 'LGPL3',
   meson_version : '>=0.50.1',
 version : '6.1.6',
-  default_options : ['c_std=c11', 'cpp_std=c++20']
+  default_options : [
+    'c_std=c11',
+    'cpp_std=c++20',
+    'b_vscrt=md',
+  ]
 )
 
 
