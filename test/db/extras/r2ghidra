@@ -2947,3 +2947,43 @@ uint32_t sym.isFileExist(uint param_1)
 
 EOF
 RUN
+
+NAME=ppc32 small-data r2 seed resolves sdata globals under pdg
+FILE=bins/elf/ppc32-sda
+ARGS=-e anal.gp=0x1000801c
+CMDS=<<EOF
+s sym.get_sda
+af
+pdg
+EOF
+EXPECT=<<EOF
+
+int sym.get_sda(void)
+
+{
+    return _loc.gv1 + _loc.gv2;
+}
+
+EOF
+RUN
+
+NAME=ppc32 small-data loads stay unresolved without r2 seed
+FILE=bins/elf/ppc32-sda
+ARGS=-e anal.gp=0
+CMDS=<<EOF
+s sym.get_sda
+af
+pdg
+EOF
+EXPECT=<<EOF
+
+int sym.get_sda(void)
+
+{
+    int unaff_r2;
+
+    return *(unaff_r2 + -0x8000) + *(unaff_r2 + -0x7ffc);
+}
+
+EOF
+RUN
