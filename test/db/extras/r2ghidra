@@ -2987,3 +2987,48 @@ int sym.get_sda(void)
 
 EOF
 RUN
+
+NAME=ppc32 e500mc sleigh auto-selected from apuinfo cpu
+FILE=bins/elf/ppc32-e500mc-isel
+CMDS=<<EOF
+pdgss
+EOF
+EXPECT=<<EOF
+PowerPC:BE:32:e500mc:gcc
+EOF
+RUN
+
+NAME=ppc64 isel selects 64-bit-address A2ALT sleigh variant
+FILE=bins/elf/ppc64-isel
+CMDS=<<EOF
+pdgss
+EOF
+EXPECT=<<EOF
+PowerPC:BE:64:A2ALT:gcc
+EOF
+RUN
+
+NAME=ppc64 isel decompiles as conditional select under A2ALT
+FILE=bins/elf/ppc64-isel
+CMDS=<<EOF
+aa
+s 0x10000000
+af
+pdg
+EOF
+EXPECT=<<EOF
+
+ulong fcn.10000000(ulong param_1,ulong param_2)
+
+{
+    uint8_t in_cr0;
+    
+    //[01] -r-x section size 16 named .text
+    if (in_cr0 >> 3 & 1) {
+        param_1 = param_2;
+    }
+    return param_1;
+}
+
+EOF
+RUN
