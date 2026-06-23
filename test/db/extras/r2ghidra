@@ -2963,6 +2963,90 @@ ulong sym..crc32_init(int64_t arg1)
     reloc.._mcount();
     *(arg1 + 8) = *(*arg1 + 0x20);
     return 0;
+} 
+EOF
+RUN
+
+NAME=ppc32 small-data r2 seed resolves sdata globals under pdg
+FILE=bins/elf/ppc32-sda
+ARGS=-e anal.gp=0x1000801c
+CMDS=<<EOF
+s sym.get_sda
+af
+pdg
+EOF
+EXPECT=<<EOF
+
+int sym.get_sda(void)
+
+{
+    return _loc.gv1 + _loc.gv2;
+}
+
+EOF
+RUN
+
+NAME=ppc32 small-data loads stay unresolved without r2 seed
+FILE=bins/elf/ppc32-sda
+ARGS=-e anal.gp=0
+CMDS=<<EOF
+s sym.get_sda
+af
+pdg
+EOF
+EXPECT=<<EOF
+
+int sym.get_sda(void)
+
+{
+    int unaff_r2;
+    
+    return *(unaff_r2 + -0x8000) + *(unaff_r2 + -0x7ffc);
+}
+
+EOF
+RUN
+
+NAME=ppc32 e500mc sleigh auto-selected from apuinfo cpu
+FILE=bins/elf/ppc32-e500mc-isel
+CMDS=<<EOF
+pdgss
+EOF
+EXPECT=<<EOF
+PowerPC:BE:32:e500mc:gcc
+EOF
+RUN
+
+NAME=ppc64 isel selects 64-bit-address A2ALT sleigh variant
+FILE=bins/elf/ppc64-isel
+CMDS=<<EOF
+pdgss
+EOF
+EXPECT=<<EOF
+PowerPC:BE:64:A2ALT:gcc
+EOF
+RUN
+
+NAME=ppc64 isel decompiles as conditional select under A2ALT
+FILE=bins/elf/ppc64-isel
+CMDS=<<EOF
+aa
+s 0x10000000
+af
+pdg
+EOF
+EXPECT=<<EOF
+
+ulong fcn.10000000(ulong param_1,ulong param_2)
+
+{
+    uint8_t in_cr0;
+    
+    //[01] -r-x section size 16 named .text
+    if (in_cr0 >> 3 & 1) {
+        param_1 = param_2;
+    }
+    return param_1;
 }
 
 EOF

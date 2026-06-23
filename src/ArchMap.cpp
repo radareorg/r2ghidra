@@ -116,6 +116,21 @@ static std::string DalvikFlavorFromCore(RCore *core) {
 	return "DEX_Base";
 }
 
+static std::string PpcFlavorFromCore(RCore *core) {
+	if (r_config_get_i (core->config, "asm.bits") == 64) {
+		// A2ALT decodes isel and keeps 64-bit addressing; identical to default on non-isel ppc64
+		return "A2ALT";
+	}
+	// ppc asm.cpu only accepts ppc/vle/ps, so the EMB apuinfo cpu is reachable only via bin info
+	RBinInfo *info = r_bin_get_info (core->bin);
+	const char *cpu = info? info->cpu: NULL;
+	if (cpu && (!strcmp (cpu, "e500") || !strcmp (cpu, "e500mc") || !strcmp (cpu, "4xx"))) {
+		R_LOG_INFO ("Selecting PowerPC sleigh variant '%s' from bin info cpu", cpu);
+		return cpu;
+	}
+	return "default";
+}
+
 // keys = asm.arch values
 static const std::map<std::string, ArchMapper> arch_map = {
 	{ "x86", {
@@ -146,7 +161,12 @@ static const std::map<std::string, ArchMapper> arch_map = {
 	{ "hppa", { S("pa-risc") } },
 	{ "riscv", { S("RISCV") } },
 	{ "toy", { S("Toy") } },
-	{ "ppc", { S("PowerPC") } },
+	{ "ppc", {
+		S("PowerPC"),
+		CUSTOM_FLAVOR ((RCore *core) {
+			return PpcFlavorFromCore (core);
+		})
+	} },
 	{ "8051", { S("8051"), S("default"), B(16), E(true) }},
 	{ "6800", { S("6809"), S("default"), B(16), E(true) } },
 	{ "6801", { S("6809"), S("default"), B(16), E(true) } },

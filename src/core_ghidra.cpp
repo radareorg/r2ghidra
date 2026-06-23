@@ -159,8 +159,8 @@ static void seedGlobalPointerRegister(R2Architecture &arch, RCore *core, RAnalFu
 		value = function->addr;
 	} else {
 		regname = r_reg_alias_getname (core->anal->reg, R_REG_ALIAS_GP);
-		if (!regname && r_str_startswith (acfg->arch, "ppc")
-				&& acfg->bits == 64 && R_ARCH_CONFIG_IS_BIG_ENDIAN (acfg)) {
+		if (!regname && r_str_startswith (acfg->arch, "ppc")) {
+			// ppc64 TOC base and ppc32 small-data base both live in r2
 			regname = "r2";
 		}
 	}
