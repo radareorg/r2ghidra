@@ -2948,6 +2948,25 @@ uint32_t sym.isFileExist(uint param_1)
 EOF
 RUN
 
+NAME=ppc64 et_rel reloc call target resolves to named function under pdg
+FILE=bins/elf/ppc64v1-crc32_generic.ko
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF
+aa
+pdg @ sym..crc32_init
+EOF
+EXPECT=<<EOF
+
+ulong sym..crc32_init(int64_t arg1)
+
+{
+    reloc.._mcount();
+    *(arg1 + 8) = *(*arg1 + 0x20);
+    return 0;
+} 
+EOF
+RUN
+
 NAME=ppc32 small-data r2 seed resolves sdata globals under pdg
 FILE=bins/elf/ppc32-sda
 ARGS=-e anal.gp=0x1000801c
