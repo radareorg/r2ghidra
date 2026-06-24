@@ -3051,3 +3051,15 @@ ulong fcn.10000000(ulong param_1,ulong param_2)
 
 EOF
 RUN
+
+NAME=string literals render inline instead of as flag symbols
+FILE=bins/elf/crackme0x05
+CMDS=<<EOF
+aaa
+pdg @ main~printf
+EOF
+EXPECT=<<EOF
+    sym.imp.printf("IOLI Crackme Level 0x05\n");
+    sym.imp.printf("Password: ");
+EOF
+RUN

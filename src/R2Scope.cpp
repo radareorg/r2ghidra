@@ -839,7 +839,9 @@ Symbol *R2Scope::queryR2Absolute(ut64 addr, bool contain) const {
 			void *pos;
 			r_list_foreach (flags, iter, pos) {
 				auto flag = reinterpret_cast<RFlagItem *>(pos);
-				if (flag->space && flag->space->name && !strcmp (flag->space->name, R_FLAGS_FS_SECTIONS)) {
+				if (flag->space && flag->space->name
+						&& (!strcmp (flag->space->name, R_FLAGS_FS_SECTIONS)
+						|| !strcmp (flag->space->name, R_FLAGS_FS_STRINGS))) {
 					continue;
 				}
 				if (execok || is_reloc_or_import_flag (flag)) {
