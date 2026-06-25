@@ -192,11 +192,9 @@ EOF
 RUN
 
 NAME=v850cmp
+ARGS=-e asm.arch=r2ghidra -e asm.bits=32 -e asm.cpu=v850
 FILE=-
 CMDS=<<EOF
-e asm.cpu=v850
-e asm.bits=32
-e asm.arch=r2ghidra
 pdga
 e anal.arch
 e anal.cpu
@@ -217,17 +215,15 @@ size: 2
 sign: true
 type: cmp
 cycles: 0
-esil: r7,NUM,r6,NUM,-,1,32,1,<<,-,&,4294967287,psw,NUM,&,1,32,1,<<,-,&,r7,NUM,r6,NUM,<,DUP,3,2,PICK,<<,1,32,1,<<,-,&,DUP,5,PICK,|,1,32,1,<<,-,&,psw,=,r6,NUM,r7,NUM,DUP,3,PICK,-,1,32,1,<<,-,&,31,4,PICK,>>,1,32,1,<<,-,&,DUP,0,SWAP,>>,1,8,1,<<,-,&,31,5,PICK,>>,1,32,1,<<,-,&,DUP,0,SWAP,>>,1,8,1,<<,-,&,31,6,PICK,>>,1,32,1,<<,-,&,DUP,0,SWAP,>>,1,8,1,<<,-,&,1,2,PICK,&,1,8,1,<<,-,&,4294967291,psw,NUM,&,1,32,1,<<,-,&,5,PICK,8,PICK,-,!,!,3,PICK,7,PICK,-,!,DUP,3,PICK,&,1,8,1,<<,-,&,DUP,2,2,PICK,<<,1,32,1,<<,-,&,DUP,7,PICK,|,1,32,1,<<,-,&,psw,=,4294967293,psw,NUM,&,1,32,1,<<,-,&,0,23,PICK,32,SWAP,~,SWAP,32,SWAP,~,SWAP,<,DUP,1,2,PICK,<<,1,32,1,<<,-,&,DUP,5,PICK,|,1,32,1,<<,-,&,psw,=,4294967294,psw,NUM,&,1,32,1,<<,-,&,0,27,PICK,-,!,DUP,DUP,4,PICK,|,1,32,1,<<,-,&,psw,=
+esil: r6,NUM,r7,NUM,-,1,32,<<,1,-,&,psw,NUM,4294967287,&,1,32,<<,1,-,&,r6,NUM,r7,NUM,<,DUP,DUP,3,<<,1,32,<<,1,-,&,4,PICK,2,PICK,|,1,32,<<,1,-,&,psw,=,r6,NUM,r7,NUM,2,PICK,2,PICK,-,1,32,<<,1,-,&,3,PICK,31,>>,1,32,<<,1,-,&,DUP,0,>>,1,8,<<,1,-,&,4,PICK,31,>>,1,32,<<,1,-,&,DUP,0,>>,1,8,<<,1,-,&,5,PICK,31,>>,1,32,<<,1,-,&,DUP,0,>>,1,8,<<,1,-,&,DUP,1,&,1,8,<<,1,-,&,psw,NUM,4294967291,&,1,32,<<,1,-,&,7,PICK,6,PICK,-,!,!,6,PICK,4,PICK,-,!,2,PICK,2,PICK,&,1,8,<<,1,-,&,DUP,DUP,2,<<,1,32,<<,1,-,&,6,PICK,2,PICK,|,1,32,<<,1,-,&,psw,=,psw,NUM,4294967293,&,1,32,<<,1,-,&,22,PICK,0,32,~,SWAP,32,~,SWAP,<,DUP,DUP,1,<<,1,32,<<,1,-,&,4,PICK,2,PICK,|,1,32,<<,1,-,&,psw,=,psw,NUM,4294967294,&,1,32,<<,1,-,&,26,PICK,0,-,!,DUP,3,PICK,2,PICK,|,1,32,<<,1,-,&,psw,=
 family: cpu
 EOF
 RUN
 
 NAME=v850load
+ARGS=-e asm.arch=r2ghidra -e asm.bits=32 -e asm.cpu=v850
 FILE=-
 CMDS=<<EOF
-e asm.cpu=v850
-e asm.bits=32
-e asm.arch=r2ghidra
 pdga
 e anal.arch
 e anal.cpu
@@ -248,7 +244,7 @@ size: 4
 sign: true
 type: load
 cycles: 0
-esil: 4,r29,NUM,+,1,32,1,<<,-,&,DUP,[4],r11,=
+esil: r29,NUM,4,+,1,32,<<,1,-,&,DUP,[4],r11,=
 family: cpu
 EOF
 RUN
@@ -270,7 +266,7 @@ EOF
 EXPECT=<<EOF
 type: load
 esilcost: 8
-esil: 3856,x9,NUM,+,1,64,1,<<,-,&,DUP,[8],x9,=
+esil: x9,NUM,3856,+,1,64,<<,1,-,&,DUP,[8],x9,=
 ----
 type: store
 esilcost: 24
@@ -279,12 +275,10 @@ EOF
 RUN
 
 NAME=v850 esil
+ARGS=-e asm.arch=r2ghidra -e asm.bits=32 -e asm.cpu=v850
 FILE=-
 CMDS=<<EOF
 e log.level=0
-e asm.cpu=v850
-e asm.bits=32
-e asm.arch=r2ghidra
 wx e731
 ao 1~type
 ao 1~esilcost
