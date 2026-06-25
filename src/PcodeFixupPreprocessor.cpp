@@ -3,6 +3,7 @@
 
 #include "PcodeFixupPreprocessor.h"
 #include "R2LoadImage.h"
+#include "R2Utils.h"
 
 #include <funcdata.hh>
 #include <flow.hh>
@@ -133,6 +134,51 @@ void PcodeFixupPreprocessor::fixupSharedReturnJumpToRelocs(RAnalFunction *r2Func
 		}
 	}
 	RVecAnalRef_free (refs);
+}
+
+static bool has_data_xref_at(RCore *core, ut64 addr) {
+	RVecAnalRef *xrefs = r_anal_xrefs_get (core->anal, addr);
+	if (!xrefs) {
+		return false;
+	}
+	bool found = false;
+	RAnalRef *xi;
+	R_VEC_FOREACH (xrefs, xi) {
+		if (R_ANAL_REF_TYPE_MASK (xi->type) == R_ANAL_REF_TYPE_DATA) {
+			found = true;
+			break;
+		}
+	}
+	RVecAnalRef_free (xrefs);
+	return found;
+}
+
+// A call followed by a literal pool (data xref target) does not return; truncate flow so pdg stops instead of decoding the pool as code and emitting halt_baddata().
+void PcodeFixupPreprocessor::fixupNoreturnCallsBeforeData(RAnalFunction *r2Func, Funcdata *ghFunc, RCore *core, R2Architecture &arch) {
+	auto space = arch.getDefaultCodeSpace ();
+	const ut64 fcnMax = r_anal_function_max_addr (r2Func);
+	r_list_foreach_cpp<RAnalBlock> (r2Func->bbs, [&](RAnalBlock *bb) {
+		ut64 addr = bb->addr;
+		const ut64 bbend = bb->addr + bb->size;
+		while (addr < bbend) {
+			RAnalOp *op = r_core_anal_op (core, addr, R_ARCH_OP_MASK_BASIC);
+			if (!op) {
+				break;
+			}
+			const int size = op->size;
+			const ut32 type = op->type & R_ANAL_OP_TYPE_MASK;
+			r_anal_op_free (op);
+			if (size < 1) {
+				break;
+			}
+			const ut64 next = addr + size;
+			if ((type == R_ANAL_OP_TYPE_CALL || type == R_ANAL_OP_TYPE_UCALL)
+					&& next <= fcnMax && has_data_xref_at (core, next)) {
+				ghFunc->getOverride ().insertFlowOverride (Address (space, addr), Override::CALL_RETURN);
+			}
+			addr = next;
+		}
+	});
 }
 
 void PcodeFixupPreprocessor::fixupResolvedIndirectCalls(RAnalFunction *r2Func, Funcdata *ghFunc, RCore *core, R2Architecture &arch) {
