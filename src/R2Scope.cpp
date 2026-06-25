@@ -707,35 +707,23 @@ Symbol *R2Scope::registerFlag(RFlagItem *flag) const {
 	Datatype *type = nullptr;
 	// retrieve string from r2
 	if (flag->space && std::string (R_FLAGS_FS_STRINGS) == flag->space->name) {
-		RBinString *str = nullptr;
-		RListIter *iter;
-		void *pos;
-		r_list_foreach (core->bin->binfiles, iter, pos) {
-			auto bf = reinterpret_cast<RBinFile *>(pos);
-			RBinObject *bo = bf->bo;
-			if (!bo) {
-				continue;
-			}
-
-			void *s = ht_up_find (bo->strings_db, flag->addr, nullptr);
-			if (s) {
-				str = reinterpret_cast<RBinString *>(s);
-				break;
-			}
-		}
-		Datatype *ptype;
+		// pick the char width from the Cs string metadata (bytes per char) rather than scanning the bin string vector
 		const char *tn = "char";
-		if (str) {
-			switch (str->type) {
-			case R_STRING_TYPE_WIDE:
-				tn = "char16_t";
-				break;
-			case R_STRING_TYPE_WIDE32:
+		ut64 nbytes = 0;
+		RAnalMetaItem *mi = r_meta_get_at (core->anal, flag->addr, R_META_TYPE_STRING, &nbytes);
+		if (mi && mi->str && nbytes > 0) {
+			// mi->str is escaped, so unescape to count real chars and derive the byte width
+			char *raw = strdup (mi->str);
+			const int nchars = raw? r_str_unescape (raw): 0;
+			free (raw);
+			const ut64 cw = nchars > 0? nbytes / (nchars + 1): 1;
+			if (cw >= 4) {
 				tn = "char32_t";
-				break;
+			} else if (cw == 2) {
+				tn = "char16_t";
 			}
 		}
-		ptype = arch->types->findByName (tn);
+		Datatype *ptype = arch->types->findByName (tn);
 		int4 sz = static_cast<int4>(flag->size) / ptype->getSize ();
 		type = arch->types->getTypeArray (sz, ptype);
 		attr |= Varnode::readonly;
