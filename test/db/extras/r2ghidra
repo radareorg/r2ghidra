@@ -3151,3 +3151,15 @@ EXPECT=<<EOF
 0
 EOF
 RUN
+
+NAME=arm import veneer tail call resolves to a named call
+FILE=bins/elf/bashbot.arm.gcc.O0.elf
+CMDS=<<EOF
+e r2ghidra.fixups=true
+aaa
+pdg @ sym.call_weak_fn~__gmon_start__
+EOF
+EXPECT=<<EOF
+    rsym.__gmon_start__();
+EOF
+RUN

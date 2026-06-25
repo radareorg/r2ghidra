@@ -25,8 +25,26 @@ using namespace ghidra;
 static bool is_import_name(const char * R_NONNULL name) {
 	return r_str_startswith (name, "imp.")
 		|| r_str_startswith (name, "sym.imp.")
+		|| r_str_startswith (name, "loc.imp.")
 		|| r_str_startswith (name, "plt.")
 		|| r_str_startswith (name, "reloc.");
+}
+
+// match any import-named flag at addr (an ARM veneer is both loc.imp.foo and rsym.foo)
+static const char *import_flag_at(RCore *core, ut64 addr) {
+	const RList *flags = r_flag_get_list (core->flags, addr);
+	if (!flags) {
+		return nullptr;
+	}
+	RListIter *iter;
+	void *pos;
+	r_list_foreach (flags, iter, pos) {
+		RFlagItem *f = reinterpret_cast<RFlagItem *>(pos);
+		if (f->name && is_import_name (f->name)) {
+			return f->name;
+		}
+	}
+	return nullptr;
 }
 
 // Helper to extract base function name from an import
@@ -112,26 +130,21 @@ void PcodeFixupPreprocessor::fixupSharedReturnJumpToRelocs(RAnalFunction *r2Func
 		ghFunc->getFuncProto().setNoReturn(true);
 	}
 	R_VEC_FOREACH (refs, refi) {
-		// R_LOG_INFO ("refi 0x%"PFMT64x"", refi->addr);
-		RFlagItem *f = r_flag_get_at (core->flags, refi->addr, true);
-		if (f) {
-			if (is_import_name (f->name)) {
-				RAnalOp *op = r_core_anal_op (core, refi->at, 0);
-				if (!op) {
-					continue;
-				}
-				bool isCallRet = (op->type == R_ANAL_OP_TYPE_JMP);
-				// isCallRet = true;
-				if (isCallRet) {
-					// apply only if its a jump ref?
-					// Address callAddr (space, refi->addr); // address of FUNCTION
-					Address callAddr (space, refi->at); // address of CALL
-					R_LOG_INFO ("OverridingCallReturn %s", extractLibcFuncName (f->name));
-					ghFunc->getOverride().insertFlowOverride(callAddr, Override::CALL_RETURN);
-				}
-				r_anal_op_free (op);
-			}
+		const char *impname = import_flag_at (core, refi->addr);
+		if (!impname) {
+			continue;
 		}
+		RAnalOp *op = r_core_anal_op (core, refi->at, 0);
+		if (!op) {
+			continue;
+		}
+		// a tail-branch into an import veneer reads as a returning call
+		if (op->type == R_ANAL_OP_TYPE_JMP) {
+			Address callAddr (space, refi->at);
+			R_LOG_INFO ("OverridingCallReturn %s", extractLibcFuncName (impname));
+			ghFunc->getOverride().insertFlowOverride(callAddr, Override::CALL_RETURN);
+		}
+		r_anal_op_free (op);
 	}
 	RVecAnalRef_free (refs);
 }
