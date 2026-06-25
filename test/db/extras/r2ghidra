@@ -3105,3 +3105,14 @@ afc cdecl
 pdg~mycheck(
 EOF
 RUN
+
+NAME=stop at noreturn call before data
+FILE=bins/elf/arm-stackchk
+CMDS=<<EOF
+aaa
+pdg @ sym.checkval~?halt_baddata
+EOF
+EXPECT=<<EOF
+0
+EOF
+RUN
