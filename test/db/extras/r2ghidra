@@ -2979,6 +2979,41 @@ EXPECT=<<EOF
 EOF
 RUN
 
+NAME=ppc64 sign-prefixed register arg keeps its 64-bit width under pdg
+FILE=bins/elf/ppc64v1-crc32_generic.ko
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF
+aa
+afvt arg1 signed int64_t @ sym..crc32_init
+pdg @ sym..crc32_init
+EOF
+EXPECT=<<EOF
+
+ulong sym..crc32_init(int64_t arg1)
+
+{
+    reloc.._mcount();
+    *(arg1 + 8) = *(*arg1 + 0x20);
+    return 0;
+}
+
+EOF
+RUN
+
+NAME=ppc64 big-endian narrow register arg maps to low-order bytes under pdg
+FILE=bins/elf/ppc64v1-crc32_generic.ko
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF
+aa
+afvt arg3 int @ sym..crc32_setkey
+pdg @ sym..crc32_setkey~arg3
+EOF
+EXPECT=<<EOF
+int64_t sym..crc32_setkey(int64_t arg1,int64_t arg2,int arg3)
+    if (arg3 == 4) {
+EOF
+RUN
+
 NAME=ppc32 small-data r2 seed resolves sdata globals under pdg
 FILE=bins/elf/ppc32-sda
 ARGS=-e anal.gp=0x1000801c

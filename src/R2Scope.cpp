@@ -287,13 +287,23 @@ struct FunctionVars {
 			if (a.isInvalid ()) {
 				return;
 			}
-			uintb last = a.getOffset () + type->getSize () - 1;
-			if (last < a.getOffset ()) {
+			int4 index = var->isarg ? paramIndex (a, paramSize (var, type), var) : -1;
+			if (var->isarg && index < 0) {
+				return;
+			}
+			const int4 tsize = type->getSize ();
+			// big-endian: a sub-register-width reg arg sits in the GPR's low-order (high-address) bytes
+			Address sa = a;
+			if (var->kind == R_ANAL_VAR_KIND_REG && arch->translate->isBigEndian () && tsize > 0 && tsize < default_size) {
+				sa = a + (default_size - tsize);
+			}
+			uintb last = sa.getOffset () + tsize - 1;
+			if (last < sa.getOffset ()) {
 				arch->addWarning ("Variable " + to_string (var->name) + " extends beyond the stackframe. Try changing its type to something smaller.");
 				return;
 			}
 			bool typelock = true;
-			if (overlaps (a, last)) {
+			if (overlaps (sa, last)) {
 				arch->addWarning ("Detected overlap for variable " + to_string (var->name));
 				if (var->isarg) {
 					return;
@@ -301,13 +311,9 @@ struct FunctionVars {
 				typelock = false;
 			}
 
-			int4 index = var->isarg ? paramIndex (a, paramSize (var, type), var) : -1;
-			if (var->isarg && index < 0) {
-				return;
-			}
-			ranges.insertRange (a.getSpace (), a.getOffset (), last);
+			ranges.insertRange (sa.getSpace (), sa.getOffset (), last);
 
-			Element *symbolElement = emitSymbol (symbollistElement, var->name, type, a,
+			Element *symbolElement = emitSymbol (symbollistElement, var->name, type, sa,
 				typelock ? "true" : "false", "true", var->isarg ? "0" : "-1", index,
 				var->isarg && var->kind == R_ANAL_VAR_KIND_REG, childRegRange);
 			if (var->isarg) {

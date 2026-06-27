@@ -213,6 +213,7 @@ static bool get_builtin_spec(const R2TypeFactory *factory, const std::string &na
 	bool is_bool = false;
 	bool is_wchar = false;
 	int long_count = 0;
+	int4 explicit_size = 0;
 	while (ss >> token) {
 		if (token == "const" || token == "volatile" || token == "restrict") {
 			continue;
@@ -257,9 +258,24 @@ static bool get_builtin_spec(const R2TypeFactory *factory, const std::string &na
 			is_wchar = true;
 			continue;
 		}
+		int4 tok_size = 0;
+		if (parse_bits_suffix(token, "uint", tok_size) || parse_bits_suffix(token, "ut", tok_size)) {
+			explicit_size = tok_size;
+			is_unsigned = true;
+			continue;
+		}
+		if (parse_bits_suffix(token, "int", tok_size) || parse_bits_suffix(token, "st", tok_size)) {
+			explicit_size = tok_size;
+			continue;
+		}
 		return false;
 	}
 
+	if (explicit_size > 0) {
+		spec.size = explicit_size;
+		spec.meta = is_unsigned ? TYPE_UINT : TYPE_INT;
+		return true;
+	}
 	if (is_bool) {
 		spec.size = 1;
 		spec.meta = TYPE_BOOL;
@@ -309,6 +325,14 @@ static bool get_builtin_spec(const R2TypeFactory *factory, const std::string &na
 	return false;
 }
 
+static Datatype *base_or_unknown(R2TypeFactory *factory, int4 size, type_metatype meta) {
+	Datatype *base = factory->getBase(size, meta);
+	if (!base && meta != TYPE_UNKNOWN) {
+		base = factory->getBase(size, TYPE_UNKNOWN);
+	}
+	return base;
+}
+
 static Datatype *make_typedef(R2TypeFactory *factory, Datatype *base, const std::string &name) {
 	Datatype *typedefd = factory->getTypedef(base, name, 0, 0);
 	factory->setName(typedefd, name);
@@ -340,10 +364,7 @@ Datatype *R2TypeFactory::queryR2Base(const string &n) {
 		size = bits / 8;
 		meta = formatToMeta(r_type_format(sdb, n.c_str()));
 	}
-	Datatype *base = getBase(size, meta);
-	if (!base && meta != TYPE_UNKNOWN) {
-		base = getBase(size, TYPE_UNKNOWN);
-	}
+	Datatype *base = base_or_unknown(this, size, meta);
 	if (!base) {
 		return nullptr;
 	}
@@ -732,6 +753,12 @@ Datatype *R2TypeFactory::findById(const string &n, uint8 id, int4 sz, std::set<s
 			r = fromCString (n, nullptr, &stackTypes);
 		}
 	}
+	if (r == nullptr) {
+		BuiltinTypeSpec builtin;
+		if (get_builtin_spec (this, n, builtin)) {
+			r = base_or_unknown (this, builtin.size, builtin.meta);
+		}
+	}
 	// Fallback to a basic type if the type cannot be resolved
 	if (r == nullptr) {
 		int4 fallback_size = (sz > 0) ? sz : getSizeOfInt();
@@ -814,10 +841,7 @@ Datatype *R2TypeFactory::fromCString(const string &str, string *error, std::set<
 		if (!base) {
 			BuiltinTypeSpec builtin;
 			if (get_builtin_spec(this, manual, builtin)) {
-				Datatype *builtin_base = getBase(builtin.size, builtin.meta);
-				if (!builtin_base && builtin.meta != TYPE_UNKNOWN) {
-					builtin_base = getBase(builtin.size, TYPE_UNKNOWN);
-				}
+				Datatype *builtin_base = base_or_unknown(this, builtin.size, builtin.meta);
 				if (builtin_base) {
 					base = make_typedef(this, builtin_base, manual);
 				}
