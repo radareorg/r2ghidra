@@ -442,7 +442,8 @@ static void processFunctionSignature(
 			}
 		}
 	}
-	have_sig_proto = sig_has_structured;
+	// variadic functions need the full proto pushed so the decompiler does call-site vararg recovery
+	have_sig_proto = sig_has_structured || (sig_first_vararg >= 0);
 	if (have_sig_proto) {
 		sig_proto = protoPieces;
 	}
