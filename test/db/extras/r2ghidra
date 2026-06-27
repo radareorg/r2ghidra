@@ -2967,6 +2967,18 @@ ulong sym..crc32_init(int64_t arg1)
 EOF
 RUN
 
+NAME=ppc64 variadic prototype recovers call-site register args under pdg
+FILE=bins/elf/ppc64v1-vararg
+CMDS=<<EOF
+aa
+"td int vfmt(const char *tag, ...);"
+pdg @ sym.caller~vfmt
+EOF
+EXPECT=<<EOF
+    iVar1 = sym.vfmt(0x100006c8,arg1,arg2);
+EOF
+RUN
+
 NAME=ppc32 small-data r2 seed resolves sdata globals under pdg
 FILE=bins/elf/ppc32-sda
 ARGS=-e anal.gp=0x1000801c
