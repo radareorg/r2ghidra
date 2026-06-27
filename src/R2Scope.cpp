@@ -382,12 +382,15 @@ static void processFunctionSignature(
 {
 	std::vector<SigArg> sig_args;
 	int4 sig_first_vararg = -1;
+	bool explicit_proto = false;
 
 	{
 		RCoreLock core_lock (arch->getCore ());
 		Sdb *tdb = core_lock->anal->sdb_types;
 		char *fname = r_type_func_guess (tdb, fcn_name);
 		if (fname && r_type_func_exist (tdb, fname)) {
+			// a cc key marks an afs-set prototype; auto-inferred and library types have none
+			explicit_proto = sdb_const_get (tdb, ("func." + std::string (fname) + ".cc").c_str (), nullptr) != nullptr;
 			const int argc = r_type_func_args_count (tdb, fname);
 			for (int i = 0; i < argc; i++) {
 				char *arg_type = r_type_func_args_type (tdb, fname, i);
@@ -420,7 +423,8 @@ static void processFunctionSignature(
 		free (fname);
 	}
 
-	if (sig_args.empty ()) {
+	// a return-only prototype still needs the proto built below so its return type can be locked
+	if (sig_args.empty () && !(sig_ret_type != nullptr && explicit_proto)) {
 		return;
 	}
 
@@ -442,8 +446,8 @@ static void processFunctionSignature(
 			}
 		}
 	}
-	// variadic functions need the full proto pushed so the decompiler does call-site vararg recovery
-	have_sig_proto = sig_has_structured || (sig_first_vararg >= 0);
+	// varargs need the full proto for call-site recovery; an explicit return type must be locked so the decompiler keeps it instead of demoting to void
+	have_sig_proto = sig_has_structured || (sig_first_vararg >= 0) || (sig_ret_type != nullptr && explicit_proto);
 	if (have_sig_proto) {
 		sig_proto = protoPieces;
 	}

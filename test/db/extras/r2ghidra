@@ -3075,3 +3075,33 @@ EXPECT=<<EOF
     sym.imp.printf("Password: ");
 EOF
 RUN
+
+NAME=return type from r2 prototype is preserved
+FILE=bins/elf/crackme0x05
+EXPECT=<<EOF
+int mycheck(int code)
+EOF
+CMDS=<<EOF
+s sym.check
+af
+afn mycheck
+afc cdecl
+'afs int mycheck(int code)
+pdg~mycheck(
+EOF
+RUN
+
+NAME=return type preserved for argument-less prototype
+FILE=bins/elf/crackme0x05
+EXPECT=<<EOF
+int mycheck(void)
+EOF
+CMDS=<<EOF
+s sym.check
+af
+afn mycheck
+afc cdecl
+'afs int mycheck(void)
+pdg~mycheck(
+EOF
+RUN
