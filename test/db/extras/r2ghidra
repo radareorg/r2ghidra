@@ -3386,3 +3386,27 @@ EXPECT=<<EOF2
     sym.imp.printf("IOLI Crackme Level 0x05\n",in_stack_ffffff64);
 EOF2
 RUN
+
+NAME=ppc64 noreturn void callee gets no phantom canary arg under pdg
+FILE=bins/elf/ppc64-noreturn-arg.so
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+aaa
+pdg @ sym.withbuf~stack_chk_fail
+EOF2
+EXPECT=<<EOF2
+    sub.__stack_chk_fail();
+EOF2
+RUN
+
+NAME=ppc64 noreturn callee that takes an argument keeps it under pdg
+FILE=bins/elf/ppc64-noreturn-arg.so
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+aaa
+pdg @ sym.doexit~0x2a
+EOF2
+EXPECT=<<EOF2
+        entry0(0x2a);
+EOF2
+RUN
