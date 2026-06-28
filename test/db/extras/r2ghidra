@@ -3174,3 +3174,16 @@ EXPECT=<<EOF
     rsym.__gmon_start__();
 EOF
 RUN
+
+NAME=arm tail call into rsym-flagged local veneer resolves to a named call
+FILE=bins/elf/rsym-veneer-arm.so
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+e r2ghidra.fixups=true
+aaa
+pdg @ sym.tail_caller~rsym.local_target
+EOF2
+EXPECT=<<EOF2
+    rsym.local_target();
+EOF2
+RUN
