@@ -3283,3 +3283,106 @@ EXPECT=<<EOF2
 x86:LE:64:default:clang
 EOF2
 RUN
+
+NAME=x86-64 printf call-site varargs recovered from the format string under pdg
+FILE=bins/elf/x86_64-varargs.so
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+e r2ghidra.varargs=true
+aaa
+pdg @ sym.p_printf~%f
+EOF2
+EXPECT=<<EOF2
+    iVar1 = sym.imp.printf("%s %d %f %x\n",arg1,arg2,in_d0,arg3);
+EOF2
+RUN
+
+NAME=printf vararg recovery stays off by default
+FILE=bins/elf/x86_64-varargs.so
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+e r2ghidra.varargs=false
+aaa
+pdg @ sym.p_printf~%f
+EOF2
+EXPECT=<<EOF2
+    sym.imp.printf("%s %d %f %x\n",arg1);
+EOF2
+RUN
+
+NAME=x86-64 snprintf call-site varargs recovered under pdg
+FILE=bins/elf/x86_64-varargs.so
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+e r2ghidra.varargs=true
+aaa
+pdg @ sym.p_snprintf~n=%d
+EOF2
+EXPECT=<<EOF2
+    iVar1 = sym.imp.snprintf(*0x1fd0,0x40,"n=%d x=%x",arg1,arg2);
+EOF2
+RUN
+
+NAME=scanf-family is left untouched by printf vararg recovery
+FILE=bins/elf/x86_64-varargs.so
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+e r2ghidra.varargs=true
+aaa
+pdg @ sym.p_sscanf~isoc23
+EOF2
+EXPECT=<<EOF2
+    sym.imp.__isoc23_sscanf(arg1,0x7b0,arg2);
+EOF2
+RUN
+
+NAME=arm64 printf call-site varargs recovered from the format string under pdg
+FILE=bins/elf/arm64-varargs.so
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+e r2ghidra.varargs=true
+aaa
+pdg @ sym.p_printf~%f
+EOF2
+EXPECT=<<EOF2
+    iVar1 = sym.imp.printf("%s %d %f %x\n",arg1,arg2,in_d0,arg3);
+EOF2
+RUN
+
+NAME=arm64 snprintf call-site varargs recovered under pdg
+FILE=bins/elf/arm64-varargs.so
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+e r2ghidra.varargs=true
+aaa
+pdg @ sym.p_snprintf~n=%d
+EOF2
+EXPECT=<<EOF2
+    iVar1 = sym.imp.snprintf(*0x1fd0,0x40,"n=%d x=%x",arg1,arg2);
+EOF2
+RUN
+
+NAME=ppc64 printf float vararg lands in an fp register under pdg
+FILE=bins/elf/ppc64v1-printf-vararg
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+e r2ghidra.varargs=true
+aaa
+pdg @ sym.report~("%s code
+EOF2
+EXPECT=<<EOF2
+                      ("%s code=%d ratio=%f mask=%x\n",_obj.g_tag,_obj.g_code,_obj.g_ratio,_obj.g_mask);
+EOF2
+RUN
+
+NAME=x86-32 stack-arg varargs are not recovered (register-ABI only)
+FILE=bins/elf/crackme0x05
+CMDS=<<EOF2
+e r2ghidra.varargs=true
+aaa
+pdg @ main~IOLI
+EOF2
+EXPECT=<<EOF2
+    sym.imp.printf("IOLI Crackme Level 0x05\n",in_stack_ffffff64);
+EOF2
+RUN

@@ -77,6 +77,7 @@ CV cfg_var_rawptr     ("rawptr",      "true",     "Show unknown globals as raw a
 CV cfg_var_verbose    ("verbose",     "false",    "Show verbose warning messages while decompiling");
 CV cfg_var_casts      ("casts",       "false",    "Show type casts where needed");
 CV cfg_var_fixups     ("fixups",      "false",    "Apply pcode fixups");
+CV cfg_var_varargs    ("varargs",     "false",    "Recover printf-family varargs from literal format strings");
 CV cfg_var_roprop     ("roprop",      "0",        "Propagate read-only constants (0,1,2,3,4)");
 CV cfg_var_timeout    ("timeout",     "0",        "Run decompilation in a separate process and kill it after a specific time");
 CV cfg_var_compiler   ("compiler",    "default",  "Select compiler for calling conventions", ConfigCompiler);
@@ -216,6 +217,9 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	}
 	PcodeFixupPreprocessor::fixupNoreturnCallsBeforeData(function, func, core, arch);
 	PcodeFixupPreprocessor::fixupResolvedIndirectCalls(function, func, core, arch);
+	if (cfg_var_varargs.GetBool (core->config)) {
+		PcodeFixupPreprocessor::fixupVariadicFormatCalls(function, func, core, arch);
+	}
 
 	int res;
 #ifndef DEBUG_EXCEPTIONS
