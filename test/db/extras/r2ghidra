@@ -110,16 +110,16 @@ x86:LE:16:Real Mode:
 
 //WARNING: Variable defined which should be unmapped: var_8h
 //WARNING: Variable defined which should be unmapped: var_4h
-//WARNING: Type propagation algorithm not settling
 //WARNING: Unknown calling convention -- yet parameter storage is locked
 
-char * fcn.00001c98(int16_t arg_8h,int16_t arg_6h,int16_t arg_eh,int16_t arg_ah)
+uint fcn.00001c98(int16_t arg_eh,int16_t arg_ah)
 
 {
     int16_t *piVar1;
     ushort unaff_CS;
     ushort unaff_DS;
-    char *in_stack_00000008;
+    ushort in_stack_00000004;
+    int16_t in_stack_00000008;
     int16_t in_stack_0000000c;
     int16_t var_8h;
     int16_t var_6h;
@@ -130,7 +130,7 @@ char * fcn.00001c98(int16_t arg_8h,int16_t arg_6h,int16_t arg_eh,int16_t arg_ah)
     var_6h = 0x13da;
     do {
         func_0x0000ec24(unaff_CS,var_6h,unaff_DS,0x401e);
-        func_0x0000ec24(0xdee,arg_8h,arg_ah,0x401e);
+        func_0x0000ec24(0xdee,in_stack_00000004,arg_ah,0x401e);
         func_0x0000e59a(0xdee,0x401e);
         var_2h = 0;
         do {
@@ -139,7 +139,7 @@ char * fcn.00001c98(int16_t arg_8h,int16_t arg_6h,int16_t arg_eh,int16_t arg_ah)
                 cStack_4 = '\n';
             }
             if (var_2h < in_stack_0000000c) {
-                in_stack_00000008[var_2h] = cStack_4;
+                *(in_stack_00000008 + var_2h) = cStack_4;
                 var_2h = var_2h + 1;
             }
         } while (cStack_4 != '\n');
@@ -155,8 +155,8 @@ char * fcn.00001c98(int16_t arg_8h,int16_t arg_6h,int16_t arg_eh,int16_t arg_ah)
         unaff_CS = 0xdee;
         func_0x0000e59a(0xdee,0x401e);
         var_6h = 0x13db;
-    } while (in_stack_00000008[var_2h + -1] != '\n');
-    in_stack_00000008[var_2h + -1] = '\0';
+    } while (*(in_stack_00000008 + var_2h + -1) != '\n');
+    *(in_stack_00000008 + var_2h + -1) = 0;
     return _in_stack_00000008;
 }
 
@@ -891,7 +891,7 @@ NAME=constant variable annotation
 FILE=bins/dectest32
 EXPECT=<<EOF
 {
-  "code": "\nvoid sym.PrintAmbassador(int32_t arg_8h)\n\n{\n    func_0x08049050(\"Ambassador value: \");\n    if (arg_8h < 5) {\n        if (arg_8h < 5) {\n            switch(*(arg_8h * 4 + 0x804a048)) {\n            case 0x8049261:\n                func_0x08049050(\"pure\");\n                break;\n            case 0x8049273:\n                func_0x08049050(\"reason\");\n                break;\n            case 0x8049285:\n                func_0x08049050(\"revolution\");\n                break;\n            case 0x8049297:\n                func_0x08049050(\"echoes\");\n                break;\n            case 0x80492a9:\n                func_0x08049050(\"wall\");\n            }\n        }\n    }\n    else if (arg_8h == 1000000) {\n        func_0x08049050(\"million\");\n    }\n    func_0x08049090(10);\n    return;\n}\n\n",
+  "code": "\nvoid sym.PrintAmbassador(int32_t arg_8h)\n\n{\n    sym.imp.printf(\"Ambassador value: \");\n    if (arg_8h < 5) {\n        if (arg_8h < 5) {\n            switch(*(arg_8h * 4 + 0x804a048)) {\n            case 0x8049261:\n                sym.imp.printf(\"pure\");\n                break;\n            case 0x8049273:\n                sym.imp.printf(\"reason\");\n                break;\n            case 0x8049285:\n                sym.imp.printf(\"revolution\");\n                break;\n            case 0x8049297:\n                sym.imp.printf(\"echoes\");\n                break;\n            case 0x80492a9:\n                sym.imp.printf(\"wall\");\n            }\n        }\n    }\n    else if (arg_8h == 1000000) {\n        sym.imp.printf(\"million\");\n    }\n    sym.imp.putchar(10);\n    return;\n}\n\n",
   "annotations": [
     {
       "start": 1,
@@ -938,507 +938,507 @@ EXPECT=<<EOF
     },
     {
       "start": 49,
-      "end": 64,
+      "end": 63,
       "type": "function_name",
-      "name": "",
+      "name": "sym.imp.printf",
       "offset": 134516816
     },
     {
       "start": 49,
-      "end": 64,
+      "end": 63,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 65,
-      "end": 85,
+      "start": 64,
+      "end": 84,
       "type": "constant_variable",
       "offset": 134520840
     },
     {
-      "start": 65,
-      "end": 85,
+      "start": 64,
+      "end": 84,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
       "start": 49,
-      "end": 86,
+      "end": 85,
       "type": "offset",
       "offset": 134517295
     },
     {
-      "start": 92,
-      "end": 94,
+      "start": 91,
+      "end": 93,
       "type": "offset",
       "offset": 134517307
     },
     {
-      "start": 92,
-      "end": 94,
+      "start": 91,
+      "end": 93,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 96,
-      "end": 102,
+      "start": 95,
+      "end": 101,
       "type": "function_parameter",
       "name": "arg_8h"
     },
     {
-      "start": 96,
-      "end": 102,
+      "start": 95,
+      "end": 101,
       "type": "syntax_highlight",
       "syntax_highlight": "function_parameter"
     },
     {
-      "start": 103,
-      "end": 104,
+      "start": 102,
+      "end": 103,
       "type": "offset",
       "offset": 134517307
     },
     {
-      "start": 105,
-      "end": 106,
+      "start": 104,
+      "end": 105,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 118,
-      "end": 120,
+      "start": 117,
+      "end": 119,
       "type": "offset",
       "offset": 134517313
     },
     {
-      "start": 118,
-      "end": 120,
+      "start": 117,
+      "end": 119,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 122,
-      "end": 128,
+      "start": 121,
+      "end": 127,
       "type": "function_parameter",
       "name": "arg_8h"
     },
     {
-      "start": 122,
-      "end": 128,
+      "start": 121,
+      "end": 127,
       "type": "syntax_highlight",
       "syntax_highlight": "function_parameter"
     },
     {
-      "start": 129,
-      "end": 130,
+      "start": 128,
+      "end": 129,
       "type": "offset",
       "offset": 134517313
     },
     {
-      "start": 131,
-      "end": 132,
+      "start": 130,
+      "end": 131,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 148,
-      "end": 154,
+      "start": 147,
+      "end": 153,
       "type": "offset",
       "offset": 134517332
     },
     {
-      "start": 148,
-      "end": 154,
+      "start": 147,
+      "end": 153,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 155,
-      "end": 156,
+      "start": 154,
+      "end": 155,
       "type": "offset",
       "offset": 134517330
     },
     {
-      "start": 157,
-      "end": 163,
+      "start": 156,
+      "end": 162,
       "type": "function_parameter",
       "name": "arg_8h"
     },
     {
-      "start": 157,
-      "end": 163,
+      "start": 156,
+      "end": 162,
       "type": "syntax_highlight",
       "syntax_highlight": "function_parameter"
     },
     {
-      "start": 164,
-      "end": 165,
+      "start": 163,
+      "end": 164,
       "type": "offset",
       "offset": 134517322
     },
     {
-      "start": 166,
-      "end": 167,
+      "start": 165,
+      "end": 166,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 168,
-      "end": 169,
+      "start": 167,
+      "end": 168,
       "type": "offset",
       "offset": 134517325
     },
     {
-      "start": 170,
-      "end": 179,
+      "start": 169,
+      "end": 178,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 196,
-      "end": 200,
+      "start": 195,
+      "end": 199,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 228,
-      "end": 243,
+      "start": 227,
+      "end": 241,
       "type": "function_name",
-      "name": "",
+      "name": "sym.imp.printf",
       "offset": 134516816
     },
     {
-      "start": 228,
-      "end": 243,
+      "start": 227,
+      "end": 241,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 244,
-      "end": 250,
+      "start": 242,
+      "end": 248,
       "type": "constant_variable",
       "offset": 134520859
     },
     {
-      "start": 244,
-      "end": 250,
+      "start": 242,
+      "end": 248,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 228,
-      "end": 251,
+      "start": 227,
+      "end": 249,
       "type": "offset",
       "offset": 134517353
     },
     {
-      "start": 269,
-      "end": 274,
+      "start": 267,
+      "end": 272,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 269,
-      "end": 275,
+      "start": 267,
+      "end": 273,
       "type": "offset",
       "offset": 134517361
     },
     {
-      "start": 288,
-      "end": 292,
+      "start": 286,
+      "end": 290,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 320,
-      "end": 335,
+      "start": 318,
+      "end": 332,
       "type": "function_name",
-      "name": "",
+      "name": "sym.imp.printf",
       "offset": 134516816
     },
     {
-      "start": 320,
-      "end": 335,
+      "start": 318,
+      "end": 332,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 336,
-      "end": 344,
+      "start": 333,
+      "end": 341,
       "type": "constant_variable",
       "offset": 134520864
     },
     {
-      "start": 336,
-      "end": 344,
+      "start": 333,
+      "end": 341,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 320,
-      "end": 345,
+      "start": 318,
+      "end": 342,
       "type": "offset",
       "offset": 134517371
     },
     {
-      "start": 363,
-      "end": 368,
+      "start": 360,
+      "end": 365,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 363,
-      "end": 369,
+      "start": 360,
+      "end": 366,
       "type": "offset",
       "offset": 134517379
     },
     {
-      "start": 382,
-      "end": 386,
+      "start": 379,
+      "end": 383,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 414,
-      "end": 429,
+      "start": 411,
+      "end": 425,
       "type": "function_name",
-      "name": "",
+      "name": "sym.imp.printf",
       "offset": 134516816
     },
     {
-      "start": 414,
-      "end": 429,
+      "start": 411,
+      "end": 425,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 430,
-      "end": 442,
+      "start": 426,
+      "end": 438,
       "type": "constant_variable",
       "offset": 134520871
     },
     {
-      "start": 430,
-      "end": 442,
+      "start": 426,
+      "end": 438,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 414,
-      "end": 443,
+      "start": 411,
+      "end": 439,
       "type": "offset",
       "offset": 134517389
     },
     {
-      "start": 461,
-      "end": 466,
+      "start": 457,
+      "end": 462,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 461,
-      "end": 467,
+      "start": 457,
+      "end": 463,
       "type": "offset",
       "offset": 134517397
     },
     {
-      "start": 480,
-      "end": 484,
+      "start": 476,
+      "end": 480,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 512,
-      "end": 527,
+      "start": 508,
+      "end": 522,
       "type": "function_name",
-      "name": "",
+      "name": "sym.imp.printf",
       "offset": 134516816
     },
     {
-      "start": 512,
-      "end": 527,
+      "start": 508,
+      "end": 522,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 528,
-      "end": 536,
+      "start": 523,
+      "end": 531,
       "type": "constant_variable",
       "offset": 134520882
     },
     {
-      "start": 528,
-      "end": 536,
+      "start": 523,
+      "end": 531,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 512,
-      "end": 537,
+      "start": 508,
+      "end": 532,
       "type": "offset",
       "offset": 134517407
     },
     {
-      "start": 555,
-      "end": 560,
+      "start": 550,
+      "end": 555,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 555,
-      "end": 561,
+      "start": 550,
+      "end": 556,
       "type": "offset",
       "offset": 134517415
     },
     {
-      "start": 574,
-      "end": 578,
+      "start": 569,
+      "end": 573,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 606,
-      "end": 621,
+      "start": 601,
+      "end": 615,
       "type": "function_name",
-      "name": "",
+      "name": "sym.imp.printf",
       "offset": 134516816
     },
     {
-      "start": 606,
-      "end": 621,
+      "start": 601,
+      "end": 615,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 622,
-      "end": 628,
+      "start": 616,
+      "end": 622,
       "type": "constant_variable",
       "offset": 134520889
     },
     {
-      "start": 622,
-      "end": 628,
+      "start": 616,
+      "end": 622,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 606,
-      "end": 629,
+      "start": 601,
+      "end": 623,
       "type": "offset",
       "offset": 134517425
     },
     {
-      "start": 665,
-      "end": 669,
+      "start": 659,
+      "end": 663,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 670,
-      "end": 672,
+      "start": 664,
+      "end": 666,
       "type": "offset",
       "offset": 134517341
     },
     {
-      "start": 670,
-      "end": 672,
+      "start": 664,
+      "end": 666,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 674,
-      "end": 680,
+      "start": 668,
+      "end": 674,
       "type": "function_parameter",
       "name": "arg_8h"
     },
     {
-      "start": 674,
-      "end": 680,
+      "start": 668,
+      "end": 674,
       "type": "syntax_highlight",
       "syntax_highlight": "function_parameter"
     },
     {
-      "start": 681,
-      "end": 683,
+      "start": 675,
+      "end": 677,
       "type": "offset",
       "offset": 134517334
     },
     {
-      "start": 684,
-      "end": 691,
+      "start": 678,
+      "end": 685,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 703,
-      "end": 718,
+      "start": 697,
+      "end": 711,
       "type": "function_name",
-      "name": "",
+      "name": "sym.imp.printf",
       "offset": 134516816
     },
     {
-      "start": 703,
-      "end": 718,
+      "start": 697,
+      "end": 711,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 719,
-      "end": 728,
+      "start": 712,
+      "end": 721,
       "type": "constant_variable",
       "offset": 134520894
     },
     {
-      "start": 719,
-      "end": 728,
+      "start": 712,
+      "end": 721,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 703,
-      "end": 729,
+      "start": 697,
+      "end": 722,
       "type": "offset",
       "offset": 134517443
     },
     {
-      "start": 741,
-      "end": 756,
+      "start": 734,
+      "end": 749,
       "type": "function_name",
-      "name": "",
+      "name": "sym.imp.putchar",
       "offset": 134516880
     },
     {
-      "start": 741,
-      "end": 756,
+      "start": 734,
+      "end": 749,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 757,
-      "end": 759,
+      "start": 750,
+      "end": 752,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 741,
-      "end": 760,
+      "start": 734,
+      "end": 753,
       "type": "offset",
       "offset": 134517459
     },
     {
-      "start": 766,
-      "end": 772,
+      "start": 759,
+      "end": 765,
       "type": "offset",
       "offset": 134517469
     },
     {
-      "start": 766,
-      "end": 772,
+      "start": 759,
+      "end": 765,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 766,
-      "end": 772,
+      "start": 759,
+      "end": 765,
       "type": "offset",
       "offset": 134517469
     }
@@ -1549,26 +1549,26 @@ void sym.Aeropause(Bright *bright,int32_t argc,char **argv)
     bright->morning->saved_argc = argc;
     bright->morning->saved_argv = argv;
     if (bright->morning->saved_argc < 2) {
-        bright->ambassador = AMBASSADOR_PURE;
+        *&bright->ambassador = AMBASSADOR_PURE;
     }
     else {
         (bright->window).sunlight = bright->morning->saved_argv[1];
         iVar2 = sym.imp.strcmp((bright->window).sunlight,"the  ");
         if (iVar2 == 0) {
-            bright->ambassador = AMBASSADOR_REASON;
+            *&bright->ambassador = AMBASSADOR_REASON;
         }
         else {
             iVar2 = sym.imp.strcmp((bright->window).sunlight,"dark");
             if (iVar2 == 0) {
-                bright->ambassador = AMBASSADOR_REVOLUTION;
+                *&bright->ambassador = AMBASSADOR_REVOLUTION;
             }
             else {
                 iVar2 = sym.imp.strcmp((bright->window).sunlight,"third");
                 if (iVar2 == 0) {
-                    bright->ambassador = AMBASSADOR_ECHOES;
+                    *&bright->ambassador = AMBASSADOR_ECHOES;
                 }
                 else {
-                    bright->ambassador = AMBASSADOR_MILLION;
+                    *&bright->ambassador = AMBASSADOR_MILLION;
                 }
             }
         }
@@ -1836,7 +1836,7 @@ EXPECT=<<EOF
 void __stdcall main(int argc,char **argv,char **envp)
 
 {
-    char *var_4h;
+    int64_t var_4h;
     
     sym._call();
     return;
@@ -1860,7 +1860,7 @@ void entry0(void)
 
 {
     //[11] -r-x section size 200 named .text
-    func_0x0000039c();
+    rsym.__libc_init();
     //WARNING: Bad instruction - Truncating control flow here
     halt_baddata();
 }
@@ -2561,6 +2561,8 @@ FILE=-
 EXPECT=<<EOF
 6502:LE:16:default
 65C02:LE:16:default
+6805:BE:16:default
+6809:BE:16:default
 80251:BE:24:default
 80390:BE:24:default
 8051:BE:16:default
@@ -2608,7 +2610,15 @@ Dalvik:LE:32:DEX_Pie
 Dalvik:LE:32:Marshmallow
 Dalvik:LE:32:ODEX_KitKat
 Dalvik:LE:32:default
+H6309:BE:16:default
 JVM:BE:32:default
+Loongarch:LE:32:ilp32d
+Loongarch:LE:32:ilp32f
+Loongarch:LE:64:lp64d
+Loongarch:LE:64:lp64f
+M16C/60:LE:16:default
+M16C/80:LE:16:default
+M8C:BE:16:default
 MCS96:LE:16:default
 MIPS:BE:32:R6
 MIPS:BE:32:default
@@ -2901,15 +2911,15 @@ EXPECT=<<EOF
 void sym.KillList(LL arg1)
 
 {
-    LinkedList LVar1;
+    LL pLVar1;
     LL ptr;
     int64_t var_8h;
     
     ptr = arg1;
     while (ptr != NULL) {
-        LVar1 = ptr[1];
+        pLVar1 = *&ptr->next;
         sym.imp.free(ptr);
-        ptr = LVar1;
+        ptr = pLVar1;
     }
     return;
 }
@@ -2918,20 +2928,20 @@ EOF
 RUN
 
 NAME=mips gp-relative import argument resolves under pdg
-FILE=bins/elf/boa-mips
+FILE=bins/elf/boa-mips-mini
 CMDS=<<EOF
-0x00408af4;af;pdg~sym.imp.umask,sym.imp.time
+0x00400500;af;pdg~sym.imp.umask,sym.imp.time
 EOF
 EXPECT=<<EOF
     sym.imp.umask(0x3f);
-    sym.imp.time(*0x4f5204);
+    sym.imp.time(_reloc.current_time);
 EOF
 RUN
 
 NAME=mips t9 seed removes phantom gp args under pdg
-FILE=bins/elf/boa-mips
+FILE=bins/elf/boa-mips-mini
 CMDS=<<EOF
-0x43e43c;af;pdg
+0x00400580;af;pdg
 EOF
 EXPECT=<<EOF
 
@@ -2963,7 +2973,8 @@ ulong sym..crc32_init(int64_t arg1)
     reloc.._mcount();
     *(arg1 + 8) = *(*arg1 + 0x20);
     return 0;
-} 
+}
+
 EOF
 RUN
 

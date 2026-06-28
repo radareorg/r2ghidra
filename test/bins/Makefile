@@ -1,9 +1,12 @@
 
-all:
+all: elf/boa-mips-mini
 
 .PHONY: clean
 clean:
 	rm -fv dectest32 dectest64 rec
+
+elf/boa-mips-mini: mk-boa-mips-mini.py
+	python3 mk-boa-mips-mini.py $@
 
 dectest32: dectest.c types.h
 	gcc -m32 -fno-pic -no-pie -fno-omit-frame-pointer -o dectest32 -O0 dectest.c
