@@ -80,7 +80,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v7
     - name: Large >99KB files in test/bins are not allowed
-      run: [ "$(find test/bins -type f -size +99123c |wc -c)" -eq 0 ]
+      run: [ "$(find test/bins -type f -size +99123c | wc -l)" -eq 0 ]
     - name: Installing radare2 from deb
       run: |
         wget https://github.com/radareorg/radare2/releases/download/${{env.R2V}}/radare2_${{env.R2V}}_amd64.deb
