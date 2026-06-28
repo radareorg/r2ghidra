@@ -27,6 +27,7 @@ static bool is_import_name(const char * R_NONNULL name) {
 		|| r_str_startswith (name, "sym.imp.")
 		|| r_str_startswith (name, "loc.imp.")
 		|| r_str_startswith (name, "plt.")
+		|| r_str_startswith (name, "rsym.")
 		|| r_str_startswith (name, "reloc.");
 }
 
