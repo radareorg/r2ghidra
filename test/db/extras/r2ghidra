@@ -2986,7 +2986,7 @@ aa
 pdg @ sym.caller~vfmt
 EOF
 EXPECT=<<EOF
-    iVar1 = sym.vfmt(0x100006c8,arg1,arg2);
+    iVar1 = sym.vfmt(0x100001c8,arg1,arg2);
 EOF
 RUN
 
