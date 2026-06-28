@@ -525,6 +525,26 @@ static void processFunctionSignature(
 }
 #endif
 
+static bool noreturnTakesArgs(RCore *core, RAnalFunction *fcn, const char *fcn_name) {
+	RAnalVar **it;
+	R_VEC_FOREACH (&fcn->vars, it) {
+		RAnalVar *v = *it;
+		// a ppc PLT stub's TOC save lands a spurious stack arg, so only a register arg counts
+		if (v && v->isarg && v->kind == R_ANAL_VAR_KIND_REG) {
+			return true;
+		}
+	}
+	Sdb *tdb = core->anal->sdb_types;
+	char *fname = r_type_func_guess (tdb, fcn_name);
+	if (!fname) {
+		return false;
+	}
+	// args_count is 0 for both unknown and zero-arg protos, so > 0 alone tells real arg-takers apart
+	bool has_args = r_type_func_args_count (tdb, fname) > 0;
+	free (fname);
+	return has_args;
+}
+
 FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	// lol globals
 	RCoreLock core (arch->getCore ());
@@ -688,6 +708,15 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 		Funcdata *fd = funcsym->getFunction();
 		if (fd) {
 			fd->getFuncProto().setPieces(sig_proto);
+		}
+	}
+	// Ghidra does active param recovery unless input is locked, so a no-arg noreturn (eg __stack_chk_fail) would otherwise get a live caller reg as a phantom arg
+	if (funcsym && fcn->is_noreturn && !noreturnTakesArgs (core, fcn, fcn_name)) {
+		if (Funcdata *fd = funcsym->getFunction ()) {
+			FuncProto &fp = fd->getFuncProto ();
+			fp.setNoReturn (true);
+			fp.clearInput ();
+			fp.setInputLock (true);
 		}
 	}
 	return funcsym;
