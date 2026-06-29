@@ -280,25 +280,168 @@ static const std::map<std::string, ArchMapper> arch_map = {
 	{ "sbpf", { S("sBPF"), S("default"), B(64), E(false) } }
 };
 
+const char *ghidraCompilers[] = {
+	"6502.default",
+	"68000.default",
+	"6805.default",
+	"8048.default",
+	"8051.Archimedes",
+	"8051.default",
+	"8085.default",
+	"AARCH64.Visual Studio",
+	"AARCH64.default",
+	"ARM.Visual Studio",
+	"ARM.default",
+	"AppleSilicon.default",
+	"CP1600.default",
+	"CR16.default",
+	"Dalvik.default",
+	"HC05.default",
+	"HC08.default",
+	"HCS08.default",
+	"HCS12.default",
+	"JVM.default",
+	"MCS96.default",
+	"PIC24.default",
+	"STM8.default",
+	"SparcV9.default",
+	"SuperH4.Visual Studio",
+	"SuperH4.default",
+	"TI_MSP430.default",
+	"V850.default",
+	"avr32a.default",
+	"avr8.gcc",
+	"avr8.iarV1",
+	"avr8.imgCraftV8",
+	"hexagon.default",
+	"m8c.default",
+	"mips.Visual Studio",
+	"mips.default",
+	"mips.n32",
+	"mips.o32",
+	"mips.o64",
+	"old/v01stuff/toy.default",
+	"pa-risc.default",
+	"pic12c5xx.default",
+	"pic16.default",
+	"pic16c5x.default",
+	"pic17c7xx.default",
+	"pic18.default",
+	"ppc.Mac OS X",
+	"ppc.Visual Studio",
+	"ppc.default",
+	"riscv.gcc",
+	"superh.default",
+	"toy.default",
+	"toy.posStack",
+	"tricore.default",
+	"x86.Borland C++",
+	"x86.Delphi",
+	"x86.Visual Studio",
+	"x86.clang",
+	"x86.default",
+	"x86.gcc",
+	"z80.default",
+	NULL
+};
+
+// short names for the cspecs that are awkward to type via `e r2ghidra.compiler=`
+static const std::map<std::string, std::string> compiler_alias = {
+	{ "vs", "Visual Studio" },
+	{ "msvc", "Visual Studio" },
+	{ "windows", "Visual Studio" },
+	{ "mach0", "Mac OS X" },
+	{ "macos", "Mac OS X" },
+	{ "osx", "Mac OS X" },
+};
+
 static const std::map<std::string, std::string> compiler_map = {
 	{ "elf", "gcc" },
-	{ "pe", "windows" },
-	{ "mach0", "clang" }
+	{ "pe", "Visual Studio" },
+	{ "mach0", "clang" },
 };
+
+std::string findGhidraCompiler(RCore *core, const char *bin_compiler) {
+	const char *arch = r_config_get (core->config, "asm.arch");
+	if (R_STR_ISEMPTY (arch)) {
+		return std::string("default");
+	}
+	if (!strcmp (arch, "r2ghidra")) {
+		arch = r_config_get (core->config, "asm.cpu");
+	}
+	
+	char *a = strdup (arch);
+	// take arch name by splitting by the dot.
+	char *dot = strchr (a, '.');
+	if (dot) {
+		*dot = 0;
+	}
+	// asm.arch "arm" is "ARM" (32-bit) or "AARCH64" (64-bit) in Ghidra's processor naming
+	if (!strcmp (a, "arm")) {
+		free (a);
+		a = strdup (r_config_get_i (core->config, "asm.bits") == 64? "AARCH64": "ARM");
+	}
+	char *b = r_str_newf ("%s.", a);
+	free (a);
+	const char *uc = bin_compiler;
+	if (!strcmp (uc, "?")) {
+		for (int i = 0; ghidraCompilers[i]; i++) {
+			if (r_str_startswith (ghidraCompilers[i], b)) {
+				const char *c = ghidraCompilers[i] + strlen (b);
+				r_cons_printf (core->cons, "%s\n", c);
+			}
+		}
+		free (b);
+		return std::string("default");
+	}
+	if (R_STR_ISEMPTY (bin_compiler) || !strcmp (uc, "default")) {
+		bin_compiler = uc;
+	}
+	auto ali = compiler_alias.find (tolower (bin_compiler));
+	if (ali != compiler_alias.end ()) {
+		bin_compiler = ali->second.c_str ();
+	}
+	const char *goodcompiler = NULL;
+	for (int i = 0; ghidraCompilers[i]; i++) {
+		if (r_str_startswith (ghidraCompilers[i], b)) {
+			const char *c = ghidraCompilers[i] + strlen (b);
+			goodcompiler = c;
+			if (R_STR_ISEMPTY (bin_compiler) || !r_str_casecmp (c, bin_compiler)) {
+				break;
+			}
+		}
+	}
+	free (b);
+	if (goodcompiler != NULL) {
+		return std::string(goodcompiler);
+	}
+	if (r_str_startswith (arch, "x86")) {
+		return std::string("gcc");
+	}
+	return std::string("default");
+}
 
 std::string CompilerFromCore(RCore *core) {
 	if (core == nullptr) {
 		return "gcc";
 	}
+	// an explicit r2ghidra.compiler selects the cspec; "default" defers to the binary
+	const char *want = r_config_get (core->config, "r2ghidra.compiler");
+	if (R_STR_ISNOTEMPTY (want) && strcmp (want, "default")) {
+		return findGhidraCompiler (core, want);
+	}
 	RBinInfo *info = r_bin_get_info (core->bin);
 	if (!info || !info->rclass) {
 		return std::string ();
+	}
+	if (R_STR_ISNOTEMPTY (info->compiler)) {
+		// the bin's compiler string ("GCC: (GNU) 9.2.0") is not a cspec name; normalize it
+		return findGhidraCompiler (core, info->compiler);
 	}
 	auto comp_it = compiler_map.find (info->rclass);
 	if (comp_it == compiler_map.end ()) {
 		return std::string ();
 	}
-
 	return comp_it->second;
 }
 
