@@ -3187,3 +3187,99 @@ EXPECT=<<EOF2
     rsym.local_target();
 EOF2
 RUN
+
+NAME=r2ghidra.compiler lists the x86 compiler specs
+FILE=bins/dectest64
+CMDS=<<EOF2
+e r2ghidra.compiler=?
+EOF2
+EXPECT=<<EOF2
+Borland C++
+Delphi
+Visual Studio
+clang
+default
+gcc
+EOF2
+RUN
+
+NAME=r2ghidra.compiler lists the mips compiler specs
+FILE=bins/elf/boa-mips-mini
+CMDS=<<EOF2
+e r2ghidra.compiler=?
+EOF2
+EXPECT=<<EOF2
+Visual Studio
+default
+n32
+o32
+o64
+EOF2
+RUN
+
+NAME=r2ghidra.compiler lists the ppc compiler specs
+FILE=bins/elf/ppc64-isel
+CMDS=<<EOF2
+e r2ghidra.compiler=?
+EOF2
+EXPECT=<<EOF2
+Mac OS X
+Visual Studio
+default
+EOF2
+RUN
+
+NAME=r2ghidra.compiler normalizes an unknown name to the arch default
+FILE=bins/dectest64
+CMDS=<<EOF2
+e r2ghidra.compiler=icc
+e r2ghidra.compiler
+EOF2
+EXPECT=<<EOF2
+gcc
+EOF2
+RUN
+
+NAME=r2ghidra.compiler expands a short alias to the full cspec name
+FILE=bins/dectest64
+CMDS=<<EOF2
+e r2ghidra.compiler=windows
+e r2ghidra.compiler
+EOF2
+EXPECT=<<EOF2
+Visual Studio
+EOF2
+RUN
+
+NAME=r2ghidra.compiler keeps a valid compiler name
+FILE=bins/dectest64
+CMDS=<<EOF2
+e r2ghidra.compiler=clang
+e r2ghidra.compiler
+EOF2
+EXPECT=<<EOF2
+clang
+EOF2
+RUN
+
+NAME=r2ghidra.compiler lists the arm compiler specs
+FILE=bins/hello-arm
+CMDS=<<EOF2
+e r2ghidra.compiler=?
+EOF2
+EXPECT=<<EOF2
+Visual Studio
+default
+EOF2
+RUN
+
+NAME=r2ghidra.compiler selects the cspec in the matched language id
+FILE=bins/dectest64
+CMDS=<<EOF2
+e r2ghidra.compiler=clang
+pd:gss
+EOF2
+EXPECT=<<EOF2
+x86:LE:64:default:clang
+EOF2
+RUN
