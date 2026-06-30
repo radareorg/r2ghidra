@@ -720,8 +720,8 @@ static char *zigname_for(const char *name, ut64 key) {
 	}
 	int used = 0;
 	for (const ut8 *p = (const ut8 *)(name? name: "sub"); *p && used < 96; p++) {
-		char ch = (char)*p;
-		if (IS_DIGIT (ch) || IS_UPPER (ch) || IS_LOWER (ch) || ch == '_' || ch == '.') {
+		const char ch = (char)*p;
+		if (isalnum (ch) || ch == '_' || ch == '.') {
 			r_strbuf_append_n (sb, &ch, 1);
 		} else {
 			r_strbuf_append (sb, "_");
