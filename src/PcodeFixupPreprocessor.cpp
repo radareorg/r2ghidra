@@ -372,6 +372,27 @@ static bool read_format_string(RCore *core, ut64 addr, std::string &out) {
 
 // false on any conversion we can't model, so the caller skips the override
 static bool parse_format_conversions(const char *fmt, std::vector<std::string> &out) {
+#if R2_ABIVERSION >= 112
+	// the same parser, now in r2 core; bits is irrelevant in types mode
+	char *csv = r_str_printfmt (fmt, 0, 0);
+	if (!csv) {
+		return false;
+	}
+	for (char *p = csv; *p; ) {
+		char *comma = strchr (p, ',');
+		if (comma) {
+			*comma = 0;
+		}
+		out.push_back (p);
+		if (!comma) {
+			break;
+		}
+		p = comma + 1;
+	}
+	free (csv);
+	return true;
+#else
+	// TODO: drop this fallback once the minimum r2 is a release with ABI >= 112
 	for (const char *p = fmt; *p; p++) {
 		if (*p != '%') {
 			continue;
@@ -464,6 +485,7 @@ static bool parse_format_conversions(const char *fmt, std::vector<std::string> &
 		}
 	}
 	return true;
+#endif
 }
 
 static FuncProto *build_locked_proto(R2Architecture &arch, const char *cc, const char *callee,
