@@ -1,0 +1,291 @@
+NAME=x86_32
+FILE=bins/elf/crackme0x05
+EXPECT=<<EOF
+x86:LE:32:default:gcc
+
+uint main(int argc,char **argv,char **envp)
+
+{
+    int32_t var_78h;
+    
+    sym.imp.printf("IOLI Crackme Level 0x05\n");
+    sym.imp.printf("Password: ");
+    sym.imp.scanf(0x80486b2,&var_78h);
+    sym.check(&var_78h);
+    return 0;
+}
+
+EOF
+CMDS=<<EOF
+pdgss
+s main
+af
+pdg
+EOF
+RUN
+
+NAME=x86_32
+FILE=bins/elf/crackme0x05
+EXPECT=<<EOF
+                                                |
+    0x08048540 push ebp                         |uint main(int argc,char **argv,char **envp)
+                                                |
+                                                |{
+                                                |    int32_t var_78h;
+                                                |    
+    0x08048566 call sym.imp.printf              |    sym.imp.printf("IOLI Crackme Level 0x05\n");
+    0x08048572 call sym.imp.printf              |    sym.imp.printf("Password: ");
+    0x08048585 call sym.imp.scanf               |    sym.imp.scanf(0x80486b2,&var_78h);
+    0x08048590 call sym.check                   |    sym.check(&var_78h);
+    0x0804859b ret                              |    return 0;
+                                                |}
+                                                |
+x86
+x86:LE:32:default:gcc
+
+uint main(int argc,char **argv,char **envp)
+
+{
+    int32_t var_78h;
+    
+    sym.imp.printf("IOLI Crackme Level 0x05\n");
+    sym.imp.printf("Password: ");
+    sym.imp.scanf(0x80486b2,&var_78h);
+    sym.check(&var_78h);
+    return 0;
+}
+
+EOF
+CMDS=<<EOF
+s main
+af
+pdga
+e asm.arch
+pdgss
+pdg
+EOF
+RUN
+
+NAME=x86_64
+FILE=bins/elf/hello_world
+EXPECT=<<EOF
+x86:LE:64:default:gcc
+
+void main(int argc,char **argv,char **envp)
+
+{
+    int iVar1;
+    int iVar2;
+    char *dest;
+    int64_t var_20h;
+    int64_t var_18h;
+    int64_t var_10h;
+    int64_t var_8h;
+    
+    iVar1 = sym.imp.strlen("Hello");
+    iVar2 = sym.imp.strlen(" r2-folks");
+    dest = sym.imp.malloc(iVar2 + iVar1 + 1);
+    if (dest != NULL) {
+        sym.imp.strcpy(dest,"Hello");
+        sym.imp.strcat(dest," r2-folks");
+        sym.imp.puts(dest);
+        sym.imp.free(dest);
+    }
+    return;
+}
+
+EOF
+CMDS=<<EOF
+pdgss
+s main
+af
+pdg
+EOF
+RUN
+
+NAME=x86_16
+FILE=bins/mz/unzip.exe
+EXPECT=<<EOF
+x86:LE:16:Real Mode:
+
+//WARNING: Variable defined which should be unmapped: var_8h
+//WARNING: Variable defined which should be unmapped: var_4h
+//WARNING: Unknown calling convention -- yet parameter storage is locked
+
+uint fcn.00001c98(int16_t arg_eh,int16_t arg_ah)
+
+{
+    int16_t *piVar1;
+    ushort unaff_CS;
+    ushort unaff_DS;
+    ushort in_stack_00000004;
+    int16_t in_stack_00000008;
+    int16_t in_stack_0000000c;
+    int16_t var_8h;
+    int16_t var_6h;
+    int16_t var_4h;
+    int16_t var_2h;
+    char cStack_4;
+    
+    var_6h = 0x13da;
+    do {
+        func_0x0000ec24(unaff_CS,var_6h,unaff_DS,0x401e);
+        func_0x0000ec24(0xdee,in_stack_00000004,arg_ah,0x401e);
+        func_0x0000e59a(0xdee,0x401e);
+        var_2h = 0;
+        do {
+            cStack_4 = func_0x0000eb82(0xdee);
+            if (cStack_4 == '\r') {
+                cStack_4 = '\n';
+            }
+            if (var_2h < in_stack_0000000c) {
+                *(in_stack_00000008 + var_2h) = cStack_4;
+                var_2h = var_2h + 1;
+            }
+        } while (cStack_4 != '\n');
+        piVar1 = 0x4022;
+        *piVar1 = *piVar1 + -1;
+        if (*piVar1 < 0) {
+            func_0x0000e4ae(0xdee,10,0x401e);
+        }
+        else {
+            **0x401e = 10;
+            *0x401e = *0x401e + 1;
+        }
+        unaff_CS = 0xdee;
+        func_0x0000e59a(0xdee,0x401e);
+        var_6h = 0x13db;
+    } while (*(in_stack_00000008 + var_2h + -1) != '\n');
+    *(in_stack_00000008 + var_2h + -1) = 0;
+    return _in_stack_00000008;
+}
+
+EOF
+CMDS=<<EOF
+pdgss
+s 0x1c98
+af
+pdg
+EOF
+RUN
+
+NAME=x86_64
+FILE=bins/elf/hello_world
+EXPECT=<<EOF
+x86:LE:64:default:gcc
+
+void main(int argc,char **argv,char **envp)
+
+{
+    int iVar1;
+    int iVar2;
+    char *dest;
+    int64_t var_20h;
+    int64_t var_18h;
+    int64_t var_10h;
+    int64_t var_8h;
+    
+    iVar1 = sym.imp.strlen("Hello");
+    iVar2 = sym.imp.strlen(" r2-folks");
+    dest = sym.imp.malloc(iVar2 + iVar1 + 1);
+    if (dest != NULL) {
+        sym.imp.strcpy(dest,"Hello");
+        sym.imp.strcat(dest," r2-folks");
+        sym.imp.puts(dest);
+        sym.imp.free(dest);
+    }
+    return;
+}
+
+EOF
+CMDS=<<EOF
+pdgss
+s main
+af
+pdg
+EOF
+RUN
+
+
+NAME=6502
+FILE=bins/prg/t01.prg
+ARGS=-F prg
+EXPECT=<<EOF
+6502:LE:16:default:
+
+void fcn.0000080e(void)
+
+{
+    uchar uVar1;
+    uint8_t uVar2;
+    
+    uVar2 = 0xff;
+    do {
+        *(uVar2 + 0x3ff) = 0x41;
+        uVar1 = *0x824;
+        uVar2 = uVar2 - 1;
+    } while (uVar2 != 0);
+    uVar2 = 0xff;
+    do {
+        *(uVar2 + 0xd7ff) = uVar1;
+        uVar2 = uVar2 - 1;
+    } while (uVar2 != 0);
+    return;
+}
+
+EOF
+CMDS=<<EOF
+pdgss
+s 0x080e
+af
+pdg
+EOF
+RUN
+
+
+NAME=macos args
+FILE=bins/mach0/arg
+EXPECT=<<EOF
+
+//WARNING: Variable defined which should be unmapped: var_4h
+
+void __stdcall main(int argc,char **argv,char **envp)
+
+{
+    int64_t var_4h;
+    
+    sym._call();
+    return;
+}
+
+EOF
+CMDS=<<EOF
+aaa
+s main
+pdg
+EOF
+RUN
+
+NAME=Nodup function on container query
+FILE=bins/hello-arm
+EXPECT=<<EOF
+
+//WARNING: Control flow encountered bad instruction data
+
+void entry0(void)
+
+{
+    //[11] -r-x section size 200 named .text
+    rsym.__libc_init();
+    //WARNING: Bad instruction - Truncating control flow here
+    halt_baddata();
+}
+
+EOF
+CMDS=<<EOF
+s entry0
+af
+pdg
+EOF
+RUN
+

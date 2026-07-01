@@ -1,0 +1,1222 @@
+NAME=code printing
+FILE=bins/elf/crackme0x05
+EXPECT=<<EOF
+
+uint main(int argc,char **argv,char **envp)
+
+{
+    int32_t var_78h;
+    
+    sym.imp.printf("IOLI Crackme Level 0x05\n");
+    sym.imp.printf("Password: ");
+    sym.imp.scanf(0x80486b2,&var_78h);
+    sym.check(&var_78h);
+    return 0;
+}
+
+--
+                  |
+    0x08048540    |uint main(int argc,char **argv,char **envp)
+                  |
+                  |{
+                  |    int32_t var_78h;
+                  |    
+    0x08048566    |    sym.imp.printf("IOLI Crackme Level 0x05\n");
+    0x08048572    |    sym.imp.printf("Password: ");
+    0x08048585    |    sym.imp.scanf(0x80486b2,&var_78h);
+    0x08048590    |    sym.check(&var_78h);
+    0x0804859b    |    return 0;
+                  |}
+                  |
+--
+CCu base64:Jg== @ 0x8048577
+CCu base64:bWFpbg== @ 0x8048540
+CCu base64:c3ltLmltcC5zY2FuZigweDgwNDg2YjIsJnZhcl83OGgp @ 0x8048585
+CCu base64:c3ltLmNoZWNrKCZ2YXJfNzhoKQ== @ 0x8048590
+CCu base64:cmV0dXJuIDA= @ 0x804859b
+CCu base64:c3ltLmltcC5wcmludGYoIklPTEkgQ3JhY2ttZSBMZXZlbCAweDA1XG4iKQ== @ 0x8048566
+CCu base64:c3ltLmltcC5wcmludGYoIlBhc3N3b3JkOiAiKQ== @ 0x8048572
+CCu base64:Jg== @ 0x804858a
+--
+<result><function>
+<function name="main" size="92">
+  <localdb main="stack" lock="false">
+      <rangelist>
+        <range space="stack" first="0x4" last="0x1f7"/>
+        <range space="stack" first="0xfff0bdc0" last="0xffffff5f"/>
+        <range space="stack" first="0xffffff68" last="0xfffffffb"/>
+      </rangelist>
+      <symbollist>
+        <mapsym>
+          </symbol>
+          <rangelist>
+            <range space="ram" first="0x804853f" last="0x804853f"/>
+          </rangelist>
+        </mapsym>
+        <mapsym>
+            <type name="" size="4" metatype="ptr" core="true">
+              <type name="" size="4" metatype="ptr" core="true">
+              </type>
+            </type>
+          </symbol>
+          <rangelist>
+            <range space="ram" first="0x804853f" last="0x804853f"/>
+          </rangelist>
+        </mapsym>
+        <mapsym>
+            <type name="" size="4" metatype="ptr" core="true">
+              <type name="" size="4" metatype="ptr" core="true">
+              </type>
+            </type>
+          </symbol>
+          <rangelist>
+            <range space="ram" first="0x804853f" last="0x804853f"/>
+          </rangelist>
+        </mapsym>
+        <mapsym>
+          </symbol>
+          <rangelist/>
+        </mapsym>
+      </symbollist>
+    </scope>
+  </localdb>
+  <ast>
+    <varnodes>
+    </varnodes>
+    <block index="0">
+      <rangelist>
+        <range space="ram" first="0x8048540" last="0x804859b"/>
+      </rangelist>
+      <op code="1">
+        <seqnum space="ram" offset="0x8048566" uniq="0xf6"/>
+      </op>
+      <op code="7">
+        <seqnum space="ram" offset="0x8048566" uniq="0x80"/>
+        <void/>
+      </op>
+      <op code="1">
+        <seqnum space="ram" offset="0x8048572" uniq="0xf7"/>
+      </op>
+      <op code="7">
+        <seqnum space="ram" offset="0x8048572" uniq="0x85"/>
+        <void/>
+      </op>
+      <op code="66">
+        <seqnum space="ram" offset="0x8048577" uniq="0xf8"/>
+      </op>
+      <op code="7">
+        <seqnum space="ram" offset="0x8048585" uniq="0x8f"/>
+        <void/>
+      </op>
+      <op code="66">
+        <seqnum space="ram" offset="0x804858a" uniq="0xf9"/>
+      </op>
+      <op code="64">
+        <seqnum space="ram" offset="0x8048590" uniq="0xfa"/>
+      </op>
+      <op code="7">
+        <seqnum space="ram" offset="0x8048590" uniq="0x96"/>
+        <void/>
+      </op>
+      <op code="1">
+        <seqnum space="ram" offset="0x8048595" uniq="0x97"/>
+      </op>
+      <op code="10">
+        <seqnum space="ram" offset="0x804859b" uniq="0x9d"/>
+        <void/>
+      </op>
+    </block>
+  </ast>
+  <highlist>
+    <high repref="0x1a3" class="constant">
+    </high>
+    <high repref="0x1c1" class="constant">
+    </high>
+    <high repref="0x316" class="constant">
+      <type name="" size="4" metatype="ptr" core="true">
+      </type>
+    </high>
+    <high repref="0x317" class="constant">
+      <type name="" size="4" metatype="ptr" core="true">
+      </type>
+    </high>
+    <high repref="0x30b" class="constant">
+      <type name="" size="4" metatype="ptr" core="true">
+      </type>
+    </high>
+    <high repref="0x312" class="constant" symref="0x4000010000000003" offset="0">
+    </high>
+    <high repref="0x314" class="constant" symref="0x4000010000000003" offset="0">
+    </high>
+    <high repref="0x176" class="other">
+      <type name="" size="4" metatype="ptr" core="true">
+      </type>
+    </high>
+    <high repref="0x190" class="other">
+      <type name="" size="4" metatype="ptr" core="true">
+      </type>
+    </high>
+    <high repref="0x30d" class="other" typelock="true">
+      <type name="" size="4" metatype="ptr" core="true">
+      </type>
+    </high>
+    <high repref="0x310" class="other" typelock="true">
+      <type name="" size="4" metatype="ptr" core="true">
+      </type>
+    </high>
+    <high repref="0x318" class="other">
+    </high>
+    <high repref="0x1a2" class="other">
+    </high>
+    <high repref="0x240" class="other" typelock="true">
+      <type name="" size="4" metatype="ptr">
+        <type name="" size="0" metatype="spacebase" space="stack">
+        </type>
+      </type>
+    </high>
+    <high repref="0x1c2" class="param" symref="0x4000010000000000">
+    </high>
+    <high repref="0x1c3" class="param" symref="0x4000010000000001">
+      <type name="" size="4" metatype="ptr" core="true">
+        <type name="" size="4" metatype="ptr" core="true">
+        </type>
+      </type>
+    </high>
+    <high repref="0x1c4" class="param" symref="0x4000010000000002">
+      <type name="" size="4" metatype="ptr" core="true">
+        <type name="" size="4" metatype="ptr" core="true">
+        </type>
+      </type>
+    </high>
+  </highlist>
+  <prototype model="__cdecl" extrapop="4" modellock="true">
+    <returnsym>
+    </returnsym>
+  </prototype>
+</function></function><code>
+<function>
+  <syntax></syntax>
+  <break indent="0"/>
+  <funcproto>
+    <return_type varref="0x1a2">
+      <syntax></syntax>
+      <syntax></syntax>
+    </return_type>
+    <syntax> </syntax>
+    <funcname color="0x3">main</funcname>
+    <syntax></syntax>
+    <syntax open="113">(</syntax>
+    <syntax></syntax>
+    <vardecl symref="0x4000010000000000">
+      <syntax> </syntax>
+      <variable color="0x6">argc</variable>
+    </vardecl>
+    <syntax></syntax>
+    <syntax>, </syntax>
+    <syntax></syntax>
+    <vardecl symref="0x4000010000000001">
+      <syntax> </syntax>
+      <op>*</op>
+      <syntax></syntax>
+      <op>*</op>
+      <syntax></syntax>
+      <variable color="0x6">argv</variable>
+    </vardecl>
+    <syntax></syntax>
+    <syntax>, </syntax>
+    <syntax></syntax>
+    <vardecl symref="0x4000010000000002">
+      <syntax> </syntax>
+      <op>*</op>
+      <syntax></syntax>
+      <op>*</op>
+      <syntax></syntax>
+      <variable color="0x6">envp</variable>
+    </vardecl>
+    <syntax></syntax>
+    <syntax close="113">)</syntax>
+  </funcproto>
+  <break indent="0"/>
+  <syntax></syntax>
+  <break indent="0"/>
+  <syntax>{</syntax>
+  <break indent="4"/>
+  <vardecl symref="0x4000010000000003">
+    <syntax> </syntax>
+    <variable color="0x4">var_78h</variable>
+  </vardecl>
+  <syntax></syntax>
+  <syntax>;</syntax>
+  <break indent="4"/>
+  <block blockref="0">
+    <syntax></syntax>
+    <break indent="4"/>
+    <statement opref="0x80">
+      <funcname color="0x3" opref="0x80">sym.imp.printf</funcname>
+      <syntax></syntax>
+      <syntax open="130">(</syntax>
+      <syntax></syntax>
+      <variable color="0x5" varref="0x316" opref="0xf6">&quot;IOLI Crackme Level 0x05\n&quot;</variable>
+      <syntax></syntax>
+      <syntax close="130">)</syntax>
+    </statement>
+    <syntax></syntax>
+    <syntax>;</syntax>
+    <break indent="4"/>
+    <statement opref="0x85">
+      <funcname color="0x3" opref="0x85">sym.imp.printf</funcname>
+      <syntax></syntax>
+      <syntax open="133">(</syntax>
+      <syntax></syntax>
+      <variable color="0x5" varref="0x317" opref="0xf7">&quot;Password: &quot;</variable>
+      <syntax></syntax>
+      <syntax close="133">)</syntax>
+    </statement>
+    <syntax></syntax>
+    <syntax>;</syntax>
+    <break indent="4"/>
+    <statement opref="0x8f">
+      <funcname color="0x3" opref="0x8f">sym.imp.scanf</funcname>
+      <syntax></syntax>
+      <syntax open="136">(</syntax>
+      <syntax></syntax>
+      <variable color="0x5" varref="0x30b" opref="0x8f">0x80486b2</variable>
+      <syntax></syntax>
+      <op opref="0x8f">, </op>
+      <syntax></syntax>
+      <op opref="0xf8">&amp;</op>
+      <syntax></syntax>
+      <variable color="0x4" opref="0xf8">var_78h</variable>
+      <syntax></syntax>
+      <syntax close="136">)</syntax>
+    </statement>
+    <syntax></syntax>
+    <syntax>;</syntax>
+    <break indent="4"/>
+    <statement opref="0x96">
+      <funcname color="0x3" opref="0x96">sym.check</funcname>
+      <syntax></syntax>
+      <syntax open="141">(</syntax>
+      <syntax></syntax>
+      <op opref="0xf9">&amp;</op>
+      <syntax></syntax>
+      <variable color="0x4" opref="0xf9">var_78h</variable>
+      <syntax></syntax>
+      <syntax close="141">)</syntax>
+    </statement>
+    <syntax></syntax>
+    <syntax>;</syntax>
+    <break indent="4"/>
+    <statement opref="0x9d">
+      <op color="0x0" opref="0x9d">return</op>
+      <syntax> </syntax>
+      <variable color="0x5" varref="0x1a3" opref="0x97">0</variable>
+    </statement>
+    <syntax></syntax>
+    <syntax>;</syntax>
+  </block>
+  <break indent="0"/>
+  <syntax>}</syntax>
+  <break indent="0"/>
+  <syntax></syntax>
+</function></code></result>
+--
+<save_state loadersymbols="false">
+  <typegrp/>
+  <db>
+    <property_changepoint space="register" offset="0x1100" val="0x20000000"/>
+    <property_changepoint space="register" offset="0x110a" val="0x0"/>
+    <property_changepoint space="register" offset="0x1110" val="0x20000000"/>
+    <property_changepoint space="register" offset="0x111a" val="0x0"/>
+    <property_changepoint space="register" offset="0x1120" val="0x20000000"/>
+    <property_changepoint space="register" offset="0x112a" val="0x0"/>
+    <property_changepoint space="register" offset="0x1130" val="0x20000000"/>
+    <property_changepoint space="register" offset="0x113a" val="0x0"/>
+    <property_changepoint space="register" offset="0x1140" val="0x20000000"/>
+    <property_changepoint space="register" offset="0x114a" val="0x0"/>
+    <property_changepoint space="register" offset="0x1150" val="0x20000000"/>
+    <property_changepoint space="register" offset="0x115a" val="0x0"/>
+    <property_changepoint space="register" offset="0x1160" val="0x20000000"/>
+    <property_changepoint space="register" offset="0x116a" val="0x0"/>
+    <property_changepoint space="register" offset="0x1170" val="0x20000000"/>
+    <property_changepoint space="register" offset="0x117a" val="0x0"/>
+      <rangelist/>
+      <symbollist>
+        <mapsym>
+            <addr space="ram" offset="0x8048540"/>
+            <localdb main="stack" lock="false">
+                <rangelist>
+                  <range space="stack" first="0x4" last="0x1f7"/>
+                  <range space="stack" first="0xfff0bdc0" last="0xffffff5f"/>
+                  <range space="stack" first="0xffffff68" last="0xfffffffb"/>
+                </rangelist>
+                <symbollist>
+                  <mapsym>
+                    </symbol>
+                    <addr space="stack" offset="0x4"/>
+                    <rangelist>
+                      <range space="ram" first="0x804853f" last="0x804853f"/>
+                    </rangelist>
+                  </mapsym>
+                  <mapsym>
+                      <type name="" size="4" metatype="ptr" core="true">
+                        <type name="" size="4" metatype="ptr" core="true">
+                        </type>
+                      </type>
+                    </symbol>
+                    <addr space="stack" offset="0x8"/>
+                    <rangelist>
+                      <range space="ram" first="0x804853f" last="0x804853f"/>
+                    </rangelist>
+                  </mapsym>
+                  <mapsym>
+                      <type name="" size="4" metatype="ptr" core="true">
+                        <type name="" size="4" metatype="ptr" core="true">
+                        </type>
+                      </type>
+                    </symbol>
+                    <addr space="stack" offset="0xc"/>
+                    <rangelist>
+                      <range space="ram" first="0x804853f" last="0x804853f"/>
+                    </rangelist>
+                  </mapsym>
+                  <mapsym>
+                    </symbol>
+                    <addr space="stack" offset="0xffffff84"/>
+                    <rangelist/>
+                  </mapsym>
+                </symbollist>
+              </scope>
+            </localdb>
+            <prototype model="__cdecl" extrapop="4" modellock="true">
+              <returnsym>
+                <addr space="register" offset="0x0" size="4"/>
+              </returnsym>
+            </prototype>
+          </function>
+          <addr space="ram" offset="0x8048540"/>
+          <rangelist/>
+        </mapsym>
+        <mapsym>
+            <type name="" size="25" metatype="array" arraysize="25">
+            </type>
+          </symbol>
+          <addr space="ram" offset="0x804868e"/>
+          <rangelist/>
+        </mapsym>
+        <mapsym>
+            <type name="" size="11" metatype="array" arraysize="11">
+            </type>
+          </symbol>
+          <addr space="ram" offset="0x80486a7"/>
+          <rangelist/>
+        </mapsym>
+        <mapsym>
+            <addr space="ram" offset="0x80484c8"/>
+            <localdb main="stack" lock="false">
+                <rangelist>
+                  <range space="stack" first="0x4" last="0x1f7"/>
+                  <range space="stack" first="0xfff0bdc0" last="0xffffffff"/>
+                </rangelist>
+                <symbollist>
+                  <mapsym>
+                    </symbol>
+                    <addr space="stack" offset="0x4"/>
+                    <rangelist/>
+                  </mapsym>
+                  <mapsym>
+                    </symbol>
+                    <addr space="stack" offset="0xfffffff4"/>
+                    <rangelist/>
+                  </mapsym>
+                  <mapsym>
+                    </symbol>
+                    <addr space="stack" offset="0xfffffff0"/>
+                    <rangelist/>
+                  </mapsym>
+                </symbollist>
+              </scope>
+            </localdb>
+            <prototype model="__cdecl" extrapop="4" modellock="true">
+              <returnsym>
+                <addr space="stack" offset="0x0" size="4"/>
+              </returnsym>
+            </prototype>
+          </function>
+          <addr space="ram" offset="0x80484c8"/>
+          <rangelist/>
+        </mapsym>
+        <mapsym>
+            <addr space="ram" offset="0x8048394"/>
+            <localdb main="stack" lock="false">
+                <rangelist>
+                  <range space="stack" first="0x4" last="0x1f7"/>
+                  <range space="stack" first="0xfff0bdc0" last="0xffffffff"/>
+                </rangelist>
+                <symbollist>
+                  <mapsym>
+                      <type name="" size="4" metatype="ptr" core="true">
+                      </type>
+                    </symbol>
+                    <addr space="stack" offset="0x4"/>
+                    <rangelist>
+                      <range space="ram" first="0x8048393" last="0x8048393"/>
+                    </rangelist>
+                  </mapsym>
+                </symbollist>
+              </scope>
+            </localdb>
+            <prototype model="__cdecl" extrapop="4" modellock="true">
+              <returnsym>
+                <addr space="stack" offset="0x0" size="4"/>
+              </returnsym>
+            </prototype>
+          </function>
+          <addr space="ram" offset="0x8048394"/>
+          <rangelist/>
+        </mapsym>
+        <mapsym>
+            <addr space="ram" offset="0x8048374"/>
+            <localdb main="stack" lock="false">
+                <rangelist>
+                  <range space="stack" first="0x4" last="0x1f7"/>
+                  <range space="stack" first="0xfff0bdc0" last="0xffffffff"/>
+                </rangelist>
+                <symbollist>
+                  <mapsym>
+                    </symbol>
+                    <addr space="stack" offset="0x8"/>
+                    <rangelist>
+                      <range space="ram" first="0x8048373" last="0x8048373"/>
+                    </rangelist>
+                  </mapsym>
+                  <mapsym>
+                      <type name="" size="4" metatype="ptr" core="true">
+                      </type>
+                    </symbol>
+                    <addr space="stack" offset="0x4"/>
+                    <rangelist>
+                      <range space="ram" first="0x8048373" last="0x8048373"/>
+                    </rangelist>
+                  </mapsym>
+                </symbollist>
+              </scope>
+            </localdb>
+            <prototype model="__cdecl" extrapop="4" modellock="true">
+              <returnsym>
+                <addr space="stack" offset="0x0" size="4"/>
+              </returnsym>
+            </prototype>
+          </function>
+          <addr space="ram" offset="0x8048374"/>
+          <rangelist/>
+        </mapsym>
+      </symbollist>
+    </scope>
+  </db>
+  <context_points>
+    <context_pointset space="ram" offset="0x0">
+      <set name="addrsize" val="0x1"/>
+      <set name="bit64" val="0x0"/>
+      <set name="evexAAA" val="0x0"/>
+      <set name="evexB" val="0x0"/>
+      <set name="evexBType" val="0x0"/>
+      <set name="evexD8Type" val="0x0"/>
+      <set name="evexDisp8" val="0x0"/>
+      <set name="evexL" val="0x0"/>
+      <set name="evexLp" val="0x0"/>
+      <set name="evexRp" val="0x0"/>
+      <set name="evexTType" val="0x0"/>
+      <set name="evexV5" val="0x0"/>
+      <set name="evexVp" val="0x0"/>
+      <set name="evexZ" val="0x0"/>
+      <set name="highseg" val="0x0"/>
+      <set name="instrPhase" val="0x0"/>
+      <set name="lockprefx" val="0x0"/>
+      <set name="mandover" val="0x0"/>
+      <set name="opsize" val="0x1"/>
+      <set name="prefix_66" val="0x0"/>
+      <set name="prefix_f2" val="0x0"/>
+      <set name="prefix_f3" val="0x0"/>
+      <set name="repneprefx" val="0x0"/>
+      <set name="repprefx" val="0x0"/>
+      <set name="reserved" val="0x0"/>
+      <set name="reservedHigh" val="0x0"/>
+      <set name="rexBprefix" val="0x0"/>
+      <set name="rexRprefix" val="0x0"/>
+      <set name="rexWRXBprefix" val="0x0"/>
+      <set name="rexWprefix" val="0x0"/>
+      <set name="rexXprefix" val="0x0"/>
+      <set name="rexprefix" val="0x0"/>
+      <set name="segover" val="0x0"/>
+      <set name="suffix3D" val="0x0"/>
+      <set name="vexHighV" val="0x0"/>
+      <set name="vexL" val="0x0"/>
+      <set name="vexMMMMM" val="0x0"/>
+      <set name="vexMode" val="0x0"/>
+      <set name="vexVVVV" val="0x0"/>
+      <set name="vexVVVV_r64" val="0x0"/>
+      <set name="xacquireprefx" val="0x0"/>
+      <set name="xreleaseprefx" val="0x0"/>
+    </context_pointset>
+    <context_pointset space="register" offset="0x0">
+      <set name="addrsize" val="0x0"/>
+      <set name="bit64" val="0x0"/>
+      <set name="evexAAA" val="0x0"/>
+      <set name="evexB" val="0x0"/>
+      <set name="evexBType" val="0x0"/>
+      <set name="evexD8Type" val="0x0"/>
+      <set name="evexDisp8" val="0x0"/>
+      <set name="evexL" val="0x0"/>
+      <set name="evexLp" val="0x0"/>
+      <set name="evexRp" val="0x0"/>
+      <set name="evexTType" val="0x0"/>
+      <set name="evexV5" val="0x0"/>
+      <set name="evexVp" val="0x0"/>
+      <set name="evexZ" val="0x0"/>
+      <set name="highseg" val="0x0"/>
+      <set name="instrPhase" val="0x0"/>
+      <set name="lockprefx" val="0x0"/>
+      <set name="mandover" val="0x0"/>
+      <set name="opsize" val="0x0"/>
+      <set name="prefix_66" val="0x0"/>
+      <set name="prefix_f2" val="0x0"/>
+      <set name="prefix_f3" val="0x0"/>
+      <set name="repneprefx" val="0x0"/>
+      <set name="repprefx" val="0x0"/>
+      <set name="reserved" val="0x0"/>
+      <set name="reservedHigh" val="0x0"/>
+      <set name="rexBprefix" val="0x0"/>
+      <set name="rexRprefix" val="0x0"/>
+      <set name="rexWRXBprefix" val="0x0"/>
+      <set name="rexWprefix" val="0x0"/>
+      <set name="rexXprefix" val="0x0"/>
+      <set name="rexprefix" val="0x0"/>
+      <set name="segover" val="0x0"/>
+      <set name="suffix3D" val="0x0"/>
+      <set name="vexHighV" val="0x0"/>
+      <set name="vexL" val="0x0"/>
+      <set name="vexMMMMM" val="0x0"/>
+      <set name="vexMode" val="0x0"/>
+      <set name="vexVVVV" val="0x0"/>
+      <set name="vexVVVV_r64" val="0x0"/>
+      <set name="xacquireprefx" val="0x0"/>
+      <set name="xreleaseprefx" val="0x0"/>
+    </context_pointset>
+    <tracked_pointset space="ram" offset="0x0">
+      <set space="register" offset="0x20a" size="1" val="0x0"/>
+    </tracked_pointset>
+  </context_points>
+  <commentdb/>
+  <stringmanage>
+    <string>
+      <addr space="ram" offset="0x804868e"/>
+      <bytes trunc="false">
+494f4c4920437261636b6d65204c6576656c2030
+  7830350a0050617373776f72
+</bytes>
+      <string>
+        <addr space="ram" offset="0x80486a7"/>
+        <bytes trunc="false">
+50617373776f72643a2000257300000000000000
+  00ffffffffffffffffffffff
+</bytes>
+      </stringmanage>
+    </save_state>
+EOF
+CMDS=<<EOF
+s main
+af
+e scr.color=0
+pdg
+?e --
+pdgo
+?e --
+pdg*
+?e --
+pdgx~!id=,<addr
+?e --
+pdgd~!id=,protectedMode
+# ?e --
+# e scr.color=3 - XXX: Make colors work on tests
+# pdg
+# ?e --
+# pdgo
+EOF
+RUN
+
+NAME=pdgo align
+FILE=bins/elf/hello_world
+ARGS=-B 0x1000000000000000
+EXPECT=<<EOF
+                          |
+    0x10000000000007aa    |void main(int argc,char **argv,char **envp)
+                          |
+                          |{
+                          |    int iVar1;
+                          |    int iVar2;
+                          |    char *dest;
+                          |    int64_t var_20h;
+                          |    int64_t var_18h;
+                          |    int64_t var_10h;
+                          |    int64_t var_8h;
+                          |    
+    0x10000000000007cf    |    iVar1 = sym.imp.strlen("Hello");
+    0x10000000000007de    |    iVar2 = sym.imp.strlen(" r2-folks");
+    0x10000000000007f6    |    dest = sym.imp.malloc(iVar2 + iVar1 + 1);
+    0x1000000000000804    |    if (dest != NULL) {
+    0x1000000000000814    |        sym.imp.strcpy(dest,"Hello");
+    0x1000000000000827    |        sym.imp.strcat(dest," r2-folks");
+    0x1000000000000833    |        sym.imp.puts(dest);
+    0x100000000000083f    |        sym.imp.free(dest);
+                          |    }
+    0x1000000000000846    |    return;
+                          |}
+                          |
+EOF
+CMDS=<<EOF
+s main
+af
+pdgo
+EOF
+RUN
+
+NAME=pdgs
+FILE=-
+EXPECT=<<EOF
+6502:LE:16:default
+65C02:LE:16:default
+6805:BE:16:default
+6809:BE:16:default
+80251:BE:24:default
+80390:BE:24:default
+8051:BE:16:default
+8051:BE:24:mx51
+AARCH64:BE:32:ilp32
+AARCH64:BE:64:v8A
+AARCH64:LE:32:ilp32
+AARCH64:LE:64:AppleSilicon
+AARCH64:LE:64:v8A
+ARM:BE:32:Cortex
+ARM:BE:32:v4
+ARM:BE:32:v4t
+ARM:BE:32:v5
+ARM:BE:32:v5t
+ARM:BE:32:v6
+ARM:BE:32:v7
+ARM:BE:32:v8
+ARM:BE:32:v8-m
+ARM:BE:32:v8T
+ARM:LE:32:Cortex
+ARM:LE:32:v4
+ARM:LE:32:v4t
+ARM:LE:32:v5
+ARM:LE:32:v5t
+ARM:LE:32:v6
+ARM:LE:32:v7
+ARM:LE:32:v8
+ARM:LE:32:v8-m
+ARM:LE:32:v8T
+ARM:LEBE:32:v7LEInstruction
+ARM:LEBE:32:v8LEInstruction
+BPF:LE:32:default
+DATA:BE:64:default
+DATA:LE:64:default
+Dalvik:LE:32:DEX_Android10
+Dalvik:LE:32:DEX_Android11
+Dalvik:LE:32:DEX_Android12
+Dalvik:LE:32:DEX_Android13
+Dalvik:LE:32:DEX_Base
+Dalvik:LE:32:DEX_KitKat
+Dalvik:LE:32:DEX_Lollipop
+Dalvik:LE:32:DEX_Nougat
+Dalvik:LE:32:DEX_Oreo
+Dalvik:LE:32:DEX_Pie
+Dalvik:LE:32:Marshmallow
+Dalvik:LE:32:ODEX_KitKat
+Dalvik:LE:32:default
+H6309:BE:16:default
+JVM:BE:32:default
+Loongarch:LE:32:ilp32d
+Loongarch:LE:32:ilp32f
+Loongarch:LE:64:lp64d
+Loongarch:LE:64:lp64f
+M16C/60:LE:16:default
+M16C/80:LE:16:default
+M8C:BE:16:default
+MCS96:LE:16:default
+MIPS:BE:32:R6
+MIPS:BE:32:default
+MIPS:BE:32:micro
+MIPS:BE:64:64-32R6addr
+MIPS:BE:64:64-32addr
+MIPS:BE:64:R6
+MIPS:BE:64:default
+MIPS:BE:64:micro
+MIPS:BE:64:micro64-32addr
+MIPS:LE:32:R6
+MIPS:LE:32:default
+MIPS:LE:32:micro
+MIPS:LE:64:64-32R6addr
+MIPS:LE:64:64-32addr
+MIPS:LE:64:R6
+MIPS:LE:64:default
+MIPS:LE:64:micro
+MIPS:LE:64:micro64-32addr
+PowerPC:BE:32:4xx
+PowerPC:BE:32:MPC8270
+PowerPC:BE:32:QUICC
+PowerPC:BE:32:default
+PowerPC:BE:32:e500
+PowerPC:BE:32:e500mc
+PowerPC:BE:64:64-32addr
+PowerPC:BE:64:A2-32addr
+PowerPC:BE:64:A2ALT
+PowerPC:BE:64:A2ALT-32addr
+PowerPC:BE:64:VLE-32addr
+PowerPC:BE:64:VLEALT-32addr
+PowerPC:BE:64:default
+PowerPC:LE:32:4xx
+PowerPC:LE:32:QUICC
+PowerPC:LE:32:default
+PowerPC:LE:32:e500
+PowerPC:LE:32:e500mc
+PowerPC:LE:64:64-32addr
+PowerPC:LE:64:A2-32addr
+PowerPC:LE:64:A2ALT
+PowerPC:LE:64:A2ALT-32addr
+PowerPC:LE:64:default
+RISCV:LE:32:RV32G
+RISCV:LE:32:RV32GC
+RISCV:LE:32:RV32I
+RISCV:LE:32:RV32IC
+RISCV:LE:32:RV32IMC
+RISCV:LE:32:default
+RISCV:LE:64:RV64G
+RISCV:LE:64:RV64GC
+RISCV:LE:64:RV64I
+RISCV:LE:64:RV64IC
+RISCV:LE:64:default
+STM8:BE:16:default
+STM8:BE:24:default
+SuperH:BE:32:SH-1
+SuperH:BE:32:SH-2
+SuperH:BE:32:SH-2A
+TI_MSP430:LE:16:default
+TI_MSP430X:LE:32:default
+V850:LE:32:default
+Xtensa:BE:32:default
+Xtensa:LE:32:default
+avr32:BE:32:default
+avr8:LE:16:atmega256
+avr8:LE:16:default
+avr8:LE:16:extended
+avr8:LE:24:xmega
+eBPF:BE:64:default
+eBPF:LE:64:default
+hexagon:LE:32:default
+sBPF:LE:64:default
+sparc:BE:32:default
+sparc:BE:64:default
+tricore:LE:32:default
+tricore:LE:32:tc172x
+tricore:LE:32:tc176x
+tricore:LE:32:tc29x
+x86:LE:16:Protected Mode
+x86:LE:16:Real Mode
+x86:LE:32:System Management Mode
+x86:LE:32:default
+x86:LE:64:compat32
+x86:LE:64:default
+z180:LE:16:default
+z182:LE:16:default
+z80:LE:16:default
+z8401x:LE:16:default
+EOF
+CMDS=<<EOF
+pdgs
+EOF
+RUN
+
+NAME=dalvik_sleigh_id
+FILE=-
+EXPECT=<<EOF
+Dalvik:LE:32:DEX_Base:
+EOF
+CMDS=<<EOF
+e asm.arch=dalvik
+pdgss
+EOF
+RUN
+
+NAME=pdgsd
+FILE=bins/elf/crackme0x05
+EXPECT=<<EOF
+push ebp
+mov ebp, esp
+sub esp, 0x88
+and esp, 0xfffffff0
+mov eax, 0
+add eax, 0xf
+add eax, 0xf
+shr eax, 4
+-----
+0x08048540: PUSH EBP
+    (unique,0x20a80,4) = COPY EBP
+    ESP = INT_SUB ESP, 0x4
+0x08048541: MOV EBP,ESP
+    EBP = COPY ESP
+0x08048543: SUB ESP,0x88
+    CF = INT_LESS ESP, 0x88
+    OF = INT_SBORROW ESP, 0x88
+    ESP = INT_SUB ESP, 0x88
+    SF = INT_SLESS ESP, 0x0
+    ZF = INT_EQUAL ESP, 0x0
+    (unique,0x24c00,4) = INT_AND ESP, 0xff
+    (unique,0x24c80,1) = POPCOUNT (unique,0x24c00,4)
+    (unique,0x24d00,1) = INT_AND (unique,0x24c80,1), 0x1
+    PF = INT_EQUAL (unique,0x24d00,1), 0x0
+0x08048549: AND ESP,0xfffffff0
+    CF = COPY 0x0
+    OF = COPY 0x0
+    ESP = INT_AND ESP, 0xfffffff0
+    SF = INT_SLESS ESP, 0x0
+    ZF = INT_EQUAL ESP, 0x0
+    (unique,0x24c00,4) = INT_AND ESP, 0xff
+    (unique,0x24c80,1) = POPCOUNT (unique,0x24c00,4)
+    (unique,0x24d00,1) = INT_AND (unique,0x24c80,1), 0x1
+    PF = INT_EQUAL (unique,0x24d00,1), 0x0
+0x0804854c: MOV EAX,0x0
+    EAX = COPY 0x0
+0x08048551: ADD EAX,0xf
+    CF = INT_CARRY EAX, 0xf
+    OF = INT_SCARRY EAX, 0xf
+    EAX = INT_ADD EAX, 0xf
+    SF = INT_SLESS EAX, 0x0
+    ZF = INT_EQUAL EAX, 0x0
+    (unique,0x24c00,4) = INT_AND EAX, 0xff
+    (unique,0x24c80,1) = POPCOUNT (unique,0x24c00,4)
+    (unique,0x24d00,1) = INT_AND (unique,0x24c80,1), 0x1
+    PF = INT_EQUAL (unique,0x24d00,1), 0x0
+0x08048554: ADD EAX,0xf
+    CF = INT_CARRY EAX, 0xf
+    OF = INT_SCARRY EAX, 0xf
+    EAX = INT_ADD EAX, 0xf
+    SF = INT_SLESS EAX, 0x0
+    ZF = INT_EQUAL EAX, 0x0
+    (unique,0x24c00,4) = INT_AND EAX, 0xff
+    (unique,0x24c80,1) = POPCOUNT (unique,0x24c00,4)
+    (unique,0x24d00,1) = INT_AND (unique,0x24c80,1), 0x1
+    PF = INT_EQUAL (unique,0x24d00,1), 0x0
+0x08048557: SHR EAX,0x4
+    (unique,0x55c80,4) = INT_AND 0x4, 0x1f
+    (unique,0x55d00,4) = COPY EAX
+    EAX = INT_RIGHT EAX, (unique,0x55c80,4)
+    (unique,0x28100,1) = INT_NOTEQUAL (unique,0x55c80,4), 0x0
+    (unique,0x28180,4) = INT_SUB (unique,0x55c80,4), 0x1
+    (unique,0x28200,4) = INT_RIGHT (unique,0x55d00,4), (unique,0x28180,4)
+    (unique,0x28280,4) = INT_AND (unique,0x28200,4), 0x1
+    (unique,0x28380,1) = INT_NOTEQUAL (unique,0x28280,4), 0x0
+    (unique,0x28400,1) = BOOL_NEGATE (unique,0x28100,1)
+    (unique,0x28480,1) = INT_AND (unique,0x28400,1), CF
+    (unique,0x28500,1) = INT_AND (unique,0x28100,1), (unique,0x28380,1)
+    CF = INT_OR (unique,0x28480,1), (unique,0x28500,1)
+    (unique,0x28680,1) = INT_EQUAL (unique,0x55c80,4), 0x1
+    (unique,0x28780,1) = INT_SLESS (unique,0x55d00,4), 0x0
+    (unique,0x28800,1) = BOOL_NEGATE (unique,0x28680,1)
+    (unique,0x28880,1) = INT_AND (unique,0x28800,1), OF
+    (unique,0x28900,1) = INT_AND (unique,0x28680,1), (unique,0x28780,1)
+    OF = INT_OR (unique,0x28880,1), (unique,0x28900,1)
+    (unique,0x24e80,1) = INT_NOTEQUAL (unique,0x55c80,4), 0x0
+    (unique,0x24f80,1) = INT_SLESS EAX, 0x0
+    (unique,0x25000,1) = BOOL_NEGATE (unique,0x24e80,1)
+    (unique,0x25080,1) = INT_AND (unique,0x25000,1), SF
+    (unique,0x25100,1) = INT_AND (unique,0x24e80,1), (unique,0x24f80,1)
+    SF = INT_OR (unique,0x25080,1), (unique,0x25100,1)
+    (unique,0x25280,1) = INT_EQUAL EAX, 0x0
+    (unique,0x25300,1) = BOOL_NEGATE (unique,0x24e80,1)
+    (unique,0x25380,1) = INT_AND (unique,0x25300,1), ZF
+    (unique,0x25400,1) = INT_AND (unique,0x24e80,1), (unique,0x25280,1)
+    ZF = INT_OR (unique,0x25380,1), (unique,0x25400,1)
+    (unique,0x25500,4) = INT_AND EAX, 0xff
+    (unique,0x25580,1) = POPCOUNT (unique,0x25500,4)
+    (unique,0x25600,1) = INT_AND (unique,0x25580,1), 0x1
+    (unique,0x25700,1) = INT_EQUAL (unique,0x25600,1), 0x0
+    (unique,0x25780,1) = BOOL_NEGATE (unique,0x24e80,1)
+    (unique,0x25800,1) = INT_AND (unique,0x25780,1), PF
+    (unique,0x25880,1) = INT_AND (unique,0x24e80,1), (unique,0x25700,1)
+    PF = INT_OR (unique,0x25800,1), (unique,0x25880,1)
+EOF
+CMDS=<<EOF
+s main
+pi 8
+?e -----
+pdgsd 8~!STORE
+EOF
+RUN
+
+NAME=comments
+FILE=bins/elf/crackme0x05
+EXPECT=<<EOF
+
+uint main(int argc,char **argv,char **envp)
+
+{
+    int32_t var_78h;
+    
+    //main starts here
+    //printf call here
+    sym.imp.printf("IOLI Crackme Level 0x05\n");
+    sym.imp.printf("Password: ");
+    //scanf call here
+    sym.imp.scanf(0x80486b2,&var_78h);
+    sym.check(&var_78h);
+    //main returns here
+    return 0;
+}
+
+EOF
+CMDS=<<EOF
+CCu base64:bWFpbiBzdGFydHMgaGVyZQ== @ 0x08048540
+CCu base64:cHJpbnRmIGNhbGwgaGVyZQ== @ 0x08048566
+CCu base64:bWFpbiByZXR1cm5zIGhlcmU= @ 0x0804859b
+CCu base64:bm90aGluZyB0byBzZWUgaGVyZQ== @ 0x0804859c
+CCu base64:c2NhbmYgY2FsbCBoZXJl @ 0x08048585
+s main
+af
+pdg
+EOF
+RUN
+
+NAME=comment-function_name-offset
+FILE=bins/elf/crackme0x05
+EXPECT=<<EOF
+                  |
+    0x08048540    |uint main(int argc,char **argv,char **envp)
+                  |
+                  |{
+                  |    int32_t var_78h;
+                  |    
+    0x08048540    |    //main starts here
+    0x08048566    |    //printf call here
+    0x08048566    |    sym.imp.printf("IOLI Crackme Level 0x05\n");
+    0x08048572    |    sym.imp.printf("Password: ");
+    0x08048585    |    //scanf call here
+    0x08048585    |    sym.imp.scanf(0x80486b2,&var_78h);
+    0x08048590    |    sym.check(&var_78h);
+    0x0804859b    |    //main returns here
+    0x0804859b    |    return 0;
+                  |}
+                  |
+EOF
+CMDS=<<EOF
+CCu base64:bWFpbiBzdGFydHMgaGVyZQ== @ 0x08048540
+CCu base64:cHJpbnRmIGNhbGwgaGVyZQ== @ 0x08048566
+CCu base64:bWFpbiByZXR1cm5zIGhlcmU= @ 0x0804859b
+CCu base64:bm90aGluZyB0byBzZWUgaGVyZQ== @ 0x0804859c
+CCu base64:c2NhbmYgY2FsbCBoZXJl @ 0x08048585
+s main
+af
+pdgo
+EOF
+RUN
+
+NAME=r2ghidra.compiler lists the x86 compiler specs
+FILE=bins/dectest64
+CMDS=<<EOF2
+e r2ghidra.compiler=?
+EOF2
+EXPECT=<<EOF2
+Borland C++
+Delphi
+Visual Studio
+clang
+default
+gcc
+EOF2
+RUN
+
+NAME=r2ghidra.compiler lists the mips compiler specs
+FILE=bins/elf/boa-mips-mini
+CMDS=<<EOF2
+e r2ghidra.compiler=?
+EOF2
+EXPECT=<<EOF2
+Visual Studio
+default
+n32
+o32
+o64
+EOF2
+RUN
+
+NAME=r2ghidra.compiler lists the ppc compiler specs
+FILE=bins/elf/ppc64-isel
+CMDS=<<EOF2
+e r2ghidra.compiler=?
+EOF2
+EXPECT=<<EOF2
+Mac OS X
+Visual Studio
+default
+EOF2
+RUN
+
+NAME=r2ghidra.compiler normalizes an unknown name to the arch default
+FILE=bins/dectest64
+CMDS=<<EOF2
+e r2ghidra.compiler=icc
+e r2ghidra.compiler
+EOF2
+EXPECT=<<EOF2
+gcc
+EOF2
+RUN
+
+NAME=r2ghidra.compiler expands a short alias to the full cspec name
+FILE=bins/dectest64
+CMDS=<<EOF2
+e r2ghidra.compiler=windows
+e r2ghidra.compiler
+EOF2
+EXPECT=<<EOF2
+Visual Studio
+EOF2
+RUN
+
+NAME=r2ghidra.compiler keeps a valid compiler name
+FILE=bins/dectest64
+CMDS=<<EOF2
+e r2ghidra.compiler=clang
+e r2ghidra.compiler
+EOF2
+EXPECT=<<EOF2
+clang
+EOF2
+RUN
+
+NAME=r2ghidra.compiler lists the arm compiler specs
+FILE=bins/hello-arm
+CMDS=<<EOF2
+e r2ghidra.compiler=?
+EOF2
+EXPECT=<<EOF2
+Visual Studio
+default
+EOF2
+RUN
+
+NAME=r2ghidra.compiler selects the cspec in the matched language id
+FILE=bins/dectest64
+CMDS=<<EOF2
+e r2ghidra.compiler=clang
+pd:gss
+EOF2
+EXPECT=<<EOF2
+x86:LE:64:default:clang
+EOF2
+RUN
+
+NAME=x86-64 printf call-site varargs recovered from the format string under pdg
+FILE=bins/elf/x86_64-varargs.so
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+e r2ghidra.varargs=true
+aaa
+pdg @ sym.p_printf~%f
+EOF2
+EXPECT=<<EOF2
+    iVar1 = sym.imp.printf("%s %d %f %x\n",arg1,arg2,in_d0,arg3);
+EOF2
+RUN
+
+NAME=printf vararg recovery stays off by default
+FILE=bins/elf/x86_64-varargs.so
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+e r2ghidra.varargs=false
+aaa
+pdg @ sym.p_printf~%f
+EOF2
+EXPECT=<<EOF2
+    sym.imp.printf("%s %d %f %x\n",arg1);
+EOF2
+RUN
+
+NAME=x86-64 snprintf call-site varargs recovered under pdg
+FILE=bins/elf/x86_64-varargs.so
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+e r2ghidra.varargs=true
+aaa
+pdg @ sym.p_snprintf~n=%d
+EOF2
+EXPECT=<<EOF2
+    iVar1 = sym.imp.snprintf(*0x1fd0,0x40,"n=%d x=%x",arg1,arg2);
+EOF2
+RUN
+
+NAME=scanf-family is left untouched by printf vararg recovery
+FILE=bins/elf/x86_64-varargs.so
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+e r2ghidra.varargs=true
+aaa
+pdg @ sym.p_sscanf~isoc23
+EOF2
+EXPECT=<<EOF2
+    sym.imp.__isoc23_sscanf(arg1,0x7b0,arg2);
+EOF2
+RUN
+
+NAME=arm64 printf call-site varargs recovered from the format string under pdg
+FILE=bins/elf/arm64-varargs.so
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+e r2ghidra.varargs=true
+aaa
+pdg @ sym.p_printf~%f
+EOF2
+EXPECT=<<EOF2
+    iVar1 = sym.imp.printf("%s %d %f %x\n",arg1,arg2,in_d0,arg3);
+EOF2
+RUN
+
+NAME=arm64 snprintf call-site varargs recovered under pdg
+FILE=bins/elf/arm64-varargs.so
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+e r2ghidra.varargs=true
+aaa
+pdg @ sym.p_snprintf~n=%d
+EOF2
+EXPECT=<<EOF2
+    iVar1 = sym.imp.snprintf(*0x1fd0,0x40,"n=%d x=%x",arg1,arg2);
+EOF2
+RUN
+
+NAME=ppc64 printf float vararg lands in an fp register under pdg
+FILE=bins/elf/ppc64v1-printf-vararg
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+e r2ghidra.varargs=true
+aaa
+pdg @ sym.report~("%s code
+EOF2
+EXPECT=<<EOF2
+                      ("%s code=%d ratio=%f mask=%x\n",_obj.g_tag,_obj.g_code,_obj.g_ratio,_obj.g_mask);
+EOF2
+RUN
+
+NAME=x86-32 stack-arg varargs are not recovered (register-ABI only)
+FILE=bins/elf/crackme0x05
+CMDS=<<EOF2
+e r2ghidra.varargs=true
+aaa
+pdg @ main~IOLI
+EOF2
+EXPECT=<<EOF2
+    sym.imp.printf("IOLI Crackme Level 0x05\n",in_stack_ffffff64);
+EOF2
+RUN
+

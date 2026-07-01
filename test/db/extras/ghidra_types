@@ -1,0 +1,1635 @@
+NAME=rawptr
+FILE=bins/dectest32
+EXPECT=<<EOF
+
+uint sym.get_global_array_entry(void)
+
+{
+    return *0x804c034;
+}
+
+--
+
+uint sym.get_global_array_entry(void)
+
+{
+    return uRam0804c034;
+}
+
+EOF
+CMDS=<<EOF
+s sym.get_global_array_entry
+af
+e r2ghidra.rawptr=1
+pdg
+?e --
+e r2ghidra.rawptr=0
+pdg
+EOF
+RUN
+
+NAME=global flag
+FILE=bins/dectest32
+EXPECT=<<EOF
+
+uint sym.get_global_var(void)
+
+{
+    return _obj.global_var;
+}
+
+--
+
+//WARNING: Globals starting with '_' overlap smaller symbols at the same address
+
+uint sym.get_global_var(void)
+
+{
+    return _obj.global_var;
+}
+
+EOF
+CMDS=<<EOF
+s sym.get_global_var
+af
+e r2ghidra.rawptr=1
+pdg
+?e --
+e r2ghidra.rawptr=0
+pdg
+EOF
+RUN
+
+NAME=function variable annotations
+FILE=bins/dectest64
+EXPECT=<<EOF
+{
+  "code": "\nulong main(int argc,char **argv)\n\n{\n    ulong uVar1;\n    int64_t in_FS_OFFSET;\n    int64_t var_30h;\n    int64_t var_24h;\n    int64_t var_8h;\n    \n    var_8h = *(in_FS_OFFSET + 0x28);\n    var_24h._0_4_ = argc;\n    sym.Aeropause(&var_24h + 4,argc,argv);\n    uVar1 = 0;\n    if (var_8h != *(in_FS_OFFSET + 0x28)) {\n        uVar1 = sym.imp.__stack_chk_fail();\n    }\n    return uVar1;\n}\n\n",
+  "annotations": [
+    {
+      "start": 1,
+      "end": 6,
+      "type": "syntax_highlight",
+      "syntax_highlight": "datatype"
+    },
+    {
+      "start": 7,
+      "end": 11,
+      "type": "function_name",
+      "name": "main",
+      "offset": 4198782
+    },
+    {
+      "start": 7,
+      "end": 11,
+      "type": "offset",
+      "offset": 4198782
+    },
+    {
+      "start": 7,
+      "end": 11,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_name"
+    },
+    {
+      "start": 12,
+      "end": 15,
+      "type": "syntax_highlight",
+      "syntax_highlight": "datatype"
+    },
+    {
+      "start": 16,
+      "end": 20,
+      "type": "function_parameter",
+      "name": "argc"
+    },
+    {
+      "start": 16,
+      "end": 20,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_parameter"
+    },
+    {
+      "start": 21,
+      "end": 25,
+      "type": "syntax_highlight",
+      "syntax_highlight": "datatype"
+    },
+    {
+      "start": 28,
+      "end": 32,
+      "type": "function_parameter",
+      "name": "argv"
+    },
+    {
+      "start": 28,
+      "end": 32,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_parameter"
+    },
+    {
+      "start": 41,
+      "end": 46,
+      "type": "syntax_highlight",
+      "syntax_highlight": "datatype"
+    },
+    {
+      "start": 47,
+      "end": 52,
+      "type": "local_variable",
+      "name": "uVar1"
+    },
+    {
+      "start": 47,
+      "end": 52,
+      "type": "syntax_highlight",
+      "syntax_highlight": "local_variable"
+    },
+    {
+      "start": 58,
+      "end": 65,
+      "type": "syntax_highlight",
+      "syntax_highlight": "datatype"
+    },
+    {
+      "start": 66,
+      "end": 78,
+      "type": "local_variable",
+      "name": "in_FS_OFFSET"
+    },
+    {
+      "start": 66,
+      "end": 78,
+      "type": "syntax_highlight",
+      "syntax_highlight": "local_variable"
+    },
+    {
+      "start": 84,
+      "end": 91,
+      "type": "syntax_highlight",
+      "syntax_highlight": "datatype"
+    },
+    {
+      "start": 92,
+      "end": 99,
+      "type": "local_variable",
+      "name": "var_30h"
+    },
+    {
+      "start": 92,
+      "end": 99,
+      "type": "syntax_highlight",
+      "syntax_highlight": "local_variable"
+    },
+    {
+      "start": 105,
+      "end": 112,
+      "type": "syntax_highlight",
+      "syntax_highlight": "datatype"
+    },
+    {
+      "start": 113,
+      "end": 120,
+      "type": "local_variable",
+      "name": "var_24h"
+    },
+    {
+      "start": 113,
+      "end": 120,
+      "type": "syntax_highlight",
+      "syntax_highlight": "local_variable"
+    },
+    {
+      "start": 126,
+      "end": 133,
+      "type": "syntax_highlight",
+      "syntax_highlight": "datatype"
+    },
+    {
+      "start": 134,
+      "end": 140,
+      "type": "local_variable",
+      "name": "var_8h"
+    },
+    {
+      "start": 134,
+      "end": 140,
+      "type": "syntax_highlight",
+      "syntax_highlight": "local_variable"
+    },
+    {
+      "start": 151,
+      "end": 157,
+      "type": "local_variable",
+      "name": "var_8h"
+    },
+    {
+      "start": 151,
+      "end": 157,
+      "type": "syntax_highlight",
+      "syntax_highlight": "local_variable"
+    },
+    {
+      "start": 158,
+      "end": 159,
+      "type": "offset",
+      "offset": 4198797
+    },
+    {
+      "start": 160,
+      "end": 161,
+      "type": "offset",
+      "offset": 4198797
+    },
+    {
+      "start": 162,
+      "end": 174,
+      "type": "local_variable",
+      "name": "in_FS_OFFSET"
+    },
+    {
+      "start": 162,
+      "end": 174,
+      "type": "syntax_highlight",
+      "syntax_highlight": "local_variable"
+    },
+    {
+      "start": 175,
+      "end": 176,
+      "type": "offset",
+      "offset": 4198797
+    },
+    {
+      "start": 177,
+      "end": 181,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 151,
+      "end": 182,
+      "type": "offset",
+      "offset": 4198797
+    },
+    {
+      "start": 188,
+      "end": 195,
+      "type": "local_variable",
+      "name": "var_24h"
+    },
+    {
+      "start": 188,
+      "end": 195,
+      "type": "syntax_highlight",
+      "syntax_highlight": "local_variable"
+    },
+    {
+      "start": 195,
+      "end": 196,
+      "type": "offset",
+      "offset": 4198828
+    },
+    {
+      "start": 202,
+      "end": 203,
+      "type": "offset",
+      "offset": 4198828
+    },
+    {
+      "start": 204,
+      "end": 208,
+      "type": "function_parameter",
+      "name": "argc"
+    },
+    {
+      "start": 204,
+      "end": 208,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_parameter"
+    },
+    {
+      "start": 188,
+      "end": 208,
+      "type": "offset",
+      "offset": 4198828
+    },
+    {
+      "start": 214,
+      "end": 227,
+      "type": "function_name",
+      "name": "sym.Aeropause",
+      "offset": 4199038
+    },
+    {
+      "start": 214,
+      "end": 227,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_name"
+    },
+    {
+      "start": 228,
+      "end": 229,
+      "type": "offset",
+      "offset": 4198819
+    },
+    {
+      "start": 229,
+      "end": 236,
+      "type": "syntax_highlight",
+      "syntax_highlight": "local_variable"
+    },
+    {
+      "start": 237,
+      "end": 238,
+      "type": "offset",
+      "offset": 4198819
+    },
+    {
+      "start": 239,
+      "end": 240,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 240,
+      "end": 241,
+      "type": "offset",
+      "offset": 4198828
+    },
+    {
+      "start": 241,
+      "end": 245,
+      "type": "function_parameter",
+      "name": "argc"
+    },
+    {
+      "start": 241,
+      "end": 245,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_parameter"
+    },
+    {
+      "start": 245,
+      "end": 246,
+      "type": "offset",
+      "offset": 4198828
+    },
+    {
+      "start": 246,
+      "end": 250,
+      "type": "function_parameter",
+      "name": "argv"
+    },
+    {
+      "start": 246,
+      "end": 250,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_parameter"
+    },
+    {
+      "start": 214,
+      "end": 251,
+      "type": "offset",
+      "offset": 4198828
+    },
+    {
+      "start": 257,
+      "end": 262,
+      "type": "local_variable",
+      "name": "uVar1"
+    },
+    {
+      "start": 257,
+      "end": 262,
+      "type": "syntax_highlight",
+      "syntax_highlight": "local_variable"
+    },
+    {
+      "start": 263,
+      "end": 264,
+      "type": "offset",
+      "offset": 4198833
+    },
+    {
+      "start": 265,
+      "end": 266,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 257,
+      "end": 266,
+      "type": "offset",
+      "offset": 4198833
+    },
+    {
+      "start": 272,
+      "end": 274,
+      "type": "offset",
+      "offset": 4198851
+    },
+    {
+      "start": 272,
+      "end": 274,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 276,
+      "end": 282,
+      "type": "local_variable",
+      "name": "var_8h"
+    },
+    {
+      "start": 276,
+      "end": 282,
+      "type": "syntax_highlight",
+      "syntax_highlight": "local_variable"
+    },
+    {
+      "start": 283,
+      "end": 285,
+      "type": "offset",
+      "offset": 4198842
+    },
+    {
+      "start": 286,
+      "end": 287,
+      "type": "offset",
+      "offset": 4198842
+    },
+    {
+      "start": 288,
+      "end": 300,
+      "type": "local_variable",
+      "name": "in_FS_OFFSET"
+    },
+    {
+      "start": 288,
+      "end": 300,
+      "type": "syntax_highlight",
+      "syntax_highlight": "local_variable"
+    },
+    {
+      "start": 301,
+      "end": 302,
+      "type": "offset",
+      "offset": 4198842
+    },
+    {
+      "start": 303,
+      "end": 307,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 320,
+      "end": 325,
+      "type": "local_variable",
+      "name": "uVar1"
+    },
+    {
+      "start": 320,
+      "end": 325,
+      "type": "syntax_highlight",
+      "syntax_highlight": "local_variable"
+    },
+    {
+      "start": 326,
+      "end": 327,
+      "type": "offset",
+      "offset": 4198853
+    },
+    {
+      "start": 328,
+      "end": 352,
+      "type": "function_name",
+      "name": "sym.imp.__stack_chk_fail",
+      "offset": 4198464
+    },
+    {
+      "start": 328,
+      "end": 352,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_name"
+    },
+    {
+      "start": 320,
+      "end": 354,
+      "type": "offset",
+      "offset": 4198853
+    },
+    {
+      "start": 366,
+      "end": 372,
+      "type": "offset",
+      "offset": 4198859
+    },
+    {
+      "start": 366,
+      "end": 372,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 373,
+      "end": 378,
+      "type": "local_variable",
+      "name": "uVar1"
+    },
+    {
+      "start": 373,
+      "end": 378,
+      "type": "syntax_highlight",
+      "syntax_highlight": "local_variable"
+    },
+    {
+      "start": 366,
+      "end": 378,
+      "type": "offset",
+      "offset": 4198859
+    }
+  ]
+}
+EOF
+CMDS=<<EOF
+s main
+af
+pdgj~{}
+EOF
+RUN
+
+NAME=global variable annotation
+FILE=bins/dectest32
+EXPECT=<<EOF
+{
+  "code": "\nuint sym.get_global_array_entry(void)\n\n{\n    return *0x804c034;\n}\n\n",
+  "annotations": [
+    {
+      "start": 1,
+      "end": 5,
+      "type": "syntax_highlight",
+      "syntax_highlight": "datatype"
+    },
+    {
+      "start": 6,
+      "end": 32,
+      "type": "function_name",
+      "name": "sym.get_global_array_entry",
+      "offset": 134517184
+    },
+    {
+      "start": 6,
+      "end": 32,
+      "type": "offset",
+      "offset": 134517184
+    },
+    {
+      "start": 6,
+      "end": 32,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_name"
+    },
+    {
+      "start": 33,
+      "end": 37,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 46,
+      "end": 52,
+      "type": "offset",
+      "offset": 134517193
+    },
+    {
+      "start": 46,
+      "end": 52,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 53,
+      "end": 54,
+      "type": "offset",
+      "offset": 134517187
+    },
+    {
+      "start": 54,
+      "end": 63,
+      "type": "global_variable",
+      "offset": 134529076
+    },
+    {
+      "start": 54,
+      "end": 63,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 46,
+      "end": 63,
+      "type": "offset",
+      "offset": 134517193
+    }
+  ]
+}
+EOF
+CMDS=<<EOF
+s sym.get_global_array_entry
+af
+pdgj~{}
+EOF
+RUN
+
+NAME=constant variable annotation
+FILE=bins/dectest32
+EXPECT=<<EOF
+{
+  "code": "\nvoid sym.PrintAmbassador(int32_t arg_8h)\n\n{\n    sym.imp.printf(\"Ambassador value: \");\n    if (arg_8h < 5) {\n        if (arg_8h < 5) {\n            switch(*(arg_8h * 4 + 0x804a048)) {\n            case 0x8049261:\n                sym.imp.printf(\"pure\");\n                break;\n            case 0x8049273:\n                sym.imp.printf(\"reason\");\n                break;\n            case 0x8049285:\n                sym.imp.printf(\"revolution\");\n                break;\n            case 0x8049297:\n                sym.imp.printf(\"echoes\");\n                break;\n            case 0x80492a9:\n                sym.imp.printf(\"wall\");\n            }\n        }\n    }\n    else if (arg_8h == 1000000) {\n        sym.imp.printf(\"million\");\n    }\n    sym.imp.putchar(10);\n    return;\n}\n\n",
+  "annotations": [
+    {
+      "start": 1,
+      "end": 5,
+      "type": "syntax_highlight",
+      "syntax_highlight": "datatype"
+    },
+    {
+      "start": 6,
+      "end": 25,
+      "type": "function_name",
+      "name": "sym.PrintAmbassador",
+      "offset": 134517281
+    },
+    {
+      "start": 6,
+      "end": 25,
+      "type": "offset",
+      "offset": 134517281
+    },
+    {
+      "start": 6,
+      "end": 25,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_name"
+    },
+    {
+      "start": 26,
+      "end": 33,
+      "type": "syntax_highlight",
+      "syntax_highlight": "datatype"
+    },
+    {
+      "start": 34,
+      "end": 40,
+      "type": "function_parameter",
+      "name": "arg_8h"
+    },
+    {
+      "start": 34,
+      "end": 40,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_parameter"
+    },
+    {
+      "start": 49,
+      "end": 63,
+      "type": "function_name",
+      "name": "sym.imp.printf",
+      "offset": 134516816
+    },
+    {
+      "start": 49,
+      "end": 63,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_name"
+    },
+    {
+      "start": 64,
+      "end": 84,
+      "type": "constant_variable",
+      "offset": 134520840
+    },
+    {
+      "start": 64,
+      "end": 84,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 49,
+      "end": 85,
+      "type": "offset",
+      "offset": 134517295
+    },
+    {
+      "start": 91,
+      "end": 93,
+      "type": "offset",
+      "offset": 134517307
+    },
+    {
+      "start": 91,
+      "end": 93,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 95,
+      "end": 101,
+      "type": "function_parameter",
+      "name": "arg_8h"
+    },
+    {
+      "start": 95,
+      "end": 101,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_parameter"
+    },
+    {
+      "start": 102,
+      "end": 103,
+      "type": "offset",
+      "offset": 134517307
+    },
+    {
+      "start": 104,
+      "end": 105,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 117,
+      "end": 119,
+      "type": "offset",
+      "offset": 134517313
+    },
+    {
+      "start": 117,
+      "end": 119,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 121,
+      "end": 127,
+      "type": "function_parameter",
+      "name": "arg_8h"
+    },
+    {
+      "start": 121,
+      "end": 127,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_parameter"
+    },
+    {
+      "start": 128,
+      "end": 129,
+      "type": "offset",
+      "offset": 134517313
+    },
+    {
+      "start": 130,
+      "end": 131,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 147,
+      "end": 153,
+      "type": "offset",
+      "offset": 134517332
+    },
+    {
+      "start": 147,
+      "end": 153,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 154,
+      "end": 155,
+      "type": "offset",
+      "offset": 134517330
+    },
+    {
+      "start": 156,
+      "end": 162,
+      "type": "function_parameter",
+      "name": "arg_8h"
+    },
+    {
+      "start": 156,
+      "end": 162,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_parameter"
+    },
+    {
+      "start": 163,
+      "end": 164,
+      "type": "offset",
+      "offset": 134517322
+    },
+    {
+      "start": 165,
+      "end": 166,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 167,
+      "end": 168,
+      "type": "offset",
+      "offset": 134517325
+    },
+    {
+      "start": 169,
+      "end": 178,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 195,
+      "end": 199,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 227,
+      "end": 241,
+      "type": "function_name",
+      "name": "sym.imp.printf",
+      "offset": 134516816
+    },
+    {
+      "start": 227,
+      "end": 241,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_name"
+    },
+    {
+      "start": 242,
+      "end": 248,
+      "type": "constant_variable",
+      "offset": 134520859
+    },
+    {
+      "start": 242,
+      "end": 248,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 227,
+      "end": 249,
+      "type": "offset",
+      "offset": 134517353
+    },
+    {
+      "start": 267,
+      "end": 272,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 267,
+      "end": 273,
+      "type": "offset",
+      "offset": 134517361
+    },
+    {
+      "start": 286,
+      "end": 290,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 318,
+      "end": 332,
+      "type": "function_name",
+      "name": "sym.imp.printf",
+      "offset": 134516816
+    },
+    {
+      "start": 318,
+      "end": 332,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_name"
+    },
+    {
+      "start": 333,
+      "end": 341,
+      "type": "constant_variable",
+      "offset": 134520864
+    },
+    {
+      "start": 333,
+      "end": 341,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 318,
+      "end": 342,
+      "type": "offset",
+      "offset": 134517371
+    },
+    {
+      "start": 360,
+      "end": 365,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 360,
+      "end": 366,
+      "type": "offset",
+      "offset": 134517379
+    },
+    {
+      "start": 379,
+      "end": 383,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 411,
+      "end": 425,
+      "type": "function_name",
+      "name": "sym.imp.printf",
+      "offset": 134516816
+    },
+    {
+      "start": 411,
+      "end": 425,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_name"
+    },
+    {
+      "start": 426,
+      "end": 438,
+      "type": "constant_variable",
+      "offset": 134520871
+    },
+    {
+      "start": 426,
+      "end": 438,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 411,
+      "end": 439,
+      "type": "offset",
+      "offset": 134517389
+    },
+    {
+      "start": 457,
+      "end": 462,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 457,
+      "end": 463,
+      "type": "offset",
+      "offset": 134517397
+    },
+    {
+      "start": 476,
+      "end": 480,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 508,
+      "end": 522,
+      "type": "function_name",
+      "name": "sym.imp.printf",
+      "offset": 134516816
+    },
+    {
+      "start": 508,
+      "end": 522,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_name"
+    },
+    {
+      "start": 523,
+      "end": 531,
+      "type": "constant_variable",
+      "offset": 134520882
+    },
+    {
+      "start": 523,
+      "end": 531,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 508,
+      "end": 532,
+      "type": "offset",
+      "offset": 134517407
+    },
+    {
+      "start": 550,
+      "end": 555,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 550,
+      "end": 556,
+      "type": "offset",
+      "offset": 134517415
+    },
+    {
+      "start": 569,
+      "end": 573,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 601,
+      "end": 615,
+      "type": "function_name",
+      "name": "sym.imp.printf",
+      "offset": 134516816
+    },
+    {
+      "start": 601,
+      "end": 615,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_name"
+    },
+    {
+      "start": 616,
+      "end": 622,
+      "type": "constant_variable",
+      "offset": 134520889
+    },
+    {
+      "start": 616,
+      "end": 622,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 601,
+      "end": 623,
+      "type": "offset",
+      "offset": 134517425
+    },
+    {
+      "start": 659,
+      "end": 663,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 664,
+      "end": 666,
+      "type": "offset",
+      "offset": 134517341
+    },
+    {
+      "start": 664,
+      "end": 666,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 668,
+      "end": 674,
+      "type": "function_parameter",
+      "name": "arg_8h"
+    },
+    {
+      "start": 668,
+      "end": 674,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_parameter"
+    },
+    {
+      "start": 675,
+      "end": 677,
+      "type": "offset",
+      "offset": 134517334
+    },
+    {
+      "start": 678,
+      "end": 685,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 697,
+      "end": 711,
+      "type": "function_name",
+      "name": "sym.imp.printf",
+      "offset": 134516816
+    },
+    {
+      "start": 697,
+      "end": 711,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_name"
+    },
+    {
+      "start": 712,
+      "end": 721,
+      "type": "constant_variable",
+      "offset": 134520894
+    },
+    {
+      "start": 712,
+      "end": 721,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 697,
+      "end": 722,
+      "type": "offset",
+      "offset": 134517443
+    },
+    {
+      "start": 734,
+      "end": 749,
+      "type": "function_name",
+      "name": "sym.imp.putchar",
+      "offset": 134516880
+    },
+    {
+      "start": 734,
+      "end": 749,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_name"
+    },
+    {
+      "start": 750,
+      "end": 752,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 734,
+      "end": 753,
+      "type": "offset",
+      "offset": 134517459
+    },
+    {
+      "start": 759,
+      "end": 765,
+      "type": "offset",
+      "offset": 134517469
+    },
+    {
+      "start": 759,
+      "end": 765,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 759,
+      "end": 765,
+      "type": "offset",
+      "offset": 134517469
+    }
+  ]
+}
+EOF
+CMDS=<<EOF
+s sym.PrintAmbassador
+af
+pdgj~{}
+EOF
+RUN
+
+NAME=aeropause32 (many features combined)
+FILE=bins/dectest32
+EXPECT=<<EOF
+
+void sym.Aeropause(Bright *bright,int32_t argc,char **argv)
+
+{
+    Ambassador AVar1;
+    Morning *pMVar2;
+    int iVar3;
+    
+    pMVar2 = sym.imp.malloc(8);
+    bright->morning = pMVar2;
+    bright->morning->saved_argc = argc;
+    bright->morning->saved_argv = argv;
+    if (bright->morning->saved_argc < 2) {
+        bright->ambassador = AMBASSADOR_PURE;
+    }
+    else {
+        (bright->window).sunlight = bright->morning->saved_argv[1];
+        iVar3 = sym.imp.strcmp((bright->window).sunlight,0x804a05c);
+        if (iVar3 == 0) {
+            bright->ambassador = AMBASSADOR_REASON;
+        }
+        else {
+            iVar3 = sym.imp.strcmp((bright->window).sunlight,"dark");
+            if (iVar3 == 0) {
+                bright->ambassador = AMBASSADOR_REVOLUTION;
+            }
+            else {
+                iVar3 = sym.imp.strcmp((bright->window).sunlight,"third");
+                if (iVar3 == 0) {
+                    bright->ambassador = AMBASSADOR_ECHOES;
+                }
+                else {
+                    bright->ambassador = AMBASSADOR_MILLION;
+                }
+            }
+        }
+    }
+    AVar1 = bright->ambassador;
+    if (AVar1 < (AMBASSADOR_WALL|AMBASSADOR_REASON)) {
+    //switch table (5 cases) at 0x804a070
+        switch(AVar1) {
+        case AMBASSADOR_PURE:
+            sym.imp.printf("pure");
+            break;
+        case AMBASSADOR_REASON:
+            sym.imp.printf("reason");
+            break;
+        case AMBASSADOR_REVOLUTION:
+            sym.imp.printf("revolution");
+            break;
+        case AMBASSADOR_ECHOES:
+            sym.imp.printf("echoes");
+            break;
+        case AMBASSADOR_WALL:
+            sym.imp.printf("wall");
+        }
+    }
+    else if (AVar1 == AMBASSADOR_MILLION) {
+        sym.imp.printf("million");
+    }
+    sym.PrintAmbassador(bright->ambassador);
+    return;
+}
+
+EOF
+CMDS=<<EOF
+aaa
+to bins/types.h
+s sym.Aeropause
+afvb 8 bright Bright *
+afvb 12 argc int32_t
+afvb 16 argv const char **
+pdg
+EOF
+RUN
+
+NAME=aeropause64 (many features combined)
+FILE=bins/dectest64
+EXPECT=<<EOF
+
+void sym.Aeropause(Bright *bright,int32_t argc,char **argv)
+
+{
+    uint uVar1;
+    int iVar2;
+    Morning *pMVar3;
+    int64_t var_18h;
+    void **var_8h;
+    
+    pMVar3 = sym.imp.malloc(0x10);
+    bright->morning = pMVar3;
+    bright->morning->saved_argc = argc;
+    bright->morning->saved_argv = argv;
+    if (bright->morning->saved_argc < 2) {
+        *&bright->ambassador = AMBASSADOR_PURE;
+    }
+    else {
+        (bright->window).sunlight = bright->morning->saved_argv[1];
+        iVar2 = sym.imp.strcmp((bright->window).sunlight,"the  ");
+        if (iVar2 == 0) {
+            *&bright->ambassador = AMBASSADOR_REASON;
+        }
+        else {
+            iVar2 = sym.imp.strcmp((bright->window).sunlight,"dark");
+            if (iVar2 == 0) {
+                *&bright->ambassador = AMBASSADOR_REVOLUTION;
+            }
+            else {
+                iVar2 = sym.imp.strcmp((bright->window).sunlight,"third");
+                if (iVar2 == 0) {
+                    *&bright->ambassador = AMBASSADOR_ECHOES;
+                }
+                else {
+                    *&bright->ambassador = AMBASSADOR_MILLION;
+                }
+            }
+        }
+    }
+    uVar1 = bright->ambassador;
+    if (uVar1 < (AMBASSADOR_WALL|AMBASSADOR_REASON)) {
+    //switch table (5 cases) at 0x402088
+        switch(uVar1) {
+        case 0:
+            sym.imp.printf("pure");
+            break;
+        case 1:
+            sym.imp.printf("reason");
+            break;
+        case 2:
+            sym.imp.printf("revolution");
+            break;
+        case 3:
+            sym.imp.printf("echoes");
+            break;
+        case 4:
+            sym.imp.printf("wall");
+        }
+    }
+    else if (uVar1 == AMBASSADOR_MILLION) {
+        sym.imp.printf("million");
+    }
+    sym.PrintAmbassador(bright->ambassador);
+    return;
+}
+
+EOF
+CMDS=<<EOF
+aaa
+to bins/types.h
+
+s sym.Aeropause
+pdg
+EOF
+RUN
+
+NAME=typedef
+FILE=bins/dectest32
+EXPECT=<<EOF
+
+void sym.Aeropause(Bright *bright,int32_t argc,char **argv)
+
+{
+    Ambassador AVar1;
+    Morning *pMVar2;
+    int iVar3;
+    
+    pMVar2 = sym.imp.malloc(8);
+    bright->morning = pMVar2;
+    bright->morning->saved_argc = argc;
+    bright->morning->saved_argv = argv;
+    if (bright->morning->saved_argc < 2) {
+        bright->ambassador = AMBASSADOR_PURE;
+    }
+    else {
+        (bright->window).sunlight = bright->morning->saved_argv[1];
+        iVar3 = sym.imp.strcmp((bright->window).sunlight,0x804a05c);
+        if (iVar3 == 0) {
+            bright->ambassador = AMBASSADOR_REASON;
+        }
+        else {
+            iVar3 = sym.imp.strcmp((bright->window).sunlight,"dark");
+            if (iVar3 == 0) {
+                bright->ambassador = AMBASSADOR_REVOLUTION;
+            }
+            else {
+                iVar3 = sym.imp.strcmp((bright->window).sunlight,"third");
+                if (iVar3 == 0) {
+                    bright->ambassador = AMBASSADOR_ECHOES;
+                }
+                else {
+                    bright->ambassador = AMBASSADOR_MILLION;
+                }
+            }
+        }
+    }
+    AVar1 = bright->ambassador;
+    if (AVar1 < (AMBASSADOR_WALL|AMBASSADOR_REASON)) {
+    //switch table (5 cases) at 0x804a070
+        switch(AVar1) {
+        case AMBASSADOR_PURE:
+            sym.imp.printf("pure");
+            break;
+        case AMBASSADOR_REASON:
+            sym.imp.printf("reason");
+            break;
+        case AMBASSADOR_REVOLUTION:
+            sym.imp.printf("revolution");
+            break;
+        case AMBASSADOR_ECHOES:
+            sym.imp.printf("echoes");
+            break;
+        case AMBASSADOR_WALL:
+            sym.imp.printf("wall");
+        }
+    }
+    else if (AVar1 == AMBASSADOR_MILLION) {
+        sym.imp.printf("million");
+    }
+    sym.PrintAmbassador(bright->ambassador);
+    return;
+}
+
+--
+
+void sym.Aeropause(Bright *bright,int32_t argc,char **argv)
+
+{
+    Ambassador AVar1;
+    Morning *pMVar2;
+    int iVar3;
+    
+    pMVar2 = sym.imp.malloc(8);
+    bright->morning = pMVar2;
+    bright->morning->saved_argc = argc;
+    bright->morning->saved_argv = argv;
+    if (bright->morning->saved_argc < 2) {
+        bright->ambassador = AMBASSADOR_PURE;
+    }
+    else {
+        (bright->window).sunlight = bright->morning->saved_argv[1];
+        iVar3 = sym.imp.strcmp((bright->window).sunlight,0x804a05c);
+        if (iVar3 == 0) {
+            bright->ambassador = AMBASSADOR_REASON;
+        }
+        else {
+            iVar3 = sym.imp.strcmp((bright->window).sunlight,"dark");
+            if (iVar3 == 0) {
+                bright->ambassador = AMBASSADOR_REVOLUTION;
+            }
+            else {
+                iVar3 = sym.imp.strcmp((bright->window).sunlight,"third");
+                if (iVar3 == 0) {
+                    bright->ambassador = AMBASSADOR_ECHOES;
+                }
+                else {
+                    bright->ambassador = AMBASSADOR_MILLION;
+                }
+            }
+        }
+    }
+    AVar1 = bright->ambassador;
+    if (AVar1 < (AMBASSADOR_WALL|AMBASSADOR_REASON)) {
+    //switch table (5 cases) at 0x804a070
+        switch(AVar1) {
+        case AMBASSADOR_PURE:
+            sym.imp.printf("pure");
+            break;
+        case AMBASSADOR_REASON:
+            sym.imp.printf("reason");
+            break;
+        case AMBASSADOR_REVOLUTION:
+            sym.imp.printf("revolution");
+            break;
+        case AMBASSADOR_ECHOES:
+            sym.imp.printf("echoes");
+            break;
+        case AMBASSADOR_WALL:
+            sym.imp.printf("wall");
+        }
+    }
+    else if (AVar1 == AMBASSADOR_MILLION) {
+        sym.imp.printf("million");
+    }
+    sym.PrintAmbassador(bright->ambassador);
+    return;
+}
+
+--
+
+void sym.Aeropause(Bright *bright,int32_t argc,char **argv)
+
+{
+    Ambassador AVar1;
+    Morning *pMVar2;
+    int iVar3;
+    
+    pMVar2 = sym.imp.malloc(8);
+    bright->morning = pMVar2;
+    bright->morning->saved_argc = argc;
+    bright->morning->saved_argv = argv;
+    if (bright->morning->saved_argc < 2) {
+        bright->ambassador = AMBASSADOR_PURE;
+    }
+    else {
+        (bright->window).sunlight = bright->morning->saved_argv[1];
+        iVar3 = sym.imp.strcmp((bright->window).sunlight,0x804a05c);
+        if (iVar3 == 0) {
+            bright->ambassador = AMBASSADOR_REASON;
+        }
+        else {
+            iVar3 = sym.imp.strcmp((bright->window).sunlight,"dark");
+            if (iVar3 == 0) {
+                bright->ambassador = AMBASSADOR_REVOLUTION;
+            }
+            else {
+                iVar3 = sym.imp.strcmp((bright->window).sunlight,"third");
+                if (iVar3 == 0) {
+                    bright->ambassador = AMBASSADOR_ECHOES;
+                }
+                else {
+                    bright->ambassador = AMBASSADOR_MILLION;
+                }
+            }
+        }
+    }
+    AVar1 = bright->ambassador;
+    if (AVar1 < (AMBASSADOR_WALL|AMBASSADOR_REASON)) {
+    //switch table (5 cases) at 0x804a070
+        switch(AVar1) {
+        case AMBASSADOR_PURE:
+            sym.imp.printf("pure");
+            break;
+        case AMBASSADOR_REASON:
+            sym.imp.printf("reason");
+            break;
+        case AMBASSADOR_REVOLUTION:
+            sym.imp.printf("revolution");
+            break;
+        case AMBASSADOR_ECHOES:
+            sym.imp.printf("echoes");
+            break;
+        case AMBASSADOR_WALL:
+            sym.imp.printf("wall");
+        }
+    }
+    else if (AVar1 == AMBASSADOR_MILLION) {
+        sym.imp.printf("million");
+    }
+    sym.PrintAmbassador(bright->ambassador);
+    return;
+}
+
+EOF
+CMDS=<<EOF
+aaa
+to bins/types.h
+s sym.Aeropause
+afvb 8 bright BrightPtr
+afvb 12 argc Bright *
+afvb 16 argv const char **
+pdg
+?e --
+afvb 8 bright BrightTypedefd *
+afvb 12 argc int32_t
+afvb 16 argv const char **
+pdg
+?e --
+afvb 8 bright BrightTypedefdPtr
+pdg
+EOF
+RUN
+
+NAME=recursive type
+FILE=bins/rec
+CMDS=<<EOF
+to bins/types_rec.h
+aaa
+s sym.KillList
+afvt arg1 LL
+afvt ptr LL
+pdg
+EOF
+EXPECT=<<EOF
+
+void sym.KillList(LL arg1)
+
+{
+    LL pLVar1;
+    LL ptr;
+    int64_t var_8h;
+    
+    ptr = arg1;
+    while (ptr != NULL) {
+        pLVar1 = *&ptr->next;
+        sym.imp.free(ptr);
+        ptr = pLVar1;
+    }
+    return;
+}
+
+EOF
+RUN
+
+NAME=global variable support
+FILE=bins/dectest64
+CMDS=<<EOF
+aaa
+"td struct MyGlobal { int32_t val; };"
+s 0x404050
+avg MyGlobal my_custom_global
+s sym.get_global_var
+pdg
+EOF
+EXPECT=<<EOF
+
+int sym.get_global_var(void)
+
+{
+    return my_custom_global;
+}
+
+EOF
+RUN
