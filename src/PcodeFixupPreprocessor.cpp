@@ -178,7 +178,10 @@ void PcodeFixupPreprocessor::fixupSharedReturnJumpToRelocs(RAnalFunction *r2Func
 	}
 	R_VEC_FOREACH (refs, refi) {
 		const char *impname = import_flag_at (core, refi->addr);
-		if (!impname) {
+		// Also fire on a tail `b` into ANY analyzed function start (named by the caller's own analysis or
+		// symbols), not just import/reloc veneers, so pdg renders `return X(args)`. Gated by r2ghidra.fixups.
+		bool localFunc = !impname && r_anal_get_function_at (core->anal, refi->addr) != NULL;
+		if (!impname && !localFunc) {
 			continue;
 		}
 		RAnalOp *op = r_core_anal_op (core, refi->at, 0);
@@ -188,7 +191,7 @@ void PcodeFixupPreprocessor::fixupSharedReturnJumpToRelocs(RAnalFunction *r2Func
 		// a tail-branch into an import veneer reads as a returning call
 		if (op->type == R_ANAL_OP_TYPE_JMP) {
 			Address callAddr (space, refi->at);
-			R_LOG_INFO ("OverridingCallReturn %s", normalize_callee (impname).c_str ());
+			R_LOG_INFO ("OverridingCallReturn %s", impname? normalize_callee (impname).c_str (): "(local fcn)");
 			ghFunc->getOverride().insertFlowOverride(callAddr, Override::CALL_RETURN);
 		}
 		r_anal_op_free (op);
