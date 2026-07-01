@@ -25,3 +25,7 @@ elf/arm-stackchk: arm-stackchk.c
 	arm-linux-gnueabi-gcc -march=armv7-a -O1 -fstack-protector-all -nostdlib -nostartfiles \
 		-Wl,-e,checkval -Wl,--defsym,__stack_chk_fail=0x00bad000 -Wl,--defsym,__stack_chk_guard=0x00bad100 \
 		-o elf/arm-stackchk arm-stackchk.c
+
+elf/arm64-tailcall-local: arm64-tailcall-local.c
+	aarch64-linux-gnu-gcc -O2 -fPIC -nostdlib -nostartfiles -shared -fno-stack-protector \
+		-o elf/arm64-tailcall-local.so arm64-tailcall-local.c
