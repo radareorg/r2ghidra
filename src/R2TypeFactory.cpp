@@ -160,17 +160,17 @@ static bool get_builtin_spec(const R2TypeFactory *factory, const std::string &na
 		return true;
 	}
 	if (lower == "wchar_t") {
-		spec.size = factory->getSizeOfWChar();
+		spec.size = sizeof(wchar_t);
 		spec.meta = TYPE_INT;
 		return true;
 	}
 	if (lower == "uchar") {
-		spec.size = factory->getSizeOfChar();
+		spec.size = 1;
 		spec.meta = TYPE_UINT;
 		return true;
 	}
 	if (lower == "schar") {
-		spec.size = factory->getSizeOfChar();
+		spec.size = 1;
 		spec.meta = TYPE_INT;
 		return true;
 	}
@@ -282,7 +282,7 @@ static bool get_builtin_spec(const R2TypeFactory *factory, const std::string &na
 		return true;
 	}
 	if (is_wchar) {
-		spec.size = factory->getSizeOfWChar();
+		spec.size = sizeof(wchar_t);
 		spec.meta = TYPE_INT;
 		return true;
 	}
@@ -298,7 +298,7 @@ static bool get_builtin_spec(const R2TypeFactory *factory, const std::string &na
 		return true;
 	}
 	if (is_char) {
-		spec.size = factory->getSizeOfChar();
+		spec.size = 1;
 		spec.meta = is_unsigned ? TYPE_UINT : TYPE_INT;
 		return true;
 	}
@@ -353,16 +353,20 @@ Datatype *R2TypeFactory::queryR2Base(const string &n) {
 	int4 size = 0;
 	type_metatype meta = TYPE_UNKNOWN;
 	BuiltinTypeSpec builtin;
-	if (get_builtin_spec(this, n, builtin)) {
-		size = builtin.size;
-		meta = builtin.meta;
-	} else {
-		ut64 bits = r_type_get_bitsize(sdb, n.c_str());
-		if (!bits || (bits % 8) != 0) {
-			return nullptr;
-		}
+	const bool has_builtin = get_builtin_spec(this, n, builtin);
+	ut64 bits = r_type_get_bitsize(sdb, n.c_str());
+	if (bits && (bits % 8) == 0) {
 		size = bits / 8;
 		meta = formatToMeta(r_type_format(sdb, n.c_str()));
+		if (meta == TYPE_UNKNOWN && has_builtin) {
+			meta = builtin.meta;
+		}
+	} else {
+		if (!has_builtin) {
+			return nullptr;
+		}
+		size = builtin.size;
+		meta = builtin.meta;
 	}
 	Datatype *base = base_or_unknown(this, size, meta);
 	if (!base) {
@@ -612,9 +616,10 @@ Datatype *R2TypeFactory::queryR2Enum(const string &n, std::set<std::string> &sta
 	}
 	try {
 		auto enumType = getTypeEnum(n);
-		map<uintb,string> namemap;
-		TypeEnum::assignValues(namemap,namelist,vallist,assignlist,enumType);
-		setEnumValues(namemap, enumType);
+		if (!setEnumValues(namelist, vallist, assignlist, enumType)) {
+			arch->addWarning("Failed to load " + n);
+			return nullptr;
+		}
 		return enumType;
 	} catch (LowlevelError &e) {
 		arch->addWarning("Failed to load " + n);

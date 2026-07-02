@@ -39,7 +39,6 @@ decompiler_sources = [
   'src/decompiler/emulateutil.cc',
   'src/decompiler/flow.cc',
   'src/decompiler/userop.cc',
-  'src/decompiler/expression.cc',
   'src/decompiler/multiprecision.cc',
   'src/decompiler/funcdata.cc',
   'src/decompiler/funcdata_block.cc',
@@ -68,8 +67,8 @@ decompiler_sources = [
   'src/decompiler/memstate.cc',
   'src/decompiler/opbehavior.cc',
   'src/decompiler/paramid.cc',
+  'src/decompiler/signature.cc',
   'src/decompiler/string_ghidra.cc',
-  'src/decompiler/constseq.cc',
 ]
 
 libdecomp_sources = [
@@ -85,6 +84,7 @@ ghidra_sources = [
   'src/decompiler/ghidra_context.cc',
   'src/decompiler/cpool_ghidra.cc',
   'src/decompiler/comment_ghidra.cc',
+  'src/decompiler/signature_ghidra.cc',
   'src/decompiler/inject_ghidra.cc',
   'src/decompiler/ghidra_translate.cc',
 ]
@@ -127,28 +127,32 @@ incs = include_directories('src/decompiler')
 
 ghidra_base_static = static_library('base',
   base_sources,
-  include_directories: incs
+  include_directories: incs,
+  implicit_include_directories: false
 )
 
 ghidra_decompiler_static = static_library('ghidra',
   decompiler_sources,
   dependencies: zlib,
   link_with: ghidra_base_static,
-  include_directories: incs
+  include_directories: incs,
+  implicit_include_directories: false
 )
 
 slgh_static = static_library('slgh',
   slgh_sources, # + sleigh_compiler_sources,
   dependencies: zlib,
   link_with: ghidra_base_static,
-  include_directories: incs
+  include_directories: incs,
+  implicit_include_directories: false
 )
 
 libdecomp_static = static_library('libdecomp',
   libdecomp_sources,
   dependencies: zlib,
   link_with: [ghidra_decompiler_static, slgh_static],
-  include_directories: incs
+  include_directories: incs,
+  implicit_include_directories: false
 )
 
 sleighc_exe = executable('sleighc',
@@ -156,6 +160,7 @@ sleighc_exe = executable('sleighc',
   dependencies: zlib,
   link_with: slgh_static,
   include_directories: incs,
+  implicit_include_directories: false,
   override_options : ['c_std=c11', 'cpp_std=c++14'],
   install: true
 )
