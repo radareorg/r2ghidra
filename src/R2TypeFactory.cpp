@@ -737,10 +737,12 @@ Datatype *R2TypeFactory::findById(const string &n, uint8 id, int4 sz, std::set<s
 		int4 fallback_size = (sz > 0) ? sz : 1;
 		return getBase(fallback_size, TYPE_UNKNOWN);
 	}
+	// re-parsing a name already on the resolution stack would recurse forever
+	const bool revisiting = stackTypes.find (n) != stackTypes.end ();
 	if (r == nullptr) {
 		r = queryR2 (n, stackTypes);
 	}
-	if (r == nullptr) {
+	if (r == nullptr && !revisiting) {
 		const bool needs_parse =
 			n.find('*') != std::string::npos ||
 			n.rfind("const ", 0) == 0 ||
