@@ -1690,3 +1690,29 @@ EXPECT=<<EOF2
         entry0(0x2a);
 EOF2
 RUN
+
+NAME=pdg survives an unparseable var type string instead of recursing
+FILE=bins/dectest64
+CMDS=<<EOF
+s sym.Aeropause
+af
+afvt arg1 int (*)(int)
+pdg~Aeropause(
+EOF
+EXPECT=<<EOF
+void sym.Aeropause(int arg1,int64_t arg2,int64_t arg3)
+EOF
+RUN
+
+NAME=afvt pointer type on a register arg applies under pdg
+FILE=bins/dectest64
+CMDS=<<EOF
+s sym.Aeropause
+af
+"afvt arg1 char *"
+pdg~Aeropause(
+EOF
+EXPECT=<<EOF
+void sym.Aeropause(char *arg1,int64_t arg2,int64_t arg3)
+EOF
+RUN
