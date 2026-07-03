@@ -642,6 +642,7 @@ static void _cmd(RCore *core, const char *input) {
 			return;
 		}
 		if (pid == 0) {
+			close (fds[0]);
 			runcmd (core, input);
 			r_cons_flush (core->cons);
 			fflush (stdout);
@@ -655,12 +656,12 @@ static void _cmd(RCore *core, const char *input) {
 			tv.tv_usec = (timeout - (tv.tv_sec * 1000)) * 1000;
 			FD_ZERO (&rfds);
 			FD_SET (fds[0], &rfds);
+			// keeping our copy of the write end open would suppress eof from a crashed child until the timeout expires
+			close (fds[1]);
 			if (select (fds[0] + 1, &rfds, NULL, NULL, &tv) > 0) {
 				char ch = 0;
-				int rr = read (fds[0], &ch, 1);
-				if (rr > 0 && ch == 0x12) {
-					// eprintf ("Completed\n");
-					// return;
+				if (read (fds[0], &ch, 1) != 1 || ch != 0x12) {
+					R_LOG_ERROR ("Decompiler process died unexpectedly");
 				}
 			} else {
 				eprintf ("Timeout\n");
@@ -670,9 +671,8 @@ static void _cmd(RCore *core, const char *input) {
 			}
 			fflush (stderr);
 			fflush (stdout);
+			close (fds[0]);
 		}
-		close (fds[0]);
-		close (fds[1]);
 #else
 		R_LOG_WARN ("r2ghidra.timeout is not supported outside UNIX systems.");
 		runcmd (core, input);
