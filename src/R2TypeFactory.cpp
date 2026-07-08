@@ -12,6 +12,7 @@
 #include <cerrno>
 #include <climits>
 #include <cstdlib>
+#include <utility>
 
 // Compatibility for older radare2 versions that don't have these type kinds
 #ifndef R_TYPE_BASIC
@@ -816,7 +817,7 @@ Datatype *R2TypeFactory::fromCString(const string &str, string *error, std::set<
 	}
 	// results computed mid-recursion may be truncated by the recursion guard, so only cache full resolutions
 	const bool toplevel = !stackTypes || stackTypes->empty ();
-	std::string parseError;
+	CStringCacheEntry entry{ nullptr, {} };
 	Datatype *r = nullptr;
 	std::set<std::string> localStack;
 	std::set<std::string> *stack = stackTypes ? stackTypes : &localStack;
@@ -904,24 +905,27 @@ Datatype *R2TypeFactory::fromCString(const string &str, string *error, std::set<
 						free(out);
 					}
 					if (error_cstr) {
-						parseError = error_cstr;
+						entry.error = error_cstr;
 						free(error_cstr);
 					}
 				}
 			}
 			r = queryR2(tmp_name, *stack);
 #endif
-			if (!r && parseError.empty()) {
-				parseError = "Unknown type identifier " + manual;
+			if (!r && entry.error.empty()) {
+				entry.error = "Unknown type identifier " + manual;
 			}
 		}
 	}
 
+	entry.type = r;
+	const CStringCacheEntry *result = &entry;
 	if (toplevel) {
-		cstringCache[key] = { r, parseError };
+		auto cached = cstringCache.insert_or_assign(std::move(key), std::move(entry));
+		result = &cached.first->second;
 	}
-	if (error && !r) {
-		*error = parseError;
+	if (error && !result->type) {
+		*error = result->error;
 	}
-	return r;
+	return result->type;
 }
