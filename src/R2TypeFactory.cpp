@@ -25,7 +25,6 @@
 // - Handle declarators that need identifier placement (arrays, function pointers) when wrapping r_anal_cparse.
 // - Improve base-type signedness/alias mapping (size_t, ssize_t, uintptr_t, etc).
 // - Prefer structured r2 type APIs over raw sdb parsing when available.
-// - Add caching to avoid repeated type parsing/conversion.
 // - Drop manual libc arg typing in tests once r2 auto-applies known signatures (printf, malloc, strcmp, ...).
 #define R2G_USE_CTYPE 1
 #include "R2Utils.h"
@@ -776,17 +775,57 @@ Datatype *R2TypeFactory::findById(const string &n, uint8 id, int4 sz, std::set<s
 
 // overriden call
 Datatype *R2TypeFactory::findById(const string &n, uint8 id, int4 sz) {
+	Datatype *r = TypeFactory::findById (n, id, sz);
+	if (r) {
+		return r;
+	}
+	// the slow path ignores id and only uses sz for the fallback size, so name-keyed memoization is sound for sz <= 0
+	const bool cacheable = !n.empty () && sz <= 0;
+	if (cacheable) {
+		auto it = lookupCache.find (n);
+		if (it != lookupCache.end ()) {
+			return it->second;
+		}
+	}
 	std::set<std::string> stackTypes; // to detect recursion
-	return findById (n, id, sz, stackTypes);
+	r = findById (n, id, sz, stackTypes);
+	if (cacheable) {
+		lookupCache[n] = r;
+	}
+	return r;
 }
 
 Datatype *R2TypeFactory::fromCString(const string &str, string *error, std::set<std::string> *stackTypes) {
-	std::set<std::string> localStack;
-	std::set<std::string> *stack = stackTypes ? stackTypes : &localStack;
-	std::string type_str = normalize_ws(trim_ws(str));
-	if (type_str.empty()) {
+	std::string key = normalize_ws (trim_ws (str));
+	if (key.empty ()) {
 		return nullptr;
 	}
+	auto it = cstringCache.find (key);
+	if (it != cstringCache.end ()) {
+		const CStringCacheEntry &entry = it->second;
+		if (error && !entry.type) {
+			*error = entry.error;
+		}
+		return entry.type;
+	}
+	// results computed mid-recursion may be truncated by the recursion guard, so only cache full resolutions
+	const bool toplevel = !stackTypes || stackTypes->empty ();
+	std::string parseError;
+	Datatype *r = fromCStringInternal (key, &parseError, stackTypes);
+	if (toplevel) {
+		cstringCache[key] = { r, parseError };
+	}
+	if (error && !r) {
+		*error = parseError;
+	}
+	return r;
+}
+
+// str is already normalized and non-empty (fromCString is the only caller)
+Datatype *R2TypeFactory::fromCStringInternal(const string &str, string *error, std::set<std::string> *stackTypes) {
+	std::set<std::string> localStack;
+	std::set<std::string> *stack = stackTypes ? stackTypes : &localStack;
+	const std::string &type_str = str;
 
 	if (r_str_startswith(type_str.c_str(), "func.")) {
 		std::string func_name = type_str.substr(strlen("func."));
