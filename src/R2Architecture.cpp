@@ -98,6 +98,14 @@ Address R2Architecture::registerAddressFromR2Reg(const char *regname) {
 	return it->second.getAddr ();
 }
 
+std::string R2Architecture::registerNameFromAddress(const Address &addr, int4 size) {
+	if (!translate || addr.isInvalid ()) {
+		return "";
+	}
+	// r2 register profiles use lowercase names, sleigh uppercase
+	return tolower (translate->getRegisterName (addr.getSpace (), addr.getOffset (), size));
+}
+
 Translate *R2Architecture::buildTranslator(DocumentStorage &store) {
 	Translate *ret = SleighArchitecture::buildTranslator (store);
 	loadRegisters(ret);

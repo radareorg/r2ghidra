@@ -1716,3 +1716,157 @@ EXPECT=<<EOF
 void sym.Aeropause(char *arg1,int64_t arg2,int64_t arg3)
 EOF
 RUN
+
+NAME=pdgw applies the recovered register-arg type and signature
+FILE=bins/dectest64
+CMDS=<<EOF
+s sym.Aeropause
+af
+e r2ghidra.vars=false
+pdgw
+afv
+afs
+EOF
+EXPECT=<<EOF
+pdgw: applied 1 types, 0 names
+arg int64_t * arg1 @ rdi
+arg int64_t arg2 @ rsi
+arg int64_t arg3 @ rdx
+var int64_t var_8h @ rbp-0x8
+var int64_t var_ch @ rbp-0xc
+var int64_t var_18h @ rbp-0x18
+void sym.Aeropause (int64_t arg1, int64_t arg2, int64_t arg3);
+EOF
+RUN
+
+NAME=pdgw applied twice makes no further changes
+FILE=bins/dectest64
+CMDS=<<EOF
+s sym.Aeropause
+af
+e r2ghidra.vars=false
+pdgw
+?e ----
+pdgw
+afv
+EOF
+EXPECT=<<EOF
+pdgw: applied 1 types, 0 names
+----
+pdgw: no changes
+arg int64_t * arg1 @ rdi
+arg int64_t arg2 @ rsi
+arg int64_t arg3 @ rdx
+var int64_t var_8h @ rbp-0x8
+var int64_t var_ch @ rbp-0xc
+var int64_t var_18h @ rbp-0x18
+EOF
+RUN
+
+NAME=pdg output improves after pdgw applies types
+FILE=bins/dectest64
+CMDS=<<EOF
+s sym.Aeropause
+af
+pdg~Aeropause(
+e r2ghidra.vars=false
+pdgw
+e r2ghidra.vars=true
+pdg~Aeropause(
+EOF
+EXPECT=<<EOF
+void sym.Aeropause(int64_t arg1,int64_t arg2,int64_t arg3)
+pdgw: applied 1 types, 0 names
+void sym.Aeropause(int64_t *arg1,int64_t arg2,int64_t arg3)
+EOF
+RUN
+
+NAME=pdgw with apply gates disabled writes nothing
+FILE=bins/dectest64
+CMDS=<<EOF
+s sym.Aeropause
+af
+e r2ghidra.vars=false
+e r2ghidra.apply.vars=false
+e r2ghidra.apply.sig=false
+pdgw
+afv~arg1
+EOF
+EXPECT=<<EOF
+pdgw: no changes
+arg int64_t arg1 @ rdi
+EOF
+RUN
+
+NAME=pdgw applies the recovered signature on big endian ppc64
+FILE=bins/elf/ppc64v1-crc32_generic.ko
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF
+aaa
+s sym..crc32_init
+pdgw
+afs
+?e ----
+pdgw
+EOF
+EXPECT=<<EOF
+pdgw: applied 0 types, 0 names, signature
+void sym..crc32_init (int64_t arg1);
+----
+pdgw: no changes
+EOF
+RUN
+
+NAME=pdgw preserves an existing explicit prototype
+FILE=bins/elf/hello_world
+CMDS=<<EOF
+aaa
+s main
+"afs int main(int argc, char **argv)"
+pdgw
+afs
+EOF
+EXPECT=<<EOF
+pdgw: no changes
+int main (int argc, char **argv);
+EOF
+RUN
+
+NAME=pdgw applies the recovered signature on arm64
+FILE=bins/elf/arm64-varargs.so
+CMDS=<<EOF
+aaa
+s sym.p_snprintf
+pdgw
+afs
+?e ----
+pdgw
+EOF
+EXPECT=<<EOF
+pdgw: applied 0 types, 0 names, signature
+void sym.p_snprintf (int64_t arg1, int64_t arg2);
+----
+pdgw: no changes
+EOF
+RUN
+
+NAME=pdgw is stable on 32-bit x86 stack arguments
+FILE=bins/elf/crackme0x05
+CMDS=<<EOF
+s sym.check
+af
+e r2ghidra.vars=false
+pdgw
+?e ----
+pdgw
+afv
+EOF
+EXPECT=<<EOF
+pdgw: no changes
+----
+pdgw: no changes
+arg int32_t arg_8h @ ebp+0x8
+var int32_t var_8h @ ebp-0x8
+var int32_t var_ch @ ebp-0xc
+EOF
+RUN

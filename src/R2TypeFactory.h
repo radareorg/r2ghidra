@@ -45,6 +45,7 @@ public:
 	~R2TypeFactory() override;
 
 	Datatype *fromCString(const string &str, string *error = nullptr, std::set<std::string> *stackTypes = nullptr);
+	static std::string toCString(Datatype *type);
 };
 
 #endif //R2GHIDRA_R2TYPEFACTORY_H

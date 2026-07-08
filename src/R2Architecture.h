@@ -35,6 +35,7 @@ public:
 
 	ProtoModel *protoModelFromR2CC(const char *cc);
 	Address registerAddressFromR2Reg(const char *regname);
+	std::string registerNameFromAddress(const Address &addr, int4 size);
 
 	void addWarning(const std::string &warning)	{ warnings.push_back(warning); }
 	const std::vector<std::string> getWarnings() const { return warnings; }

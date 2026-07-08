@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 
 #include "R2Architecture.h"
+#include "R2TypeFactory.h"
 #include "CodeXMLParse.h"
 #include "PrettyXmlEncode.h"
 #include "R2PrintC.h"
@@ -81,6 +82,8 @@ CV cfg_var_varargs    ("varargs",     "false",    "Recover printf-family varargs
 CV cfg_var_roprop     ("roprop",      "0",        "Propagate read-only constants (0,1,2,3,4)");
 CV cfg_var_timeout    ("timeout",     "0",        "Run decompilation in a separate process and kill it after a specific time");
 CV cfg_var_compiler   ("compiler",    "default",  "Select compiler for calling conventions", ConfigCompiler);
+CV cfg_var_apply_vars ("apply.vars",  "true",     "pdgw: apply recovered variable names and types");
+CV cfg_var_apply_sig  ("apply.sig",   "true",     "pdgw: apply the recovered function signature");
 
 
 static std::recursive_mutex decompiler_mutex;
@@ -114,6 +117,7 @@ static const char* r2ghidra_help[] = {
 	"pd:gs", "", "# Display loaded Sleigh Languages (alias for pdgL)",
 	"pd:gsd", " N", "# Disassemble N instructions with Sleigh and print pcode",
 	"pd:gss", "", "# Display automatically matched Sleigh Language ID",
+	"pd:gw", "", "# Decompile and apply recovered names, types and signature into r2",
 	"pd:gx", "", "# Dump the XML of the current decompiled function",
 	"Environment:", "", "",
 	"%SLEIGHHOME" , "", "# Path to ghidra sleigh directory (same as r2ghidra.sleighhome)",
@@ -130,7 +134,8 @@ enum class DecompileMode {
 	OFFSET,
 	STATEMENTS,
 	DISASM,
-	JSON
+	JSON,
+	APPLY
 };
 
 static void ApplyPrintCConfig(RConfig *cfg, PrintC *print_c) {
@@ -185,7 +190,279 @@ static void seedGlobalPointerRegister(R2Architecture &arch, RCore *core, RAnalFu
 	});
 }
 
-static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstream &out_stream, RCodeMeta **out_code) {
+struct HarvestVar {
+	std::string name;
+	std::string type; // "" = don't retype
+	std::string regName; // non-empty = register storage
+	std::string regNameFull; // full-width register at the same offset (r2 vars live on the wide name)
+	uintb stackOff = 0;
+	bool onStack = false;
+	bool nameDefined = false;
+};
+
+struct HarvestProto {
+	bool valid = false;
+	std::string retType; // "" = keep the current return type
+	bool dotdotdot = false;
+	bool noreturn = false;
+	std::vector<HarvestVar> params;
+};
+
+struct Harvest {
+	HarvestProto proto;
+	std::vector<HarvestVar> locals;
+	int4 extraPop = 0;
+	uintb stackHighest = 0;
+};
+
+// formalized parameters and promoted locals keep their auto names without the undefined flag
+static bool IsGhidraAutoName(const std::string &name) {
+	size_t pos;
+	if (name.compare (0, strlen ("param_"), "param_") == 0) {
+		pos = strlen ("param_");
+	} else if (name.compare (0, strlen ("local_"), "local_") == 0) {
+		pos = strlen ("local_");
+	} else {
+		return false;
+	}
+	return pos < name.size () && name.find_first_not_of ("0123456789abcdef", pos) == std::string::npos;
+}
+
+static void HarvestStorage(R2Architecture &arch, const Address &a, int4 size, int4 defaultSize, HarvestVar &out) {
+	if (a.isInvalid ()) {
+		return;
+	}
+	if (a.getSpace () == arch.getStackSpace ()) {
+		out.onStack = true;
+		out.stackOff = a.getOffset ();
+		return;
+	}
+	out.regName = arch.registerNameFromAddress (a, size);
+	if (out.regName.empty () && arch.translate->isBigEndian () && size > 0 && size < defaultSize) {
+		// undo the BE low-order placement of sub-width register args
+		out.regName = arch.registerNameFromAddress (Address (a.getSpace (), a.getOffset () - (defaultSize - size)), defaultSize);
+	}
+	if (size > 0 && size < defaultSize) {
+		out.regNameFull = arch.registerNameFromAddress (a, defaultSize);
+	}
+}
+
+// copy the recovered prototype and locals into plain data so nothing references the arch after teardown
+static void HarvestFuncdata(R2Architecture &arch, Funcdata *func, Harvest &out) {
+	const int4 defaultSize = arch.translate->getDefaultSize ();
+	out.stackHighest = arch.getStackSpace ()->getHighest ();
+	FuncProto &proto = func->getFuncProto ();
+	out.extraPop = proto.getExtraPop ();
+	if (out.extraPop == ProtoModel::extrapop_unknown) {
+		out.extraPop = defaultSize;
+	}
+	out.proto.valid = true;
+	out.proto.dotdotdot = proto.isDotdotdot ();
+	out.proto.noreturn = proto.isNoReturn ();
+	out.proto.retType = R2TypeFactory::toCString (proto.getOutputType ());
+	for (int4 i = 0; i < proto.numParams (); i++) {
+		ProtoParameter *param = proto.getParam (i);
+		if (!param || param->isHiddenReturn ()) {
+			continue;
+		}
+		HarvestVar hv;
+		if (!param->isNameUndefined () && !IsGhidraAutoName (param->getName ())) {
+			hv.name = param->getName ();
+			hv.nameDefined = true;
+		}
+		hv.type = R2TypeFactory::toCString (param->getType ());
+		HarvestStorage (arch, param->getAddress (), param->getSize (), defaultSize, hv);
+		out.proto.params.push_back (hv);
+	}
+	ScopeLocal *scope = func->getScopeLocal ();
+	if (!scope) {
+		return;
+	}
+	for (MapIterator it = scope->begin (); it != scope->end (); ++it) {
+		const SymbolEntry *entry = *it;
+		if (!entry || entry->isPiece ()) {
+			continue;
+		}
+		Symbol *sym = entry->getSymbol ();
+		if (!sym || sym->getName ().empty () || sym->getCategory () != Symbol::no_category) {
+			continue;
+		}
+		if (dynamic_cast<FunctionSymbol *> (sym) || dynamic_cast<LabSymbol *> (sym)) {
+			continue;
+		}
+		HarvestVar hv;
+		if (!sym->isNameUndefined () && !IsGhidraAutoName (sym->getName ())) {
+			hv.name = sym->getName ();
+			hv.nameDefined = true;
+		}
+		hv.type = R2TypeFactory::toCString (sym->getType ());
+		HarvestStorage (arch, entry->getAddr (), entry->getSize (), defaultSize, hv);
+		if ((!hv.onStack && hv.regName.empty () && hv.regNameFull.empty ()) || (hv.type.empty () && !hv.nameDefined)) {
+			continue;
+		}
+		out.locals.push_back (hv);
+	}
+}
+
+static bool TypeParseable(RAnal *anal, const std::string &type) {
+	std::string base = type;
+	while (!base.empty () && (base.back () == '*' || base.back () == ' ')) {
+		base.pop_back ();
+	}
+	if (base.empty ()) {
+		return false;
+	}
+	if (base == "void") {
+		return true;
+	}
+	return r_type_kind (anal->sdb_types, base.c_str ()) != R_TYPE_INVALID;
+}
+
+static RAnalVar *MatchRegVar(RCore *core, RAnalFunction *fcn, const std::string &regName) {
+	if (regName.empty ()) {
+		return nullptr;
+	}
+	RRegItem *ri = r_reg_get (core->anal->reg, regName.c_str (), -1);
+	if (!ri) {
+		return nullptr;
+	}
+	const int index = ri->index;
+	r_unref (ri);
+	return r_anal_function_get_var (fcn, R_ANAL_VAR_KIND_REG, index);
+}
+
+static RAnalVar *MatchVar(RCore *core, RAnalFunction *fcn, const HarvestVar &hv, const Harvest &h) {
+	if (!hv.regName.empty () || !hv.regNameFull.empty ()) {
+		RAnalVar *var = MatchRegVar (core, fcn, hv.regName);
+		return var ? var : MatchRegVar (core, fcn, hv.regNameFull);
+	}
+	if (!hv.onStack) {
+		return nullptr;
+	}
+	// invert the stack mapping from FunctionVars::addr: negative deltas wrap to the top of the stack space
+	st64 gdelta = (hv.stackOff > h.stackHighest / 2)
+		? (st64)hv.stackOff - (st64)h.stackHighest - 1
+		: (st64)hv.stackOff;
+	int delta = (int)(gdelta - fcn->bp_off + h.extraPop);
+	return r_anal_function_get_var (fcn, R_ANAL_VAR_KIND_BPV, delta);
+}
+
+static void ApplyVar(RCore *core, RAnalFunction *fcn, const HarvestVar &hv, const Harvest &h, int *types, int *names) {
+	RAnalVar *var = MatchVar (core, fcn, hv, h);
+	if (!var) {
+		R_LOG_DEBUG ("pdgw: no r2 variable matches %s", hv.name.c_str ());
+		return;
+	}
+	if (!hv.type.empty () && (!var->type || hv.type != var->type)) {
+		if (TypeParseable (core->anal, hv.type)) {
+			r_anal_var_set_type (core->anal, var, hv.type.c_str ());
+			(*types)++;
+		} else {
+			R_LOG_DEBUG ("pdgw: skipping unknown type %s", hv.type.c_str ());
+		}
+	}
+	if (hv.nameDefined && var->name && hv.name != var->name) {
+		if (r_anal_var_rename (core->anal, var, hv.name.c_str ())) {
+			(*names)++;
+		}
+	}
+}
+
+static void param_free(void *p) {
+	RAnalFunctionParam *fp = (RAnalFunctionParam *)p;
+	if (fp) {
+		free (fp->name);
+		free (fp->type);
+		free (fp);
+	}
+}
+
+static bool ApplySignature(RCore *core, RAnalFunction *fcn, const Harvest &h) {
+	RAnalFunctionSignature *cur = r_anal_function_get_signature (fcn);
+	const char *curRet = (cur && R_STR_ISNOTEMPTY (cur->ret_type)) ? cur->ret_type : NULL;
+	std::string ret = h.proto.retType;
+	if (ret.empty () || !TypeParseable (core->anal, ret)) {
+		ret = curRet ? curRet : "void";
+	} else if (ret == "void" && curRet && strcmp (curRet, "void")) {
+		// the decompiler demotes unused return values to void; never lose a known return type
+		ret = curRet;
+	}
+	RAnalFunctionSignature sig = {};
+	sig.ret_type = (char *)ret.c_str ();
+	sig.callconv = (char *)fcn->callconv;
+	sig.noreturn = h.proto.noreturn || fcn->is_noreturn;
+	sig.params = r_list_newf (param_free);
+	bool complete = true;
+	int idx = 0;
+	for (const HarvestVar &hv : h.proto.params) {
+		if (hv.type.empty () || !TypeParseable (core->anal, hv.type)) {
+			complete = false;
+			break;
+		}
+		RAnalFunctionParam *fp = R_NEW0 (RAnalFunctionParam);
+		std::string pname = hv.name;
+		if (!hv.nameDefined) {
+			RAnalVar *var = MatchVar (core, fcn, hv, h);
+			pname = (var && var->name) ? var->name : "arg" + std::to_string (idx + 1);
+		}
+		fp->name = strdup (pname.c_str ());
+		fp->type = strdup (hv.type.c_str ());
+		r_list_append (sig.params, fp);
+		idx++;
+	}
+	if (complete && h.proto.dotdotdot) {
+		RAnalFunctionParam *fp = R_NEW0 (RAnalFunctionParam);
+		fp->type = strdup ("...");
+		r_list_append (sig.params, fp);
+	}
+	bool changed = !cur;
+	if (complete && cur) {
+		changed = !cur->ret_type || ret != cur->ret_type
+			|| r_list_length (cur->params) != r_list_length (sig.params);
+		for (ut32 i = 0; !changed && i < r_list_length (sig.params); i++) {
+			RAnalFunctionParam *pa = (RAnalFunctionParam *)r_list_get_n (cur->params, i);
+			RAnalFunctionParam *pb = (RAnalFunctionParam *)r_list_get_n (sig.params, i);
+			if (strcmp (r_str_get (pa->type), r_str_get (pb->type)) || strcmp (r_str_get (pa->name), r_str_get (pb->name))) {
+				changed = true;
+			}
+		}
+	}
+	bool applied = false;
+	if (complete && changed) {
+		applied = r_anal_function_set_signature (core->anal, fcn, &sig);
+		if (!applied) {
+			R_LOG_DEBUG ("pdgw: signature rejected by the type parser");
+		}
+	} else if (!complete) {
+		R_LOG_DEBUG ("pdgw: incomplete parameter types, not applying the signature");
+	}
+	r_list_free (sig.params);
+	r_anal_function_signature_free (cur);
+	return applied;
+}
+
+static void ApplyHarvest(RCore *core, RAnalFunction *fcn, const Harvest &h) {
+	int types = 0, names = 0;
+	bool sig = false;
+	if (cfg_var_apply_vars.GetBool (core->config)) {
+		for (const HarvestVar &hv : h.proto.params) {
+			ApplyVar (core, fcn, hv, h, &types, &names);
+		}
+		for (const HarvestVar &hv : h.locals) {
+			ApplyVar (core, fcn, hv, h, &types, &names);
+		}
+	}
+	if (cfg_var_apply_sig.GetBool (core->config) && h.proto.valid) {
+		sig = ApplySignature (core, fcn, h);
+	}
+	if (types || names || sig) {
+		r_cons_printf (core->cons, "pdgw: applied %d types, %d names%s\n", types, names, sig ? ", signature" : "");
+	} else {
+		r_cons_printf (core->cons, "pdgw: no changes\n");
+	}
+}
+
+static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstream &out_stream, RCodeMeta **out_code, Harvest *out_harvest = nullptr) {
 	RAnalFunction *function = r_anal_get_fcn_in (core->anal, addr, R_ANAL_FCN_TYPE_NULL);
 	if (!function) {
 		throw LowlevelError ("No function at this offset");
@@ -241,6 +518,12 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 		for (const auto &warning : arch.getWarnings()) {
 			func->warningHeader("[r2ghidra] " + warning);
 		}
+	}
+	if (mode == DecompileMode::APPLY) {
+		if (out_harvest) {
+			HarvestFuncdata (arch, func, *out_harvest);
+		}
+		return;
 	}
 	switch (mode) {
 	case DecompileMode::XML:
@@ -320,8 +603,17 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 #endif
 		RCodeMeta *code = nullptr;
 		std::stringstream out_stream;
-		Decompile (core, core->addr, mode, out_stream, &code);
+		Harvest harvest;
+		Decompile (core, core->addr, mode, out_stream, &code, mode == DecompileMode::APPLY ? &harvest : nullptr);
 		switch (mode) {
+		case DecompileMode::APPLY:
+			{
+				RAnalFunction *fcn = r_anal_get_fcn_in (core->anal, core->addr, R_ANAL_FCN_TYPE_NULL);
+				if (fcn) {
+					ApplyHarvest (core, fcn, harvest);
+				}
+			}
+			break;
 		case DecompileMode::DISASM:
 			{
 #if defined(R2_ABIVERSION) && R2_ABIVERSION >= 40
@@ -617,6 +909,9 @@ static void runcmd(RCore *core, const char *input) {
 	case 'a': // "pdga"
 		DecompileCmd (core, DecompileMode::DISASM);
 		break;
+	case 'w': // "pdgw"
+		DecompileCmd (core, DecompileMode::APPLY);
+		break;
 	case 'p': // "pdgp"
 		EnablePlugin (core);
 		break;
@@ -628,6 +923,11 @@ static void runcmd(RCore *core, const char *input) {
 
 static void _cmd(RCore *core, const char *input) {
 	int timeout = r_config_get_i (core->config, "r2ghidra.timeout");
+	if (*input == 'w') {
+		// pdgw writes into the r2 DB; a forked child would lose the writes
+		runcmd (core, input);
+		return;
+	}
 	if (timeout > 0) {
 #if R2__UNIX__
 		// TODO: note that first execution is slower than the rest. and forking loses the cache
