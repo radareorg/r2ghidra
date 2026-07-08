@@ -729,9 +729,11 @@ Datatype *R2TypeFactory::queryR2(const string &n, std::set<std::string> &stackTy
 	}
 }
 
-Datatype *R2TypeFactory::findById(const string &n, uint8 id, int4 sz, std::set<std::string> &stackTypes) {
+Datatype *R2TypeFactory::findByIdResolved(const string &n, uint8 id, int4 sz, std::set<std::string> &stackTypes, Datatype *r, bool resolvedBase) {
 	// resolve basic types
-	Datatype *r = TypeFactory::findById (n, id, sz);
+	if (!resolvedBase) {
+		r = TypeFactory::findById (n, id, sz);
+	}
 	if (r == nullptr && n.empty()) {
 		int4 fallback_size = (sz > 0) ? sz : 1;
 		return getBase(fallback_size, TYPE_UNKNOWN);
@@ -773,6 +775,10 @@ Datatype *R2TypeFactory::findById(const string &n, uint8 id, int4 sz, std::set<s
 	return r;
 }
 
+Datatype *R2TypeFactory::findById(const string &n, uint8 id, int4 sz, std::set<std::string> &stackTypes) {
+	return findByIdResolved (n, id, sz, stackTypes, nullptr, false);
+}
+
 // overriden call
 Datatype *R2TypeFactory::findById(const string &n, uint8 id, int4 sz) {
 	Datatype *r = TypeFactory::findById (n, id, sz);
@@ -788,7 +794,7 @@ Datatype *R2TypeFactory::findById(const string &n, uint8 id, int4 sz) {
 		}
 	}
 	std::set<std::string> stackTypes; // to detect recursion
-	r = findById (n, id, sz, stackTypes);
+	r = findByIdResolved (n, id, sz, stackTypes, r, true);
 	if (cacheable) {
 		lookupCache[n] = r;
 	}

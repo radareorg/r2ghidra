@@ -33,6 +33,7 @@ private:
 	Datatype *queryR2Typedef(const string &n, std::set<std::string> &stackTypes);
 	Datatype *queryR2Function(const string &n, std::set<std::string> &stackTypes);
 	Datatype *queryR2(const string &n, std::set<std::string> &stackTypes);
+	Datatype *findByIdResolved(const string &n, uint8 id, int4 sz, std::set<std::string> &stackTypes, Datatype *r, bool resolvedBase);
 
 protected:
 	Datatype *findById(const string &n, uint8 id, int4 sz, std::set<std::string> &stackTypes);
