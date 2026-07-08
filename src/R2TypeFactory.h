@@ -24,8 +24,6 @@ private:
 	std::unordered_map<std::string, CStringCacheEntry> cstringCache;
 	std::unordered_map<std::string, Datatype *> lookupCache;
 
-	Datatype *fromCStringInternal(const string &str, string *error, std::set<std::string> *stackTypes);
-
 	Datatype *queryR2Struct(const string &n, std::set<std::string> &stackTypes);
 	Datatype *queryR2Union(const string &n, std::set<std::string> &stackTypes);
 	Datatype *queryR2Base(const string &n);

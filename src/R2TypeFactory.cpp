@@ -817,7 +817,106 @@ Datatype *R2TypeFactory::fromCString(const string &str, string *error, std::set<
 	// results computed mid-recursion may be truncated by the recursion guard, so only cache full resolutions
 	const bool toplevel = !stackTypes || stackTypes->empty ();
 	std::string parseError;
-	Datatype *r = fromCStringInternal (key, &parseError, stackTypes);
+	Datatype *r = nullptr;
+	std::set<std::string> localStack;
+	std::set<std::string> *stack = stackTypes ? stackTypes : &localStack;
+	const std::string &type_str = key;
+
+	if (r_str_startswith(type_str.c_str(), "func.")) {
+		std::string func_name = type_str.substr(strlen("func."));
+		r = queryR2Function(func_name, *stack);
+	}
+
+	if (!r) {
+		auto strip_prefix = [](std::string &in, const std::string &prefix) {
+			if (in.rfind(prefix, 0) == 0) {
+				in = in.substr(prefix.size());
+				return true;
+			}
+			return false;
+		};
+
+		std::string manual = type_str;
+		int ptr_depth = 0;
+		while (!manual.empty()) {
+			manual = trim_ws(manual);
+			if (!manual.empty() && manual.back() == '*') {
+				manual.pop_back();
+				ptr_depth++;
+				continue;
+			}
+			break;
+		}
+
+		bool stripped = true;
+		while (stripped) {
+			stripped = false;
+			stripped |= strip_prefix(manual, "const ");
+			stripped |= strip_prefix(manual, "volatile ");
+		}
+		manual = normalize_ws(trim_ws(manual));
+
+		if (manual.rfind("struct ", 0) == 0) {
+			manual = trim_ws(manual.substr(sizeof("struct ") - 1));
+		} else if (manual.rfind("enum ", 0) == 0) {
+			manual = trim_ws(manual.substr(sizeof("enum ") - 1));
+		} else if (manual.rfind("union ", 0) == 0) {
+			manual = trim_ws(manual.substr(sizeof("union ") - 1));
+		}
+
+		Datatype *base = nullptr;
+		if (manual == "void") {
+			base = getTypeVoid();
+		} else {
+			base = findByName(manual, *stack);
+			if (!base) {
+				base = queryR2(manual, *stack);
+			}
+			if (!base) {
+				BuiltinTypeSpec builtin;
+				if (get_builtin_spec(this, manual, builtin)) {
+					Datatype *builtin_base = base_or_unknown(this, builtin.size, builtin.meta);
+					if (builtin_base) {
+						base = make_typedef(this, builtin_base, manual);
+					}
+				}
+			}
+		}
+		if (base) {
+			auto space = arch->getDefaultCodeSpace();
+			r = base;
+			for (int i = 0; i < ptr_depth; i++) {
+				r = getTypePointer(space->getAddrSize(), r, space->getWordSize());
+			}
+		}
+
+		if (!r) {
+#if R2G_USE_CTYPE
+			std::string tmp_name = make_tmp_typename(type_str);
+			{
+				RCoreLock core(arch->getCore());
+				if (r_type_kind(core->anal->sdb_types, tmp_name.c_str()) == R_TYPE_INVALID) {
+					std::string decl = "typedef " + type_str + " " + tmp_name + ";";
+					char *error_cstr = nullptr;
+					char *out = r_anal_cparse(core->anal, decl.c_str(), &error_cstr);
+					if (out) {
+						r_anal_save_parsed_type(core->anal, out);
+						free(out);
+					}
+					if (error_cstr) {
+						parseError = error_cstr;
+						free(error_cstr);
+					}
+				}
+			}
+			r = queryR2(tmp_name, *stack);
+#endif
+			if (!r && parseError.empty()) {
+				parseError = "Unknown type identifier " + manual;
+			}
+		}
+	}
+
 	if (toplevel) {
 		cstringCache[key] = { r, parseError };
 	}
@@ -825,111 +924,4 @@ Datatype *R2TypeFactory::fromCString(const string &str, string *error, std::set<
 		*error = parseError;
 	}
 	return r;
-}
-
-// str is already normalized and non-empty (fromCString is the only caller)
-Datatype *R2TypeFactory::fromCStringInternal(const string &str, string *error, std::set<std::string> *stackTypes) {
-	std::set<std::string> localStack;
-	std::set<std::string> *stack = stackTypes ? stackTypes : &localStack;
-	const std::string &type_str = str;
-
-	if (r_str_startswith(type_str.c_str(), "func.")) {
-		std::string func_name = type_str.substr(strlen("func."));
-		Datatype *fn = queryR2Function(func_name, *stack);
-		if (fn) {
-			return fn;
-		}
-	}
-
-	auto strip_prefix = [](std::string &in, const std::string &prefix) {
-		if (in.rfind(prefix, 0) == 0) {
-			in = in.substr(prefix.size());
-			return true;
-		}
-		return false;
-	};
-
-	std::string manual = type_str;
-	int ptr_depth = 0;
-	while (!manual.empty()) {
-		manual = trim_ws(manual);
-		if (!manual.empty() && manual.back() == '*') {
-			manual.pop_back();
-			ptr_depth++;
-			continue;
-		}
-		break;
-	}
-
-	bool stripped = true;
-	while (stripped) {
-		stripped = false;
-		stripped |= strip_prefix(manual, "const ");
-		stripped |= strip_prefix(manual, "volatile ");
-	}
-	manual = normalize_ws(trim_ws(manual));
-
-	if (manual.rfind("struct ", 0) == 0) {
-		manual = trim_ws(manual.substr(sizeof("struct ") - 1));
-	} else if (manual.rfind("enum ", 0) == 0) {
-		manual = trim_ws(manual.substr(sizeof("enum ") - 1));
-	} else if (manual.rfind("union ", 0) == 0) {
-		manual = trim_ws(manual.substr(sizeof("union ") - 1));
-	}
-
-	Datatype *base = nullptr;
-	if (manual == "void") {
-		base = getTypeVoid();
-	} else {
-		base = findByName(manual, *stack);
-		if (!base) {
-			base = queryR2(manual, *stack);
-		}
-		if (!base) {
-			BuiltinTypeSpec builtin;
-			if (get_builtin_spec(this, manual, builtin)) {
-				Datatype *builtin_base = base_or_unknown(this, builtin.size, builtin.meta);
-				if (builtin_base) {
-					base = make_typedef(this, builtin_base, manual);
-				}
-			}
-		}
-	}
-	if (base) {
-		auto space = arch->getDefaultCodeSpace();
-		Datatype *result = base;
-		for (int i = 0; i < ptr_depth; i++) {
-			result = getTypePointer(space->getAddrSize(), result, space->getWordSize());
-		}
-		return result;
-	}
-
-	std::string parse_error;
-#if R2G_USE_CTYPE
-	std::string tmp_name = make_tmp_typename(type_str);
-	{
-		RCoreLock core(arch->getCore());
-		if (r_type_kind(core->anal->sdb_types, tmp_name.c_str()) == R_TYPE_INVALID) {
-			std::string decl = "typedef " + type_str + " " + tmp_name + ";";
-			char *error_cstr = nullptr;
-			char *out = r_anal_cparse(core->anal, decl.c_str(), &error_cstr);
-			if (out) {
-				r_anal_save_parsed_type(core->anal, out);
-				free(out);
-			}
-			if (error_cstr) {
-				parse_error = error_cstr;
-				free(error_cstr);
-			}
-		}
-	}
-	Datatype *parsed = queryR2(tmp_name, *stack);
-	if (parsed) {
-		return parsed;
-	}
-#endif
-	if (error) {
-		*error = !parse_error.empty() ? parse_error : "Unknown type identifier " + manual;
-	}
-	return nullptr;
 }
