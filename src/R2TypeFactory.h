@@ -6,7 +6,7 @@
 
 #include <type.hh>
 
-#include <map>
+#include <unordered_map>
 
 using namespace ghidra;
 class R2Architecture;
@@ -21,8 +21,8 @@ private:
 		std::string error;
 	};
 	// both caches live for the factory's lifetime (one decompile); Datatypes are owned by the factory
-	std::map<std::string, CStringCacheEntry> cstringCache;
-	std::map<std::string, Datatype *> lookupCache;
+	std::unordered_map<std::string, CStringCacheEntry> cstringCache;
+	std::unordered_map<std::string, Datatype *> lookupCache;
 
 	Datatype *fromCStringInternal(const string &str, string *error, std::set<std::string> *stackTypes);
 
