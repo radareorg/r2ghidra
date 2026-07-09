@@ -1717,18 +1717,19 @@ void sym.Aeropause(char *arg1,int64_t arg2,int64_t arg3)
 EOF
 RUN
 
-NAME=pdgw applies the recovered register-arg type and signature
+NAME=pdgw writes the recovered register-arg type and signature
 FILE=bins/dectest64
+ARGS=-e log.level=0
 CMDS=<<EOF
 s sym.Aeropause
 af
 e r2ghidra.vars=false
+e log.level=2
 pdgw
 afv
 afs
 EOF
 EXPECT=<<EOF
-pdgw: applied 1 types, 0 names
 arg int64_t * arg1 @ rdi
 arg int64_t arg2 @ rsi
 arg int64_t arg3 @ rdx
@@ -1737,23 +1738,24 @@ var int64_t var_ch @ rbp-0xc
 var int64_t var_18h @ rbp-0x18
 void sym.Aeropause (int64_t arg1, int64_t arg2, int64_t arg3);
 EOF
+EXPECT_ERR=<<EOF
+INFO: pdgw: wrote 1 types, 0 names
+EOF
 RUN
 
-NAME=pdgw applied twice makes no further changes
+NAME=pdgw run twice makes no further changes
 FILE=bins/dectest64
+ARGS=-e log.level=0
 CMDS=<<EOF
 s sym.Aeropause
 af
 e r2ghidra.vars=false
+e log.level=2
 pdgw
-?e ----
 pdgw
 afv
 EOF
 EXPECT=<<EOF
-pdgw: applied 1 types, 0 names
-----
-pdgw: no changes
 arg int64_t * arg1 @ rdi
 arg int64_t arg2 @ rsi
 arg int64_t arg3 @ rdx
@@ -1761,9 +1763,13 @@ var int64_t var_8h @ rbp-0x8
 var int64_t var_ch @ rbp-0xc
 var int64_t var_18h @ rbp-0x18
 EOF
+EXPECT_ERR=<<EOF
+INFO: pdgw: wrote 1 types, 0 names
+INFO: pdgw: no changes
+EOF
 RUN
 
-NAME=pdg output improves after pdgw applies types
+NAME=pdg output improves after pdgw writes types
 FILE=bins/dectest64
 CMDS=<<EOF
 s sym.Aeropause
@@ -1776,112 +1782,125 @@ pdg~Aeropause(
 EOF
 EXPECT=<<EOF
 void sym.Aeropause(int64_t arg1,int64_t arg2,int64_t arg3)
-pdgw: applied 1 types, 0 names
 void sym.Aeropause(int64_t *arg1,int64_t arg2,int64_t arg3)
 EOF
 RUN
 
-NAME=pdgw with apply gates disabled writes nothing
+NAME=pdgw with write gates disabled changes nothing
 FILE=bins/dectest64
+ARGS=-e log.level=0
 CMDS=<<EOF
 s sym.Aeropause
 af
 e r2ghidra.vars=false
-e r2ghidra.apply.vars=false
-e r2ghidra.apply.sig=false
+e r2ghidra.write.vars=false
+e r2ghidra.write.sig=false
+e log.level=2
 pdgw
 afv~arg1
 EOF
 EXPECT=<<EOF
-pdgw: no changes
 arg int64_t arg1 @ rdi
+EOF
+EXPECT_ERR=<<EOF
+INFO: pdgw: no changes
 EOF
 RUN
 
-NAME=pdgw applies the recovered signature on big endian ppc64
+NAME=pdgw writes the recovered signature on big endian ppc64
 FILE=bins/elf/ppc64v1-crc32_generic.ko
-ARGS=-e bin.relocs.apply=true
+ARGS=-e bin.relocs.apply=true -e log.level=0
 CMDS=<<EOF
 aaa
 s sym..crc32_init
+e log.level=2
 pdgw
 afs
-?e ----
 pdgw
 EOF
 EXPECT=<<EOF
-pdgw: applied 0 types, 0 names, signature
 void sym..crc32_init (int64_t arg1);
-----
-pdgw: no changes
+EOF
+EXPECT_ERR=<<EOF
+INFO: pdgw: wrote 0 types, 0 names, signature
+INFO: pdgw: no changes
 EOF
 RUN
 
 NAME=pdgw preserves an existing explicit prototype
 FILE=bins/elf/hello_world
+ARGS=-e log.level=0
 CMDS=<<EOF
 aaa
 s main
 "afs int main(int argc, char **argv)"
+e log.level=2
 pdgw
 afs
 EOF
 EXPECT=<<EOF
-pdgw: no changes
 int main (int argc, char **argv);
+EOF
+EXPECT_ERR=<<EOF
+INFO: pdgw: no changes
 EOF
 RUN
 
-NAME=pdgw applies the recovered signature on arm64
+NAME=pdgw writes the recovered signature on arm64
 FILE=bins/elf/arm64-varargs.so
+ARGS=-e log.level=0
 CMDS=<<EOF
 aaa
 s sym.p_snprintf
+e log.level=2
 pdgw
 afs
-?e ----
 pdgw
 EOF
 EXPECT=<<EOF
-pdgw: applied 0 types, 0 names, signature
 void sym.p_snprintf (int64_t arg1, int64_t arg2);
-----
-pdgw: no changes
+EOF
+EXPECT_ERR=<<EOF
+INFO: pdgw: wrote 0 types, 0 names, signature
+INFO: pdgw: no changes
 EOF
 RUN
 
 NAME=pdgw is stable on 32-bit x86 stack arguments
 FILE=bins/elf/crackme0x05
+ARGS=-e log.level=0
 CMDS=<<EOF
 s sym.check
 af
 e r2ghidra.vars=false
+e log.level=2
 pdgw
-?e ----
 pdgw
 afv
 EOF
 EXPECT=<<EOF
-pdgw: no changes
-----
-pdgw: no changes
 arg int32_t arg_8h @ ebp+0x8
 var int32_t var_8h @ ebp-0x8
 var int32_t var_ch @ ebp-0xc
+EOF
+EXPECT_ERR=<<EOF
+INFO: pdgw: no changes
+INFO: pdgw: no changes
 EOF
 RUN
 
 NAME=pdgw does not import auto-generated ghidra variable names
 FILE=bins/dectest64
+ARGS=-e log.level=0
 CMDS=<<EOF
 s main
 af
 e r2ghidra.vars=false
+e log.level=2
 pdgw
 afv
 EOF
 EXPECT=<<EOF
-pdgw: no changes
 arg int argc @ rdi
 arg char ** argv @ rsi
 var int64_t var_8h @ rbp-0x8
@@ -1889,23 +1908,28 @@ var int64_t var_20h @ rbp-0x20
 var int64_t var_24h @ rbp-0x24
 var int64_t var_30h @ rbp-0x30
 EOF
+EXPECT_ERR=<<EOF
+INFO: pdgw: no changes
+EOF
 RUN
 
 NAME=pdgw converges when a ghidra local shares storage with a parameter
 FILE=bins/elf/arm64-varargs.so
+ARGS=-e log.level=0
 CMDS=<<EOF
 aaa
 s sym.p_snprintf
 e r2ghidra.varargs=true
+e log.level=2
 pdgw
-?e ----
 pdgw
 afv~arg1
 EOF
 EXPECT=<<EOF
-pdgw: applied 0 types, 0 names, signature
-----
-pdgw: no changes
 arg int64_t arg1 @ x0
+EOF
+EXPECT_ERR=<<EOF
+INFO: pdgw: wrote 0 types, 0 names, signature
+INFO: pdgw: no changes
 EOF
 RUN
