@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 
 #include "R2Architecture.h"
-#include "R2TypeFactory.h"
 #include "CodeXMLParse.h"
 #include "PrettyXmlEncode.h"
 #include "R2PrintC.h"
@@ -248,10 +247,8 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 			func->warningHeader("[r2ghidra] " + warning);
 		}
 	}
-	if (mode == DecompileMode::WRITE) {
-		if (out_harvest) {
-			HarvestFuncdata (arch, func, *out_harvest);
-		}
+	if (out_harvest) {
+		HarvestFuncdata (arch, func, *out_harvest);
 		return;
 	}
 	switch (mode) {

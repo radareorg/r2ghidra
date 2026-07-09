@@ -24,8 +24,9 @@ static bool IsGhidraAutoName(const std::string &name) {
 		{ "local_", true }
 	};
 	for (const auto &p : prefixes) {
-		if (name.compare (0, strlen (p.prefix), p.prefix) == 0) {
-			return !p.hexSuffix || IsGhidraAutoSuffix (name, strlen (p.prefix));
+		const size_t n = strlen (p.prefix);
+		if (name.compare (0, n, p.prefix) == 0) {
+			return !p.hexSuffix || IsGhidraAutoSuffix (name, n);
 		}
 	}
 	// type-prefixed forms like iVar1, puVar2, auStack_28, iStack_10
@@ -127,17 +128,12 @@ void HarvestFuncdata(R2Architecture &arch, Funcdata *func, Harvest &out) {
 }
 
 static bool TypeParseable(RAnal *anal, const std::string &type) {
-	std::string base = type;
-	while (!base.empty () && (base.back () == '*' || base.back () == ' ')) {
-		base.pop_back ();
-	}
-	if (base.empty ()) {
+	const size_t end = type.find_last_not_of ("* ");
+	if (end == std::string::npos) {
 		return false;
 	}
-	if (base == "void") {
-		return true;
-	}
-	return r_type_kind (anal->sdb_types, base.c_str ()) != R_TYPE_INVALID;
+	const std::string base = type.substr (0, end + 1);
+	return base == "void" || r_type_kind (anal->sdb_types, base.c_str ()) != R_TYPE_INVALID;
 }
 
 static RAnalVar *MatchRegVar(RCore *core, RAnalFunction *fcn, const std::string &regName) {
