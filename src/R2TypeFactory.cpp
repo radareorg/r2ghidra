@@ -929,3 +929,46 @@ Datatype *R2TypeFactory::fromCString(const string &str, string *error, std::set<
 	}
 	return result->type;
 }
+
+// reverse of fromCString: render a Datatype as an r2-parseable C type string, "" = not expressible
+std::string R2TypeFactory::toCString(Datatype *type) {
+	if (!type) {
+		return "";
+	}
+	if (type->getMetatype() == TYPE_VOID) {
+		return "void";
+	}
+	if (type->getSize() < 1) {
+		return "";
+	}
+	Datatype *base = type->getTypedef();
+	if (base) {
+		// keep real typedef names, but resolve our own scratch typedefs to what they alias
+		if (type->getName().compare(0, strlen("__r2ghidra_t_"), "__r2ghidra_t_") == 0) {
+			return toCString(base);
+		}
+		return type->getName();
+	}
+	switch (type->getMetatype()) {
+	case TYPE_PTR:
+	case TYPE_PTRREL: {
+		std::string inner = toCString(static_cast<TypePointer *>(type)->getPtrTo());
+		if (inner.empty()) {
+			return "";
+		}
+		return inner + (inner.back() == '*' ? "*" : " *");
+	}
+	case TYPE_INT:
+	case TYPE_UINT:
+	case TYPE_BOOL:
+	case TYPE_FLOAT:
+	case TYPE_STRUCT:
+	case TYPE_UNION:
+	case TYPE_ENUM_INT:
+	case TYPE_ENUM_UINT:
+		return type->getName();
+	default:
+		// TYPE_UNKNOWN would come back as a typelocked guess; arrays/partials/code are not expressible
+		return "";
+	}
+}

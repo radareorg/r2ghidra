@@ -9,6 +9,7 @@
 #include "ArchMap.h"
 #include "PcodeFixupPreprocessor.h"
 #include "R2Utils.h"
+#include "r2harvest.h"
 #include "r2ghidra.h"
 #include <r_core.h>
 
@@ -81,6 +82,8 @@ CV cfg_var_varargs    ("varargs",     "false",    "Recover printf-family varargs
 CV cfg_var_roprop     ("roprop",      "0",        "Propagate read-only constants (0,1,2,3,4)");
 CV cfg_var_timeout    ("timeout",     "0",        "Run decompilation in a separate process and kill it after a specific time");
 CV cfg_var_compiler   ("compiler",    "default",  "Select compiler for calling conventions", ConfigCompiler);
+CV cfg_var_write_vars ("write.vars",  "true",     "pdgw: write recovered variable names and types");
+CV cfg_var_write_sig  ("write.sig",   "true",     "pdgw: write the recovered function signature");
 
 
 static std::recursive_mutex decompiler_mutex;
@@ -114,6 +117,7 @@ static const char* r2ghidra_help[] = {
 	"pd:gs", "", "# Display loaded Sleigh Languages (alias for pdgL)",
 	"pd:gsd", " N", "# Disassemble N instructions with Sleigh and print pcode",
 	"pd:gss", "", "# Display automatically matched Sleigh Language ID",
+	"pd:gw", "", "# Decompile and write recovered names, types and signature back into r2",
 	"pd:gx", "", "# Dump the XML of the current decompiled function",
 	"Environment:", "", "",
 	"%SLEIGHHOME" , "", "# Path to ghidra sleigh directory (same as r2ghidra.sleighhome)",
@@ -130,7 +134,8 @@ enum class DecompileMode {
 	OFFSET,
 	STATEMENTS,
 	DISASM,
-	JSON
+	JSON,
+	WRITE
 };
 
 static void ApplyPrintCConfig(RConfig *cfg, PrintC *print_c) {
@@ -185,7 +190,7 @@ static void seedGlobalPointerRegister(R2Architecture &arch, RCore *core, RAnalFu
 	});
 }
 
-static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstream &out_stream, RCodeMeta **out_code) {
+static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstream &out_stream, RCodeMeta **out_code, Harvest *out_harvest = nullptr) {
 	RAnalFunction *function = r_anal_get_fcn_in (core->anal, addr, R_ANAL_FCN_TYPE_NULL);
 	if (!function) {
 		throw LowlevelError ("No function at this offset");
@@ -241,6 +246,10 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 		for (const auto &warning : arch.getWarnings()) {
 			func->warningHeader("[r2ghidra] " + warning);
 		}
+	}
+	if (out_harvest) {
+		HarvestFuncdata (arch, func, *out_harvest);
+		return;
 	}
 	switch (mode) {
 	case DecompileMode::XML:
@@ -320,8 +329,17 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 #endif
 		RCodeMeta *code = nullptr;
 		std::stringstream out_stream;
-		Decompile (core, core->addr, mode, out_stream, &code);
+		Harvest harvest;
+		Decompile (core, core->addr, mode, out_stream, &code, mode == DecompileMode::WRITE ? &harvest : nullptr);
 		switch (mode) {
+		case DecompileMode::WRITE:
+			{
+				RAnalFunction *fcn = r_anal_get_fcn_in (core->anal, core->addr, R_ANAL_FCN_TYPE_NULL);
+				if (fcn) {
+					WriteHarvest (core, fcn, harvest, cfg_var_write_vars.GetBool (core->config), cfg_var_write_sig.GetBool (core->config));
+				}
+			}
+			break;
 		case DecompileMode::DISASM:
 			{
 #if defined(R2_ABIVERSION) && R2_ABIVERSION >= 40
@@ -617,6 +635,9 @@ static void runcmd(RCore *core, const char *input) {
 	case 'a': // "pdga"
 		DecompileCmd (core, DecompileMode::DISASM);
 		break;
+	case 'w': // "pdgw"
+		DecompileCmd (core, DecompileMode::WRITE);
+		break;
 	case 'p': // "pdgp"
 		EnablePlugin (core);
 		break;
@@ -628,6 +649,11 @@ static void runcmd(RCore *core, const char *input) {
 
 static void _cmd(RCore *core, const char *input) {
 	int timeout = r_config_get_i (core->config, "r2ghidra.timeout");
+	if (*input == 'w') {
+		// pdgw writes into the r2 DB; a forked child would lose the writes
+		runcmd (core, input);
+		return;
+	}
 	if (timeout > 0) {
 #if R2__UNIX__
 		// TODO: note that first execution is slower than the rest. and forking loses the cache
