@@ -26,6 +26,7 @@
 #endif
 
 #include <vector>
+#include <set>
 #include <mutex>
 
 #undef DEBUG_EXCEPTIONS
@@ -215,17 +216,38 @@ struct Harvest {
 	uintb stackHighest = 0;
 };
 
-// formalized parameters and promoted locals keep their auto names without the undefined flag
-static bool IsGhidraAutoName(const std::string &name) {
-	size_t pos;
-	if (name.compare (0, strlen ("param_"), "param_") == 0) {
-		pos = strlen ("param_");
-	} else if (name.compare (0, strlen ("local_"), "local_") == 0) {
-		pos = strlen ("local_");
-	} else {
-		return false;
-	}
+static bool IsGhidraAutoSuffix(const std::string &name, size_t pos) {
 	return pos < name.size () && name.find_first_not_of ("0123456789abcdef", pos) == std::string::npos;
+}
+
+// generated names are not flagged undefined; match every ScopeInternal::buildVariableName pattern
+static bool IsGhidraAutoName(const std::string &name) {
+	if (name.compare (0, strlen ("in_"), "in_") == 0
+			|| name.compare (0, strlen ("unaff_"), "unaff_") == 0
+			|| name.compare (0, strlen ("extraout_"), "extraout_") == 0) {
+		return true;
+	}
+	if (name.compare (0, strlen ("param_"), "param_") == 0) {
+		return IsGhidraAutoSuffix (name, strlen ("param_"));
+	}
+	if (name.compare (0, strlen ("local_"), "local_") == 0) {
+		return IsGhidraAutoSuffix (name, strlen ("local_"));
+	}
+	// type-prefixed forms like iVar1, puVar2, auStack_28, iStack_10
+	for (const char *marker : { "Var", "Stack" }) {
+		size_t m = name.find (marker);
+		if (m == std::string::npos || name.find_first_not_of ("abcdefghijklmnopqrstuvwxyz") != m) {
+			continue;
+		}
+		size_t pos = m + strlen (marker);
+		if (pos < name.size () && name[pos] == '_') {
+			pos++;
+		}
+		if (IsGhidraAutoSuffix (name, pos)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 static void HarvestStorage(R2Architecture &arch, const Address &a, int4 size, int4 defaultSize, HarvestVar &out) {
@@ -347,10 +369,14 @@ static RAnalVar *MatchVar(RCore *core, RAnalFunction *fcn, const HarvestVar &hv,
 	return r_anal_function_get_var (fcn, R_ANAL_VAR_KIND_BPV, delta);
 }
 
-static void ApplyVar(RCore *core, RAnalFunction *fcn, const HarvestVar &hv, const Harvest &h, int *types, int *names) {
+static void ApplyVar(RCore *core, RAnalFunction *fcn, const HarvestVar &hv, const Harvest &h, std::set<RAnalVar *> &seen, int *types, int *names) {
 	RAnalVar *var = MatchVar (core, fcn, hv, h);
 	if (!var) {
 		R_LOG_DEBUG ("pdgw: no r2 variable matches %s", hv.name.c_str ());
+		return;
+	}
+	// params and locals can share storage; the first (param) view wins
+	if (!seen.insert (var).second) {
 		return;
 	}
 	if (!hv.type.empty () && (!var->type || hv.type != var->type)) {
@@ -419,7 +445,7 @@ static bool ApplySignature(RCore *core, RAnalFunction *fcn, const Harvest &h) {
 	if (complete && cur) {
 		changed = !cur->ret_type || ret != cur->ret_type
 			|| r_list_length (cur->params) != r_list_length (sig.params);
-		for (ut32 i = 0; !changed && i < r_list_length (sig.params); i++) {
+		for (int i = 0; !changed && i < r_list_length (sig.params); i++) {
 			RAnalFunctionParam *pa = (RAnalFunctionParam *)r_list_get_n (cur->params, i);
 			RAnalFunctionParam *pb = (RAnalFunctionParam *)r_list_get_n (sig.params, i);
 			if (strcmp (r_str_get (pa->type), r_str_get (pb->type)) || strcmp (r_str_get (pa->name), r_str_get (pb->name))) {
@@ -445,11 +471,12 @@ static void ApplyHarvest(RCore *core, RAnalFunction *fcn, const Harvest &h) {
 	int types = 0, names = 0;
 	bool sig = false;
 	if (cfg_var_apply_vars.GetBool (core->config)) {
+		std::set<RAnalVar *> seen;
 		for (const HarvestVar &hv : h.proto.params) {
-			ApplyVar (core, fcn, hv, h, &types, &names);
+			ApplyVar (core, fcn, hv, h, seen, &types, &names);
 		}
 		for (const HarvestVar &hv : h.locals) {
-			ApplyVar (core, fcn, hv, h, &types, &names);
+			ApplyVar (core, fcn, hv, h, seen, &types, &names);
 		}
 	}
 	if (cfg_var_apply_sig.GetBool (core->config) && h.proto.valid) {

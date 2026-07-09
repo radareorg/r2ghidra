@@ -1870,3 +1870,42 @@ var int32_t var_8h @ ebp-0x8
 var int32_t var_ch @ ebp-0xc
 EOF
 RUN
+
+NAME=pdgw does not import auto-generated ghidra variable names
+FILE=bins/dectest64
+CMDS=<<EOF
+s main
+af
+e r2ghidra.vars=false
+pdgw
+afv
+EOF
+EXPECT=<<EOF
+pdgw: no changes
+arg int argc @ rdi
+arg char ** argv @ rsi
+var int64_t var_8h @ rbp-0x8
+var int64_t var_20h @ rbp-0x20
+var int64_t var_24h @ rbp-0x24
+var int64_t var_30h @ rbp-0x30
+EOF
+RUN
+
+NAME=pdgw converges when a ghidra local shares storage with a parameter
+FILE=bins/elf/arm64-varargs.so
+CMDS=<<EOF
+aaa
+s sym.p_snprintf
+e r2ghidra.varargs=true
+pdgw
+?e ----
+pdgw
+afv~arg1
+EOF
+EXPECT=<<EOF
+pdgw: applied 0 types, 0 names, signature
+----
+pdgw: no changes
+arg int64_t arg1 @ x0
+EOF
+RUN
