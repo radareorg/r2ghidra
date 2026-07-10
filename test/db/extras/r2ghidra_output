@@ -1130,7 +1130,7 @@ EXPECT=<<EOF2
 EOF2
 RUN
 
-NAME=printf vararg recovery stays off by default
+NAME=vararg recovery off leaves call-site args to decompiler liveness
 FILE=bins/elf/x86_64-varargs.so
 ARGS=-e bin.relocs.apply=true
 CMDS=<<EOF2
@@ -1139,7 +1139,7 @@ aaa
 pdg @ sym.p_printf~%f
 EOF2
 EXPECT=<<EOF2
-    sym.imp.printf("%s %d %f %x\n",arg1);
+    iVar1 = sym.imp.printf("%s %d %f %x\n",in_d0,arg1,arg2 & 0xffffffff,arg3 & 0xffffffff);
 EOF2
 RUN
 
@@ -1216,7 +1216,7 @@ aaa
 pdg @ main~IOLI
 EOF2
 EXPECT=<<EOF2
-    sym.imp.printf("IOLI Crackme Level 0x05\n",in_stack_ffffff64);
+    sym.imp.printf("IOLI Crackme Level 0x05\n");
 EOF2
 RUN
 

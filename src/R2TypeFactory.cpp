@@ -646,7 +646,9 @@ Datatype *R2TypeFactory::queryR2Function(const string &n, std::set<std::string> 
 
 	for (int i = 0; i < arg_count; i++) {
 		char *arg_type = r_type_func_args_type(sdb, n.c_str(), i);
-		if (arg_type && !strcmp(arg_type, "...")) {
+		const char *arg_name = r_type_func_args_name(sdb, n.c_str(), i);
+		// the variadic slot is stored as `,...` so the marker lands in the name, not the type
+		if ((arg_type && !strcmp(arg_type, "...")) || (arg_name && !strcmp(arg_name, "..."))) {
 			proto.firstVarArgSlot = proto.intypes.size();
 			free(arg_type);
 			continue;
@@ -660,8 +662,6 @@ Datatype *R2TypeFactory::queryR2Function(const string &n, std::set<std::string> 
 			arg = getBase(1, TYPE_UNKNOWN);
 		}
 		proto.intypes.push_back(arg);
-
-		const char *arg_name = r_type_func_args_name(sdb, n.c_str(), i);
 		proto.innames.push_back(arg_name ? arg_name : "");
 
 		if (arg_type) {
