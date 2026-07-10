@@ -421,7 +421,7 @@ CMDS=<<EOF
 pdgss
 EOF
 EXPECT=<<EOF
-PowerPC:BE:32:e500mc:gcc
+PowerPC:BE:32:e500mc:default
 EOF
 RUN
 
