@@ -405,12 +405,13 @@ static void processFunctionSignature(
 				}
 				std::string arg_type_str = arg_type;
 				free (arg_type);
-				if (arg_type_str == "...") {
+				const char *arg_name = r_type_func_args_name (tdb, fname, i);
+				// the variadic slot is stored as `,...` so the marker lands in the name, not the type
+				if (arg_type_str == "..." || (arg_name && !strcmp (arg_name, "..."))) {
 					sig_first_vararg = i;
 					break;
 				}
 
-				const char *arg_name = r_type_func_args_name (tdb, fname, i);
 				std::string name = (R_STR_ISNOTEMPTY (arg_name))
 					? std::string (arg_name)
 					: ("arg" + to_string (i));

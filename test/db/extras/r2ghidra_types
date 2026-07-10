@@ -1858,7 +1858,7 @@ afs
 pdgw
 EOF
 EXPECT=<<EOF
-void sym.p_snprintf (int64_t arg1, int64_t arg2);
+int sym.p_snprintf (int64_t arg1, int64_t arg2);
 EOF
 EXPECT_ERR=<<EOF
 INFO: pdgw: wrote 0 types, 0 names, signature
