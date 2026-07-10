@@ -249,12 +249,12 @@ EXPECT=<<EOF
 
 //WARNING: Variable defined which should be unmapped: var_4h
 
-void __stdcall main(int argc,char **argv,char **envp)
+void main(int argc,char **argv,char **envp)
 
 {
     int64_t var_4h;
     
-    sym._call();
+    sym._call("hello",0x100000faa);
     return;
 }
 
