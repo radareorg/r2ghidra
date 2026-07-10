@@ -1027,12 +1027,11 @@ CMDS=<<EOF2
 e r2ghidra.compiler=?
 EOF2
 EXPECT=<<EOF2
-Borland C++
-Delphi
-Visual Studio
-clang
-default
-gcc
+windows  (Visual Studio)
+clangwindows  (clang)
+gcc  (gcc)
+golang  (golang)
+swift  (Swift)
 EOF2
 RUN
 
@@ -1042,11 +1041,9 @@ CMDS=<<EOF2
 e r2ghidra.compiler=?
 EOF2
 EXPECT=<<EOF2
-Visual Studio
-default
-n32
-o32
-o64
+default  (default)
+windows  (Visual Studio)
+eabi  (eabi)
 EOF2
 RUN
 
@@ -1056,9 +1053,7 @@ CMDS=<<EOF2
 e r2ghidra.compiler=?
 EOF2
 EXPECT=<<EOF2
-Mac OS X
-Visual Studio
-default
+default  (default)
 EOF2
 RUN
 
@@ -1073,25 +1068,25 @@ gcc
 EOF2
 RUN
 
-NAME=r2ghidra.compiler expands a short alias to the full cspec name
+NAME=r2ghidra.compiler resolves an alias to the cspec id
 FILE=bins/dectest64
 CMDS=<<EOF2
-e r2ghidra.compiler=windows
+e r2ghidra.compiler=vs
 e r2ghidra.compiler
 EOF2
 EXPECT=<<EOF2
-Visual Studio
+windows
 EOF2
 RUN
 
-NAME=r2ghidra.compiler keeps a valid compiler name
+NAME=r2ghidra.compiler keeps a valid cspec id
 FILE=bins/dectest64
 CMDS=<<EOF2
-e r2ghidra.compiler=clang
+e r2ghidra.compiler=clangwindows
 e r2ghidra.compiler
 EOF2
 EXPECT=<<EOF2
-clang
+clangwindows
 EOF2
 RUN
 
@@ -1101,19 +1096,29 @@ CMDS=<<EOF2
 e r2ghidra.compiler=?
 EOF2
 EXPECT=<<EOF2
-Visual Studio
-default
+default  (default)
+windows  (Visual Studio)
+apcs  (APCS)
 EOF2
 RUN
 
+NAME=mach0 clang compiler string resolves the sysv gcc cspec
+FILE=bins/mach0/arg
+CMDS=<<EOF2
+pdgss
+EOF2
+EXPECT=<<EOF2
+x86:LE:64:default:gcc
+EOF2
+RUN
 NAME=r2ghidra.compiler selects the cspec in the matched language id
 FILE=bins/dectest64
 CMDS=<<EOF2
-e r2ghidra.compiler=clang
+e r2ghidra.compiler=clangwindows
 pd:gss
 EOF2
 EXPECT=<<EOF2
-x86:LE:64:default:clang
+x86:LE:64:default:clangwindows
 EOF2
 RUN
 
