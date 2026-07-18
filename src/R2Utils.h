@@ -28,4 +28,20 @@ static inline std::string tolower(std::string str) {
 	return str;
 }
 
+static inline std::string hex(ut64 v) {
+	std::stringstream ss;
+	ss << "0x" << std::hex << v;
+	return ss.str ();
+}
+
+static inline ghidra::Element *child(ghidra::Element *el, const std::string &name, const std::map<std::string, std::string> &attrs = {}) {
+	auto c = new ghidra::Element (el);
+	c->setName (name);
+	el->addChild (c);
+	for (const auto &attr : attrs) {
+		c->addAttribute (attr.first, attr.second);
+	}
+	return c;
+}
+
 #endif

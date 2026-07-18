@@ -30,22 +30,6 @@ Scope *R2Scope::buildSubScope(uint8 id, const string &nm) {
 	return new ScopeInternal(id, nm, arch);
 }
 
-static std::string hex(ut64 v) {
-	std::stringstream ss;
-	ss << "0x" << std::hex << v;
-	return ss.str ();
-}
-
-static Element *child(Element *el, const std::string &name, const std::map<std::string, std::string> &attrs = {}) {
-	auto child = new Element (el);
-	child->setName (name);
-	el->addChild (child);
-	for (const auto &attr : attrs) {
-		child->addAttribute (attr.first, attr.second);
-	}
-	return child;
-}
-
 static Element *childAddr(Element *el, const std::string &name, const Address &addr) {
 	return child(el, name, {
 		{ "space", addr.getSpace()->getName () },
