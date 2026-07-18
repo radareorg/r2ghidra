@@ -20,11 +20,14 @@ private:
 
 	R2TypeFactory *r2TypeFactory_ = nullptr;
 	std::map<std::string, VarnodeData> registers;
+	std::map<std::string, ProtoModel *> r2CCModels;
 	std::vector<std::string> warnings;
 
 	bool rawptr = false;
 
 	void loadRegisters(const Translate *translate);
+	const VarnodeData *registerVarnodeFromR2Reg(const char *regname);
+	ProtoModel *buildProtoModelFromR2CC(const char *cc);
 
 public:
 	explicit R2Architecture(RCore *core, const std::string &sleigh_id);

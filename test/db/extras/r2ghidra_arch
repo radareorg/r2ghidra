@@ -110,16 +110,14 @@ x86:LE:16:Real Mode:
 
 //WARNING: Variable defined which should be unmapped: var_8h
 //WARNING: Variable defined which should be unmapped: var_4h
-//WARNING: Unknown calling convention -- yet parameter storage is locked
 
-uint fcn.00001c98(int16_t arg_eh,int16_t arg_ah)
+uint fcn.00001c98(ushort noname_0,ushort noname_1,int16_t arg_ah,int16_t noname_3,int16_t arg_eh)
 
 {
     int16_t *piVar1;
     ushort unaff_CS;
     ushort unaff_DS;
-    ushort in_stack_00000004;
-    int16_t in_stack_00000008;
+    uint uVar2;
     int16_t in_stack_0000000c;
     int16_t var_8h;
     int16_t var_6h;
@@ -130,7 +128,7 @@ uint fcn.00001c98(int16_t arg_eh,int16_t arg_ah)
     var_6h = 0x13da;
     do {
         func_0x0000ec24(unaff_CS,var_6h,unaff_DS,0x401e);
-        func_0x0000ec24(0xdee,in_stack_00000004,arg_ah,0x401e);
+        func_0x0000ec24(0xdee,noname_1,arg_ah,0x401e);
         func_0x0000e59a(0xdee,0x401e);
         var_2h = 0;
         do {
@@ -139,7 +137,7 @@ uint fcn.00001c98(int16_t arg_eh,int16_t arg_ah)
                 cStack_4 = '\n';
             }
             if (var_2h < in_stack_0000000c) {
-                *(in_stack_00000008 + var_2h) = cStack_4;
+                *(noname_3 + var_2h) = cStack_4;
                 var_2h = var_2h + 1;
             }
         } while (cStack_4 != '\n');
@@ -155,9 +153,9 @@ uint fcn.00001c98(int16_t arg_eh,int16_t arg_ah)
         unaff_CS = 0xdee;
         func_0x0000e59a(0xdee,0x401e);
         var_6h = 0x13db;
-    } while (*(in_stack_00000008 + var_2h + -1) != '\n');
-    *(in_stack_00000008 + var_2h + -1) = 0;
-    return _in_stack_00000008;
+    } while (*(noname_3 + var_2h + -1) != '\n');
+    *(noname_3 + var_2h + -1) = 0;
+    return uVar2;
 }
 
 EOF
@@ -496,3 +494,29 @@ EXPECT=<<EOF2
 EOF2
 RUN
 
+
+NAME=windows calling convention on a sysv binary resolves the MSABI proto model
+FILE=bins/elf/hello_world
+CMDS=<<EOF2
+s main
+af
+afc ms
+pdg~MSABI
+EOF2
+EXPECT=<<EOF2
+void MSABI main(int argc,char **argv,char **envp)
+EOF2
+RUN
+
+NAME=custom calling convention builds a prototype model from r2 cc data
+FILE=bins/elf/hello_world
+CMDS=<<EOF2
+s main
+af
+afc swift
+pdg~r2:swift
+EOF2
+EXPECT=<<EOF2
+void r2:swift main(int argc,char **argv,char **envp)
+EOF2
+RUN
