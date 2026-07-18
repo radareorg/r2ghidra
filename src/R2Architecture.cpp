@@ -198,6 +198,7 @@ ProtoModel *R2Architecture::buildProtoModelFromR2CC(const char *cc) {
 	}
 	childPentry (output, retvn, isFloatReg (anal, rloc));
 
+#if R2_VERSION_NUMBER >= 60109
 	std::vector<std::pair<const VarnodeData *, bool>> effects;
 	bool anyclobber = false;
 	static const int regtypes[] = {
@@ -247,6 +248,7 @@ ProtoModel *R2Architecture::buildProtoModelFromR2CC(const char *cc) {
 			});
 		}
 	}
+#endif
 
 	XmlDecode dec (this, &doc);
 	return decodeProto (dec);
