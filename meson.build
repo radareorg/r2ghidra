@@ -71,7 +71,7 @@ if cpp.get_id() == 'msvc'
     cpp.find_library('r_config', dirs: r2libdir),
   ]
 else
-  r_core = dependency('r_core')
+  r_core = dependency('r_core', version : '>=6.1.4')
 endif
 
 r2ghidra_version = meson.project_version()
@@ -104,13 +104,6 @@ slgh_static = ghidra.get_variable('slgh_static')
 
 r2ghidra_deps = [r_core, zlib]
 r2ghidra_cpp_args = []
-if get_option('rxml')
-  r2ghidra_cpp_args += ['-DR2GHIDRA_USE_RXML=1']
-else
-  pugixml = subproject('pugixml').get_variable('pugixml_dep')
-  r2ghidra_deps += pugixml
-  r2ghidra_cpp_args += ['-DR2GHIDRA_USE_RXML=0']
-endif
 
 r2ghidra_core_sources = [
   r2ghidra_sources,

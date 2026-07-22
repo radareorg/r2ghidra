@@ -154,7 +154,5 @@ under its own license:
 * [ghidra-native](https://github.com/radareorg/ghidra-native) — Apache
   License 2.0 (statically linked; this is the native portion of the
   Ghidra decompiler that r2ghidra is built around).
-* [pugixml](https://pugixml.org/) — MIT License (vendored under
-  `subprojects/pugixml`).
 * [zlib](https://zlib.net/) — zlib License (vendored under
   `subprojects/zlib`).

@@ -18,7 +18,6 @@ control_c() {
   exit 1
 }
 trap control_c 2
-USE_RXML=0
 split_host() {
 S="$"
 while : ; do
@@ -175,10 +174,6 @@ System types:
 EOF2
 
 printf "
-Optional Features:
-  --with-rxml            use r2 apis instead of pugixml
-"
-printf "
 Some influential environment variables:
   CXX         C++ compiler command
   CXXFLAGS    C++ compiler flags
@@ -245,7 +240,7 @@ echo "AUTHOR:      pancake"
 echo "EMAIL:       pancake@nopcode.org"
 echo "LANGS:       c++"
 echo "PKGCONFIG:   r_core r_asm r_anal"
-echo "FLAGS:       --with-rxml"
+echo "FLAGS:       "
 	exit 0
 	;;
 --cache-file)
@@ -297,7 +292,6 @@ echo "FLAGS:       --with-rxml"
 --mandir)
 	MANDIR="$value"; ;;
 
-"--with-rxml") USE_RXML="1"; ;;
 *) if [ "$value" ]; then eval "`echo $flag2=$value`" ;
 else echo ; echo "WARNING: Unknown flag '$flag'." >&2 ; echo ; fi ;;
 esac
@@ -315,7 +309,7 @@ parse_options "$1"
 shift
 done
 
-ENVWORDS="MANDIR DESCRIPTION INFODIR LIBDIR INCLUDEDIR LOCALSTATEDIR ETCDIR SYSCONFDIR DATADIR DOCDIR LIBEXECDIR SBINDIR BINDIR EPREFIX PREFIX SPREFIX TARGET HOST BUILD INSTALL INSTALL_LIB INSTALL_MAN INSTALL_PROGRAM INSTALL_PROGRAM_STRIP INSTALL_DIR INSTALL_SCRIPT INSTALL_DATA HOST_OS HOST_CPU BUILD_OS BUILD_CPU TARGET_OS TARGET_CPU VERSION VERSION_MAJOR VERSION_MINOR VERSION_PATCH VERSION_NUMBER PKGCFG_LIBDIR PKGCFG_INCDIR PKGNAME VPATH CONTACT CONTACT_NAME CONTACT_MAIL CXX CXXFLAGS LDFLAGS HAVE_LANG_CXX CPP HAVE_GIT GIT PKGCONFIG R2_CFLAGS R2_LDFLAGS HAVE_PKGCFG_R_CORE R2ASM_CFLAGS R2ASM_LDFLAGS HAVE_PKGCFG_R_ASM R2ANAL_CFLAGS R2ANAL_LDFLAGS HAVE_PKGCFG_R_ANAL HAVE_R2 R2 USE_RXML R2_PREFIX R2_USER_PLUGINS R2_LIBR_PLUGINS R2GHIDRA_VERSION"
+ENVWORDS="MANDIR DESCRIPTION INFODIR LIBDIR INCLUDEDIR LOCALSTATEDIR ETCDIR SYSCONFDIR DATADIR DOCDIR LIBEXECDIR SBINDIR BINDIR EPREFIX PREFIX SPREFIX TARGET HOST BUILD INSTALL INSTALL_LIB INSTALL_MAN INSTALL_PROGRAM INSTALL_PROGRAM_STRIP INSTALL_DIR INSTALL_SCRIPT INSTALL_DATA HOST_OS HOST_CPU BUILD_OS BUILD_CPU TARGET_OS TARGET_CPU VERSION VERSION_MAJOR VERSION_MINOR VERSION_PATCH VERSION_NUMBER PKGCFG_LIBDIR PKGCFG_INCDIR PKGNAME VPATH CONTACT CONTACT_NAME CONTACT_MAIL CXX CXXFLAGS LDFLAGS HAVE_LANG_CXX CPP HAVE_GIT GIT PKGCONFIG R2_CFLAGS R2_LDFLAGS HAVE_PKGCFG_R_CORE R2ASM_CFLAGS R2ASM_LDFLAGS HAVE_PKGCFG_R_ASM R2ANAL_CFLAGS R2ANAL_LDFLAGS HAVE_PKGCFG_R_ANAL HAVE_R2 R2 R2_PREFIX R2_USER_PLUGINS R2_LIBR_PLUGINS R2GHIDRA_VERSION"
 
 create_environ
 
@@ -430,6 +424,14 @@ tmp=`${PKGCONFIG} --libs r_core 2>/dev/null`
 if [ $? = 0 ]; then
 echo yes; HAVE_PKGCFG_R_CORE=1;
 R2_LDFLAGS=$tmp; fi; fi
+printf 'checking radare2 >= 6.1.4 for the rxml API... '
+if ${PKGCONFIG} --atleast-version=6.1.4 r_core 2>/dev/null; then
+echo yes
+else
+echo no
+echo 'ERROR: r2ghidra requires radare2 >= 6.1.4' >&2
+exit 1
+fi
 if [ -z "${PKGCONFIG}" ]; then pkg-config --version >/dev/null 2>&1 ; if [ 0 = 0 ]; then PKGCONFIG=pkg-config ; else PKGCONFIG=pkgconf ; fi; fi
 printf 'checking pkg-config flags for r_asm... '
 tmp=`${PKGCONFIG} --cflags r_asm 2>/dev/null`
@@ -566,7 +568,7 @@ do_remove
 if [ "$QUIET" = 0 ]; then
 echo
 echo "Final report:"
-for A in  USE_RXML VERSION R2_PREFIX PREFIX PKGCONFIG ; do
+for A in  VERSION R2_PREFIX PREFIX PKGCONFIG ; do
 eval VAL="\$${A}"
 [ -z "${VAL}" ] && VAL="\"\""
 echo " - ${A} = ${VAL}"
