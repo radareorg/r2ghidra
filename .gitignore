@@ -19,7 +19,6 @@ ghidra/sleighc
 
 subprojects/.wraplock
 subprojects/ghidra-native
-subprojects/pugixml
 subprojects/zlib
 /Makefile
 config.h

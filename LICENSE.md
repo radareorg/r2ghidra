@@ -22,10 +22,8 @@ projects, each distributed under its own license:
 - **ghidra-native** (statically linked) — Apache License 2.0. See
   `subprojects/ghidra-native/LICENSE` once fetched, or the upstream
   repository at <https://github.com/radareorg/ghidra-native>.
-- **pugixml** (vendored under `subprojects/pugixml`) — MIT License.
-  See `subprojects/pugixml/LICENSE.md`.
 - **zlib** (vendored under `subprojects/zlib`) — zlib license. See
   `subprojects/zlib/LICENSE`.
 
-The Apache-2.0, MIT and zlib licenses are all compatible with
+The Apache-2.0 and zlib licenses are both compatible with
 distribution under the LGPLv3 of the combined work.
