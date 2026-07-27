@@ -1933,3 +1933,30 @@ INFO: pdgw: wrote 0 types, 0 names, signature
 INFO: pdgw: no changes
 EOF
 RUN
+
+NAME=typed HFA parameter decodes join-space storage under pdg
+FILE=bins/elf/join-hfa-arm64.o
+CMDS=<<EOF
+s sym.sum2
+af
+'td struct V2 { float x; float y; };
+'afs float sum2(V2 v)
+pdg~v.x
+EOF
+EXPECT=<<EOF
+    return v.x + v.y;
+EOF
+RUN
+
+NAME=scalar float parameter keeps regular storage under pdg
+FILE=bins/elf/join-hfa-arm64.o
+CMDS=<<EOF
+s sym.scale1
+af
+'afs float scale1(float a)
+pdg~return
+EOF
+EXPECT=<<EOF
+    return a + a;
+EOF
+RUN
