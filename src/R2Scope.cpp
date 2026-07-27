@@ -31,10 +31,35 @@ Scope *R2Scope::buildSubScope(uint8 id, const string &nm) {
 }
 
 static Element *childAddr(Element *el, const std::string &name, const Address &addr) {
-	return child(el, name, {
-		{ "space", addr.getSpace()->getName () },
-		{ "offset", hex(addr.getOffset ()) }
+	AddrSpace *space = addr.getSpace ();
+	if (space->getType () != IPTR_JOIN) {
+		return child (el, name, {
+			{ "space", space->getName () },
+			{ "offset", hex (addr.getOffset ()) }
+		});
+	}
+
+	// Join addresses must be marshaled with their physical pieces.
+	JoinRecord *record = space->getManager ()->findJoin (addr.getOffset ());
+	const int4 numPieces = record->numPieces ();
+	constexpr int4 maxMarshaledJoinPieces = 64; // JoinSpace::MAX_PIECES is private.
+	if (numPieces > maxMarshaledJoinPieces) {
+		throw LowlevelError ("Exceeded maximum pieces in one join address");
+	}
+
+	Element *result = child (el, name, {
+		{ "space", space->getName () }
 	});
+	for (int4 i = 0; i < numPieces; i++) {
+		const VarnodeData &piece = record->getPiece (i);
+		const std::string value = piece.space->getName () + ":" +
+			hex (piece.offset) + ":" + std::to_string (piece.size);
+		result->addAttribute ("piece" + std::to_string (i + 1), value);
+	}
+	if (numPieces == 1) {
+		result->addAttribute ("logicalsize", std::to_string (record->getUnified ().size));
+	}
+	return result;
 }
 
 static Element *childType(Element *el, Datatype *type) {

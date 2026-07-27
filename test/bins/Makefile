@@ -29,3 +29,11 @@ elf/arm-stackchk: arm-stackchk.c
 elf/arm64-tailcall-local: arm64-tailcall-local.c
 	aarch64-linux-gnu-gcc -O2 -fPIC -nostdlib -nostartfiles -shared -fno-stack-protector \
 		-o elf/arm64-tailcall-local.so arm64-tailcall-local.c
+
+elf/join-hfa-arm64.o: join-hfa-arm64.c
+	aarch64-linux-gnu-gcc -O2 -c \
+		-fno-stack-protector \
+		-fno-asynchronous-unwind-tables \
+		-fno-unwind-tables \
+		-fno-ident \
+		-o elf/join-hfa-arm64.o join-hfa-arm64.c
