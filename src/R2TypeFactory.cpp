@@ -419,6 +419,13 @@ Datatype *R2TypeFactory::queryR2Struct(const string &n, std::set<std::string> &s
 				arch->addWarning ("Failed to match type " + memberTypeName + " of member " + memberName + " in struct " + n);
 				continue;
 			}
+			if (memberType->getMetatype () == TYPE_CODE) {
+				auto space = arch->getDefaultCodeSpace ();
+				memberType = getTypePointer (
+					space->getAddrSize (),
+					memberType,
+					space->getWordSize ());
+			}
 			if (elements > 0) {
 				memberType = getTypeArray (elements, memberType);
 			}
