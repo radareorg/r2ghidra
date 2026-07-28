@@ -1960,3 +1960,31 @@ EXPECT=<<EOF
     return a + a;
 EOF
 RUN
+
+NAME=typed function pointer struct field is stored as a pointer
+FILE=bins/elf/function-pointer-field-arm64.o
+CMDS=<<EOF
+to bins/function-pointer-field-arm64.h
+s sym.call_short_slot
+af
+'afs float call_short_slot(ShortSlot* slot, Receiver* receiver)
+pdg~methodPtr
+EOF
+EXPECT=<<EOF
+    fVar1 = (*slot->methodPtr)(receiver,slot->method);
+EOF
+RUN
+
+NAME=typed function pointer field preserves return type with a long owner name
+FILE=bins/elf/function-pointer-field-arm64.o
+CMDS=<<EOF
+to bins/function-pointer-field-arm64.h
+s sym.call_long_slot
+af
+'afs float call_long_slot(VeryLongConcreteGenericOwnerName_VTableSlot* slot, Receiver* receiver)
+pdg~methodPtr
+EOF
+EXPECT=<<EOF
+    fVar1 = (*slot->methodPtr)(receiver,slot->method);
+EOF
+RUN

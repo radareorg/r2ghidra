@@ -37,3 +37,12 @@ elf/join-hfa-arm64.o: join-hfa-arm64.c
 		-fno-unwind-tables \
 		-fno-ident \
 		-o elf/join-hfa-arm64.o join-hfa-arm64.c
+
+elf/function-pointer-field-arm64.o: function-pointer-field-arm64.c
+	aarch64-linux-gnu-gcc -O2 -c \
+		-fno-stack-protector \
+		-fno-asynchronous-unwind-tables \
+		-fno-unwind-tables \
+		-fno-ident \
+		-o elf/function-pointer-field-arm64.o \
+		function-pointer-field-arm64.c
