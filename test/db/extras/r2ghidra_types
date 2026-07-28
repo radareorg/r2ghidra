@@ -1935,7 +1935,7 @@ EOF
 RUN
 
 NAME=typed HFA parameter decodes join-space storage under pdg
-FILE=bins/elf/join-hfa-arm64.o
+FILE=bins/elf/join-hfa-arm64
 CMDS=<<EOF
 s sym.sum2
 af
@@ -1949,7 +1949,7 @@ EOF
 RUN
 
 NAME=scalar float parameter keeps regular storage under pdg
-FILE=bins/elf/join-hfa-arm64.o
+FILE=bins/elf/join-hfa-arm64
 CMDS=<<EOF
 s sym.scale1
 af
@@ -1962,7 +1962,7 @@ EOF
 RUN
 
 NAME=typed function pointer struct field is stored as a pointer
-FILE=bins/elf/function-pointer-field-arm64.o
+FILE=bins/elf/function-pointer-field-arm64
 CMDS=<<EOF
 to bins/function-pointer-field-arm64.h
 s sym.call_short_slot
@@ -1976,7 +1976,7 @@ EOF
 RUN
 
 NAME=typed function pointer field preserves return type with a long owner name
-FILE=bins/elf/function-pointer-field-arm64.o
+FILE=bins/elf/function-pointer-field-arm64
 CMDS=<<EOF
 to bins/function-pointer-field-arm64.h
 s sym.call_long_slot
