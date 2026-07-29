@@ -1,0 +1,26 @@
+NAME=by-value struct parameter decodes ppc64 elfv1 join storage under pdg
+FILE=bins/elf/ppc64v1-vararg
+CMDS=<<EOF
+aa
+'td struct Pair { long a; long b; };
+s sym.caller
+'afs long caller(Pair p)
+pdg~vfmt
+EOF
+EXPECT=<<EOF
+    lVar1 = sym.vfmt(0x100001c8,p.a,p.b);
+EOF
+RUN
+
+NAME=scalar parameters keep regular register storage under pdg
+FILE=bins/elf/ppc64v1-vararg
+CMDS=<<EOF
+aa
+s sym.caller
+'afs long caller(long a, long b)
+pdg~vfmt
+EOF
+EXPECT=<<EOF
+    lVar1 = sym.vfmt(0x100001c8,a,b);
+EOF
+RUN
