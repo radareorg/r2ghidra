@@ -1,0 +1,26 @@
+diff --git a/src/decompiler/slghscan.cc b/src/decompiler/slghscan.cc
+index a8545a5..cfae3d6 100644
+--- a/src/decompiler/slghscan.cc
++++ b/src/decompiler/slghscan.cc
+@@ -1582,7 +1582,7 @@ int4 scan_number(char *numtext,SLEIGHSTYPE *lval,int4 radix,bool signednum)
+ {
+   uintb val;
+   try {
+-    val = std::stoul(numtext,(size_t *)0,radix);
++    val = std::stoull(numtext,(size_t *)0,radix);
+   }
+   catch(...) {
+     return BADINTEGER;
+diff --git a/src/decompiler/slghscan.l b/src/decompiler/slghscan.l
+index 1c25962..29db987 100644
+--- a/src/decompiler/slghscan.l
++++ b/src/decompiler/slghscan.l
+@@ -461,7 +461,7 @@ int4 scan_number(char *numtext,SLEIGHSTYPE *lval,int4 radix,bool signednum)
+ {
+   uintb val;
+   try {
+-    val = std::stoul(numtext,(size_t *)0,radix);
++    val = std::stoull(numtext,(size_t *)0,radix);
+   }
+   catch(...) {
+     return BADINTEGER;

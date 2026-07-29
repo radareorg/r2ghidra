@@ -1,25 +1,37 @@
 diff --git a/src/decompiler/context.hh b/src/decompiler/context.hh
-index 3372e5a..5d2e108 100644
+index abe1701..b3d9d45 100644
 --- a/src/decompiler/context.hh
 +++ b/src/decompiler/context.hh
-@@ -89,6 +89,8 @@ private:
-   ConstructState *base_state;
-   int4 alloc;			// Number of ConstructState's allocated
-   int4 delayslot;		// delayslot depth
+@@ -124,6 +124,8 @@ private:
+   ConstructState *base_state;		///< Root node of the constructor tree
+   int4 alloc;				///< Number of unallocated ConstructState nodes remaining
+   int4 delayslot;			///< delayslot depth
 +protected:
 +  ConstructState **getBaseState(void) { return &base_state; }
  public:
-   ParserContext(ContextCache *ccache);
-   ~ParserContext(void) { if (context != (uintm *)0) delete [] context; }
+   ParserContext(ContextCache *ccache,Translate *trans);	///< Constructor
+   ~ParserContext(void);					///< Destructor
 diff --git a/src/decompiler/sleigh.hh b/src/decompiler/sleigh.hh
-index 1a758a4..1e96c2c 100644
+index 95249cf..379ee73 100644
 --- a/src/decompiler/sleigh.hh
 +++ b/src/decompiler/sleigh.hh
-@@ -166,6 +166,7 @@ protected:
-   ParserContext *obtainContext(const Address &addr,int4 state) const;
+@@ -170,6 +170,7 @@ protected:
+   ParserContext *obtainContext(const Address &addr,ParserContext::parse_state state) const;
    void resolve(ParserContext &pos) const;	///< Generate a parse tree suitable for disassembly
    void resolveHandles(ParserContext &pos) const;	///< Prepare the parse tree for p-code generation
 +  ContextCache *getContextCache(void) { return cache; }
  public:
    Sleigh(LoadImage *ld,ContextDatabase *c_db);		///< Constructor
    virtual ~Sleigh(void);				///< Destructor
+diff --git a/src/decompiler/type.hh b/src/decompiler/type.hh
+index cc0951c..d7b7533 100644
+--- a/src/decompiler/type.hh
++++ b/src/decompiler/type.hh
+@@ -861,6 +861,7 @@ class TypeFactory {
+   void insertWarning(Datatype *dt,string warn);	///< Register a new data-type warning with \b this factory
+   void removeWarning(Datatype *dt);		///< Remove the warning associated with the given data-type
+   void resolveIncompleteTypedefs(void);		///< Redefine incomplete typedefs of data-types that are now complete
++public:
+   void setFields(const vector<TypeField> &fd,const vector<TypeBitField> &bit,TypeStruct *ot,int4 newSize,int4 newAlign,uint4 flags);
+   void setFields(const vector<TypeField> &fd,TypeUnion *ot,int4 newSize,int4 newAlign,uint4 flags);	///< Set fields on a TypeUnion
+ protected:

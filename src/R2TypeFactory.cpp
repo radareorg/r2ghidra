@@ -498,7 +498,7 @@ Datatype *R2TypeFactory::queryR2Struct(const string &n, std::set<std::string> &s
 				structSize += (maxAlign - rem);
 			}
 		}
-		setFields (fields, r, structSize, maxAlign, 0);
+		setFields (fields, {}, r, structSize, maxAlign, 0);
 		return r;
 	} catch (std::invalid_argument &e) {
 		arch->addWarning ("Failed to load struct " + n + " from sdb.");

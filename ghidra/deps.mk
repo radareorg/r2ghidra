@@ -31,10 +31,13 @@ G_DECOMPILER+=merge.cc double.cc coreaction.cc condexe.cc override.cc
 G_DECOMPILER+=dynamic.cc crc32.cc prettyprint.cc printlanguage.cc
 G_DECOMPILER+=printc.cc printjava.cc memstate.cc opbehavior.cc
 G_DECOMPILER+=paramid.cc transform.cc string_ghidra.cc constseq.cc
+G_DECOMPILER+=signature.cc bitfield.cc
 
 G_DECOMPILER+=ghidra_arch.cc inject_ghidra.cc ghidra_translate.cc
 G_DECOMPILER+=loadimage_ghidra.cc typegrp_ghidra.cc database_ghidra.cc
 G_DECOMPILER+=ghidra_context.cc cpool_ghidra.cc comment_ghidra.cc
+# signature_ghidra.cc needs GhidraCommand from ghidra_process.cc, whose main() clashes with sleighc
+#  G_DECOMPILER+=signature_ghidra.cc
 #  G_DECOMPILER+=ghidra_process.cc
 
 G_DECOMPILER+= $(GHIDRA_LIBDECOMP_SRCS)
