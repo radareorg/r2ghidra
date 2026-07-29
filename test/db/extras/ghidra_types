@@ -646,7 +646,7 @@ NAME=constant variable annotation
 FILE=bins/dectest32
 EXPECT=<<EOF
 {
-  "code": "\nvoid sym.PrintAmbassador(int32_t arg_8h)\n\n{\n    sym.imp.printf(\"Ambassador value: \");\n    if (arg_8h < 5) {\n        if (arg_8h < 5) {\n            switch(*(arg_8h * 4 + 0x804a048)) {\n            case 0x8049261:\n                sym.imp.printf(\"pure\");\n                break;\n            case 0x8049273:\n                sym.imp.printf(\"reason\");\n                break;\n            case 0x8049285:\n                sym.imp.printf(\"revolution\");\n                break;\n            case 0x8049297:\n                sym.imp.printf(\"echoes\");\n                break;\n            case 0x80492a9:\n                sym.imp.printf(\"wall\");\n            }\n        }\n    }\n    else if (arg_8h == 1000000) {\n        sym.imp.printf(\"million\");\n    }\n    sym.imp.putchar(10);\n    return;\n}\n\n",
+  "code": "\nvoid sym.PrintAmbassador(int32_t arg_8h)\n\n{\n    sym.imp.printf(\"Ambassador value: \");\n    if (arg_8h < 5) {\n        switch(arg_8h) {\n        case 0:\n            sym.imp.printf(\"pure\");\n            break;\n        case 1:\n            sym.imp.printf(\"reason\");\n            break;\n        case 2:\n            sym.imp.printf(\"revolution\");\n            break;\n        case 3:\n            sym.imp.printf(\"echoes\");\n            break;\n        case 4:\n            sym.imp.printf(\"wall\");\n        }\n    }\n    else if (arg_8h == 1000000) {\n        sym.imp.printf(\"million\");\n    }\n    sym.imp.putchar(10);\n    return;\n}\n\n",
   "annotations": [
     {
       "start": 1,
@@ -760,142 +760,125 @@ EXPECT=<<EOF
     },
     {
       "start": 117,
-      "end": 119,
-      "type": "offset",
-      "offset": 134517313
-    },
-    {
-      "start": 117,
-      "end": 119,
-      "type": "syntax_highlight",
-      "syntax_highlight": "keyword"
-    },
-    {
-      "start": 121,
-      "end": 127,
-      "type": "function_parameter",
-      "name": "arg_8h"
-    },
-    {
-      "start": 121,
-      "end": 127,
-      "type": "syntax_highlight",
-      "syntax_highlight": "function_parameter"
-    },
-    {
-      "start": 128,
-      "end": 129,
-      "type": "offset",
-      "offset": 134517313
-    },
-    {
-      "start": 130,
-      "end": 131,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 147,
-      "end": 153,
+      "end": 123,
       "type": "offset",
       "offset": 134517332
     },
     {
-      "start": 147,
-      "end": 153,
+      "start": 117,
+      "end": 123,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 154,
-      "end": 155,
-      "type": "offset",
-      "offset": 134517330
-    },
-    {
-      "start": 156,
-      "end": 162,
+      "start": 124,
+      "end": 130,
       "type": "function_parameter",
       "name": "arg_8h"
     },
     {
-      "start": 156,
-      "end": 162,
+      "start": 124,
+      "end": 130,
       "type": "syntax_highlight",
       "syntax_highlight": "function_parameter"
     },
     {
-      "start": 163,
-      "end": 164,
-      "type": "offset",
-      "offset": 134517322
-    },
-    {
-      "start": 165,
-      "end": 166,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 167,
-      "end": 168,
-      "type": "offset",
-      "offset": 134517325
-    },
-    {
-      "start": 169,
-      "end": 178,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 195,
-      "end": 199,
+      "start": 142,
+      "end": 146,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 227,
-      "end": 241,
+      "start": 162,
+      "end": 176,
       "type": "function_name",
       "name": "sym.imp.printf",
       "offset": 134516816
     },
     {
-      "start": 227,
-      "end": 241,
+      "start": 162,
+      "end": 176,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 242,
-      "end": 248,
+      "start": 177,
+      "end": 183,
       "type": "constant_variable",
       "offset": 134520859
     },
     {
-      "start": 242,
-      "end": 248,
+      "start": 177,
+      "end": 183,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 227,
-      "end": 249,
+      "start": 162,
+      "end": 184,
       "type": "offset",
       "offset": 134517353
     },
     {
-      "start": 267,
-      "end": 272,
+      "start": 198,
+      "end": 203,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 267,
-      "end": 273,
+      "start": 198,
+      "end": 204,
       "type": "offset",
       "offset": 134517361
+    },
+    {
+      "start": 213,
+      "end": 217,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 233,
+      "end": 247,
+      "type": "function_name",
+      "name": "sym.imp.printf",
+      "offset": 134516816
+    },
+    {
+      "start": 233,
+      "end": 247,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_name"
+    },
+    {
+      "start": 248,
+      "end": 256,
+      "type": "constant_variable",
+      "offset": 134520864
+    },
+    {
+      "start": 248,
+      "end": 256,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 233,
+      "end": 257,
+      "type": "offset",
+      "offset": 134517371
+    },
+    {
+      "start": 271,
+      "end": 276,
+      "type": "syntax_highlight",
+      "syntax_highlight": "keyword"
+    },
+    {
+      "start": 271,
+      "end": 277,
+      "type": "offset",
+      "offset": 134517379
     },
     {
       "start": 286,
@@ -904,296 +887,247 @@ EXPECT=<<EOF
       "syntax_highlight": "keyword"
     },
     {
-      "start": 318,
-      "end": 332,
+      "start": 306,
+      "end": 320,
       "type": "function_name",
       "name": "sym.imp.printf",
       "offset": 134516816
     },
     {
-      "start": 318,
-      "end": 332,
+      "start": 306,
+      "end": 320,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 333,
-      "end": 341,
-      "type": "constant_variable",
-      "offset": 134520864
-    },
-    {
-      "start": 333,
-      "end": 341,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 318,
-      "end": 342,
-      "type": "offset",
-      "offset": 134517371
-    },
-    {
-      "start": 360,
-      "end": 365,
-      "type": "syntax_highlight",
-      "syntax_highlight": "keyword"
-    },
-    {
-      "start": 360,
-      "end": 366,
-      "type": "offset",
-      "offset": 134517379
-    },
-    {
-      "start": 379,
-      "end": 383,
-      "type": "syntax_highlight",
-      "syntax_highlight": "keyword"
-    },
-    {
-      "start": 411,
-      "end": 425,
-      "type": "function_name",
-      "name": "sym.imp.printf",
-      "offset": 134516816
-    },
-    {
-      "start": 411,
-      "end": 425,
-      "type": "syntax_highlight",
-      "syntax_highlight": "function_name"
-    },
-    {
-      "start": 426,
-      "end": 438,
+      "start": 321,
+      "end": 333,
       "type": "constant_variable",
       "offset": 134520871
     },
     {
-      "start": 426,
-      "end": 438,
+      "start": 321,
+      "end": 333,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 411,
-      "end": 439,
+      "start": 306,
+      "end": 334,
       "type": "offset",
       "offset": 134517389
     },
     {
-      "start": 457,
-      "end": 462,
+      "start": 348,
+      "end": 353,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 457,
-      "end": 463,
+      "start": 348,
+      "end": 354,
       "type": "offset",
       "offset": 134517397
     },
     {
-      "start": 476,
-      "end": 480,
+      "start": 363,
+      "end": 367,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 508,
-      "end": 522,
+      "start": 383,
+      "end": 397,
       "type": "function_name",
       "name": "sym.imp.printf",
       "offset": 134516816
     },
     {
-      "start": 508,
-      "end": 522,
+      "start": 383,
+      "end": 397,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 523,
-      "end": 531,
+      "start": 398,
+      "end": 406,
       "type": "constant_variable",
       "offset": 134520882
     },
     {
-      "start": 523,
-      "end": 531,
+      "start": 398,
+      "end": 406,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 508,
-      "end": 532,
+      "start": 383,
+      "end": 407,
       "type": "offset",
       "offset": 134517407
     },
     {
-      "start": 550,
-      "end": 555,
+      "start": 421,
+      "end": 426,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 550,
-      "end": 556,
+      "start": 421,
+      "end": 427,
       "type": "offset",
       "offset": 134517415
     },
     {
-      "start": 569,
-      "end": 573,
+      "start": 436,
+      "end": 440,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 601,
-      "end": 615,
+      "start": 456,
+      "end": 470,
       "type": "function_name",
       "name": "sym.imp.printf",
       "offset": 134516816
     },
     {
-      "start": 601,
-      "end": 615,
+      "start": 456,
+      "end": 470,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 616,
-      "end": 622,
+      "start": 471,
+      "end": 477,
       "type": "constant_variable",
       "offset": 134520889
     },
     {
-      "start": 616,
-      "end": 622,
+      "start": 471,
+      "end": 477,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 601,
-      "end": 623,
+      "start": 456,
+      "end": 478,
       "type": "offset",
       "offset": 134517425
     },
     {
-      "start": 659,
-      "end": 663,
+      "start": 500,
+      "end": 504,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 664,
-      "end": 666,
+      "start": 505,
+      "end": 507,
       "type": "offset",
       "offset": 134517341
     },
     {
-      "start": 664,
-      "end": 666,
+      "start": 505,
+      "end": 507,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 668,
-      "end": 674,
+      "start": 509,
+      "end": 515,
       "type": "function_parameter",
       "name": "arg_8h"
     },
     {
-      "start": 668,
-      "end": 674,
+      "start": 509,
+      "end": 515,
       "type": "syntax_highlight",
       "syntax_highlight": "function_parameter"
     },
     {
-      "start": 675,
-      "end": 677,
+      "start": 516,
+      "end": 518,
       "type": "offset",
       "offset": 134517334
     },
     {
-      "start": 678,
-      "end": 685,
+      "start": 519,
+      "end": 526,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 697,
-      "end": 711,
+      "start": 538,
+      "end": 552,
       "type": "function_name",
       "name": "sym.imp.printf",
       "offset": 134516816
     },
     {
-      "start": 697,
-      "end": 711,
+      "start": 538,
+      "end": 552,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 712,
-      "end": 721,
+      "start": 553,
+      "end": 562,
       "type": "constant_variable",
       "offset": 134520894
     },
     {
-      "start": 712,
-      "end": 721,
+      "start": 553,
+      "end": 562,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 697,
-      "end": 722,
+      "start": 538,
+      "end": 563,
       "type": "offset",
       "offset": 134517443
     },
     {
-      "start": 734,
-      "end": 749,
+      "start": 575,
+      "end": 590,
       "type": "function_name",
       "name": "sym.imp.putchar",
       "offset": 134516880
     },
     {
-      "start": 734,
-      "end": 749,
+      "start": 575,
+      "end": 590,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 750,
-      "end": 752,
+      "start": 591,
+      "end": 593,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 734,
-      "end": 753,
+      "start": 575,
+      "end": 594,
       "type": "offset",
       "offset": 134517459
     },
     {
-      "start": 759,
-      "end": 765,
+      "start": 600,
+      "end": 606,
       "type": "offset",
       "offset": 134517469
     },
     {
-      "start": 759,
-      "end": 765,
+      "start": 600,
+      "end": 606,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 759,
-      "end": 765,
+      "start": 600,
+      "end": 606,
       "type": "offset",
       "offset": 134517469
     }

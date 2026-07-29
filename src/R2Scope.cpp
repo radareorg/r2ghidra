@@ -260,14 +260,14 @@ struct FunctionVars {
 		return index;
 	}
 	Element *emitSymbol(Element *symbollistElement, const std::string &name, Datatype *type, const Address &a,
-			const char *typelock, const char *readonly, const char *cat, int4 index,
+			const char *typelock, const char *cat, int4 index,
 			bool add_reg_range, const std::function<void(Element *)> &childRegRange) {
 		auto mapsymElement = child (symbollistElement, "mapsym");
+		// no readonly attribute: it would let the decompiler constant-fold reads of the variable
 		auto symbolElement = child (mapsymElement, "symbol", {
 			{ "name", name },
 			{ "typelock", typelock },
 			{ "namelock", "true" },
-			{ "readonly", readonly },
 			{ "cat", cat }
 		});
 		if (index >= 0) {
@@ -323,7 +323,7 @@ struct FunctionVars {
 			ranges.insertRange (sa.getSpace (), sa.getOffset (), last);
 
 			Element *symbolElement = emitSymbol (symbollistElement, var->name, type, sa,
-				typelock ? "true" : "false", "true", var->isarg ? "0" : "-1", index,
+				typelock ? "true" : "false", var->isarg ? "0" : "-1", index,
 				var->isarg && var->kind == R_ANAL_VAR_KIND_REG, childRegRange);
 			if (var->isarg) {
 				if (argsByIndex.size () < index + 1) {
@@ -346,7 +346,7 @@ struct FunctionVars {
 				continue;
 			}
 			emitSymbol (symbollistElement, "noname_" + to_string (i), type, trial.getAddress (),
-				"true", "false", "0", i, trial.getAddress ().getSpace () != arch->translate->getStackSpace (),
+				"true", "0", i, trial.getAddress ().getSpace () != arch->translate->getStackSpace (),
 				childRegRange);
 		}
 	}
@@ -510,7 +510,6 @@ static void processFunctionSignature(
 				{ "name", arg.name },
 				{ "typelock", "true" },
 				{ "namelock", "true" },
-				{ "readonly", "true" },
 				{ "cat", "0" },
 				{ "index", to_string (sig_index - 1) }
 			});
