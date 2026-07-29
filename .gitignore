@@ -6,6 +6,7 @@ build
 *.swp
 *.o
 *.so
+!test/bins/**
 compile_commands.json
 ghidra/flex/
 .vscode

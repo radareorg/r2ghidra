@@ -287,7 +287,9 @@ pdg
 EOF
 RUN
 
+# needs the anal.gp auto-seeding added to radare2 after the 6.1.8 release
 NAME=mips gp-relative import argument resolves under pdg
+BROKEN=1
 FILE=bins/elf/boa-mips-mini
 CMDS=<<EOF
 0x00400500;af;pdg~sym.imp.umask,sym.imp.time

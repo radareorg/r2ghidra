@@ -58,6 +58,9 @@ jobs:
       run: make user-uninstall && sudo make install
     - name: Testing r2ghidra oneliner on system wide install
       run: R2_DEBUG=1 r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
+    - name: Running testsuite
+      timeout-minutes: 30
+      run: make -C test
     - name: Packaging r2ghidra for Debian using Dockcross
       run: make -C dist/debian
     - name: Uploading debs
