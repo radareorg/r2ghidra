@@ -179,8 +179,9 @@ type: load
 type: store
 EOF
 CMDS=<<EOF
-e asm.cpu=AARCH64:LE:64:v8A:gcc
 e asm.arch=r2ghidra
+e asm.cpu=arm
+e asm.bits=64
 wx 298947f9
 pd 1
 ao | grep type
@@ -253,8 +254,9 @@ NAME=AARCH64 esil
 FILE=malloc://2048
 CMDS=<<EOF
 e log.level=0
-e asm.cpu=AARCH64:LE:64:v8A:gcc
 e asm.arch=r2ghidra
+e asm.cpu=arm
+e asm.bits=64
 wx 298947f9
 ao 1~type
 ao 1~esil
