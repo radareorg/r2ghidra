@@ -143,7 +143,7 @@ static const std::map<std::string, ArchMapper> arch_map = {
 	{ "dalvik", { S("Dalvik"), CUSTOM_FLAVOR((RCore *core) {
 		return DalvikFlavorFromCore (core);
 	}), B(32), E(false), 2, 10 }},
-	{ "hexagon", { S("hexagon"), S("default"), B(32), E(false) } },
+	{ "hexagon", { S("Hexagon"), S("default"), B(32), E(false) } },
 	{ "wasm", { S("wasm"), S("default"), B(32) } },
 	{ "6502", { S("6502"), S("default"), B(16) } },
 	{ "65c02", { S("65c02"), S("default"), B(16) } },

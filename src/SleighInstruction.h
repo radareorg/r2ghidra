@@ -122,9 +122,13 @@ static uint4 hashConstructState(ConstructState *cs, uint4 hashCode) {
 	hashCode = crc_update(hashCode, id >> 8);
 	hashCode = crc_update(hashCode, id);
 
-	for (ConstructState *p: cs->resolve) {
-		if (p != nullptr) {
-			hashCode = hashConstructState(p, hashCode);
+	if (cs->resolve != nullptr) {
+		int4 numOperands = cs->ct->getNumOperands();
+		for (int4 i = 0; i < numOperands; i++) {
+			ConstructState *p = cs->resolve[i];
+			if (p != nullptr) {
+				hashCode = hashConstructState(p, hashCode);
+			}
 		}
 	}
 
@@ -299,7 +303,7 @@ public:
 	void clearCache();
 	LRUCache<uintm, SleighInstruction *> *getInsCache() { return &ins_cache; }
 
-	ParserContext *getContext(const Address &addr,int4 state) const
+	ParserContext *getContext(const Address &addr,ParserContext::parse_state state) const
 	{
 		return obtainContext(addr, state);
 	}
@@ -416,13 +420,12 @@ public:
 	}
 
 	void clearRootState(ConstructState *curr) {
-		// Classic DFS
-		if (curr) {
-			for (auto iter = curr->resolve.begin(); iter != curr->resolve.end(); iter++) {
-				if (*iter) {
-					clearRootState(*iter);
-				}
-				delete *iter;
+		// Classic DFS; the nodes own their child arrays, so only the child nodes are deleted here
+		if (curr && curr->resolve && curr->ct) {
+			int4 numOperands = curr->ct->getNumOperands();
+			for (int4 i = 0; i < numOperands; i++) {
+				clearRootState(curr->resolve[i]);
+				delete curr->resolve[i];
 			}
 		}
 	}
@@ -439,6 +442,12 @@ public:
 	}
 
 	void allocateOperand(int4 i) {
+		if (i >= ParserContext::MAX_OPERAND) {
+			throw LowlevelError("SLEIGH parser out of state space");
+		}
+		if (depth > ParserContext::MAX_DEPTH - 2) {
+			throw LowlevelError("SLEIGH exceeded maximum parse depth");
+		}
 		ConstructState *opstate = new ConstructState;
 		opstate->ct = nullptr;
 		opstate->parent = point;
@@ -446,7 +455,10 @@ public:
 		opstate->hand.space = opstate->hand.offset_space = opstate->hand.temp_space = nullptr;
 		opstate->hand.size = opstate->hand.offset_offset = opstate->hand.offset_size = opstate->hand.temp_offset = 0;
 
-		point->resolve.emplace_back(opstate);
+		if (point->resolve == nullptr) {
+			point->resolve = new ConstructState *[ParserContext::MAX_OPERAND]();
+		}
+		point->resolve[i] = opstate;
 		breadcrumb[depth++] += 1;
 		point = opstate;
 		breadcrumb[depth] = 0;
