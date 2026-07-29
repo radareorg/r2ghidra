@@ -340,6 +340,15 @@ static Datatype *make_typedef(R2TypeFactory *factory, Datatype *base, const std:
 	return typedefd;
 }
 
+// sdb member parsing yields the bare function type for fn-ptrs; re-wrap TYPE_CODE as a pointer
+static Datatype *code_to_pointer(R2TypeFactory *factory, Datatype *t) {
+	if (t->getMetatype () != TYPE_CODE) {
+		return t;
+	}
+	AddrSpace *space = factory->getArch ()->getDefaultCodeSpace ();
+	return factory->getTypePointer (space->getAddrSize (), t, space->getWordSize ());
+}
+
 static std::string make_tmp_typename(const std::string &type_str) {
 	ut32 hash = r_str_hash(type_str.c_str());
 	std::stringstream ss;
@@ -419,13 +428,7 @@ Datatype *R2TypeFactory::queryR2Struct(const string &n, std::set<std::string> &s
 				arch->addWarning ("Failed to match type " + memberTypeName + " of member " + memberName + " in struct " + n);
 				continue;
 			}
-			if (memberType->getMetatype () == TYPE_CODE) {
-				auto space = arch->getDefaultCodeSpace ();
-				memberType = getTypePointer (
-					space->getAddrSize (),
-					memberType,
-					space->getWordSize ());
-			}
+			memberType = code_to_pointer (this, memberType);
 			if (elements > 0) {
 				memberType = getTypeArray (elements, memberType);
 			}
@@ -546,6 +549,7 @@ Datatype *R2TypeFactory::queryR2Union(const string &n, std::set<std::string> &st
 				arch->addWarning ("Failed to match type " + memberTypeName + " of member " + memberName + " in union " + n);
 				continue;
 			}
+			memberType = code_to_pointer (this, memberType);
 			if (elements > 0) {
 				memberType = getTypeArray (elements, memberType);
 			}

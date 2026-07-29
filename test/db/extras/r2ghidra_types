@@ -1988,3 +1988,17 @@ EXPECT=<<EOF
     fVar1 = (*slot->methodPtr)(receiver,slot->method);
 EOF
 RUN
+
+NAME=typed function pointer union member is stored as a pointer
+FILE=bins/elf/function-pointer-field-arm64.o
+CMDS=<<EOF
+to bins/function-pointer-union-arm64.h
+s sym.call_short_slot
+af
+'afs float call_short_slot(UnionSlot* slot, Receiver* receiver)
+pdg~cb
+EOF
+EXPECT=<<EOF
+    fVar1 = (*(slot->cb).fn)(receiver,slot->method);
+EOF
+RUN
