@@ -808,8 +808,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 		case CPUI_CALLOTHER:
 		case CPUI_NEW:
 		case CPUI_SEGMENTOP:
-		case CPUI_INSERT:
-		case CPUI_EXTRACT: /* Above don't have explicit definition */
+		case CPUI_INSERT: /* Above don't have explicit definition */
 		case CPUI_MULTIEQUAL:
 		case CPUI_INDIRECT:
 		case CPUI_CAST:

@@ -40,8 +40,8 @@ protected:
 	// TODO? void addRange(AddrSpace *spc,uintb first,uintb last) override;
 	void removeRange(AddrSpace *spc,uintb first,uintb last) override				{ throw LowlevelError("remove_range should not be performed on radare2 scope"); }
 	void addSymbolInternal(Symbol *sym) override									{ throw LowlevelError("addSymbolInternal unimplemented"); }
-	SymbolEntry *addMapInternal(Symbol *sym, uint4 exfl, const Address &addr, int4 off, int4 sz, const RangeList &uselim) override { throw LowlevelError("addMapInternal unimplemented"); }
-	SymbolEntry *addDynamicMapInternal(Symbol *sym, uint4 exfl, uint8 hash, int4 off, int4 sz, const RangeList &uselim) override { throw LowlevelError("addMap unimplemented"); }
+	void addMapInternal(Symbol *sym, MapEntry *entry) override						{ throw LowlevelError("addMapInternal unimplemented"); }
+	void addDynamicMapInternal(Symbol *sym, DynamicEntry *entry) override			{ throw LowlevelError("addMap unimplemented"); }
 
 public:
 	explicit R2Scope(R2Architecture *arch);
@@ -49,7 +49,7 @@ public:
 
 	Scope *buildSubScope(uint8 id, const string &nm) override;
 	void clear(void) override										{ cache->clear(); }
-	SymbolEntry *addSymbol(const string &name, Datatype *ct, const Address &addr, const Address &usepoint) override	{ return cache->addSymbol(name, ct, addr, usepoint); }
+	MapEntry *addSymbol(const string &name, Datatype *ct, const Address &addr, const Address &usepoint) override	{ return cache->addSymbol(name, ct, addr, usepoint); }
 	string buildVariableName(const Address &addr, const Address &pc, Datatype *ct,int4 &index,uint4 flags) const override { return cache->buildVariableName(addr,pc,ct,index,flags); }
 	string buildUndefinedName(void) const override					{ return cache->buildUndefinedName(); }
 	void setAttribute(Symbol *sym,uint4 attr) override				{ cache->setAttribute(sym,attr); }
@@ -57,25 +57,25 @@ public:
 	void setDisplayFormat(Symbol *sym,uint4 attr) override			{ cache->setDisplayFormat(sym,attr); }
 	void adjustCaches(void) override { cache->adjustCaches(); }
 
-	SymbolEntry *findAddr(const Address &addr,const Address &usepoint) const override;
-	SymbolEntry *findContainer(const Address &addr,int4 size, const Address &usepoint) const override;
-	SymbolEntry *findClosestFit(const Address &addr,int4 size, const Address &usepoint) const override { throw LowlevelError("findClosestFit unimplemented"); }
+	MapEntry *findAddr(const Address &addr,const Address &usepoint) const override;
+	MapEntry *findContainer(const Address &addr,int4 size, const Address &usepoint) const override;
+	MapEntry *findClosestFit(const Address &addr,int4 size, const Address &usepoint) const override { throw LowlevelError("findClosestFit unimplemented"); }
 	Funcdata *findFunction(const Address &addr) const override;
 	ExternRefSymbol *findExternalRef(const Address &addr) const override;
 	LabSymbol *findCodeLabel(const Address &addr) const override;
 	bool isNameUsed(const string &name, const Scope *op2) const override { throw LowlevelError("isNameUsed unimplemented"); }
 	Funcdata *resolveExternalRefFunction(ExternRefSymbol *sym) const override;
 
-	SymbolEntry *findOverlap(const Address &addr,int4 size) const override { throw LowlevelError("findOverlap unimplemented"); }
+	MapEntry *findOverlap(const Address &addr,int4 size) const override { throw LowlevelError("findOverlap unimplemented"); }
 	SymbolEntry *findBefore(const Address &addr) const				{ throw LowlevelError("findBefore unimplemented"); }
 	SymbolEntry *findAfter(const Address &addr) const				{ throw LowlevelError("findAfter unimplemented"); }
 	void findByName(const string &name,vector<Symbol *> &res) const	override { throw LowlevelError("findByName unimplemented"); }
 	MapIterator begin() const override								{ throw LowlevelError("begin unimplemented"); }
 	MapIterator end() const override								{ throw LowlevelError("end unimplemented"); }
-	list<SymbolEntry>::const_iterator beginDynamic() const override	{ throw LowlevelError("beginDynamic unimplemented"); }
-	list<SymbolEntry>::const_iterator endDynamic() const override	{ throw LowlevelError("endDynamic unimplemented"); }
-	list<SymbolEntry>::iterator beginDynamic() override				{ throw LowlevelError("beginDynamic unimplemented"); }
-	list<SymbolEntry>::iterator endDynamic() override				{ throw LowlevelError("endDynamic unimplemented"); }
+	list<DynamicEntry *>::const_iterator beginDynamic() const override	{ throw LowlevelError("beginDynamic unimplemented"); }
+	list<DynamicEntry *>::const_iterator endDynamic() const override	{ throw LowlevelError("endDynamic unimplemented"); }
+	list<DynamicEntry *>::iterator beginDynamic() override				{ throw LowlevelError("beginDynamic unimplemented"); }
+	list<DynamicEntry *>::iterator endDynamic() override				{ throw LowlevelError("endDynamic unimplemented"); }
 	void clearCategory(int4 cat) override							{ throw LowlevelError("clearCategory unimplemented"); }
 	void clearUnlockedCategory(int4 cat) override					{ throw LowlevelError("clearUnlockedCategory unimplemented"); }
 	void clearUnlocked() override									{ throw LowlevelError("clearUnlocked unimplemented"); }

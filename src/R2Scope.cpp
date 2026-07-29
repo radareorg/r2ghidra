@@ -776,6 +776,11 @@ Symbol *R2Scope::registerFlag(RFlagItem *flag) const {
 	const char *name = (core->flags->realnames && flag->realname) ? flag->realname : flag->name;
 
 	const ut64 at = flag->addr;
+	// a mapping whose end wraps below its start would throw out of addSymbol and abort the decompilation
+	if (type->getSize () > 0 && at + type->getSize () - 1 < at) {
+		arch->addWarning ("Flag " + to_string (name) + " extends beyond the end of the address space");
+		return nullptr;
+	}
 	SymbolEntry *entry = cache->addSymbol (name, type, Address (arch->getDefaultCodeSpace(), at), Address());
 	if (entry == nullptr) {
 		return nullptr;
@@ -833,6 +838,10 @@ Symbol *R2Scope::registerGlobalVar(RFlagItem *glob, const char *type_str) const 
 
 	const char *name = (core->flags->realnames && glob->realname)
 		? glob->realname : glob->name;
+	if (type->getSize () > 0 && addr + type->getSize () - 1 < addr) {
+		arch->addWarning ("Global " + to_string (name) + " extends beyond the end of the address space");
+		return nullptr;
+	}
 	SymbolEntry *entry = cache->addSymbol (name, type,
 		Address (arch->getDefaultCodeSpace (), addr), Address ());
 	if (!entry) {
@@ -933,8 +942,8 @@ LabSymbol *R2Scope::queryR2FunctionLabel(const Address &addr) const {
 	return nullptr;
 }
 
-SymbolEntry *R2Scope::findAddr(const Address &addr, const Address &usepoint) const {
-	SymbolEntry *entry = cache->findAddr(addr,usepoint);
+MapEntry *R2Scope::findAddr(const Address &addr, const Address &usepoint) const {
+	MapEntry *entry = cache->findAddr(addr,usepoint);
 	if (entry) {
 		return entry->getAddr() == addr ? entry : nullptr;
 	}
@@ -948,8 +957,8 @@ SymbolEntry *R2Scope::findAddr(const Address &addr, const Address &usepoint) con
 	return (entry && entry->getAddr() == addr) ? entry : nullptr;
 }
 
-SymbolEntry *R2Scope::findContainer(const Address &addr, int4 size, const Address &usepoint) const {
-	SymbolEntry *entry = cache->findClosestFit (addr, size, usepoint);
+MapEntry *R2Scope::findContainer(const Address &addr, int4 size, const Address &usepoint) const {
+	MapEntry *entry = cache->findClosestFit (addr, size, usepoint);
 	if (!entry) {
 		Symbol *sym = queryR2 (addr, true);
 		entry = sym ? sym->getMapEntry (addr) : nullptr;

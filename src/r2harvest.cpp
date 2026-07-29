@@ -107,7 +107,7 @@ void HarvestFuncdata(R2Architecture &arch, Funcdata *func, Harvest &out) {
 		return;
 	}
 	for (MapIterator it = scope->begin (); it != scope->end (); ++it) {
-		const SymbolEntry *entry = *it;
+		const MapEntry *entry = *it;
 		if (!entry || entry->isPiece ()) {
 			continue;
 		}
