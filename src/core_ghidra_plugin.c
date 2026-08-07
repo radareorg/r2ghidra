@@ -8,7 +8,7 @@ extern bool r2ghidra_core_fini(RCorePluginSession *cps);
 extern bool r2ghidra_core_init(RCorePluginSession *cps);
 extern bool r2ghidra_core_cmd(RCorePluginSession *cps, const char *cmd);
 
-RCorePlugin r_core_plugin_ghidra = {
+RCorePlugin r_core_plugin_r2ghidra = {
 	.meta = {
 		.name = "r2ghidra",
 		.desc = "Ghidra decompiler with pdg command",
@@ -21,13 +21,13 @@ RCorePlugin r_core_plugin_ghidra = {
 	.fini = r2ghidra_core_fini
 };
 
-#ifndef CORELIB
+#if !defined(CORELIB) && !defined(R2_PLUGIN_INCORE)
 #ifdef __cplusplus
 extern "C"
 #endif
 R_API RLibStruct radare_plugin = {
 	.type = R_LIB_TYPE_CORE,
-	.data = &r_core_plugin_ghidra,
+	.data = &r_core_plugin_r2ghidra,
 	.version = R2_VERSION,
 	.free = NULL,
 	.abiversion = R2_ABIVERSION,

@@ -430,7 +430,7 @@ std::string SleighAsm::getSleighHome(RConfig * R_NULLABLE cfg) {
 	}
 	free (ev);
 
-	char *path = r_xdg_datadir ("radare2/plugins/r2ghidra_sleigh");
+	char *path = r_xdg_datadir ("plugins/r2ghidra_sleigh");
 	if (r_file_is_directory (path)) {
 		if (cfg) {
 			r_config_set (cfg, varname, path);
