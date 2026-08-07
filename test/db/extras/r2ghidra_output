@@ -1025,3 +1025,34 @@ EXPECT=<<EOF2
 EOF2
 RUN
 
+# fr renames the import flag only, so the callee resolves as mylog while pdg keeps printing the function name
+NAME=user-declared formatter recovers call-site varargs via r2ghidra.varargs.formats
+FILE=bins/elf/x86_64-varargs.so
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+e r2ghidra.varargs=true
+e r2ghidra.varargs.formats=mylog
+aaa
+fr sym.imp.snprintf sym.imp.mylog
+td int mylog(char *dst, int n, const char *fmt, ...)
+pdg @ sym.p_snprintf~n=%d
+EOF2
+EXPECT=<<EOF2
+    iVar1 = sym.imp.snprintf(*0x1fd0,0x40,"n=%d x=%x",arg1,arg2);
+EOF2
+RUN
+
+NAME=a formatter absent from r2ghidra.varargs.formats is left to decompiler liveness
+FILE=bins/elf/x86_64-varargs.so
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+e r2ghidra.varargs=true
+aaa
+fr sym.imp.snprintf sym.imp.mylog
+td int mylog(char *dst, int n, const char *fmt, ...)
+pdg @ sym.p_snprintf~n=%d
+EOF2
+EXPECT=<<EOF2
+    iVar1 = sym.imp.snprintf(*0x1fd0,0x40,"n=%d x=%x",arg1 & 0xffffffff,arg2 & 0xffffffff);
+EOF2
+RUN

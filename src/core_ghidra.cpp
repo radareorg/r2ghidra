@@ -83,6 +83,7 @@ CV cfg_var_verbose    ("verbose",     "false",    "Show verbose warning messages
 CV cfg_var_casts      ("casts",       "false",    "Show type casts where needed");
 CV cfg_var_fixups     ("fixups",      "false",    "Apply pcode fixups");
 CV cfg_var_varargs    ("varargs",     "false",    "Recover printf-family varargs from literal format strings");
+CV cfg_var_vaformats  ("varargs.formats", "",     "Extra printf-style formatters for vararg recovery (bare names, comma separated)");
 CV cfg_var_roprop     ("roprop",      "0",        "Propagate read-only constants (0,1,2,3,4)");
 CV cfg_var_timeout    ("timeout",     "0",        "Run decompilation in a separate process and kill it after a specific time");
 CV cfg_var_compiler   ("compiler",    "default",  "Select compiler for calling conventions", ConfigCompiler);
