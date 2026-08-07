@@ -278,14 +278,32 @@ void PcodeFixupPreprocessor::fixupResolvedIndirectCalls(RAnalFunction *r2Func, F
 		});
 }
 
-static bool is_printf_family(const char *name) {
+static bool name_in_csv(const char *csv, const char *name) {
+	if (R_STR_ISEMPTY (csv)) {
+		return false;
+	}
+	bool found = false;
+	RList *names = r_str_split_duplist (csv, ",", true);
+	if (!names) {
+		return false;
+	}
+	r_list_foreach_cpp<char> (names, [&](char *s) {
+		if (!strcmp (s, name)) {
+			found = true;
+		}
+	});
+	r_list_free (names);
+	return found;
+}
+
+static bool is_format_callee(RCore *core, const char *name) {
 	static const char *fam[] = { "printf", "fprintf", "sprintf", "snprintf", "dprintf" };
 	for (const char *f : fam) {
 		if (!strcmp (name, f)) {
 			return true;
 		}
 	}
-	return false;
+	return name_in_csv (r_config_get (core->config, "r2ghidra.varargs.formats"), name);
 }
 
 static std::string resolve_callee_name(RCore *core, ut64 target) {
@@ -543,7 +561,7 @@ static FuncProto *build_locked_proto(R2Architecture &arch, const char *cc, const
 static void override_format_call(RCore *core, R2Architecture &arch, Funcdata *ghFunc, Sdb *tdb,
 		const std::unordered_map<std::string, ut64> &reg_strings, RAnalOp *op, AddrSpace *space) {
 	const std::string callee = resolve_callee_name (core, op->jump);
-	if (callee.empty () || !is_printf_family (callee.c_str ())) {
+	if (callee.empty () || !is_format_callee (core, callee.c_str ())) {
 		return;
 	}
 	VariadicSig sig;
@@ -551,10 +569,12 @@ static void override_format_call(RCore *core, R2Architecture &arch, Funcdata *gh
 		return;
 	}
 	const char *cc = r_anal_cc_func (core->anal, callee.c_str ());
-	if (!cc) {
-		cc = r_anal_cc_default (core->anal);
-	}
 	const char *freg = r_anal_cc_argloc (core->anal, cc, sig.firstVararg - 1, 0, 0);
+	if (!freg && !r_anal_cc_exist (core->anal, cc)) {
+		// the C parsers stamp cc=cdecl on every td/to prototype, and cdecl is undefined outside x86-32
+		cc = r_anal_cc_default (core->anal);
+		freg = r_anal_cc_argloc (core->anal, cc, sig.firstVararg - 1, 0, 0);
+	}
 	auto it = freg? reg_strings.find (tolower (freg)): reg_strings.end ();
 	if (it == reg_strings.end ()) {
 		return;
