@@ -19,11 +19,6 @@ SleighInstructionPrototype *R2Sleigh::getPrototype(SleighInstruction *context) {
 	return new_proto;
 }
 
-void R2Sleigh::reset(LoadImage *ld,ContextDatabase *c_db) {
-	R2loader = ld;
-	Sleigh::reset(ld, c_db);
-}
-
 SleighInstruction *R2Sleigh::getInstruction(Address &addr) {
 	SleighInstruction *inst = nullptr;
 #if 1

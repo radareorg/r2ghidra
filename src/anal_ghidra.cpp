@@ -643,7 +643,7 @@ static void anal_type(RAnal *anal, RAnalOp *anal_op, PcodeSlg &pcode_slg, Assemb
 	std::vector<std::string> args = string_split(assem.str);
 	std::unordered_set<std::string> reg_set;
 	std::map<VarnodeData, std::string> reglist;
-	sanal->trans.getAllRegisters(reglist);
+	sanal->trans->getAllRegisters(reglist);
 	for (auto iter = args.cbegin(); iter != args.cend(); iter++) {
 		for (auto p = reglist.cbegin (); p != reglist.cend(); p++) {
 			if (sanal->reg_mapping[p->second] == *iter) {
@@ -1345,11 +1345,11 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 		R_FREE (arch);
 
 		AssemblySlg assem(sanal);
-		Address at(sanal->trans.getDefaultCodeSpace(), addr);
+		Address at(sanal->trans->getDefaultCodeSpace(), addr);
 
 		if (1) { // mask & R_ANAL_OP_MASK_DISASM) {
 			try {
-				int size = sanal->trans.printAssembly (assem, at);
+				int size = sanal->trans->printAssembly (assem, at);
 				anal_op->size = size;
 				anal_op->mnemonic = strdup (assem.str);
 				r_str_case (anal_op->mnemonic, false);
@@ -1373,7 +1373,7 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 		} catch (LowlevelError &err) {
 			// ignored
 		}
-		if ((anal_op->size < 1) || (sanal->trans.printAssembly(assem, at) < 1)) {
+		if ((anal_op->size < 1) || (sanal->trans->printAssembly(assem, at) < 1)) {
 			return anal_op->size; // When current place has no available code, return ILL.
 		}
 		if (pcode_slg.pcodes.empty()) { // NOP case
@@ -1382,7 +1382,7 @@ extern "C" int sleigh_op(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data,
 			return anal_op->size;
 		}
 
-		SleighInstruction *ins = sanal->trans.getInstruction(at);
+		SleighInstruction *ins = sanal->trans->getInstruction(at);
 		if (ins == nullptr) {
 			return -1;
 		}
@@ -1749,7 +1749,7 @@ static void append_hardcoded_regs(std::stringstream &buf, const std::string &arc
 	}
 }
 
-static std::string regtype_name(const char *cpu, const std::string &regname) {
+static const char *regtype_name(const char *cpu, const std::string &regname, ut64 bits) {
 	if (r_str_startswith (cpu, "x86")) {
 		if (regname.find ("cr") != -1) {
 			return "drx";
@@ -1767,7 +1767,13 @@ static std::string regtype_name(const char *cpu, const std::string &regname) {
 			return "drx";
 		}
 		if (regname.find ("mm") != -1) {
-			return "mmx";
+			// r2 has no "mmx" type, and the narrower views must share one arena to alias
+			switch (bits) {
+			case 512: return "vec512";
+			case 256: return "vec256@vec512";
+			case 128: return "vec128@vec512";
+			default: return "vec64@vec512";
+			}
 		}
 	}
 	return "gpr";
@@ -1796,36 +1802,36 @@ extern "C" char *r2ghidra_regs(RArchSession *as) {
 	for (auto p = reg_list.begin(); p != reg_list.end(); p++) {
 		const std::string &group = sanal->reg_group[p->name];
 		const std::string &regname = sanal->reg_mapping[p->name];
-		const std::string &regtype = regtype_name (cpu, regname);
+		const ut64 bits = p->size * 8;
 		if (group.empty()) {
-			buf << regtype << "\t" << regname << "\t." << p->size * 8 << "\t"
-				    << p->offset << "\t" << "0\n";
-				continue;
-			}
-			for (size_t i = 0;; i++) {
-				if (!r_reg_type_arr[i]) {
-					R_LOG_WARN ("Unexpected register group(%s) from SLEIGH, abort", group.c_str());
-					return nullptr;
-				}
+			buf << regtype_name (cpu, regname, bits) << '\t';
+		} else {
+			size_t i;
+			for (i = 0; r_reg_type_arr[i]; i++) {
 				if (group == r_reg_type_arr[i]) {
 					buf << r_reg_string_arr[i] << '\t';
 					break;
 				}
 			}
-			buf << sanal->reg_mapping[p->name] << "\t." << p->size * 8 << "\t" << p->offset << "\t" << "0\n";
+			if (!r_reg_type_arr[i]) {
+				R_LOG_WARN ("Unexpected register group(%s) from SLEIGH, abort", group.c_str());
+				return nullptr;
+			}
 		}
-		if (!sanal->pc_name.empty()) {
-			buf << "=PC\t" << sanal->reg_mapping[sanal->pc_name] << '\n';
-		}
-		if (!sanal->sp_name.empty()) {
-			buf << "=SP\t" << sanal->reg_mapping[sanal->sp_name] << '\n';
-		}
-		for (unsigned i = 0; i != sanal->arg_names.size() && i <= 9; i++) {
-			buf << "=A" << i << '\t' << sanal->reg_mapping[sanal->arg_names[i]] << '\n';
-		}
-		for (unsigned i = 0; i != sanal->ret_names.size() && i <= 3; i++) {
-			buf << "=R" << i << '\t' << sanal->reg_mapping[sanal->ret_names[i]] << '\n';
-		}
+		buf << regname << "\t." << bits << "\t" << p->offset << "\t" << "0\n";
+	}
+	if (!sanal->pc_name.empty()) {
+		buf << "=PC\t" << sanal->reg_mapping[sanal->pc_name] << '\n';
+	}
+	if (!sanal->sp_name.empty()) {
+		buf << "=SP\t" << sanal->reg_mapping[sanal->sp_name] << '\n';
+	}
+	for (unsigned i = 0; i != sanal->arg_names.size() && i <= 9; i++) {
+		buf << "=A" << i << '\t' << sanal->reg_mapping[sanal->arg_names[i]] << '\n';
+	}
+	for (unsigned i = 0; i != sanal->ret_names.size() && i <= 3; i++) {
+		buf << "=R" << i << '\t' << sanal->reg_mapping[sanal->ret_names[i]] << '\n';
+	}
 
 	ut64 pp = 0;
 	string arch = sanal->sleigh_id.substr(pp, sanal->sleigh_id.find (':', pp) - pp);

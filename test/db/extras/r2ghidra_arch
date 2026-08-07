@@ -522,3 +522,35 @@ EXPECT=<<EOF2
 void r2:swift main(int argc,char **argv,char **envp)
 EOF2
 RUN
+
+NAME=arch plugin decodes both languages after switching cpu
+FILE=malloc://64
+ARGS=-a r2ghidra -b 64
+CMDS=<<EOF2
+e asm.cpu=arm
+wx 298947f9
+ao 1~mnemonic
+e asm.bits=32
+e asm.cpu=x86
+wx 90
+ao 1~mnemonic
+EOF2
+EXPECT=<<EOF2
+mnemonic: ldr
+mnemonic: nop
+EOF2
+RUN
+
+NAME=arch plugin emits a valid x86 vector register profile
+FILE=bins/elf/crackme0x05
+ARGS=-a r2ghidra
+CMDS=<<EOF2
+ar xmm0=0xff
+ar xmm0
+ar xmm0_qa
+EOF2
+EXPECT=<<EOF2
+0x000000000000000000000000000000ff
+0x000000ff
+EOF2
+RUN

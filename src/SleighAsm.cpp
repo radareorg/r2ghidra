@@ -29,24 +29,28 @@ void SleighAsm::init(const char *cpu, int bits, bool bigendian, RIO *io, RConfig
 	initInner (io, new_sleigh_id);
 }
 
-void SleighAsm::initInner(RIO *io, std::string sleigh_id) {
+void SleighAsm::initInner(RIO *io, const std::string &id) {
 	/* Initialize Sleigh */
+	// drop the old translator before its loader and context are replaced, a throw below must not leave a half-built one reachable
+	trans.reset ();
+	sleigh_id.clear ();
 	loader = std::move (AsmLoadImage (io));
 	docstorage = std::move (DocumentStorage ());
-	resolveArch (sleigh_id);
+	resolveArch (id);
 	buildSpecfile (docstorage);
 	context = std::move(ContextInternal ());
-	trans.reset (&loader, &context);
-	trans.initialize (docstorage);
+	// sleigh only loads the .sla while the translator is uninitialized, so a language switch needs a new one
+	trans = std::make_unique<R2Sleigh> (&loader, &context);
+	trans->initialize (docstorage);
 	parseProcConfig (docstorage);
 	parseCompConfig (docstorage);
-	alignment = trans.getAlignment ();
+	alignment = trans->getAlignment ();
 	RCore *core = (RCore *)io->coreb.core;
-	minopsz = ai (core, sleigh_id, R_ARCH_INFO_MINOP_SIZE);
-	maxopsz = ai (core, sleigh_id, R_ARCH_INFO_MAXOP_SIZE);
-	trans.clearCache ();
+	minopsz = ai (core, id, R_ARCH_INFO_MINOP_SIZE);
+	maxopsz = ai (core, id, R_ARCH_INFO_MAXOP_SIZE);
+	trans->clearCache ();
 	initRegMapping ();
-	this->sleigh_id = sleigh_id;
+	sleigh_id = id;
 	current_io = io;
 }
 
@@ -165,7 +169,7 @@ void SleighAsm::parseProcConfig(DocumentStorage &store) {
 	if (el == nullptr) {
 		throw LowlevelError ("No processor configuration tag found");
 	}
-	XmlDecode decoder (&trans, el);
+	XmlDecode decoder (trans.get (), el);
 	uint4 elemId = decoder.openElement (ELEM_PROCESSOR_SPEC);
 	for (;;) {
 		uint4 subId = decoder.peekElement();
@@ -462,10 +466,10 @@ std::string SleighAsm::getSleighHome(RConfig * R_NULLABLE cfg) {
 
 int SleighAsm::disassemble(RAnalOp *op, unsigned long long offset) {
 	AssemblySlg assem (this);
-	Address addr(trans.getDefaultCodeSpace (), offset);
+	Address addr(trans->getDefaultCodeSpace (), offset);
 	int length = 0;
 	try {
-		length = trans.printAssembly (assem, addr);
+		length = trans->printAssembly (assem, addr);
 		char *d = strdup (assem.str);
 		r_str_case (d, false);
 		free (op->mnemonic);
@@ -487,7 +491,7 @@ int SleighAsm::disassemble(RAnalOp *op, unsigned long long offset) {
 int SleighAsm::genOpcode(PcodeSlg &pcode_slg, Address &addr) {
 	int length = 0;
 	try {
-		length = trans.oneInstruction(pcode_slg, addr);
+		length = trans->oneInstruction(pcode_slg, addr);
 	} catch (BadDataError &err) {
 		/* Meet unknown data -> invalid opcode */
 		length = -1;
@@ -502,7 +506,7 @@ void SleighAsm::initRegMapping(void) {
 	reg_mapping.clear();
 	std::map<VarnodeData, std::string> reglist;
 	std::set<std::string> S;
-	trans.getAllRegisters(reglist);
+	trans->getAllRegisters(reglist);
 
 	for (auto iter = reglist.cbegin(); iter != reglist.cend (); iter++) {
 		std::string tmp;
@@ -520,7 +524,7 @@ void SleighAsm::initRegMapping(void) {
 std::vector<R2Reg> SleighAsm::getRegs(void) {
 	std::map<VarnodeData, std::string> reglist;
 	std::vector<R2Reg> r2_reglist;
-	trans.getAllRegisters(reglist);
+	trans->getAllRegisters(reglist);
 
 	if (reglist.empty()) {
 		return r2_reglist;
@@ -630,7 +634,7 @@ PcodeOperand *PcodeSlg::parse_vardata(VarnodeData &data) {
 }
 
 void SleighAsm::check(ut64 offset, const ut8 *buf, int len) { // To refresh cache when file content is modified.
-	ParserContext *ctx = trans.getContext (Address(trans.getDefaultCodeSpace(), offset), ParserContext::uninitialized);
+	ParserContext *ctx = trans->getContext (Address(trans->getDefaultCodeSpace(), offset), ParserContext::uninitialized);
 	if (ctx->getParserState () > ParserContext::uninitialized) {
 		ut8 *cached = ctx->getBuffer ();
 		size_t i = 0;

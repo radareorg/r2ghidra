@@ -10,6 +10,7 @@
 
 #include <r_core.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -204,8 +205,6 @@ struct R2Reg {
 	ut64 offset;
 };
 
-class R2Sleigh;
-
 class SleighAsm {
 private:
 	AsmLoadImage loader;
@@ -216,7 +215,7 @@ private:
 	std::vector<LanguageDescription> description;
 	int languageindex;
 
-	void initInner(RIO *io, std::string sleigh_id);
+	void initInner(RIO *io, const std::string &id);
 	void initRegMapping(void);
 	void collectSpecfiles(void);
 	void scanSleigh(const string &rootpath);
@@ -228,7 +227,7 @@ private:
 
 public:
 	static std::string getSleighHome(RConfig *cfg);
-	R2Sleigh trans;
+	std::unique_ptr<R2Sleigh> trans;
 	std::string sleigh_id;
 	int alignment = 1;
 	int minopsz = 1;
@@ -240,7 +239,7 @@ public:
 	std::unordered_map<std::string, std::string> reg_group;
 	// To satisfy radare2's rule: reg name has to be lowercase.
 	std::unordered_map<std::string, std::string> reg_mapping;
-	SleighAsm(): loader(nullptr), trans(nullptr, nullptr) {}
+	SleighAsm(): loader(nullptr) {}
 	void init(const char *cpu, int bits, bool bigendian, RIO *io, RConfig *cfg);
 	int disassemble(RAnalOp *op, unsigned long long offset);
 	int genOpcode(PcodeSlg &pcode_slg, Address &addr);
