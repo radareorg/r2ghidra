@@ -89,6 +89,23 @@ static void addRangesWithPointers(RCoreLock &core, RangeList &list, AddrSpace *s
 	});
 }
 
+// the loader fills relocation targets in at runtime, so their on-disk bytes are not constants
+static void removeRelocRanges(RCoreLock &core, RangeList &list, AddrSpace *space) {
+	RRBTree *relocs = r_bin_get_relocs (core->bin);
+	if (!relocs) {
+		return;
+	}
+	const ut64 width = (core->rasm->config->bits == 64)? 8: 4;
+	RRBNode *node;
+	RBinReloc *reloc;
+	r_crbtree_foreach (relocs, node, RBinReloc, reloc) {
+		const ut64 at = reloc->vaddr;
+		if (at && at != UT64_MAX) {
+			list.removeRange (space, at, at + width - 1);
+		}
+	}
+}
+
 void R2LoadImage::getReadonly(RangeList &list) const {
 	RCoreLock core(coreMutex);
 	int roprop = r_config_get_i (core->config, "r2ghidra.roprop");
@@ -125,5 +142,6 @@ void R2LoadImage::getReadonly(RangeList &list) const {
 			list.insertRange(space, 0, UT64_MAX - 1);
 			break;
 		}
+		removeRelocRanges (core, list, space);
 	}
 }
