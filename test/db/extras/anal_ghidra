@@ -169,9 +169,7 @@ ao | grep type
 EOF
 RUN
 
-# the SleighAsm/R2Sleigh arch-plugin init loses sleigh context variables on x86 hosts (ShowPAC); the pdg core path decodes the same sleigh fine
 NAME=AARCH64:LE:64:v8A:gcc
-BROKEN=1
 FILE=malloc://2048
 EXPECT=<<EOF
             0x00000000      298947f9       ldr x9, [x9, #0xf10]
@@ -252,9 +250,7 @@ family: cpu
 EOF
 RUN
 
-# the SleighAsm/R2Sleigh arch-plugin init loses sleigh context variables on x86 hosts (ShowPAC); the pdg core path decodes the same sleigh fine
 NAME=AARCH64 esil
-BROKEN=1
 FILE=malloc://2048
 CMDS=<<EOF
 e log.level=0
