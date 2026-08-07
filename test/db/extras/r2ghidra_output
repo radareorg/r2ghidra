@@ -1046,3 +1046,16 @@ EXPECT=<<EOF2
     iVar1 = sym.imp.snprintf(*0x1fd0,0x40,"n=%d x=%x",arg1 & 0xffffffff,arg2 & 0xffffffff);
 EOF2
 RUN
+
+NAME=readonly propagation does not fold relocation targets to their on-disk zero
+FILE=bins/elf/x86_64-varargs.so
+CMDS=<<EOF2
+e r2ghidra.roprop=3
+aaa
+s main
+pdg~gmon_start
+EOF2
+EXPECT=<<EOF2
+        (*_reloc.__gmon_start__)();
+EOF2
+RUN
