@@ -46,3 +46,12 @@ elf/function-pointer-field-arm64: function-pointer-field-arm64.c
 		-fno-ident \
 		-o elf/function-pointer-field-arm64 \
 		function-pointer-field-arm64.c
+
+# -O1 on purpose: at -O2 gcc tail-calls the formatter, and a tail branch is not
+# R_ANAL_OP_TYPE_CALL, so the vararg pass would silently never fire. Fortify off keeps
+# the callee at the plain libc name rather than __snprintf_chk. The arm64 and ppc64
+# varargs fixtures predate this recipe: they are -O0 and are not rebuilt from this source.
+elf/x86_64-varargs.so: varargs.c
+	x86_64-linux-gnu-gcc -shared -fPIC -O1 -U_FORTIFY_SOURCE \
+		-Wl,-z,lazy,-z,norelro,-z,max-page-size=0x1000,--build-id=none \
+		-o $@ varargs.c

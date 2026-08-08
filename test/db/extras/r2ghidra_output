@@ -917,9 +917,9 @@ e r2ghidra.varargs=true
 aaa
 pdg @ sym.p_printf~%f
 EOF2
-EXPECT=<<EOF2
-    iVar1 = sym.imp.printf("%s %d %f %x\n",arg1,arg2,in_d0,arg3);
-EOF2
+EXPECT=<<EOF
+    sym.imp.printf("%s %d %f %x\n",arg1,arg2,in_XMM0_Qa,arg3);
+EOF
 RUN
 
 NAME=vararg recovery off leaves call-site args to decompiler liveness
@@ -930,9 +930,9 @@ e r2ghidra.varargs=false
 aaa
 pdg @ sym.p_printf~%f
 EOF2
-EXPECT=<<EOF2
-    iVar1 = sym.imp.printf("%s %d %f %x\n",in_d0,arg1,arg2 & 0xffffffff,arg3 & 0xffffffff);
-EOF2
+EXPECT=<<EOF
+    sym.imp.printf("%s %d %f %x\n",arg1,arg2 & 0xffffffff,arg3);
+EOF
 RUN
 
 NAME=x86-64 snprintf call-site varargs recovered under pdg
@@ -944,7 +944,7 @@ aaa
 pdg @ sym.p_snprintf~n=%d
 EOF2
 EXPECT=<<EOF
-    iVar1 = sym.imp.snprintf(_reloc.g_buf,0x40,"n=%d x=%x",arg1,arg2);
+    sym.imp.snprintf(*_reloc.bufp,0x40,"n=%d x=%x",arg1,arg2);
 EOF
 RUN
 
@@ -956,9 +956,9 @@ e r2ghidra.varargs=true
 aaa
 pdg @ sym.p_sscanf~isoc23
 EOF2
-EXPECT=<<EOF2
-    sym.imp.__isoc23_sscanf(arg1,0x7b0,arg2);
-EOF2
+EXPECT=<<EOF
+    sym.imp.__isoc23_sscanf(in_RDI,"num=%d",arg1);
+EOF
 RUN
 
 NAME=arm64 printf call-site varargs recovered from the format string under pdg
@@ -1025,7 +1025,7 @@ td int mylog(char *dst, int n, const char *fmt, ...)
 pdg @ sym.p_snprintf~n=%d
 EOF2
 EXPECT=<<EOF
-    iVar1 = sym.imp.snprintf(_reloc.g_buf,0x40,"n=%d x=%x",arg1,arg2);
+    sym.imp.snprintf(*_reloc.bufp,0x40,"n=%d x=%x",arg1,arg2);
 EOF
 RUN
 
@@ -1040,12 +1040,12 @@ td int mylog(char *dst, int n, const char *fmt, ...)
 pdg @ sym.p_snprintf~n=%d
 EOF2
 EXPECT=<<EOF
-    iVar1 = sym.imp.snprintf(_reloc.g_buf,0x40,"n=%d x=%x",arg1 & 0xffffffff,arg2 & 0xffffffff);
+    sym.imp.snprintf(*_reloc.bufp,0x40,"n=%d x=%x",arg1 & 0xffffffff,arg2 & 0xffffffff);
 EOF
 RUN
 
 NAME=readonly propagation does not fold relocation targets to their on-disk zero
-FILE=bins/elf/x86_64-varargs.so
+FILE=bins/elf/arm64-varargs.so
 CMDS=<<EOF2
 e r2ghidra.roprop=3
 aaa
