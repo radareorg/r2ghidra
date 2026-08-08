@@ -64,7 +64,7 @@ NAME=function variable annotations
 FILE=bins/dectest64
 EXPECT=<<EOF
 {
-  "code": "\nulong main(int argc,char **argv)\n\n{\n    ulong uVar1;\n    int64_t in_FS_OFFSET;\n    int64_t var_30h;\n    int64_t var_24h;\n    int64_t var_8h;\n    \n    var_8h = *(in_FS_OFFSET + 0x28);\n    var_24h._0_4_ = argc;\n    sym.Aeropause(&var_24h + 4,argc,argv);\n    uVar1 = 0;\n    if (var_8h != *(in_FS_OFFSET + 0x28)) {\n        uVar1 = sym.imp.__stack_chk_fail();\n    }\n    return uVar1;\n}\n\n",
+  "code": "\nulong main(int argc,char **argv)\n\n{\n    ulong uVar1;\n    int64_t in_FS_OFFSET;\n    int64_t var_30h;\n    int32_t var_24h;\n    int64_t var_20h;\n    int64_t var_8h;\n    \n    var_8h = *(in_FS_OFFSET + 0x28);\n    sym.Aeropause(&var_20h,argc,argv);\n    uVar1 = 0;\n    if (var_8h != *(in_FS_OFFSET + 0x28)) {\n        uVar1 = sym.imp.__stack_chk_fail();\n    }\n    return uVar1;\n}\n\n",
   "annotations": [
     {
       "start": 1,
@@ -207,345 +207,309 @@ EXPECT=<<EOF
     },
     {
       "start": 134,
-      "end": 140,
+      "end": 141,
       "type": "local_variable",
-      "name": "var_8h"
+      "name": "var_20h"
     },
     {
       "start": 134,
-      "end": 140,
+      "end": 141,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 151,
-      "end": 157,
+      "start": 147,
+      "end": 154,
+      "type": "syntax_highlight",
+      "syntax_highlight": "datatype"
+    },
+    {
+      "start": 155,
+      "end": 161,
       "type": "local_variable",
       "name": "var_8h"
     },
     {
-      "start": 151,
-      "end": 157,
-      "type": "syntax_highlight",
-      "syntax_highlight": "local_variable"
-    },
-    {
-      "start": 158,
-      "end": 159,
-      "type": "offset",
-      "offset": 4198797
-    },
-    {
-      "start": 160,
+      "start": 155,
       "end": 161,
-      "type": "offset",
-      "offset": 4198797
-    },
-    {
-      "start": 162,
-      "end": 174,
-      "type": "local_variable",
-      "name": "in_FS_OFFSET"
-    },
-    {
-      "start": 162,
-      "end": 174,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 175,
-      "end": 176,
+      "start": 172,
+      "end": 178,
+      "type": "local_variable",
+      "name": "var_8h"
+    },
+    {
+      "start": 172,
+      "end": 178,
+      "type": "syntax_highlight",
+      "syntax_highlight": "local_variable"
+    },
+    {
+      "start": 179,
+      "end": 180,
       "type": "offset",
       "offset": 4198797
     },
     {
-      "start": 177,
-      "end": 181,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 151,
+      "start": 181,
       "end": 182,
       "type": "offset",
       "offset": 4198797
     },
     {
-      "start": 188,
+      "start": 183,
       "end": 195,
       "type": "local_variable",
-      "name": "var_24h"
+      "name": "in_FS_OFFSET"
     },
     {
-      "start": 188,
+      "start": 183,
       "end": 195,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 195,
-      "end": 196,
+      "start": 196,
+      "end": 197,
       "type": "offset",
-      "offset": 4198828
+      "offset": 4198797
     },
     {
-      "start": 202,
+      "start": 198,
+      "end": 202,
+      "type": "syntax_highlight",
+      "syntax_highlight": "constant_variable"
+    },
+    {
+      "start": 172,
       "end": 203,
       "type": "offset",
-      "offset": 4198828
+      "offset": 4198797
     },
     {
-      "start": 204,
-      "end": 208,
-      "type": "function_parameter",
-      "name": "argc"
-    },
-    {
-      "start": 204,
-      "end": 208,
-      "type": "syntax_highlight",
-      "syntax_highlight": "function_parameter"
-    },
-    {
-      "start": 188,
-      "end": 208,
-      "type": "offset",
-      "offset": 4198828
-    },
-    {
-      "start": 214,
-      "end": 227,
+      "start": 209,
+      "end": 222,
       "type": "function_name",
       "name": "sym.Aeropause",
       "offset": 4199038
     },
     {
-      "start": 214,
-      "end": 227,
+      "start": 209,
+      "end": 222,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 228,
-      "end": 229,
+      "start": 223,
+      "end": 224,
       "type": "offset",
       "offset": 4198819
     },
     {
-      "start": 229,
-      "end": 236,
+      "start": 224,
+      "end": 231,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 237,
-      "end": 238,
-      "type": "offset",
-      "offset": 4198819
-    },
-    {
-      "start": 239,
-      "end": 240,
-      "type": "syntax_highlight",
-      "syntax_highlight": "constant_variable"
-    },
-    {
-      "start": 240,
-      "end": 241,
+      "start": 231,
+      "end": 232,
       "type": "offset",
       "offset": 4198828
     },
     {
-      "start": 241,
-      "end": 245,
+      "start": 232,
+      "end": 236,
       "type": "function_parameter",
       "name": "argc"
     },
     {
-      "start": 241,
-      "end": 245,
+      "start": 232,
+      "end": 236,
       "type": "syntax_highlight",
       "syntax_highlight": "function_parameter"
     },
     {
-      "start": 245,
-      "end": 246,
+      "start": 236,
+      "end": 237,
       "type": "offset",
       "offset": 4198828
     },
     {
-      "start": 246,
-      "end": 250,
+      "start": 237,
+      "end": 241,
       "type": "function_parameter",
       "name": "argv"
     },
     {
-      "start": 246,
-      "end": 250,
+      "start": 237,
+      "end": 241,
       "type": "syntax_highlight",
       "syntax_highlight": "function_parameter"
     },
     {
-      "start": 214,
-      "end": 251,
+      "start": 209,
+      "end": 242,
       "type": "offset",
       "offset": 4198828
     },
     {
-      "start": 257,
-      "end": 262,
+      "start": 248,
+      "end": 253,
       "type": "local_variable",
       "name": "uVar1"
     },
     {
-      "start": 257,
-      "end": 262,
+      "start": 248,
+      "end": 253,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 263,
-      "end": 264,
+      "start": 254,
+      "end": 255,
       "type": "offset",
       "offset": 4198833
     },
     {
-      "start": 265,
-      "end": 266,
+      "start": 256,
+      "end": 257,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 257,
-      "end": 266,
+      "start": 248,
+      "end": 257,
       "type": "offset",
       "offset": 4198833
     },
     {
-      "start": 272,
-      "end": 274,
+      "start": 263,
+      "end": 265,
       "type": "offset",
       "offset": 4198851
     },
     {
-      "start": 272,
-      "end": 274,
+      "start": 263,
+      "end": 265,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 276,
-      "end": 282,
+      "start": 267,
+      "end": 273,
       "type": "local_variable",
       "name": "var_8h"
     },
     {
-      "start": 276,
-      "end": 282,
+      "start": 267,
+      "end": 273,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 283,
-      "end": 285,
+      "start": 274,
+      "end": 276,
       "type": "offset",
       "offset": 4198842
     },
     {
-      "start": 286,
-      "end": 287,
+      "start": 277,
+      "end": 278,
       "type": "offset",
       "offset": 4198842
     },
     {
-      "start": 288,
-      "end": 300,
+      "start": 279,
+      "end": 291,
       "type": "local_variable",
       "name": "in_FS_OFFSET"
     },
     {
-      "start": 288,
-      "end": 300,
+      "start": 279,
+      "end": 291,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 301,
-      "end": 302,
+      "start": 292,
+      "end": 293,
       "type": "offset",
       "offset": 4198842
     },
     {
-      "start": 303,
-      "end": 307,
+      "start": 294,
+      "end": 298,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 320,
-      "end": 325,
+      "start": 311,
+      "end": 316,
       "type": "local_variable",
       "name": "uVar1"
     },
     {
-      "start": 320,
-      "end": 325,
+      "start": 311,
+      "end": 316,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 326,
-      "end": 327,
+      "start": 317,
+      "end": 318,
       "type": "offset",
       "offset": 4198853
     },
     {
-      "start": 328,
-      "end": 352,
+      "start": 319,
+      "end": 343,
       "type": "function_name",
       "name": "sym.imp.__stack_chk_fail",
       "offset": 4198464
     },
     {
-      "start": 328,
-      "end": 352,
+      "start": 319,
+      "end": 343,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 320,
-      "end": 354,
+      "start": 311,
+      "end": 345,
       "type": "offset",
       "offset": 4198853
     },
     {
-      "start": 366,
-      "end": 372,
+      "start": 357,
+      "end": 363,
       "type": "offset",
       "offset": 4198859
     },
     {
-      "start": 366,
-      "end": 372,
+      "start": 357,
+      "end": 363,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 373,
-      "end": 378,
+      "start": 364,
+      "end": 369,
       "type": "local_variable",
       "name": "uVar1"
     },
     {
-      "start": 373,
-      "end": 378,
+      "start": 364,
+      "end": 369,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 366,
-      "end": 378,
+      "start": 357,
+      "end": 369,
       "type": "offset",
       "offset": 4198859
     }
@@ -1297,6 +1261,7 @@ void sym.Aeropause(Bright *bright,int32_t argc,char **argv)
     int iVar2;
     Morning *pMVar3;
     int64_t var_18h;
+    int32_t var_ch;
     void **var_8h;
     
     pMVar3 = sym.imp.malloc(0x10);

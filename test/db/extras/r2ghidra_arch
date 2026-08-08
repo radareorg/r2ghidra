@@ -77,7 +77,8 @@ void main(int argc,char **argv,char **envp)
     int iVar1;
     int iVar2;
     char *dest;
-    int64_t var_20h;
+    int32_t var_20h;
+    int32_t var_1ch;
     int64_t var_18h;
     int64_t var_10h;
     int64_t var_8h;
@@ -122,7 +123,7 @@ uint fcn.00001c98(ushort noname_0,ushort noname_1,int16_t arg_ah,int16_t noname_
     int16_t var_8h;
     int16_t var_6h;
     int16_t var_4h;
-    int16_t var_2h;
+    int8_t var_2h;
     char cStack_4;
     
     var_6h = 0x13da;
@@ -130,15 +131,15 @@ uint fcn.00001c98(ushort noname_0,ushort noname_1,int16_t arg_ah,int16_t noname_
         func_0x0000ec24(unaff_CS,var_6h,unaff_DS,0x401e);
         func_0x0000ec24(0xdee,noname_1,arg_ah,0x401e);
         func_0x0000e59a(0xdee,0x401e);
-        var_2h = 0;
+        _var_2h = 0;
         do {
             cStack_4 = func_0x0000eb82(0xdee);
             if (cStack_4 == '\r') {
                 cStack_4 = '\n';
             }
-            if (var_2h < in_stack_0000000c) {
-                *(noname_3 + var_2h) = cStack_4;
-                var_2h = var_2h + 1;
+            if (_var_2h < in_stack_0000000c) {
+                *(noname_3 + _var_2h) = cStack_4;
+                _var_2h = _var_2h + 1;
             }
         } while (cStack_4 != '\n');
         piVar1 = 0x4022;
@@ -153,8 +154,8 @@ uint fcn.00001c98(ushort noname_0,ushort noname_1,int16_t arg_ah,int16_t noname_
         unaff_CS = 0xdee;
         func_0x0000e59a(0xdee,0x401e);
         var_6h = 0x13db;
-    } while (*(noname_3 + var_2h + -1) != '\n');
-    *(noname_3 + var_2h + -1) = 0;
+    } while (*(noname_3 + _var_2h + -1) != '\n');
+    *(noname_3 + _var_2h + -1) = 0;
     return uVar2;
 }
 
@@ -178,7 +179,8 @@ void main(int argc,char **argv,char **envp)
     int iVar1;
     int iVar2;
     char *dest;
-    int64_t var_20h;
+    int32_t var_20h;
+    int32_t var_1ch;
     int64_t var_18h;
     int64_t var_10h;
     int64_t var_8h;
@@ -245,12 +247,10 @@ NAME=macos args
 FILE=bins/mach0/arg
 EXPECT=<<EOF
 
-//WARNING: Variable defined which should be unmapped: var_4h
-
 void main(int argc,char **argv,char **envp)
 
 {
-    int64_t var_4h;
+    int32_t var_4h;
     
     sym._call("hello",0x100000faa);
     return;

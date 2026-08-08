@@ -658,7 +658,8 @@ EXPECT=<<EOF
                           |    int iVar1;
                           |    int iVar2;
                           |    char *dest;
-                          |    int64_t var_20h;
+                          |    int32_t var_20h;
+                          |    int32_t var_1ch;
                           |    int64_t var_18h;
                           |    int64_t var_10h;
                           |    int64_t var_8h;
