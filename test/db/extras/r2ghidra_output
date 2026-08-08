@@ -912,9 +912,7 @@ x86:LE:64:default:clangwindows
 EOF2
 RUN
 
-# printf is variadic in radare2 sdb signatures only after the 6.1.8 release
 NAME=x86-64 printf call-site varargs recovered from the format string under pdg
-BROKEN=1
 FILE=bins/elf/x86_64-varargs.so
 ARGS=-e bin.relocs.apply=true
 CMDS=<<EOF2
@@ -927,9 +925,7 @@ EXPECT=<<EOF2
 EOF2
 RUN
 
-# printf is variadic in radare2 sdb signatures only after the 6.1.8 release
 NAME=vararg recovery off leaves call-site args to decompiler liveness
-BROKEN=1
 FILE=bins/elf/x86_64-varargs.so
 ARGS=-e bin.relocs.apply=true
 CMDS=<<EOF2
@@ -955,9 +951,7 @@ EXPECT=<<EOF2
 EOF2
 RUN
 
-# printf is variadic in radare2 sdb signatures only after the 6.1.8 release
 NAME=scanf-family is left untouched by printf vararg recovery
-BROKEN=1
 FILE=bins/elf/x86_64-varargs.so
 ARGS=-e bin.relocs.apply=true
 CMDS=<<EOF2
@@ -970,9 +964,7 @@ EXPECT=<<EOF2
 EOF2
 RUN
 
-# printf is variadic in radare2 sdb signatures only after the 6.1.8 release
 NAME=arm64 printf call-site varargs recovered from the format string under pdg
-BROKEN=1
 FILE=bins/elf/arm64-varargs.so
 ARGS=-e bin.relocs.apply=true
 CMDS=<<EOF2
@@ -998,9 +990,7 @@ EXPECT=<<EOF2
 EOF2
 RUN
 
-# printf is variadic in radare2 sdb signatures only after the 6.1.8 release
 NAME=ppc64 printf float vararg lands in an fp register under pdg
-BROKEN=1
 FILE=bins/elf/ppc64v1-printf-vararg
 ARGS=-e bin.relocs.apply=true
 CMDS=<<EOF2
