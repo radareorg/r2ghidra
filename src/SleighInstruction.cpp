@@ -80,7 +80,7 @@ SleighParserContext *R2Sleigh::getParserContext(Address &addr, SleighInstruction
 SleighParserContext *R2Sleigh::newSleighParserContext(Address &addr, SleighInstructionPrototype *proto)
 {
 	SleighParserContext *pos = new SleighParserContext(getContextCache(), this);
-	pos->initialize(1, 0, getConstantSpace());
+	pos->initialize(getConstantSpace(), 1);
 	pos->setAddr(addr);
 	pos->setPrototype(proto);
 	// resolve(*pos); // Resolve ALL the constructors involved in the instruction at this address
