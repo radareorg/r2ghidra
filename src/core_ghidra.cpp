@@ -20,7 +20,7 @@
 
 #include <libdecomp.hh>
 
-#if R2__UNIX__
+#if R2__UNIX__ && !defined(__wasi__)
 #include <errno.h>
 #include <sys/wait.h>
 #endif
@@ -91,7 +91,19 @@ CV cfg_var_write_vars ("write.vars",  "true",     "pdgw: write recovered variabl
 CV cfg_var_write_sig  ("write.sig",   "true",     "pdgw: write the recovered function signature");
 
 
-static std::recursive_mutex decompiler_mutex;
+#ifdef __wasi__
+// wasi is single-threaded and its libc++ ships without std::recursive_mutex
+struct R2GNullMutex {
+	void lock() {}
+	void unlock() {}
+	bool try_lock() { return true; }
+};
+typedef R2GNullMutex R2GMutex;
+#else
+typedef std::recursive_mutex R2GMutex;
+#endif
+
+static R2GMutex decompiler_mutex;
 
 class DecompilerLock {
 private:
@@ -664,7 +676,7 @@ static void _cmd(RCore *core, const char *input) {
 		return;
 	}
 	if (timeout > 0) {
-#if R2__UNIX__
+#if R2__UNIX__ && !defined(__wasi__)
 		// TODO: note that first execution is slower than the rest. and forking loses the cache
 		int fds[2];
 		if (pipe (fds) != 0) {
@@ -741,7 +753,7 @@ extern "C" bool r2ghidra_core_cmd(RCorePluginSession *cps, const char *input) {
 
 bool ConfigCompiler(void *user, void *data) {
 	RCore *core = (RCore *) user;
-	std::lock_guard<std::recursive_mutex> lock(decompiler_mutex);
+	std::lock_guard<R2GMutex> lock(decompiler_mutex);
 	auto node = reinterpret_cast<RConfigNode *>(data);
 	if (!strcmp (node->value, "?")) {
 		auto c = findGhidraCompiler (core, node->value);
@@ -758,7 +770,7 @@ bool ConfigCompiler(void *user, void *data) {
 }
 
 bool SleighHomeConfig(void */* user */, void *data) {
-	std::lock_guard<std::recursive_mutex> lock(decompiler_mutex);
+	std::lock_guard<R2GMutex> lock(decompiler_mutex);
 	RConfigNode *node = reinterpret_cast<RConfigNode *>(data);
 	SleighArchitecture::shutdown ();
 	SleighArchitecture::specpaths = FileManage ();
@@ -771,7 +783,7 @@ bool SleighHomeConfig(void */* user */, void *data) {
 extern "C" RArchPlugin r_arch_plugin_ghidra;
 
 extern "C" bool r2ghidra_core_init(RCorePluginSession *cps) {
-	std::lock_guard<std::recursive_mutex> lock(decompiler_mutex);
+	std::lock_guard<R2GMutex> lock(decompiler_mutex);
 	startDecompilerLibrary (nullptr);
 	RCore *core = reinterpret_cast<RCore *>(cps->core);
 	r_arch_plugin_add (core->anal->arch, &r_arch_plugin_ghidra);
@@ -788,8 +800,8 @@ extern "C" bool r2ghidra_core_init(RCorePluginSession *cps) {
 	return true;
 }
 
-extern "C" bool r2ghidra_core_fini(RCorePluginSession *cps, const char *cmd) {
-	std::lock_guard<std::recursive_mutex> lock (decompiler_mutex);
+extern "C" bool r2ghidra_core_fini(RCorePluginSession *cps) {
+	std::lock_guard<R2GMutex> lock (decompiler_mutex);
 	shutdownDecompilerLibrary ();
 	return true;
 }
