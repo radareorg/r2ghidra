@@ -71,17 +71,7 @@ R2GHIDRA_XPS_ZLIB_SRCS=\
 R2GHIDRA_XPS_OBJS=$(addprefix $(R2GHIDRA_XPS_OBD)/src_,$(R2GHIDRA_XPS_CXX_SRCS:.cpp=.o))
 R2GHIDRA_XPS_OBJS+=$(addprefix $(R2GHIDRA_XPS_OBD)/src_,$(R2GHIDRA_XPS_C_SRCS:.c=.o))
 R2GHIDRA_XPS_OBJS+=$(addprefix $(R2GHIDRA_XPS_OBD)/dec_,$(R2GHIDRA_XPS_DEC_SRCS:.cc=.o))
-ifeq ($(COMPILER),wasi)
-# radare2's wasi build already bundles zlib (otezip); linking a second copy
-# makes wasm-ld fail on duplicate symbols. otezip only exports the *Init2_
-# entrypoints, so provide the classic inflateInit_/deflateInit_ shims.
-R2GHIDRA_XPS_OBJS+=$(R2GHIDRA_XPS_OBD)/z_compat.o
-$(R2GHIDRA_XPS_OBD)/z_compat.o: $(R2GHIDRA_XPS_WD)/r2plugin/wasi/zlib_compat.c
-	@mkdir -p $(dir $@)
-	$(CC) -c $(CFLAGS) $(R2GHIDRA_XPS_CFLAGS) -o $@ $<
-else
 R2GHIDRA_XPS_OBJS+=$(addprefix $(R2GHIDRA_XPS_OBD)/z_,$(R2GHIDRA_XPS_ZLIB_SRCS:.c=.o))
-endif
 
 EXTERNAL_STATIC_OBJS+=$(R2GHIDRA_XPS_OBJS)
 
@@ -96,6 +86,10 @@ R2GHIDRA_XPS_CFLAGS+=-DNDEBUG -fPIC -fvisibility=hidden -w
 ifeq ($(COMPILER),wasi)
 # inside the wasmer sandbox the sleigh files are preopened at /sleigh
 R2GHIDRA_XPS_CFLAGS+=-DR2GHIDRA_SLEIGHHOME_DEFAULT=\"/sleigh\"
+# radare2's wasi build already bundles a minimal zlib (otezip) whose inflate
+# cannot resume across streamed input chunks as ghidra requires; carry a real
+# zlib but prefix its symbols (zconf.h Z_PREFIX) so the two never clash.
+R2GHIDRA_XPS_CFLAGS+=-DZ_PREFIX
 endif
 R2GHIDRA_XPS_CXXFLAGS=$(R2GHIDRA_XPS_CFLAGS) -std=c++20
 
