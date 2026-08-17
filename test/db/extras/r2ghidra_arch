@@ -338,6 +338,28 @@ ulong sym..crc32_init(int64_t arg1)
 EOF
 RUN
 
+NAME=et_rel with unapplied relocs is flagged in the pdg warning header
+FILE=bins/elf/ppc64v1-crc32_generic.ko
+CMDS=<<EOF
+aa
+pdg @ sym..crc32_init~Relocations
+EOF
+EXPECT=<<EOF
+//WARNING: Relocations are not applied, use -e bin.relocs.apply=true
+EOF
+RUN
+
+NAME=et_rel with applied relocs is not flagged in the pdg warning header
+FILE=bins/elf/ppc64v1-crc32_generic.ko
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF
+aa
+pdg @ sym..crc32_init~Relocations
+EOF
+EXPECT=<<EOF
+EOF
+RUN
+
 NAME=ppc64 sign-prefixed register arg keeps its 64-bit width under pdg
 FILE=bins/elf/ppc64v1-crc32_generic.ko
 ARGS=-e bin.relocs.apply=true

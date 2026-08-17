@@ -211,6 +211,39 @@ static void seedGlobalPointerRegister(R2Architecture &arch, RCore *core, RAnalFu
 	});
 }
 
+// unrelocated branch bytes decode as self-calls, so the recovered flow is fiction
+static void warnOnUnappliedRelocs(RCore *core, RAnalFunction *function, Funcdata *func) {
+	RBinObject *bo = r_bin_cur_object (core->bin);
+	if (!bo || bo->is_reloc_patched) {
+		return;
+	}
+#if R2_ABIVERSION >= 136
+	RVecRBinReloc *relocs = r_bin_get_relocs (core->bin);
+#else
+	RRBTree *relocs = r_bin_get_relocs (core->bin);
+#endif
+	if (!relocs) {
+		return;
+	}
+	const ut64 lo = r_anal_function_min_addr (function);
+	const ut64 hi = r_anal_function_max_addr (function);
+	bool found = false;
+	RBinReloc *reloc;
+#if R2_ABIVERSION >= 136
+	R_VEC_FOREACH (relocs, reloc) {
+		found |= reloc->vaddr >= lo && reloc->vaddr < hi;
+	}
+#else
+	RRBNode *node;
+	r_crbtree_foreach (relocs, node, RBinReloc, reloc) {
+		found |= reloc->vaddr >= lo && reloc->vaddr < hi;
+	}
+#endif
+	if (found) {
+		func->warningHeader ("Relocations are not applied, use -e bin.relocs.apply=true");
+	}
+}
+
 static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstream &out_stream, RCodeMeta **out_code, Harvest *out_harvest = nullptr) {
 	RAnalFunction *function = r_anal_get_fcn_in (core->anal, addr, R_ANAL_FCN_TYPE_NULL);
 	if (!function) {
@@ -238,6 +271,7 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	arch.getCore()->sleepBegin ();
 	auto action = arch.allacts.getCurrent ();
 
+	warnOnUnappliedRelocs (core, function, func);
 	if (cfg_var_fixups.GetBool (core->config)) {
 		PcodeFixupPreprocessor::fixupSharedReturnJumpToRelocs(function, func, core, arch);
 	}
