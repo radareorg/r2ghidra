@@ -290,7 +290,7 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 		//func->encode (out_stream);
 		//PrettyXmlEncode enc(out_stream);
 		XmlEncode enc(out_stream);
-		func->encode(enc, 0, true);
+		func->encode(enc, 0, true, true);
 		}
 		out_stream << "</function><code>";
 	}

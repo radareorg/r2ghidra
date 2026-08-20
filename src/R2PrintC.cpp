@@ -76,8 +76,7 @@ void R2PrintC::pushUnnamedLocation(const Address &addr, const Varnode *vn, const
 	if (space->getType() == IPTR_PROCESSOR) {
 		pushOp (&dereference, op);
 		auto type = glb->types->getTypePointer (space->getAddrSize (), vn->getType (), space->getWordSize ());
-		// pushConstant (addr.getOffset (), type, vn, op);
-		pushConstant(addr.getOffset(),type,vartoken,vn, op);
+		pushConstant (addr.getOffset (), type, vartoken, vn, op, type->getDisplayFormat ());
 	} else {
 		PrintC::pushUnnamedLocation (addr,vn, op);
 	}

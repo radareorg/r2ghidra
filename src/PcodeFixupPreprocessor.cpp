@@ -192,7 +192,7 @@ void PcodeFixupPreprocessor::fixupSharedReturnJumpToRelocs(RAnalFunction *r2Func
 		if (op->type == R_ANAL_OP_TYPE_JMP) {
 			Address callAddr (space, refi->at);
 			R_LOG_INFO ("OverridingCallReturn %s", impname? normalize_callee (impname).c_str (): "(local fcn)");
-			ghFunc->getOverride().insertFlowOverride(callAddr, Override::CALL_RETURN);
+			ghFunc->getOverride().insertFlowOverride(callAddr, Override::CallReturn::NAME);
 		}
 		r_anal_op_free (op);
 	}
@@ -237,7 +237,7 @@ void PcodeFixupPreprocessor::fixupNoreturnCallsBeforeData(RAnalFunction *r2Func,
 			const ut64 next = addr + size;
 			if ((type == R_ANAL_OP_TYPE_CALL || type == R_ANAL_OP_TYPE_UCALL)
 					&& next <= fcnMax && has_data_xref_at (core, next)) {
-				ghFunc->getOverride ().insertFlowOverride (Address (space, addr), Override::CALL_RETURN);
+				ghFunc->getOverride ().insertFlowOverride (Address (space, addr), Override::CallReturn::NAME);
 			}
 			addr = next;
 		}
@@ -271,7 +271,7 @@ void PcodeFixupPreprocessor::fixupResolvedIndirectCalls(RAnalFunction *r2Func, F
 			}
 			auto target = regs.find (tolower (op_first_reg (op, false)));
 			if (target != regs.end ()) {
-				ghFunc->getOverride ().insertIndirectOverride (
+				ghFunc->getOverride ().insertDeindirect (
 					Address (space, op->addr),
 					Address (space, target->second));
 			}
