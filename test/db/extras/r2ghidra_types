@@ -1632,15 +1632,16 @@ pdg~mycheck(
 EOF
 RUN
 
+# r2 renamed this stub after 6.2.0, so assert the call shape, not the name
 NAME=ppc64 noreturn void callee gets no phantom canary arg under pdg
 FILE=bins/elf/ppc64-noreturn-arg.so
 ARGS=-e bin.relocs.apply=true
 CMDS=<<EOF2
 aaa
-pdg @ sym.withbuf~stack_chk_fail
+pdg @ sym.withbuf~stack_chk_fail()?
 EOF2
 EXPECT=<<EOF2
-    sub.__stack_chk_fail();
+1
 EOF2
 RUN
 
