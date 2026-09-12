@@ -3,6 +3,7 @@
 
 #include "PcodeFixupPreprocessor.h"
 #include "R2LoadImage.h"
+#include "R2FlagCompat.h"
 #include "R2TypeFactory.h"
 #include "R2Utils.h"
 
@@ -37,19 +38,10 @@ static bool is_import_name(const char * R_NONNULL name) {
 
 // match any import-named flag at addr (an ARM veneer is both loc.imp.foo and rsym.foo)
 static const char *import_flag_at(RCore *core, ut64 addr) {
-	const RList *flags = r_flag_get_list (core->flags, addr);
-	if (!flags) {
-		return nullptr;
-	}
-	RListIter *iter;
-	void *pos;
-	r_list_foreach (flags, iter, pos) {
-		RFlagItem *f = reinterpret_cast<RFlagItem *>(pos);
-		if (f->name && is_import_name (f->name)) {
-			return f->name;
-		}
-	}
-	return nullptr;
+	RFlagItem *flag = r2ghidra_flag_find_at (core->flags, addr, [](RFlagItem *item) {
+		return item->name && is_import_name (item->name);
+	});
+	return flag? flag->name: nullptr;
 }
 
 // strip prefixes/version decorations to the bare libc name (sym.imp.printf, sub.printf, loc.N.plt_call.printf__GLIBC)

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 
 #include "R2Architecture.h"
+#include "R2FlagCompat.h"
 #include "R2TypeFactory.h"
 #include "R2Scope.h"
 
@@ -577,21 +578,12 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 
 	const char *fcn_name = fcn->name;
 	if (core->flags->realnames) {
-		const RList *flags = r_flag_get_list (core->flags, fcn->addr);
-		if (flags) {
-			RListIter *iter;
-			void *pos;
-			r_list_foreach (flags, iter, pos) {
-				auto flag = reinterpret_cast<RFlagItem *>(pos);
-				if (flag->space && flag->space->name && !strcmp(flag->space->name, R_FLAGS_FS_SECTIONS)) {
-					continue;
-				}
-				// if (!strcmp(flag->name, fcn->name) && flag->realname && *flag->realname)
-				if (R_STR_ISNOTEMPTY (flag->realname)) {
-					fcn_name = flag->realname;
-					break;
-				}
-			}
+		RFlagItem *flag = r2ghidra_flag_find_at (core->flags, fcn->addr, [](RFlagItem *item) {
+			return (!item->space || !item->space->name || strcmp (item->space->name, R_FLAGS_FS_SECTIONS))
+				&& R_STR_ISNOTEMPTY (item->realname);
+		});
+		if (flag) {
+			fcn_name = flag->realname;
 		}
 	}
 
@@ -877,24 +869,17 @@ Symbol *R2Scope::queryR2Absolute(ut64 addr, bool contain) const {
 		return registerFunction (fcn);
 	}
 
-	{
-		const RList *flags = r_flag_get_list (core->flags, addr);
-		if (flags) {
-			const bool execok = r_io_is_valid_offset (core->io, addr, R_PERM_X);
-			RListIter *iter;
-			void *pos;
-			r_list_foreach (flags, iter, pos) {
-				auto flag = reinterpret_cast<RFlagItem *>(pos);
-				if (flag->space && flag->space->name
-						&& (!strcmp (flag->space->name, R_FLAGS_FS_SECTIONS)
-						|| !strcmp (flag->space->name, R_FLAGS_FS_STRINGS))) {
-					continue;
-				}
-				if (execok || is_reloc_or_import_flag (flag)) {
-					return registerFunctionFlag (flag);
-				}
-			}
+	const bool execok = r_io_is_valid_offset (core->io, addr, R_PERM_X);
+	RFlagItem *flag = r2ghidra_flag_find_at (core->flags, addr, [execok](RFlagItem *item) {
+		if (item->space && item->space->name
+				&& (!strcmp (item->space->name, R_FLAGS_FS_SECTIONS)
+				|| !strcmp (item->space->name, R_FLAGS_FS_STRINGS))) {
+			return false;
 		}
+		return execok || is_reloc_or_import_flag (item);
+	});
+	if (flag) {
+		return registerFunctionFlag (flag);
 	}
 
 	RFlagItem *glob = r_anal_global_get (core->anal, addr);
@@ -906,19 +891,10 @@ Symbol *R2Scope::queryR2Absolute(ut64 addr, bool contain) const {
 	}
 
 	// TODO: correctly handle contain for flags
-	const RList *flags = r_flag_get_list (core->flags, addr);
-	if (flags) {
-		RListIter *iter;
-		void *pos;
-		r_list_foreach (flags, iter, pos) {
-			auto flag = reinterpret_cast<RFlagItem *>(pos);
-			if (flag->space && flag->space->name && !strcmp (flag->space->name, R_FLAGS_FS_SECTIONS)) {
-				continue;
-			}
-			return registerFlag (flag);
-		}
-	}
-	return nullptr;
+	flag = r2ghidra_flag_find_at (core->flags, addr, [](RFlagItem *item) {
+		return !item->space || !item->space->name || strcmp (item->space->name, R_FLAGS_FS_SECTIONS);
+	});
+	return flag? registerFlag (flag): nullptr;
 }
 
 Symbol *R2Scope::queryR2(const Address &addr, bool contain) const {
