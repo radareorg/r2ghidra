@@ -1591,6 +1591,43 @@ EXPECT=<<EOF2
 EOF2
 RUN
 
+NAME=aarch64 ET_REL decompile stops at a noreturn reloc call
+FILE=bins/elf/arm64-noreturn-etrel.o
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+aaa
+pdg @ sym.sum~Subroutine does not return,strncpy,exit([0]
+EOF2
+EXPECT=<<EOF2
+puVar2
+//WARNING:
+EOF2
+RUN
+
+NAME=aarch64 ET_REL noreturn reloc callee gets no phantom canary args
+FILE=bins/elf/arm64-noreturn-etrel.o
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+aaa
+pdg @ sym.sum~stack_chk_fail()?
+EOF2
+EXPECT=<<EOF2
+1
+EOF2
+RUN
+
+NAME=aarch64 ET_REL noreturn reloc callee that takes an argument keeps it
+FILE=bins/elf/arm64-noreturn-etrel.o
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF2
+aaa
+pdg @ sym.quit~?exit(0x2a
+EOF2
+EXPECT=<<EOF2
+1
+EOF2
+RUN
+
 NAME=pdg survives an unparseable var type string instead of recursing
 FILE=bins/dectest64
 CMDS=<<EOF

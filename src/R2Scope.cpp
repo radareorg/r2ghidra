@@ -535,6 +535,32 @@ static void processFunctionSignature(
 }
 #endif
 
+static bool protoTakesArgs(RCore *core, const char *name) {
+	Sdb *tdb = core->anal->sdb_types;
+	char *fname = r_type_func_guess (tdb, r_str_skip_prefix (name, "reloc."));
+	if (!fname) {
+		return false;
+	}
+	// args_count is 0 for both unknown and zero-arg protos, so > 0 alone tells real arg-takers apart
+	bool has_args = r_type_func_args_count (tdb, fname) > 0;
+	free (fname);
+	return has_args;
+}
+
+// Ghidra does active param recovery unless input is locked, so a no-arg noreturn (eg __stack_chk_fail) would otherwise get a live caller reg as a phantom arg
+static void markNoReturn(FunctionSymbol *funcsym, bool takesArgs) {
+	Funcdata *fd = funcsym? funcsym->getFunction (): nullptr;
+	if (!fd) {
+		return;
+	}
+	FuncProto &fp = fd->getFuncProto ();
+	fp.setNoReturn (true);
+	if (!takesArgs) {
+		fp.clearInput ();
+		fp.setInputLock (true);
+	}
+}
+
 static bool noreturnTakesArgs(RCore *core, RAnalFunction *fcn, const char *fcn_name) {
 	RAnalVar **it;
 	R_VEC_FOREACH (&fcn->vars, it) {
@@ -544,15 +570,7 @@ static bool noreturnTakesArgs(RCore *core, RAnalFunction *fcn, const char *fcn_n
 			return true;
 		}
 	}
-	Sdb *tdb = core->anal->sdb_types;
-	char *fname = r_type_func_guess (tdb, fcn_name);
-	if (!fname) {
-		return false;
-	}
-	// args_count is 0 for both unknown and zero-arg protos, so > 0 alone tells real arg-takers apart
-	bool has_args = r_type_func_args_count (tdb, fname) > 0;
-	free (fname);
-	return has_args;
+	return protoTakesArgs (core, fcn_name);
 }
 
 FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
@@ -711,14 +729,8 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 			fd->getFuncProto().setPieces(sig_proto);
 		}
 	}
-	// Ghidra does active param recovery unless input is locked, so a no-arg noreturn (eg __stack_chk_fail) would otherwise get a live caller reg as a phantom arg
-	if (funcsym && fcn->is_noreturn && !noreturnTakesArgs (core, fcn, fcn_name)) {
-		if (Funcdata *fd = funcsym->getFunction ()) {
-			FuncProto &fp = fd->getFuncProto ();
-			fp.setNoReturn (true);
-			fp.clearInput ();
-			fp.setInputLock (true);
-		}
+	if (fcn->is_noreturn && !noreturnTakesArgs (core, fcn, fcn_name)) {
+		markNoReturn (funcsym, false);
 	}
 	return funcsym;
 }
@@ -727,7 +739,11 @@ FunctionSymbol *R2Scope::registerFunctionFlag(RFlagItem *flag) const {
 	RCoreLock core (arch->getCore ());
 	const char *name = (core->flags->realnames && flag->realname)
 		? flag->realname : flag->name;
-	return cache->addFunction (Address (arch->getDefaultCodeSpace (), flag->addr), name);
+	FunctionSymbol *funcsym = cache->addFunction (Address (arch->getDefaultCodeSpace (), flag->addr), name);
+	if (r_anal_noreturn_at (core->anal, flag->addr)) {
+		markNoReturn (funcsym, protoTakesArgs (core, name));
+	}
+	return funcsym;
 }
 
 Symbol *R2Scope::registerFlag(RFlagItem *flag) const {
