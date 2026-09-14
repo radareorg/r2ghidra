@@ -1625,12 +1625,18 @@ tk func.custom_fatal.args=0
 tk reloc.custom_fatal=func
 tk func.reloc.custom_fatal.args=1
 pdg @ sym.call_custom~?reloc.custom_fatal(0x2a)
+tk func.reloc.custom_fatal.args=invalid
+pdg @ sym.call_custom~?reloc.custom_fatal(0x2a)
+tk func.reloc.custom_fatal.args=0x0
+pdg @ sym.call_custom~?reloc.custom_fatal()
 EOF2
 EXPECT=<<EOF2
 1
 1
 1
 0
+1
+1
 1
 1
 EOF2

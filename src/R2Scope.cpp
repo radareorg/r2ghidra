@@ -541,7 +541,8 @@ static bool protoHasNoArgs(RCore *core, const char *name) {
 	// a missing args key is an unknown prototype, not an empty one
 	const char *args = key? sdb_const_getf (tdb, nullptr, "func.%s.args", key): nullptr;
 	free (key);
-	return args && !strcmp (args, "0");
+	char *end = nullptr;
+	return args && *args == '0' && !strtoull (args, &end, 0) && !*end;
 }
 
 // Ghidra does active param recovery unless input is locked, so a no-arg noreturn (eg __stack_chk_fail) would otherwise get a live caller reg as a phantom arg
