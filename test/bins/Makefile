@@ -46,3 +46,21 @@ elf/function-pointer-field-arm64: function-pointer-field-arm64.c
 		-fno-ident \
 		-o elf/function-pointer-field-arm64 \
 		function-pointer-field-arm64.c
+
+elf/arm64-noreturn-etrel.o: arm64-noreturn-etrel.c
+	aarch64-linux-gnu-gcc -O2 -c \
+		-fstack-protector-all \
+		-fno-asynchronous-unwind-tables \
+		-fno-unwind-tables \
+		-fno-ident \
+		-fcf-protection=none \
+		-o $@ arm64-noreturn-etrel.c
+	aarch64-linux-gnu-strip --strip-debug $@
+
+elf/noreturn-prototypes-x86_64.o: noreturn-prototypes.c
+	x86_64-linux-gnu-gcc -O2 -c \
+		-fno-stack-protector \
+		-fno-asynchronous-unwind-tables \
+		-fno-unwind-tables \
+		-fno-ident \
+		-o $@ noreturn-prototypes.c
