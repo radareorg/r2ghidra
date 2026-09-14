@@ -55,3 +55,21 @@ elf/x86_64-varargs.so: varargs.c
 	x86_64-linux-gnu-gcc -shared -fPIC -O1 -U_FORTIFY_SOURCE \
 		-Wl,-z,lazy,-z,norelro,-z,max-page-size=0x1000,--build-id=none \
 		-o $@ varargs.c
+
+elf/arm64-noreturn-etrel.o: arm64-noreturn-etrel.c
+	aarch64-linux-gnu-gcc -O2 -c \
+		-fstack-protector-all \
+		-fno-asynchronous-unwind-tables \
+		-fno-unwind-tables \
+		-fno-ident \
+		-fcf-protection=none \
+		-o $@ arm64-noreturn-etrel.c
+	aarch64-linux-gnu-strip --strip-debug $@
+
+elf/noreturn-prototypes-x86_64.o: noreturn-prototypes.c
+	x86_64-linux-gnu-gcc -O2 -c \
+		-fno-stack-protector \
+		-fno-asynchronous-unwind-tables \
+		-fno-unwind-tables \
+		-fno-ident \
+		-o $@ noreturn-prototypes.c

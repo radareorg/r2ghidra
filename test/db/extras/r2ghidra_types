@@ -1591,39 +1591,47 @@ EXPECT=<<EOF2
 EOF2
 RUN
 
-NAME=aarch64 ET_REL decompile stops at a noreturn reloc call
+NAME=aarch64 ET_REL noreturn stops flow and preserves argument counts
 FILE=bins/elf/arm64-noreturn-etrel.o
 ARGS=-e bin.relocs.apply=true
 CMDS=<<EOF2
 aaa
-pdg @ sym.sum~Subroutine does not return,strncpy,exit([0]
+pdg @ sym.sum~?int sym.sum(
+pdg @ sym.sum~?stack_chk_fail()
+pdg @ sym.sum~?reloc.exit,halt_baddata
+pdg @ sym.quit~?exit(0x2a
 EOF2
 EXPECT=<<EOF2
-puVar2
-//WARNING:
-EOF2
-RUN
-
-NAME=aarch64 ET_REL noreturn reloc callee gets no phantom canary args
-FILE=bins/elf/arm64-noreturn-etrel.o
-ARGS=-e bin.relocs.apply=true
-CMDS=<<EOF2
-aaa
-pdg @ sym.sum~stack_chk_fail()?
-EOF2
-EXPECT=<<EOF2
+1
+1
+0
 1
 EOF2
 RUN
 
-NAME=aarch64 ET_REL noreturn reloc callee that takes an argument keeps it
-FILE=bins/elf/arm64-noreturn-etrel.o
+NAME=noreturn flags preserve known and unknown arguments
+FILE=bins/elf/noreturn-prototypes-x86_64.o
 ARGS=-e bin.relocs.apply=true
 CMDS=<<EOF2
 aaa
-pdg @ sym.quit~?exit(0x2a
+pdg @ sym.call_err~?reloc.err(0x2a
+pdg @ sym.call_errx~?reloc.errx(0x2a
+tna reloc.custom_fatal
+pdg @ sym.call_custom~?reloc.custom_fatal(0x2a)
+pdg @ sym.call_custom~?halt_baddata
+tk custom_fatal=func
+pdg @ sym.call_custom~?reloc.custom_fatal(0x2a)
+tk func.custom_fatal.args=0
+tk reloc.custom_fatal=func
+tk func.reloc.custom_fatal.args=1
+pdg @ sym.call_custom~?reloc.custom_fatal(0x2a)
 EOF2
 EXPECT=<<EOF2
+1
+1
+1
+0
+1
 1
 EOF2
 RUN
