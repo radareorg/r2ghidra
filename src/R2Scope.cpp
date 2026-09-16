@@ -3,6 +3,7 @@
 
 #include "R2Architecture.h"
 #include "R2FlagCompat.h"
+#include "R2TypeCompat.h"
 #include "R2TypeFactory.h"
 #include "R2Scope.h"
 
@@ -407,7 +408,8 @@ static void processFunctionSignature(
 		if (fname && r_type_func_exist (tdb, fname)) {
 			// a cc key marks an afs-set prototype; auto-inferred and library types have none
 			explicit_proto = sdb_const_get (tdb, ("func." + std::string (fname) + ".cc").c_str (), nullptr) != nullptr;
-			const int argc = r_type_func_args_count (tdb, fname);
+			int argc = 0;
+			countargs (tdb, fname, &argc);
 			for (int i = 0; i < argc; i++) {
 				char *arg_type = r_type_func_args_type (tdb, fname, i);
 				if (!arg_type) {
@@ -538,11 +540,11 @@ static void processFunctionSignature(
 static bool protoHasNoArgs(RCore *core, const char *name) {
 	Sdb *tdb = core->anal->sdb_types;
 	char *key = r_type_func_key (tdb, name);
+	int argc = 0;
 	// a missing args key is an unknown prototype, not an empty one
-	const char *args = key? sdb_const_getf (tdb, nullptr, "func.%s.args", key): nullptr;
+	const bool noArgs = key && countargs (tdb, key, &argc) && !argc;
 	free (key);
-	char *end = nullptr;
-	return args && *args == '0' && !strtoull (args, &end, 0) && !*end;
+	return noArgs;
 }
 
 // Ghidra does active param recovery unless input is locked, so a no-arg noreturn (eg __stack_chk_fail) would otherwise get a live caller reg as a phantom arg
