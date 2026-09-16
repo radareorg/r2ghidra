@@ -4,6 +4,7 @@
 #include "PcodeFixupPreprocessor.h"
 #include "R2LoadImage.h"
 #include "R2FlagCompat.h"
+#include "R2TypeCompat.h"
 #include "R2TypeFactory.h"
 #include "R2Utils.h"
 
@@ -324,7 +325,8 @@ static bool parse_variadic_sig(Sdb *tdb, const char *callee, VariadicSig &sig) {
 	}
 	bool ok = false;
 	if (r_type_func_exist (tdb, fname)) {
-		const int argc = r_type_func_args_count (tdb, fname);
+		int argc = 0;
+		countargs (tdb, fname, &argc);
 		for (int i = 0; i < argc; i++) {
 			// the vararg slot is stored as `,...` so the "..." marker lands in the name, not the type
 			const char *an = r_type_func_args_name (tdb, fname, i);

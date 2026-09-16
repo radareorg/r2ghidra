@@ -3,6 +3,7 @@
 
 #include "R2TypeFactory.h"
 #include "R2Architecture.h"
+#include "R2TypeCompat.h"
 #include "fspec.hh"
 
 #include <r_core.h>
@@ -638,7 +639,8 @@ Datatype *R2TypeFactory::queryR2Function(const string &n, std::set<std::string> 
 	Sdb *sdb = core->anal->sdb_types;
 
 	const char *ret = r_type_func_ret(sdb, n.c_str());
-	int arg_count = r_type_func_args_count(sdb, n.c_str());
+	int arg_count = 0;
+	countargs(sdb, n.c_str(), &arg_count);
 	if (!ret && arg_count <= 0) {
 		return nullptr;
 	}
