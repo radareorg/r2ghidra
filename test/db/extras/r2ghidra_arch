@@ -552,3 +552,16 @@ EXPECT=<<EOF2
 0x000000ff
 EOF2
 RUN
+
+NAME=single-endian sleigh cpu ignores unavailable configured endian
+FILE=malloc://64
+ARGS=-a r2ghidra -b 32
+CMDS=<<EOF2
+e cfg.bigendian=true
+e asm.cpu=V850
+pdgss
+EOF2
+EXPECT=<<EOF2
+V850:LE:32:default
+EOF2
+RUN
