@@ -646,7 +646,11 @@ static void runcmd(RCore *core, const char *input) {
 			PrintAutoSleighLang (core);
 			break;
 		case 'd': // "pdgsd"
-			Disassemble (core, r_num_math (core->num, input + 2));
+			try {
+				Disassemble (core, r_num_math (core->num, input + 2));
+			} catch (const LowlevelError &error) {
+				R_LOG_ERROR ("%s", error.explain.c_str ());
+			}
 			break;
 		default:
 			ListSleighLangs (core);
