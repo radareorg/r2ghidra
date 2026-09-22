@@ -581,7 +581,6 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	if (archName != nullptr && !strcmp (archName, "r2ghidra")) {
 		archName = r_config_get (core->config, "asm.cpu");
 	}
-	const std::string r2Arch (archName);
 
 	// We use xml here, because the public interface for Functions
 	// doesn't let us set up the scope parenting as we need it :-(
@@ -589,7 +588,7 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	Document doc;
 	doc.setName ("mapsym");
 
-	if (fcn->bits == 16 && !r2Arch.compare ("arm")) {
+	if (fcn->bits == 16 && !r_str_casecmp (archName, "arm")) {
 		ContextDatabase *cdb = arch->getContextDatabase ();
 		cdb->setVariable ("TMode", Address (arch->getDefaultCodeSpace (), fcn->addr), 1);
 	}

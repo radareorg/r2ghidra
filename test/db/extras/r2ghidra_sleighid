@@ -387,3 +387,363 @@ EXPECT=<<EOF
 mnemonic: nop
 EOF
 RUN
+
+NAME=sleighid r2 arm alias works in every case
+FILE=malloc://64
+ARGS=-a r2ghidra -b 64
+CMDS=<<EOF
+e cfg.bigendian=false
+wx 1f2003d5
+e asm.cpu=arm
+pdgss
+ao 1~mnemonic
+e asm.cpu=ARM
+pdgss
+ao 1~mnemonic
+e asm.cpu=ArM
+pdgss
+ao 1~mnemonic
+EOF
+EXPECT=<<EOF
+AARCH64:LE:64:v8A:
+mnemonic: nop
+AARCH64:LE:64:v8A:
+mnemonic: nop
+AARCH64:LE:64:v8A:
+mnemonic: nop
+EOF
+RUN
+
+NAME=sleighid r2 ppc alias works in every case
+FILE=malloc://64
+ARGS=-a r2ghidra -b 64
+CMDS=<<EOF
+e cfg.bigendian=false
+wx 01006038
+e asm.cpu=ppc
+pdgss
+ao 1~mnemonic
+e asm.cpu=PPC
+pdgss
+ao 1~mnemonic
+e asm.cpu=pPc
+pdgss
+ao 1~mnemonic
+EOF
+EXPECT=<<EOF
+PowerPC:LE:64:A2ALT:
+mnemonic: li
+PowerPC:LE:64:A2ALT:
+mnemonic: li
+PowerPC:LE:64:A2ALT:
+mnemonic: li
+EOF
+RUN
+
+NAME=sleighid r2 java alias works in every case
+FILE=malloc://64
+ARGS=-a r2ghidra -b 32
+CMDS=<<EOF
+e cfg.bigendian=false
+wx 00
+e asm.cpu=java
+pdgss
+ao 1~mnemonic
+e asm.cpu=JAVA
+pdgss
+ao 1~mnemonic
+e asm.cpu=JaVa
+pdgss
+ao 1~mnemonic
+EOF
+EXPECT=<<EOF
+JVM:BE:32:default:
+mnemonic: nop
+JVM:BE:32:default:
+mnemonic: nop
+JVM:BE:32:default:
+mnemonic: nop
+EOF
+RUN
+
+NAME=sleighid r2 msp430 alias works in every case
+FILE=malloc://64
+ARGS=-a r2ghidra -b 16
+CMDS=<<EOF
+e cfg.bigendian=false
+wx 0343
+e asm.cpu=msp430
+pdgss
+ao 1~mnemonic
+e asm.cpu=MSP430
+pdgss
+ao 1~mnemonic
+e asm.cpu=MsP430
+pdgss
+ao 1~mnemonic
+EOF
+EXPECT=<<EOF
+TI_MSP430:LE:16:default:
+mnemonic: nop
+TI_MSP430:LE:16:default:
+mnemonic: nop
+TI_MSP430:LE:16:default:
+mnemonic: nop
+EOF
+RUN
+
+NAME=sleighid optional r2 sh alias retains its mapping in every case
+FILE=malloc://64
+ARGS=-a r2ghidra -b 32
+CMDS=<<EOF
+e cfg.bigendian=false
+e asm.cpu=sh 2>/dev/null
+pdgss
+e asm.cpu=SH 2>/dev/null
+pdgss
+e asm.cpu=sH 2>/dev/null
+pdgss
+EOF
+EXPECT=<<EOF
+SuperH4:LE:32:default:
+SuperH4:LE:32:default:
+SuperH4:LE:32:default:
+EOF
+RUN
+
+NAME=sleighid r2 avr alias works in every case
+FILE=malloc://64
+ARGS=-a r2ghidra -b 16
+CMDS=<<EOF
+e cfg.bigendian=false
+wx 0000
+e asm.cpu=avr
+pdgss
+ao 1~mnemonic
+e asm.cpu=AVR
+pdgss
+ao 1~mnemonic
+e asm.cpu=AvR
+pdgss
+ao 1~mnemonic
+EOF
+EXPECT=<<EOF
+avr8:LE:16:default:
+mnemonic: nop
+avr8:LE:16:default:
+mnemonic: nop
+avr8:LE:16:default:
+mnemonic: nop
+EOF
+RUN
+
+NAME=sleighid r2 dalvik alias works in every case
+FILE=malloc://64
+ARGS=-a r2ghidra -b 32
+CMDS=<<EOF
+e cfg.bigendian=false
+wx 0000
+e asm.cpu=dalvik
+pdgss
+ao 1~mnemonic
+e asm.cpu=DALVIK
+pdgss
+ao 1~mnemonic
+e asm.cpu=DaLvIk
+pdgss
+ao 1~mnemonic
+EOF
+EXPECT=<<EOF
+Dalvik:LE:32:DEX_Base:
+mnemonic: nop
+Dalvik:LE:32:DEX_Base:
+mnemonic: nop
+Dalvik:LE:32:DEX_Base:
+mnemonic: nop
+EOF
+RUN
+
+NAME=sleighid mixed-case r2 m16c aliases preserve the selected model
+FILE=malloc://64
+ARGS=-a r2ghidra -b 16
+CMDS=<<EOF
+e asm.cpu=M16c
+pdgss
+e asm.cpu=M16C60
+pdgss
+e asm.cpu=m16C80
+pdgss
+EOF
+EXPECT=<<EOF
+M16C/60:LE:16:default:
+M16C/60:LE:16:default:
+M16C/80:LE:16:default:
+EOF
+RUN
+
+NAME=sleighid mixed-case r2 loongarch alias preserves the selected ABI
+FILE=malloc://64
+ARGS=-a r2ghidra -b 64
+CMDS=<<EOF
+e asm.cpu=LoOnGaRcH
+pdgss
+e asm.bits=32
+pdgss
+EOF
+EXPECT=<<EOF
+Loongarch:LE:64:lp64d:
+Loongarch:LE:32:ilp32d:
+EOF
+RUN
+
+NAME=sleighid uppercase x86 keeps vector registers in the vector arena
+FILE=malloc://64
+ARGS=-a r2ghidra -b 32
+CMDS=<<EOF
+e asm.cpu=X86
+e asm.bits=64
+arp~xmm0[0,1]:0
+ar xmm0=0xff
+ar xmm0
+ar xmm0_qa
+EOF
+EXPECT=<<EOF
+vec128@vec512 xmm0
+0x000000000000000000000000000000ff
+0x000000ff
+EOF
+RUN
+
+NAME=sleighid x86 preludes are available for uppercase aliases
+FILE=malloc://64
+ARGS=-a r2ghidra -b 32
+CMDS=<<EOF
+e asm.cpu=x86
+apl~5589e5
+e asm.cpu=X86
+apl~5589e5
+EOF
+EXPECT=<<EOF
+'ap+ 5589e5
+'ap+ 5589e5
+EOF
+RUN
+
+NAME=sleighid arm preludes are available for mixed-case aliases
+FILE=malloc://64
+ARGS=-a r2ghidra -b 32
+CMDS=<<EOF
+e asm.cpu=arm
+apl~f0472de9
+e asm.cpu=ArM
+apl~f0472de9
+EOF
+EXPECT=<<EOF
+'ap+ f0472de9
+'ap+ f0472de9
+EOF
+RUN
+
+NAME=sleighid arm alias decompiles Thumb functions
+FILE=bins/hello-arm
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF
+e io.cache=true
+e asm.arch=r2ghidra
+e asm.cpu=arm
+e asm.bits=16
+s entry0
+wx 01207047
+af+ $$ foo
+afb+ $$ $$ 4
+afB 16
+pdg
+EOF
+EXPECT=<<EOF
+
+uint foo(void)
+
+{
+    //[11] -r-x section size 200 named .text
+    return 1;
+}
+
+EOF
+RUN
+
+NAME=sleighid ArM alias decompiles Thumb functions
+FILE=bins/hello-arm
+ARGS=-e bin.relocs.apply=true
+CMDS=<<EOF
+e io.cache=true
+e asm.arch=r2ghidra
+e asm.cpu=ArM
+e asm.bits=16
+s entry0
+wx 01207047
+af+ $$ foo
+afb+ $$ $$ 4
+afB 16
+pdg
+EOF
+EXPECT=<<EOF
+
+uint foo(void)
+
+{
+    //[11] -r-x section size 200 named .text
+    return 1;
+}
+
+EOF
+RUN
+
+NAME=sleighid full IDs require the spelling of the installed language
+FILE=malloc://64
+ARGS=-a r2ghidra -b 64
+CMDS=<<EOF
+e asm.cpu=aarch64:le:64:v8a 2>/dev/null
+pdgsd 1
+e asm.cpu=AARCH64:LE:64:v8A
+wx 1f2003d5
+ao 1~mnemonic
+EOF
+EXPECT=<<EOF
+mnemonic: nop
+EOF
+EXPECT_ERR=<<EOF
+ERROR: No sleigh specification for aarch64:le:64:v8a
+EOF
+RUN
+
+NAME=sleighid rejects misspelled r2 aliases and recovers
+FILE=malloc://64
+ARGS=-a r2ghidra -b 64
+CMDS=<<EOF
+e asm.cpu=arMtypo 2>/dev/null
+pdgsd 1
+e asm.cpu=ArM
+wx 1f2003d5
+ao 1~mnemonic
+EOF
+EXPECT=<<EOF
+mnemonic: nop
+EOF
+EXPECT_ERR=<<EOF
+ERROR: Architecture string does not look like sleigh id: arMtypo
+EOF
+RUN
+
+NAME=sleighid installed languages remain discoverable with pdgs
+FILE=malloc://64
+ARGS=-a r2ghidra -b 32
+CMDS=<<EOF
+pdgs~JVM:BE:32:default
+e asm.cpu=JaVa
+pdgss
+EOF
+EXPECT=<<EOF
+JVM:BE:32:default
+JVM:BE:32:default:
+EOF
+RUN

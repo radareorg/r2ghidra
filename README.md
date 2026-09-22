@@ -63,6 +63,19 @@ Usage: pdg  # Native Ghidra decompiler plugin
 | pdgx          # Dump the XML of the current decompiled function
 ```
 
+With `e asm.arch=r2ghidra`, `asm.cpu` accepts r2 aliases such as `arm`, `ppc`,
+`java`, `msp430`, and `sh`. Aliases and short Ghidra processor names are
+case-insensitive: `ArM` still selects ARM or AArch64 according to `asm.bits`.
+Full Sleigh IDs, such as `AARCH64:LE:64:v8A`, use the exact spelling listed by
+`pdgs` and override automatic selection. `pdgss` prints the selected ID.
+Aliases still require the corresponding Sleigh files to be installed; for
+example, `sh` needs the optional `SuperH4` processor, not the bundled `SuperH`.
+
+The plugin leaves `cpus` unset because r2 treats a nonempty list as a strict
+allowlist, which would reject languages added through `r2ghidra.sleighhome`.
+Consequently, `e asm.cpu=?` and its CPU-name completion list are empty; use
+`pdgs` to list installed languages. This does not remove the r2 aliases.
+
 The following config vars (for the `e` command) can be used to adjust r2ghidra's behavior:
 
 ```

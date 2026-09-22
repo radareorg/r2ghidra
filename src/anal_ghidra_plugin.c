@@ -29,6 +29,7 @@ RArchPlugin r_arch_plugin_ghidra = {
 	},
 	.arch = "sleigh",
 	.endian = R_SYS_ENDIAN_LITTLE | R_SYS_ENDIAN_BIG,
+	.cpus = NULL, // ArchMap resolves r2 aliases and installed Sleigh IDs.
 	.bits = 0,
 	.init = &sanal_init,
 	.fini = &sanal_fini,
