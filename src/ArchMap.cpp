@@ -360,7 +360,7 @@ static std::string sleighIdBaseFromCore(RCore *core) {
 	if (!strcmp (arch, "r2ghidra")) {
 		arch = r_config_get (core->config, "asm.cpu");
 	}
-	std::string a = arch? arch: "";
+	std::string a = tolower (arch? arch: "");
 	const size_t dot = a.find ('.');
 	if (dot != std::string::npos) {
 		a.resize (dot);
@@ -440,45 +440,29 @@ int ai(RCore *core, std::string cpu, int query) {
 }
 
 std::string SleighIdFromSleighAsmConfig(RCore *core, const char *cpu, int bits, bool bigendian, const vector<LanguageDescription> &langs) {
-	const char *colon = strchr (cpu, ':');
-	if (colon != nullptr && colon[1] != '\0') {
+	if (R_STR_ISEMPTY (cpu)) {
+		return std::string ();
+	}
+	if (strchr (cpu, ':')) {
 		// complete id specified
 		return cpu;
 	}
-	auto arch_it = arch_map.find(cpu);
-	if (arch_it != arch_map.end()) {
+	std::string low_cpu = tolower (cpu);
+	auto arch_it = arch_map.find (low_cpu);
+	if (arch_it != arch_map.end ()) {
 		std::string base = arch_it->second.Map (core);
 		return base + ":" + CompilerFromCore (core, base);
 	}
-	// short form if possible
-	std::string low_cpu = tolower (cpu);
-	std::string proc;
-	bool has_be = false;
-	bool has_le = false;
+	const LanguageDescription *match = nullptr;
 	for (const auto &lang : langs) {
-		if (tolower (lang.getProcessor ()) != low_cpu) {
+		if (lang.getSize () != bits || tolower (lang.getProcessor ()) != low_cpu
+				|| !lang.getId ().ends_with (":default")) {
 			continue;
 		}
-		proc = lang.getProcessor ();
-		if (lang.getSize () != bits) {
-			continue;
-		}
-		if (lang.isBigEndian ()) {
-			has_be = true;
-		} else {
-			has_le = true;
+		match = &lang;
+		if (lang.isBigEndian () == bigendian) {
+			break;
 		}
 	}
-	if (proc.empty ()) {
-		return cpu;
-	}
-	if (bigendian && !has_be && has_le) {
-		bigendian = false;
-	} else if (!bigendian && !has_le && has_be) {
-		bigendian = true;
-	}
-	return proc
-		+ ":" + (bigendian ? "BE" : "LE")
-		+ ":" + to_string (bits)
-		+ ":" + "default";
+	return match? match->getId (): cpu;
 }

@@ -1749,7 +1749,7 @@ static void append_hardcoded_regs(std::stringstream &buf, const std::string &arc
 }
 
 static const char *regtype_name(const char *cpu, const std::string &regname, ut64 bits) {
-	if (r_str_startswith (cpu, "x86")) {
+	if (!r_str_ncasecmp (cpu, "x86", 3)) {
 		if (regname.find ("cr") != -1) {
 			return "drx";
 		}
@@ -2027,7 +2027,7 @@ extern "C" RList *r2ghidra_preludes(RArchSession *as) {
 		r_list_foreach (as->arch->plugins, iter, _plugin) {
 #endif
 			RArchPlugin *plugin = (RArchPlugin*)_plugin;
-			if (plugin->preludes && plugin->meta.name && !strcmp (plugin->meta.name, cpu)) {
+			if (plugin->preludes && plugin->meta.name && !r_str_casecmp (plugin->meta.name, cpu)) {
 				return plugin->preludes (as);
 			}
 		}
