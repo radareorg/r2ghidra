@@ -96,10 +96,16 @@ First, make sure you have the latest version of radare2 for Windows, which can b
 Then run the following command from the radare2/bin/ directory to find out the `R2_USER_PLUGINS` path:
 
 ```
-$ r2 -hh
+$ r2 -H R2_USER_PLUGINS
 ```
 
 Now, download the [latest r2ghidra release](https://github.com/radareorg/r2ghidra/releases) for Windows and copy the dll file in the `R2_USER_PLUGINS` directory.
+
+Also download the matching `r2ghidra_sleigh-<version>.zip` and extract its files into
+`R2_USER_PLUGINS\r2ghidra_sleigh` (the `.ldefs` files must be directly inside that directory).
+The plugin finds this directory automatically, then checks `dir.plugins\r2ghidra_sleigh`
+for a system installation. `SLEIGHHOME` and `e r2ghidra.sleighhome=...` remain available
+for custom locations.
 
 You should now be able to do `pdg` while in radare2 to invoke the r2ghidra decompile command.
 

@@ -430,7 +430,7 @@ std::string SleighAsm::getSleighHome(RConfig * R_NULLABLE cfg) {
 	}
 	free (ev);
 
-	char *path = r_xdg_datadir ("plugins/r2ghidra_sleigh");
+	char *path = r_xdg_datadir (R_JOIN_2_PATHS ("plugins", "r2ghidra_sleigh"));
 	if (r_file_is_directory (path)) {
 		if (cfg) {
 			r_config_set (cfg, varname, path);
@@ -439,13 +439,17 @@ std::string SleighAsm::getSleighHome(RConfig * R_NULLABLE cfg) {
 		free (path);
 		return res;
 	}
-	free ((void *)path);
-	path = strdup (R2_PREFIX "/lib/radare2/" R2_VERSION "/r2ghidra_sleigh");
+	free (path);
+	const char *plugdir = cfg? r_config_get (cfg, "dir.plugins"): nullptr;
+	path = R_STR_ISNOTEMPTY (plugdir)
+		? r_file_new (plugdir, "r2ghidra_sleigh", nullptr)
+		: r_str_r2_prefix (R_JOIN_2_PATHS (R2_PLUGINS, "r2ghidra_sleigh"));
 	if (r_file_is_directory (path)) {
 		if (cfg) {
 			r_config_set (cfg, varname, path);
 		}
 		std::string res (path);
+		free (path);
 		return res;
 	} else {
 #ifdef R2GHIDRA_SLEIGHHOME_DEFAULT

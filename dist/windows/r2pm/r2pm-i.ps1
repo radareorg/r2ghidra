@@ -10,9 +10,10 @@ iwr -OutFile r2ghidra_sleigh-${V}.zip https://github.com/radareorg/r2ghidra/rele
 # python -m wget https://github.com/radareorg/r2ghidra/releases/download/${V}/r2ghidra_sleigh-${V}.zip
 echo "Expanding blobs"
 Expand-Archive -Force -Path r2ghidra-${V}-w64.zip
-Expand-Archive -Force -Path r2ghidra_sleigh-${V}.zip
+Expand-Archive -Force -Path r2ghidra_sleigh-${V}.zip -DestinationPath .
 echo "Installing plugin"
+New-Item -ItemType Directory -Force -Path "$R2_USER_PLUGINS" | Out-Null
 Remove-Item "${R2_USER_PLUGINS}\core_r2ghidra.dll"
 Move-Item -Path r2ghidra-${V}-w64\core_r2ghidra.dll -Force -Destination "${R2_USER_PLUGINS}\core_r2ghidra.dll"
-Remove-Item "${R2_USER_PLUGINS}\r2ghidra_sleigh"
+Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "${R2_USER_PLUGINS}\r2ghidra_sleigh"
 Move-Item -Path r2ghidra_sleigh-${V} -Force -Destination "${R2_USER_PLUGINS}\r2ghidra_sleigh"
