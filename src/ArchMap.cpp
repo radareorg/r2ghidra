@@ -452,14 +452,33 @@ std::string SleighIdFromSleighAsmConfig(RCore *core, const char *cpu, int bits, 
 	}
 	// short form if possible
 	std::string low_cpu = tolower (cpu);
+	std::string proc;
+	bool has_be = false;
+	bool has_le = false;
 	for (const auto &lang : langs) {
-		auto proc = lang.getProcessor();
-		if (tolower (proc) == low_cpu) {
-			return proc
-				+ ":" + (bigendian ? "BE" : "LE")
-				+ ":" + to_string (bits)
-				+ ":" + "default";
+		if (tolower (lang.getProcessor ()) != low_cpu) {
+			continue;
+		}
+		proc = lang.getProcessor ();
+		if (lang.getSize () != bits) {
+			continue;
+		}
+		if (lang.isBigEndian ()) {
+			has_be = true;
+		} else {
+			has_le = true;
 		}
 	}
-	return cpu;
+	if (proc.empty ()) {
+		return cpu;
+	}
+	if (bigendian && !has_be && has_le) {
+		bigendian = false;
+	} else if (!bigendian && !has_le && has_be) {
+		bigendian = true;
+	}
+	return proc
+		+ ":" + (bigendian ? "BE" : "LE")
+		+ ":" + to_string (bits)
+		+ ":" + "default";
 }
