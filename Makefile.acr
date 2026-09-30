@@ -54,4 +54,15 @@ r2ghidra_sleigh.zip dist: ghidra-processors.txt
 	rm -rf tmp
 
 
-.PHONY: mrproper clean install uninstall all dist
+# Binary package for r2pm -bi: plugins/ (with r2ghidra_sleigh/) and bin/ for this r2 version and platform
+BINDIST_ZIP=r2ghidra-$(shell r2 -qv)-$(shell r2pm -H R2PM_OS)-$(shell r2pm -H R2PM_ARCH)-$(shell r2pm -H R2PM_BITS).zip
+BINDIST_DIR=$(CURDIR)/tmp/bindist
+
+bindist: ghidra-processors.txt
+	rm -rf $(BINDIST_DIR) $(BINDIST_ZIP)
+	$(MAKE) -C src install DESTDIR= PLUGDIR=$(BINDIST_DIR)/plugins BINDIR=$(BINDIST_DIR)/bin
+	$(MAKE) -C ghidra user-install DH=$(BINDIST_DIR)/plugins/r2ghidra_sleigh
+	cd $(BINDIST_DIR) && zip -r $(CURDIR)/$(BINDIST_ZIP) plugins bin
+	rm -rf $(BINDIST_DIR)
+
+.PHONY: mrproper clean install uninstall all dist bindist

@@ -54,6 +54,14 @@ jobs:
       run: ./preconfigure && ./configure --prefix=/usr && make -j4 ; make user-install
     - name: Testing r2ghidra oneliner on home setup
       run: R2_DEBUG=1 r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
+    - name: Packaging r2pm binary
+      run: make bindist
+    - name: Uploading r2pm binary
+      uses: actions/upload-artifact@v7
+      with:
+        name: bindist-linux-x86-64
+        path: r2ghidra-*.zip
+        if-no-files-found: error
     - name: System-wide installation
       run: make user-uninstall && sudo make install
     - name: Testing r2ghidra oneliner on system wide install
@@ -76,6 +84,29 @@ jobs:
       with:
         name: linux-acr-ok
         path: r2ghidra_sleigh-*.zip
+
+  linux-arm:
+    runs-on: ubuntu-22.04-arm
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7
+    - name: Installing radare2 from deb
+      run: |
+        wget https://github.com/radareorg/radare2/releases/download/${{env.R2V}}/radare2_${{env.R2V}}_arm64.deb
+        wget https://github.com/radareorg/radare2/releases/download/${{env.R2V}}/radare2-dev_${{env.R2V}}_arm64.deb
+        sudo dpkg -i *.deb
+    - name: Building r2ghidra with acr
+      run: ./preconfigure && ./configure --prefix=/usr && make -j4 ; make user-install
+    - name: Testing r2ghidra oneliner on home setup
+      run: R2_DEBUG=1 r2 -qc 'af;pdg' /bin/ls | tee a.txt && grep entry0 a.txt
+    - name: Packaging r2pm binary
+      run: make bindist
+    - name: Uploading r2pm binary
+      uses: actions/upload-artifact@v7
+      with:
+        name: bindist-linux-arm-64
+        path: r2ghidra-*.zip
+        if-no-files-found: error
 
   tarball:
     runs-on: ubuntu-22.04
@@ -149,11 +180,15 @@ jobs:
 
   macos-pkg:
     # The type of runner that the job will run on
-    runs-on: macos-latest
-    # Build for both architectures
+    runs-on: ${{ matrix.os }}
+    # Build each architecture natively
     strategy:
       matrix:
-        arch: [x86_64, arm64]
+        include:
+          - os: macos-15-intel
+            arch: x86_64
+          - os: macos-latest
+            arch: arm64
     env:
       ARCH: ${{ matrix.arch }}
 
@@ -185,6 +220,14 @@ jobs:
       run: |
         r2 -qc 'af;pdg' test/bins/rec | tee a.txt
         grep csu_init a.txt
+    - name: Packaging r2pm binary
+      run: make bindist
+    - name: Uploading r2pm binary
+      uses: actions/upload-artifact@v7
+      with:
+        name: bindist-macos-${{ env.ARCH }}
+        path: r2ghidra-*.zip
+        if-no-files-found: error
     - name: Uploading artifacts
       uses: actions/upload-artifact@v7
       with:
@@ -235,6 +278,7 @@ jobs:
       tag_name: ${{ steps.release.outputs.tag }}
     needs:
       - linux-deb
+      - linux-arm
       - macos-pkg
       - tarball
       - w64
@@ -267,6 +311,14 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           path: dist/artifacts
+      - name: Packaging r2pm Windows binary
+        run: |
+          V=${{ steps.r2gv.outputs.branch }}
+          mkdir -p w64/plugins
+          unzip -q dist/artifacts/w64/r2ghidra-$V-w64.zip -d w64/plugins
+          unzip -q dist/artifacts/linux-acr-ok/r2ghidra_sleigh-$V.zip -d w64/plugins
+          mv w64/plugins/r2ghidra_sleigh-$V w64/plugins/r2ghidra_sleigh
+          cd w64 && zip -qr ../dist/artifacts/r2ghidra-$V-windows-x86-64.zip plugins
       - name: Create GitHub release and upload assets
         uses: softprops/action-gh-release@v3
         env:
@@ -285,3 +337,5 @@ jobs:
             dist/artifacts/tarball/r2ghidra-${{ steps.r2gv.outputs.branch }}.zip
             dist/artifacts/tarball/r2ghidra-${{ steps.r2gv.outputs.branch }}.tar.xz
             dist/artifacts/linux-acr-ok/r2ghidra_sleigh-${{ steps.r2gv.outputs.branch }}.zip
+            dist/artifacts/bindist-*/r2ghidra-${{ steps.r2gv.outputs.branch }}-*.zip
+            dist/artifacts/r2ghidra-${{ steps.r2gv.outputs.branch }}-windows-x86-64.zip
