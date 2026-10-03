@@ -81,6 +81,7 @@ The following config vars (for the `e` command) can be used to adjust r2ghidra's
 ```
 [0x000275a7]> e?r2ghidra.
       r2ghidra.casts: Show type casts where needed
+      r2ghidra.ccode: Emit clean C identifiers (bare import names, no fcn./sub. prefixes)
     r2ghidra.cmt.cpp: C++ comment style
  r2ghidra.cmt.indent: Comment indent
      r2ghidra.indent: Indent increment
