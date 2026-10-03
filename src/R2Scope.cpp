@@ -17,24 +17,30 @@
 #include "R2Utils.h"
 
 // `e r2ghidra.ccode=true` asks for output that is valid C: radare2 names import
-// stubs `sub.<lib>_<fn>` and anonymous/dotted symbols `fcn.ADDR` / `sym.imp.fn`,
+// flags `sym.imp.<lib>_<fn>` / `imp.<lib>_<fn>` (e.g. `sym.imp.KERNEL32.dll_memcpy`),
+// plus `sub.<lib>_<fn>` stubs and anonymous/dotted symbols `fcn.ADDR` / `sym.lib.fn`,
 // none of which are legal C identifiers. Map those back to bare symbol names so
 // the decompiled C can be parsed by C tools (e.g. Semgrep).
 static std::string sanitizeCName(const char *raw) {
 	std::string s = raw? raw : "";
 	// Import stubs: sub.<lib>_<fn> -> <fn>
 	if (s.compare(0, 4, "sub.") == 0) {
-		size_t pos = s.rfind('_');
+		size_t pos = s.find('_');
 		if (pos != std::string::npos) {
 			return s.substr(pos + 1);
 		}
 	}
-	// Import flags: sym.imp.<fn> / imp.<fn> -> <fn>
+	// Import flags: sym.imp.<lib>_<fn> / imp.<lib>_<fn> -> <fn>. radare2 6.2
+	// embeds the library name (including its `.dll` suffix) before the function
+	// name, so drop everything through the first `_`; with no underscore the
+	// whole tail is already the bare symbol name.
 	if (s.compare(0, 8, "sym.imp.") == 0) {
-		return s.substr(8);
+		size_t pos = s.find('_', 8);
+		return (pos != std::string::npos) ? s.substr(pos + 1) : s.substr(8);
 	}
 	if (s.compare(0, 4, "imp.") == 0) {
-		return s.substr(4);
+		size_t pos = s.find('_', 4);
+		return (pos != std::string::npos) ? s.substr(pos + 1) : s.substr(4);
 	}
 	// Dotted flag names (fcn.ADDR, sym.lib.fn) -> underscores.
 	for (char &c : s) {
