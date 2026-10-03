@@ -221,7 +221,8 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	DocumentStorage store = DocumentStorage ();
 	arch.max_implied_ref = cfg_var_maximplref.GetInt (core->config);
 	arch.readonlypropagate = cfg_var_roprop.GetBool (core->config);
-	arch.setRawPtr (cfg_var_rawptr.GetBool (core->config));
+	// ccode (clean C output) disables raw pointer globals so unknowns become named symbols
+	arch.setRawPtr (cfg_var_rawptr.GetBool (core->config) && !cfg_var_ccode.GetBool (core->config));
 	arch.init (store);
 
 	auto faddr = Address(arch.getDefaultCodeSpace (), function->addr);
