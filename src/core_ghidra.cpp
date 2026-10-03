@@ -253,6 +253,9 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	}
 	PcodeFixupPreprocessor::fixupNoreturnCallsBeforeData(function, func, core, arch);
 	PcodeFixupPreprocessor::fixupResolvedIndirectCalls(function, func, core, arch);
+	if (cfg_var_ccode.GetBool (core->config)) {
+		PcodeFixupPreprocessor::fixupImportCallDeindirection(function, func, core, arch);
+	}
 	if (cfg_var_varargs.GetBool (core->config)) {
 		PcodeFixupPreprocessor::fixupVariadicFormatCalls(function, func, core, arch);
 	}
