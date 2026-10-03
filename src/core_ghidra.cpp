@@ -231,6 +231,15 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	auto r2c = dynamic_cast<R2PrintC *>(arch.print);
 	bool showCasts = cfg_var_casts.GetBool (core->config);
 	r2c->setOptionNoCasts (!showCasts);
+	if (cfg_var_ccode.GetBool (core->config)) {
+		// CCODE-style output: no casts, hide implied ZEXT/SEXT extensions, drop the
+		// calling convention from prototypes — closer to what Ghidra's toggleCCode
+		// emits and far more parseable by C tools (Semgrep).
+		auto cc = dynamic_cast<PrintC *>(arch.print);
+		cc->setNoCastPrinting (true);
+		cc->setHideImpliedExts (true);
+		cc->setConvention (false);
+	}
 	ApplyPrintCConfig (core->config, dynamic_cast<PrintC *>(arch.print));
 	if (func == nullptr) {
 		throw LowlevelError ("No function in Scope");
