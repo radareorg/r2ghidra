@@ -20,7 +20,7 @@
 // flags `sym.imp.<lib>_<fn>` / `imp.<lib>_<fn>` (e.g. `sym.imp.KERNEL32.dll_memcpy`),
 // plus `sub.<lib>_<fn>` stubs and anonymous/dotted symbols `fcn.ADDR` / `sym.lib.fn`,
 // none of which are legal C identifiers. Map those back to bare symbol names so
-// the decompiled C can be parsed by C tools (e.g. Semgrep).
+// the emitted C uses only legal identifiers.
 static std::string sanitizeCName(const char *raw) {
 	std::string s = raw? raw : "";
 	// Import stubs: sub.<lib>_<fn> -> <fn>
@@ -777,10 +777,13 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 
 FunctionSymbol *R2Scope::registerFunctionFlag(RFlagItem *flag) const {
 	RCoreLock core (arch->getCore ());
-	const char *name = (core->flags->realnames && flag->realname)
+	// radare2 stores the clean import/demangled name in realname; prefer it over the
+	// sym.imp.<lib>_<fn> / mangled flag name when requesting clean output.
+	bool ccode = r_config_get_b (core->config, "r2ghidra.ccode");
+	const char *name = ((core->flags->realnames || ccode) && flag->realname)
 		? flag->realname : flag->name;
 	std::string clean = name;
-	if (r_config_get_b (core->config, "r2ghidra.ccode")) {
+	if (ccode) {
 		clean = sanitizeCName (name);
 	}
 	FunctionSymbol *funcsym = cache->addFunction (Address (arch->getDefaultCodeSpace (), flag->addr), clean.c_str ());
@@ -825,9 +828,10 @@ Symbol *R2Scope::registerFlag(RFlagItem *flag) const {
 	}
 
 	// Check whether flags should be displayed by their real name
-	const char *name = (core->flags->realnames && flag->realname) ? flag->realname : flag->name;
+	bool ccode = r_config_get_b (core->config, "r2ghidra.ccode");
+	const char *name = ((core->flags->realnames || ccode) && flag->realname) ? flag->realname : flag->name;
 	std::string clean = name;
-	if (r_config_get_b (core->config, "r2ghidra.ccode")) {
+	if (ccode) {
 		clean = sanitizeCName (name);
 	}
 

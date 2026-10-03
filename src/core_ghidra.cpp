@@ -234,7 +234,7 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	if (cfg_var_ccode.GetBool (core->config)) {
 		// CCODE-style output: no casts, hide implied ZEXT/SEXT extensions, drop the
 		// calling convention from prototypes — closer to what Ghidra's toggleCCode
-		// emits and far more parseable by C tools (Semgrep).
+		// emits and closer to plain standard C.
 		auto cc = dynamic_cast<PrintC *>(arch.print);
 		cc->setNoCastPrinting (true);
 		cc->setHideImpliedExts (true);
