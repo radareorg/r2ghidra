@@ -16,6 +16,35 @@
 
 #include "R2Utils.h"
 
+// `e r2ghidra.ccode=true` asks for output that is valid C: radare2 names import
+// stubs `sub.<lib>_<fn>` and anonymous/dotted symbols `fcn.ADDR` / `sym.imp.fn`,
+// none of which are legal C identifiers. Map those back to bare symbol names so
+// the decompiled C can be parsed by C tools (e.g. Semgrep).
+static std::string sanitizeCName(const char *raw) {
+	std::string s = raw? raw : "";
+	// Import stubs: sub.<lib>_<fn> -> <fn>
+	if (s.compare(0, 4, "sub.") == 0) {
+		size_t pos = s.rfind('_');
+		if (pos != std::string::npos) {
+			return s.substr(pos + 1);
+		}
+	}
+	// Import flags: sym.imp.<fn> / imp.<fn> -> <fn>
+	if (s.compare(0, 8, "sym.imp.") == 0) {
+		return s.substr(8);
+	}
+	if (s.compare(0, 4, "imp.") == 0) {
+		return s.substr(4);
+	}
+	// Dotted flag names (fcn.ADDR, sym.lib.fn) -> underscores.
+	for (char &c : s) {
+		if (c == '.') {
+			c = '_';
+		}
+	}
+	return s;
+}
+
 R2Scope::R2Scope(R2Architecture *arch)
 		: Scope (0, "", arch, this),
 		  arch (arch),
@@ -604,8 +633,14 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 		}
 	}
 
+	std::string fcn_display = fcn_name;
+	if (r_config_get_b (core->config, "r2ghidra.ccode")) {
+		fcn_display = sanitizeCName (fcn_name);
+	}
+	const char *fcn_display_name = fcn_display.c_str ();
+
 	auto functionElement = child (&doc, "function", {
-		{ "name", fcn_name },
+		{ "name", fcn_display_name },
 		{ "size", "1" },
 		{ "id", hex (makeId()) }
 	});
@@ -618,7 +653,7 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	});
 
 	auto scopeElement = child(localDbElement, "scope", {
-		{ "name", fcn_name }
+		{ "name", fcn_display_name }
 	});
 
 	auto parentElement = child(scopeElement, "parent", {
@@ -738,7 +773,11 @@ FunctionSymbol *R2Scope::registerFunctionFlag(RFlagItem *flag) const {
 	RCoreLock core (arch->getCore ());
 	const char *name = (core->flags->realnames && flag->realname)
 		? flag->realname : flag->name;
-	FunctionSymbol *funcsym = cache->addFunction (Address (arch->getDefaultCodeSpace (), flag->addr), name);
+	std::string clean = name;
+	if (r_config_get_b (core->config, "r2ghidra.ccode")) {
+		clean = sanitizeCName (name);
+	}
+	FunctionSymbol *funcsym = cache->addFunction (Address (arch->getDefaultCodeSpace (), flag->addr), clean.c_str ());
 	if (r_anal_noreturn_at (core->anal, flag->addr)) {
 		markNoReturn (funcsym, protoHasNoArgs (core, name));
 	}
@@ -781,6 +820,10 @@ Symbol *R2Scope::registerFlag(RFlagItem *flag) const {
 
 	// Check whether flags should be displayed by their real name
 	const char *name = (core->flags->realnames && flag->realname) ? flag->realname : flag->name;
+	std::string clean = name;
+	if (r_config_get_b (core->config, "r2ghidra.ccode")) {
+		clean = sanitizeCName (name);
+	}
 
 	const ut64 at = flag->addr;
 	// a mapping whose end wraps below its start would throw out of addSymbol and abort the decompilation
@@ -788,7 +831,7 @@ Symbol *R2Scope::registerFlag(RFlagItem *flag) const {
 		arch->addWarning ("Flag " + to_string (name) + " extends beyond the end of the address space");
 		return nullptr;
 	}
-	SymbolEntry *entry = cache->addSymbol (name, type, Address (arch->getDefaultCodeSpace(), at), Address());
+	SymbolEntry *entry = cache->addSymbol (clean.c_str (), type, Address (arch->getDefaultCodeSpace(), at), Address());
 	if (entry == nullptr) {
 		return nullptr;
 	}

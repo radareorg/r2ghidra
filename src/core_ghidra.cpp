@@ -81,6 +81,7 @@ CV cfg_var_maximplref ("maximplref",  "2",        "Maximum number of references 
 CV cfg_var_rawptr     ("rawptr",      "true",     "Show unknown globals as raw addresses instead of variables");
 CV cfg_var_verbose    ("verbose",     "false",    "Show verbose warning messages while decompiling");
 CV cfg_var_casts      ("casts",       "false",    "Show type casts where needed");
+CV cfg_var_ccode      ("ccode",       "false",    "Emit clean C identifiers (bare import names, no fcn./sub. prefixes)");
 CV cfg_var_fixups     ("fixups",      "false",    "Apply pcode fixups");
 CV cfg_var_varargs    ("varargs",     "false",    "Recover printf-family varargs from literal format strings");
 CV cfg_var_vaformats  ("varargs.formats", "",     "Extra printf-style formatters for vararg recovery (bare names, comma separated)");
