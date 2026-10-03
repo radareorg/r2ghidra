@@ -274,7 +274,7 @@ void PcodeFixupPreprocessor::fixupResolvedIndirectCalls(RAnalFunction *r2Func, F
 // PE imports are reached through the IAT: `call qword [sym.imp.KERNEL32.dll_WriteFile]`.
 // radare2 emits a CALL ref from the call site to the import flag, but pcode still renders
 // the call as an indirect dereference `(*_WriteFile)(...)`. Deindirect each such call so
-// the decompiler prints a direct `WriteFile(...)`, which C tools (e.g. Semgrep) can match.
+// the decompiler prints a direct `WriteFile(...)` instead of an indirect pointer dereference.
 void PcodeFixupPreprocessor::fixupImportCallDeindirection(RAnalFunction *r2Func, Funcdata *ghFunc, RCore *core, R2Architecture &arch) {
 	RVecAnalRef *refs = r_anal_function_get_refs (r2Func);
 	if (!refs) {
