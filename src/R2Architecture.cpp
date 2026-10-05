@@ -241,10 +241,10 @@ ProtoModel *R2Architecture::buildProtoModelFromR2CC(const char *cc) {
 			if (contained) {
 				continue; // subregisters ride with their container
 			}
-			child (e.second? killed: unaffected, "range", {
+			child (e.second? killed: unaffected, "addr", {
 				{ "space", e.first->space->getName () },
-				{ "first", hex (e.first->offset) },
-				{ "last", hex (e.first->offset + e.first->size - 1) }
+				{ "offset", hex (e.first->offset) },
+				{ "size", std::to_string (e.first->size) }
 			});
 		}
 	}

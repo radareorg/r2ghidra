@@ -64,7 +64,7 @@ NAME=function variable annotations
 FILE=bins/dectest64
 EXPECT=<<EOF
 {
-  "code": "\nulong main(int argc,char **argv)\n\n{\n    ulong uVar1;\n    int64_t in_FS_OFFSET;\n    int64_t var_30h;\n    int32_t var_24h;\n    int64_t var_20h;\n    int64_t var_8h;\n    \n    var_8h = *(in_FS_OFFSET + 0x28);\n    sym.Aeropause(&var_20h,argc,argv);\n    uVar1 = 0;\n    if (var_8h != *(in_FS_OFFSET + 0x28)) {\n        uVar1 = sym.imp.__stack_chk_fail();\n    }\n    return uVar1;\n}\n\n",
+  "code": "\nulong main(int argc,char **argv,char **envp)\n\n{\n    ulong uVar1;\n    int64_t in_FS_OFFSET;\n    int64_t var_30h;\n    int32_t var_24h;\n    int64_t var_20h;\n    int64_t var_8h;\n    \n    var_8h = *(in_FS_OFFSET + 0x28);\n    sym.Aeropause(&var_20h,argc,argv);\n    uVar1 = 0;\n    if (var_8h != *(in_FS_OFFSET + 0x28)) {\n        uVar1 = sym.imp.__stack_chk_fail();\n    }\n    return uVar1;\n}\n\n",
   "annotations": [
     {
       "start": 1,
@@ -128,388 +128,406 @@ EXPECT=<<EOF
       "syntax_highlight": "function_parameter"
     },
     {
-      "start": 41,
-      "end": 46,
+      "start": 33,
+      "end": 37,
       "type": "syntax_highlight",
       "syntax_highlight": "datatype"
     },
     {
-      "start": 47,
-      "end": 52,
+      "start": 40,
+      "end": 44,
+      "type": "function_parameter",
+      "name": "envp"
+    },
+    {
+      "start": 40,
+      "end": 44,
+      "type": "syntax_highlight",
+      "syntax_highlight": "function_parameter"
+    },
+    {
+      "start": 53,
+      "end": 58,
+      "type": "syntax_highlight",
+      "syntax_highlight": "datatype"
+    },
+    {
+      "start": 59,
+      "end": 64,
       "type": "local_variable",
       "name": "uVar1"
     },
     {
-      "start": 47,
-      "end": 52,
+      "start": 59,
+      "end": 64,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 58,
-      "end": 65,
+      "start": 70,
+      "end": 77,
       "type": "syntax_highlight",
       "syntax_highlight": "datatype"
     },
     {
-      "start": 66,
-      "end": 78,
+      "start": 78,
+      "end": 90,
       "type": "local_variable",
       "name": "in_FS_OFFSET"
     },
     {
-      "start": 66,
-      "end": 78,
+      "start": 78,
+      "end": 90,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 84,
-      "end": 91,
+      "start": 96,
+      "end": 103,
       "type": "syntax_highlight",
       "syntax_highlight": "datatype"
     },
     {
-      "start": 92,
-      "end": 99,
+      "start": 104,
+      "end": 111,
       "type": "local_variable",
       "name": "var_30h"
     },
     {
-      "start": 92,
-      "end": 99,
+      "start": 104,
+      "end": 111,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 105,
-      "end": 112,
+      "start": 117,
+      "end": 124,
       "type": "syntax_highlight",
       "syntax_highlight": "datatype"
     },
     {
-      "start": 113,
-      "end": 120,
+      "start": 125,
+      "end": 132,
       "type": "local_variable",
       "name": "var_24h"
     },
     {
-      "start": 113,
-      "end": 120,
+      "start": 125,
+      "end": 132,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 126,
-      "end": 133,
+      "start": 138,
+      "end": 145,
       "type": "syntax_highlight",
       "syntax_highlight": "datatype"
     },
     {
-      "start": 134,
-      "end": 141,
+      "start": 146,
+      "end": 153,
       "type": "local_variable",
       "name": "var_20h"
     },
     {
-      "start": 134,
-      "end": 141,
+      "start": 146,
+      "end": 153,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 147,
-      "end": 154,
+      "start": 159,
+      "end": 166,
       "type": "syntax_highlight",
       "syntax_highlight": "datatype"
     },
     {
-      "start": 155,
-      "end": 161,
+      "start": 167,
+      "end": 173,
       "type": "local_variable",
       "name": "var_8h"
     },
     {
-      "start": 155,
-      "end": 161,
+      "start": 167,
+      "end": 173,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 172,
-      "end": 178,
+      "start": 184,
+      "end": 190,
       "type": "local_variable",
       "name": "var_8h"
     },
     {
-      "start": 172,
-      "end": 178,
+      "start": 184,
+      "end": 190,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 179,
-      "end": 180,
+      "start": 191,
+      "end": 192,
       "type": "offset",
       "offset": 4198797
     },
     {
-      "start": 181,
-      "end": 182,
+      "start": 193,
+      "end": 194,
       "type": "offset",
       "offset": 4198797
     },
     {
-      "start": 183,
-      "end": 195,
+      "start": 195,
+      "end": 207,
       "type": "local_variable",
       "name": "in_FS_OFFSET"
     },
     {
-      "start": 183,
-      "end": 195,
+      "start": 195,
+      "end": 207,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 196,
-      "end": 197,
+      "start": 208,
+      "end": 209,
       "type": "offset",
       "offset": 4198797
     },
     {
-      "start": 198,
-      "end": 202,
+      "start": 210,
+      "end": 214,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 172,
-      "end": 203,
+      "start": 184,
+      "end": 215,
       "type": "offset",
       "offset": 4198797
     },
     {
-      "start": 209,
-      "end": 222,
+      "start": 221,
+      "end": 234,
       "type": "function_name",
       "name": "sym.Aeropause",
       "offset": 4199038
     },
     {
-      "start": 209,
-      "end": 222,
+      "start": 221,
+      "end": 234,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 223,
-      "end": 224,
+      "start": 235,
+      "end": 236,
       "type": "offset",
       "offset": 4198819
     },
     {
-      "start": 224,
-      "end": 231,
+      "start": 236,
+      "end": 243,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 231,
-      "end": 232,
+      "start": 243,
+      "end": 244,
       "type": "offset",
       "offset": 4198828
     },
     {
-      "start": 232,
-      "end": 236,
+      "start": 244,
+      "end": 248,
       "type": "function_parameter",
       "name": "argc"
     },
     {
-      "start": 232,
-      "end": 236,
+      "start": 244,
+      "end": 248,
       "type": "syntax_highlight",
       "syntax_highlight": "function_parameter"
     },
     {
-      "start": 236,
-      "end": 237,
+      "start": 248,
+      "end": 249,
       "type": "offset",
       "offset": 4198828
     },
     {
-      "start": 237,
-      "end": 241,
+      "start": 249,
+      "end": 253,
       "type": "function_parameter",
       "name": "argv"
     },
     {
-      "start": 237,
-      "end": 241,
+      "start": 249,
+      "end": 253,
       "type": "syntax_highlight",
       "syntax_highlight": "function_parameter"
     },
     {
-      "start": 209,
-      "end": 242,
+      "start": 221,
+      "end": 254,
       "type": "offset",
       "offset": 4198828
     },
     {
-      "start": 248,
-      "end": 253,
+      "start": 260,
+      "end": 265,
       "type": "local_variable",
       "name": "uVar1"
     },
     {
-      "start": 248,
-      "end": 253,
+      "start": 260,
+      "end": 265,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 254,
-      "end": 255,
+      "start": 266,
+      "end": 267,
       "type": "offset",
       "offset": 4198833
     },
     {
-      "start": 256,
-      "end": 257,
+      "start": 268,
+      "end": 269,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 248,
-      "end": 257,
+      "start": 260,
+      "end": 269,
       "type": "offset",
       "offset": 4198833
     },
     {
-      "start": 263,
-      "end": 265,
+      "start": 275,
+      "end": 277,
       "type": "offset",
       "offset": 4198851
     },
     {
-      "start": 263,
-      "end": 265,
+      "start": 275,
+      "end": 277,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 267,
-      "end": 273,
+      "start": 279,
+      "end": 285,
       "type": "local_variable",
       "name": "var_8h"
     },
     {
-      "start": 267,
-      "end": 273,
+      "start": 279,
+      "end": 285,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 274,
-      "end": 276,
+      "start": 286,
+      "end": 288,
       "type": "offset",
       "offset": 4198842
     },
     {
-      "start": 277,
-      "end": 278,
+      "start": 289,
+      "end": 290,
       "type": "offset",
       "offset": 4198842
     },
     {
-      "start": 279,
-      "end": 291,
+      "start": 291,
+      "end": 303,
       "type": "local_variable",
       "name": "in_FS_OFFSET"
     },
     {
-      "start": 279,
-      "end": 291,
+      "start": 291,
+      "end": 303,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 292,
-      "end": 293,
+      "start": 304,
+      "end": 305,
       "type": "offset",
       "offset": 4198842
     },
     {
-      "start": 294,
-      "end": 298,
+      "start": 306,
+      "end": 310,
       "type": "syntax_highlight",
       "syntax_highlight": "constant_variable"
     },
     {
-      "start": 311,
-      "end": 316,
+      "start": 323,
+      "end": 328,
       "type": "local_variable",
       "name": "uVar1"
     },
     {
-      "start": 311,
-      "end": 316,
+      "start": 323,
+      "end": 328,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 317,
-      "end": 318,
+      "start": 329,
+      "end": 330,
       "type": "offset",
       "offset": 4198853
     },
     {
-      "start": 319,
-      "end": 343,
+      "start": 331,
+      "end": 355,
       "type": "function_name",
       "name": "sym.imp.__stack_chk_fail",
       "offset": 4198464
     },
     {
-      "start": 319,
-      "end": 343,
+      "start": 331,
+      "end": 355,
       "type": "syntax_highlight",
       "syntax_highlight": "function_name"
     },
     {
-      "start": 311,
-      "end": 345,
+      "start": 323,
+      "end": 357,
       "type": "offset",
       "offset": 4198853
     },
     {
-      "start": 357,
-      "end": 363,
+      "start": 369,
+      "end": 375,
       "type": "offset",
       "offset": 4198859
     },
     {
-      "start": 357,
-      "end": 363,
+      "start": 369,
+      "end": 375,
       "type": "syntax_highlight",
       "syntax_highlight": "keyword"
     },
     {
-      "start": 364,
-      "end": 369,
+      "start": 376,
+      "end": 381,
       "type": "local_variable",
       "name": "uVar1"
     },
     {
-      "start": 364,
-      "end": 369,
+      "start": 376,
+      "end": 381,
       "type": "syntax_highlight",
       "syntax_highlight": "local_variable"
     },
     {
-      "start": 357,
-      "end": 369,
+      "start": 369,
+      "end": 381,
       "type": "offset",
       "offset": 4198859
     }
@@ -1687,7 +1705,7 @@ arg int64_t arg3 @ rdx
 var int64_t var_8h @ rbp-0x8
 var int32_t var_ch @ rbp-0xc
 var int64_t var_18h @ rbp-0x18
-void sym.Aeropause (int64_t arg1, int64_t arg2, int64_t arg3);
+void sym.Aeropause (int64_t *arg1, int64_t arg2, int64_t arg3);
 EOF
 EXPECT_ERR=<<EOF
 INFO: pdgw: wrote 1 types, 0 names

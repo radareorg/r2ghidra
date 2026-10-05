@@ -931,7 +931,7 @@ aaa
 pdg @ sym.p_printf~%f
 EOF2
 EXPECT=<<EOF
-    sym.imp.printf("%s %d %f %x\n",arg1,arg2 & 0xffffffff,arg3);
+    sym.imp.printf("%s %d %f %x\n",arg1,arg2 & 0xffffffff,arg3 & 0xffffffff);
 EOF
 RUN
 
