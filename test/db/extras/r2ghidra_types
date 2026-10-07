@@ -1700,15 +1700,15 @@ afs
 EOF
 EXPECT=<<EOF
 arg int64_t * arg1 @ rdi
-arg int64_t arg2 @ rsi
-arg int64_t arg3 @ rdx
+arg uint32_t arg2 @ rsi
+arg uint64_t arg3 @ rdx
 var int64_t var_8h @ rbp-0x8
 var int32_t var_ch @ rbp-0xc
 var int64_t var_18h @ rbp-0x18
-void sym.Aeropause (int64_t *arg1, int64_t arg2, int64_t arg3);
+void sym.Aeropause (int64_t *arg1, uint32_t arg2, uint64_t arg3);
 EOF
 EXPECT_ERR=<<EOF
-INFO: pdgw: wrote 1 types, 0 names
+INFO: pdgw: wrote 3 types, 0 names, signature
 EOF
 RUN
 
@@ -1726,14 +1726,14 @@ afv
 EOF
 EXPECT=<<EOF
 arg int64_t * arg1 @ rdi
-arg int64_t arg2 @ rsi
-arg int64_t arg3 @ rdx
+arg uint32_t arg2 @ rsi
+arg uint64_t arg3 @ rdx
 var int64_t var_8h @ rbp-0x8
 var int32_t var_ch @ rbp-0xc
 var int64_t var_18h @ rbp-0x18
 EOF
 EXPECT_ERR=<<EOF
-INFO: pdgw: wrote 1 types, 0 names
+INFO: pdgw: wrote 3 types, 0 names, signature
 INFO: pdgw: no changes
 EOF
 RUN
@@ -1751,7 +1751,7 @@ pdg~Aeropause(
 EOF
 EXPECT=<<EOF
 void sym.Aeropause(int64_t arg1,int64_t arg2,int64_t arg3)
-void sym.Aeropause(int64_t *arg1,int64_t arg2,int64_t arg3)
+void sym.Aeropause(int64_t *arg1,uint32_t arg2,uint64_t arg3)
 EOF
 RUN
 
@@ -1788,7 +1788,7 @@ afs
 pdgw
 EOF
 EXPECT=<<EOF
-void sym..crc32_init (int64_t arg1);
+uint64_t sym..crc32_init (int64_t arg1);
 EOF
 EXPECT_ERR=<<EOF
 INFO: pdgw: wrote 0 types, 0 names, signature
@@ -1848,12 +1848,12 @@ pdgw
 afv
 EOF
 EXPECT=<<EOF
-arg int32_t arg_8h @ ebp+0x8
+arg uint32_t arg_8h @ ebp+0x8
 var int32_t var_8h @ ebp-0x8
 var int32_t var_ch @ ebp-0xc
 EOF
 EXPECT_ERR=<<EOF
-INFO: pdgw: no changes
+INFO: pdgw: wrote 1 types, 0 names, signature
 INFO: pdgw: no changes
 EOF
 RUN
@@ -1873,12 +1873,12 @@ EXPECT=<<EOF
 arg int argc @ rdi
 arg char ** argv @ rsi
 var int64_t var_8h @ rbp-0x8
-var int64_t var_20h @ rbp-0x20
+var uint8_t[24] var_20h @ rbp-0x20
 var int32_t var_24h @ rbp-0x24
 var int64_t var_30h @ rbp-0x30
 EOF
 EXPECT_ERR=<<EOF
-INFO: pdgw: no changes
+INFO: pdgw: wrote 1 types, 0 names, signature
 EOF
 RUN
 
@@ -1969,5 +1969,558 @@ pdg~cb
 EOF
 EXPECT=<<EOF
     fVar1 = (*(slot->cb).fn)(receiver,slot->method);
+EOF
+RUN
+
+NAME=pdgw preserves an unknown 8-bit parameter and return across writes
+FILE=malloc://64
+ARGS=-a x86 -b 64 -e log.level=0
+CMDS=<<EOF
+wx 400fb6c7c3
+af
+afn transfer
+afc amd64
+e r2ghidra.lang=x86:LE:64:default:gcc
+e r2ghidra.vars=false
+e log.level=2
+pdgw
+afs
+e r2ghidra.vars=true
+pdg~return
+pdgw
+afs
+pdg~return
+EOF
+EXPECT=<<EOF
+uint8_t transfer (uint8_t arg1);
+    return arg1;
+uint8_t transfer (uint8_t arg1);
+    return arg1;
+EOF
+EXPECT_ERR=<<EOF
+INFO: pdgw: wrote 1 types, 0 names, signature
+INFO: pdgw: no changes
+EOF
+RUN
+
+NAME=pdgw preserves an unknown 16-bit parameter and return across writes
+FILE=malloc://64
+ARGS=-a x86 -b 64 -e log.level=0
+CMDS=<<EOF
+wx 0fb7c7c3
+af
+afn transfer
+afc amd64
+e r2ghidra.lang=x86:LE:64:default:gcc
+e r2ghidra.vars=false
+e log.level=2
+pdgw
+afs
+e r2ghidra.vars=true
+pdg~return
+pdgw
+afs
+pdg~return
+EOF
+EXPECT=<<EOF
+uint16_t transfer (uint16_t arg1);
+    return arg1;
+uint16_t transfer (uint16_t arg1);
+    return arg1;
+EOF
+EXPECT_ERR=<<EOF
+INFO: pdgw: wrote 1 types, 0 names, signature
+INFO: pdgw: no changes
+EOF
+RUN
+
+NAME=pdgw preserves an unknown 32-bit parameter and return across writes
+FILE=malloc://64
+ARGS=-a x86 -b 64 -e log.level=0
+CMDS=<<EOF
+wx 89f8c3
+af
+afn transfer
+afc amd64
+e r2ghidra.lang=x86:LE:64:default:gcc
+e r2ghidra.vars=false
+e log.level=2
+pdgw
+afs
+e r2ghidra.vars=true
+pdg~return
+pdgw
+afs
+pdg~return
+EOF
+EXPECT=<<EOF
+uint32_t transfer (uint32_t arg1);
+    return arg1;
+uint32_t transfer (uint32_t arg1);
+    return arg1;
+EOF
+EXPECT_ERR=<<EOF
+INFO: pdgw: wrote 1 types, 0 names, signature
+INFO: pdgw: no changes
+EOF
+RUN
+
+NAME=pdgw preserves an unknown 64-bit parameter and return across writes
+FILE=malloc://64
+ARGS=-a x86 -b 64 -e log.level=0
+CMDS=<<EOF
+wx 4889f8c3
+af
+afn transfer
+afc amd64
+e r2ghidra.lang=x86:LE:64:default:gcc
+e r2ghidra.vars=false
+e log.level=2
+pdgw
+afs
+e r2ghidra.vars=true
+pdg~return
+pdgw
+afs
+pdg~return
+EOF
+EXPECT=<<EOF
+uint64_t transfer (uint64_t arg1);
+    return arg1;
+uint64_t transfer (uint64_t arg1);
+    return arg1;
+EOF
+EXPECT_ERR=<<EOF
+INFO: pdgw: wrote 1 types, 0 names, signature
+INFO: pdgw: no changes
+EOF
+RUN
+
+NAME=pdgw retains a recovered stack array through the next decompile
+FILE=bins/dectest64
+ARGS=-e log.level=0
+CMDS=<<EOF
+s main
+af
+e r2ghidra.vars=false
+e log.level=2
+pdgw
+afv~var_20h
+e r2ghidra.vars=true
+pdg~var_20h
+pdgw
+afv~var_20h
+EOF
+EXPECT=<<EOF
+var uint8_t[24] var_20h @ rbp-0x20
+    uint8_t var_20h [24];
+    sym.Aeropause(var_20h,argc,argv);
+var uint8_t[24] var_20h @ rbp-0x20
+EOF
+EXPECT_ERR=<<EOF
+INFO: pdgw: wrote 1 types, 0 names, signature
+INFO: pdgw: no changes
+EOF
+RUN
+
+NAME=pdgw preserves multidimensional array order
+FILE=bins/dectest64
+ARGS=-e log.level=0
+CMDS=<<EOF
+s main
+af
+afvt var_20h uint8_t[2][3]
+pdg~var_20h
+pdgw
+afv~var_20h
+pdgw
+afv~var_20h
+EOF
+EXPECT=<<EOF
+    uint8_t var_20h [2] [3];
+    sym.Aeropause(var_20h,argc,argv);
+var uint8_t[2][3] var_20h @ rbp-0x20
+var uint8_t[2][3] var_20h @ rbp-0x20
+EOF
+EXPECT_ERR=<<EOF
+EOF
+RUN
+
+NAME=pdgw preserves an existing composite definition and signature
+FILE=malloc://64
+ARGS=-a x86 -b 64 -e log.level=0
+CMDS=<<EOF
+wx 8b4704c3
+af
+afc amd64
+e r2ghidra.lang=x86:LE:64:default:gcc
+"td struct Pair { int x; int y; };"
+"afs int read_pair(Pair *pair)"
+pdgw
+afs
+pdgw
+afs
+pdg~return
+tk struct.Pair.y
+EOF
+EXPECT=<<EOF
+int read_pair (Pair *pair);
+int read_pair (Pair *pair);
+    return pair->y;
+int,4,0
+EOF
+EXPECT_ERR=<<EOF
+EOF
+RUN
+
+NAME=array type parser rejects invalid dimensions and size overflow
+FILE=bins/dectest64
+ARGS=-e log.level=0
+CMDS=<<EOF
+s main
+af
+e r2ghidra.verbose=true
+afvt var_20h uint8_t[0]
+pdg~Failed to match type~?
+afvt var_20h uint8_t[-1]
+pdg~Failed to match type~?
+afvt var_20h uint8_t[2147483648]
+pdg~Failed to match type~?
+afvt var_20h uint64_t[268435456]
+pdg~Failed to match type~?
+afvt var_20h uint8_t[9999999999999999999999]
+pdg~Failed to match type~?
+afvt var_20h uint8_t[2]junk
+pdg~Failed to match type~?
+afvt var_20h uint8_t[2
+pdg~Failed to match type~?
+afvt var_20h [2]
+pdg~Failed to match type~?
+afvt var_20h uint8_t[1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1][1]
+pdg~Failed to match type~?
+EOF
+EXPECT=<<EOF
+1
+1
+1
+1
+1
+1
+1
+1
+1
+EOF
+EXPECT_ERR=<<EOF
+EOF
+RUN
+
+NAME=pdgw preserves arrays of pointers
+FILE=bins/dectest64
+ARGS=-e log.level=0
+CMDS=<<EOF
+s main
+af
+afvt var_20h uint8_t *[2]
+pdg~var_20h
+pdgw
+afv~var_20h
+pdgw
+afv~var_20h
+EOF
+EXPECT=<<EOF
+    uint8_t *var_20h [2];
+    sym.Aeropause(var_20h,argc,argv);
+var uint8_t *[2] var_20h @ rbp-0x20
+var uint8_t *[2] var_20h @ rbp-0x20
+EOF
+EXPECT_ERR=<<EOF
+EOF
+RUN
+
+NAME=pdgw keeps a safe pointer argument without moving an unknown XMM return
+FILE=malloc://64
+ARGS=-a x86 -b 64 -e log.level=0
+CMDS=<<EOF
+wx f20f1007c3
+af
+afn load
+afc amd64
+e r2ghidra.lang=x86:LE:64:default:gcc
+e r2ghidra.vars=false
+e log.level=2
+pdgw
+afv~arg1
+tk func.load.cc~?
+e r2ghidra.vars=true
+pdg~return
+pdgw
+afv~arg1
+tk func.load.cc~?
+pdg~return
+pdgw
+afv~arg1
+tk func.load.cc~?
+pdg~return
+EOF
+EXPECT=<<EOF
+arg uint64_t * arg1 @ rdi
+0
+    return *in_RDI;
+arg uint64_t * arg1 @ rdi
+0
+    return *in_RDI;
+arg uint64_t * arg1 @ rdi
+0
+    return *in_RDI;
+EOF
+EXPECT_ERR=<<EOF
+INFO: pdgw: wrote 1 types, 0 names
+INFO: pdgw: no changes
+INFO: pdgw: no changes
+EOF
+RUN
+
+NAME=pdgw keeps an unknown XMM argument out of integer ABI storage
+FILE=malloc://64
+ARGS=-a x86 -b 64 -e log.level=0
+CMDS=<<EOF
+wx 660f7ec0c3
+af
+afn transfer
+afc amd64
+e r2ghidra.lang=x86:LE:64:default:gcc
+e r2ghidra.vars=false
+pdgw
+afs
+afv
+e r2ghidra.vars=true
+pdg~return
+pdgw
+afs
+pdg~return
+pdgw
+pdg~return
+EOF
+EXPECT=<<EOF
+void transfer (double arg1);
+arg double arg1 @ xmm0
+    return in_XMM0_Da;
+uint32_t transfer (double arg1);
+    return SUB84(arg1,0);
+    return SUB84(arg1,0);
+EOF
+EXPECT_ERR=<<EOF
+EOF
+RUN
+
+NAME=pdgw preserves a recovered GPR memory return across writes
+FILE=malloc://64
+ARGS=-a x86 -b 64 -e log.level=0
+CMDS=<<EOF
+wx 488b07c3
+af
+afn load
+afc amd64
+e r2ghidra.lang=x86:LE:64:default:gcc
+e r2ghidra.vars=false
+pdgw
+afs
+e r2ghidra.vars=true
+pdg~return
+pdgw
+afs
+pdg~return
+EOF
+EXPECT=<<EOF
+uint64_t load (uint64_t *arg1);
+    return *arg1;
+uint64_t load (uint64_t *arg1);
+    return *arg1;
+EOF
+EXPECT_ERR=<<EOF
+EOF
+RUN
+
+NAME=pdgw preserves a typed floating-point return across writes
+FILE=malloc://64
+ARGS=-a x86 -b 64 -e log.level=0
+CMDS=<<EOF
+wx f20f1007c3
+af
+afn load
+afc amd64
+e r2ghidra.lang=x86:LE:64:default:gcc
+"afs double load(double *value)"
+e r2ghidra.vars=false
+pdgw
+afs
+e r2ghidra.vars=true
+pdg~return
+pdgw
+afs
+pdg~return
+EOF
+EXPECT=<<EOF
+double load (double *value);
+    return *value;
+double load (double *value);
+    return *value;
+EOF
+EXPECT_ERR=<<EOF
+EOF
+RUN
+
+NAME=pdgw retains an inferred array prefix and observable adjacent stack writes
+FILE=malloc://128
+ARGS=-a x86 -b 64 -e log.level=0
+CMDS=<<EOF
+wx 554889e54883ec20897dec8b45ec8945f8488d45f04889c7e82300000090c9c3
+wx c3 @ 0x40
+s 0x40
+af
+afn consume
+s 0
+af
+afn caller
+afc amd64
+e r2ghidra.lang=x86:LE:64:default:gcc
+e r2ghidra.vars=false
+pdgw
+afv~var_10h
+e r2ghidra.vars=true
+pdg~var_8h =
+pdg~consume(
+pdgw
+afv~var_10h
+pdg~var_8h =
+pdg~consume(
+pdgw
+afv~var_10h
+pdg~var_8h =
+EOF
+EXPECT=<<EOF
+var uint8_t[8] var_10h @ rbp-0x10
+    var_8h = arg1;
+    consume(var_10h);
+var uint8_t[8] var_10h @ rbp-0x10
+    var_8h = arg1;
+    consume(var_10h);
+var uint8_t[8] var_10h @ rbp-0x10
+    var_8h = arg1;
+EOF
+EXPECT_ERR=<<EOF
+EOF
+RUN
+
+NAME=pdgw keeps explicit array bounds and an observable element assignment
+FILE=malloc://128
+ARGS=-a x86 -b 64 -e log.level=0
+CMDS=<<EOF
+wx 554889e54883ec20897dec8b45ec8945f8488d45f04889c7e82300000090c9c3
+wx c3 @ 0x40
+s 0x40
+af
+afn consume
+s 0
+af
+afn caller
+afc amd64
+e r2ghidra.lang=x86:LE:64:default:gcc
+afvt var_10h int32_t[4]
+pdgw
+afv~var_10h
+pdg~ =
+pdg~consume(
+pdgw
+afv~var_10h
+pdg~ =
+pdg~consume(
+EOF
+EXPECT=<<EOF
+var int32_t[4] var_10h @ rbp-0x10
+    var_10h[2] = arg1;
+    consume(var_10h);
+var int32_t[4] var_10h @ rbp-0x10
+    var_10h[2] = arg1;
+    consume(var_10h);
+EOF
+EXPECT_ERR=<<EOF
+EOF
+RUN
+
+NAME=pdgw retains structure alias barriers when importing local arrays
+FILE=malloc://128
+ARGS=-a x86 -b 64 -e log.level=0
+CMDS=<<EOF
+wx 554889e54883ec20897dec8b45ec8945f8488d45f04889c7e82300000090c9c3
+wx c3 @ 0x40
+s 0x40
+af
+afn consume
+s 0
+af
+afn caller
+afc amd64
+e r2ghidra.lang=x86:LE:64:default:gcc
+"td struct Prefix { uint8_t bytes[8]; };"
+afvt var_10h Prefix
+afvt var_14h uint8_t[4]
+pdgw
+afv~var_14h
+pdg~var_8h =~?
+pdg~consume(
+pdgw
+afv~var_14h
+pdg~var_8h =~?
+pdg~consume(
+EOF
+EXPECT=<<EOF
+var uint8_t[4] var_14h @ rbp-0x14
+0
+    consume(&var_10h);
+var uint8_t[4] var_14h @ rbp-0x14
+0
+    consume(&var_10h);
+EOF
+EXPECT_ERR=<<EOF
+EOF
+RUN
+
+NAME=pdgw does not retype an unknown floating-register argument as an integer
+FILE=malloc://64
+ARGS=-a arm -b 64 -m 0x1000 -e log.level=0
+CMDS=<<EOF
+wx 0000669ec0035fd6
+af
+afn transfer
+afc arm64
+e r2ghidra.lang=AARCH64:LE:64:v8A:default
+e r2ghidra.vars=false
+e log.level=2
+pdgw
+afv
+tk func.transfer.cc~?
+e r2ghidra.vars=true
+pdg~return
+pdgw
+afv
+tk func.transfer.cc~?
+pdg~return
+pdgw
+afv
+EOF
+EXPECT=<<EOF
+arg double arg1 @ d0
+0
+    return arg1;
+arg double arg1 @ d0
+0
+    return arg1;
+arg double arg1 @ d0
+EOF
+EXPECT_ERR=<<EOF
+INFO: pdgw: no changes
+INFO: pdgw: no changes
+INFO: pdgw: no changes
 EOF
 RUN

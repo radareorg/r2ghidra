@@ -60,8 +60,20 @@ Usage: pdg  # Native Ghidra decompiler plugin
 | pdgs          # Display loaded Sleigh Languages
 | pdgsd N       # Disassemble N instructions with Sleigh and print pcode
 | pdgss         # Display automatically matched Sleigh Language ID
+| pdgw          # Write recovered variable types, names and signatures to r2
 | pdgx          # Dump the XML of the current decompiled function
 ```
+
+`pdgw` updates existing variables and the current function's signature. Unknown
+1-, 2-, 4- and 8-byte scalar types are written as fixed-width unsigned integers;
+this preserves their size without claiming that signedness was recovered. A
+signature is written only when all exported types keep the recovered ABI storage;
+individually safe argument types can still be written. Local arrays retain their
+element types and dimensions without treating array bounds as proof that adjacent
+stack writes are unobservable. Existing named composite types are preserved.
+Unsupported types are skipped, and a second write reports no changes once the
+recovered types have converged. Use
+`r2ghidra.write.vars` and `r2ghidra.write.sig` to control the two kinds of writes.
 
 With `e asm.arch=r2ghidra`, `asm.cpu` accepts r2 aliases such as `arm`, `ppc`,
 `java`, `msp430`, and `sh`. Aliases and short Ghidra processor names are

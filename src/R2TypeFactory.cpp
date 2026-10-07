@@ -815,6 +815,40 @@ Datatype *R2TypeFactory::findById(const string &n, uint8 id, int4 sz) {
 	return r;
 }
 
+Datatype *R2TypeFactory::arrayFromCString(const string &str, string *error, std::set<std::string> *stackTypes) {
+	const size_t first = str.find('[');
+	std::string base = trim_ws(str.substr(0, first));
+	if (base.empty() || base.find_first_of("()]") != std::string::npos) {
+		return nullptr;
+	}
+	std::vector<int4> dimensions;
+	size_t pos = first;
+	while (pos < str.size()) {
+		if (dimensions.size() == 64 || str[pos++] != '[') {
+			return nullptr;
+		}
+		const size_t end = str.find(']', pos);
+		if (end == std::string::npos) {
+			return nullptr;
+		}
+		const int4 size = atoi_or(trim_ws(str.substr(pos, end - pos)), 0);
+		if (size <= 0) {
+			return nullptr;
+		}
+		dimensions.push_back(size);
+		pos = str.find_first_not_of(' ', end + 1);
+	}
+	Datatype *element = fromCString(base, error, stackTypes);
+	for (auto it = dimensions.rbegin(); element && it != dimensions.rend(); ++it) {
+		const int4 stride = element->getAlignSize();
+		if (stride < 1 || *it > INT_MAX / stride) {
+			return nullptr;
+		}
+		element = getTypeArray(*it, element);
+	}
+	return element;
+}
+
 Datatype *R2TypeFactory::fromCString(const string &str, string *error, std::set<std::string> *stackTypes) {
 	std::string key = normalize_ws (trim_ws (str));
 	if (key.empty ()) {
@@ -827,6 +861,13 @@ Datatype *R2TypeFactory::fromCString(const string &str, string *error, std::set<
 			*error = entry.error;
 		}
 		return entry.type;
+	}
+	if (key.find('[') != std::string::npos) {
+		Datatype *array = arrayFromCString(key, error, stackTypes);
+		if (!array && error) {
+			*error = "Invalid or oversized array type";
+		}
+		return array;
 	}
 	// results computed mid-recursion may be truncated by the recursion guard, so only cache full resolutions
 	const bool toplevel = !stackTypes || stackTypes->empty ();
@@ -966,11 +1007,33 @@ std::string R2TypeFactory::toCString(Datatype *type) {
 	case TYPE_PTR:
 	case TYPE_PTRREL: {
 		std::string inner = toCString(static_cast<TypePointer *>(type)->getPtrTo());
-		if (inner.empty()) {
+		// afs cannot place a parameter name inside a pointer-to-array declarator.
+		if (inner.empty() || inner.find('[') != std::string::npos) {
 			return "";
 		}
 		return inner + (inner.back() == '*' ? "*" : " *");
 	}
+	case TYPE_ARRAY: {
+		auto array = static_cast<TypeArray *>(type);
+		std::string inner = toCString(array->getBase());
+		if (inner.empty()) {
+			return "";
+		}
+		const size_t bracket = inner.find('[');
+		inner.insert(bracket == std::string::npos ? inner.size() : bracket,
+			"[" + std::to_string(array->numElements()) + "]");
+		return inner;
+	}
+	case TYPE_UNKNOWN:
+		switch (type->getSize()) {
+		case 1:
+		case 2:
+		case 4:
+		case 8:
+			return "uint" + std::to_string(type->getSize() * 8) + "_t";
+		default:
+			return "";
+		}
 	case TYPE_INT:
 	case TYPE_UINT:
 	case TYPE_BOOL:
@@ -981,7 +1044,7 @@ std::string R2TypeFactory::toCString(Datatype *type) {
 	case TYPE_ENUM_UINT:
 		return type->getName();
 	default:
-		// TYPE_UNKNOWN would come back as a typelocked guess; arrays/partials/code are not expressible
+		// Partial types and code are not expressible as an r2 type string.
 		return "";
 	}
 }
