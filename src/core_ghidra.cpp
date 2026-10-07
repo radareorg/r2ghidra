@@ -81,6 +81,7 @@ CV cfg_var_maximplref ("maximplref",  "2",        "Maximum number of references 
 CV cfg_var_rawptr     ("rawptr",      "true",     "Show unknown globals as raw addresses instead of variables");
 CV cfg_var_verbose    ("verbose",     "false",    "Show verbose warning messages while decompiling");
 CV cfg_var_casts      ("casts",       "false",    "Show type casts where needed");
+CV cfg_var_ccode      ("ccode",       "false",    "Emit clean C identifiers (bare import names, no fcn./sub. prefixes)");
 CV cfg_var_fixups     ("fixups",      "false",    "Apply pcode fixups");
 CV cfg_var_varargs    ("varargs",     "false",    "Recover printf-family varargs from literal format strings");
 CV cfg_var_vaformats  ("varargs.formats", "",     "Extra printf-style formatters for vararg recovery (bare names, comma separated)");
@@ -220,7 +221,8 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	DocumentStorage store = DocumentStorage ();
 	arch.max_implied_ref = cfg_var_maximplref.GetInt (core->config);
 	arch.readonlypropagate = cfg_var_roprop.GetBool (core->config);
-	arch.setRawPtr (cfg_var_rawptr.GetBool (core->config));
+	// ccode (clean C output) disables raw pointer globals so unknowns become named symbols
+	arch.setRawPtr (cfg_var_rawptr.GetBool (core->config) && !cfg_var_ccode.GetBool (core->config));
 	arch.init (store);
 
 	auto faddr = Address(arch.getDefaultCodeSpace (), function->addr);
@@ -230,6 +232,15 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	auto r2c = dynamic_cast<R2PrintC *>(arch.print);
 	bool showCasts = cfg_var_casts.GetBool (core->config);
 	r2c->setOptionNoCasts (!showCasts);
+	if (cfg_var_ccode.GetBool (core->config)) {
+		// CCODE-style output: no casts, hide implied ZEXT/SEXT extensions, drop the
+		// calling convention from prototypes — closer to what Ghidra's toggleCCode
+		// emits and closer to plain standard C.
+		auto cc = dynamic_cast<PrintC *>(arch.print);
+		cc->setNoCastPrinting (true);
+		cc->setHideImpliedExts (true);
+		cc->setConvention (false);
+	}
 	ApplyPrintCConfig (core->config, dynamic_cast<PrintC *>(arch.print));
 	if (func == nullptr) {
 		throw LowlevelError ("No function in Scope");
@@ -243,6 +254,9 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	}
 	PcodeFixupPreprocessor::fixupNoreturnCallsBeforeData(function, func, core, arch);
 	PcodeFixupPreprocessor::fixupResolvedIndirectCalls(function, func, core, arch);
+	if (cfg_var_ccode.GetBool (core->config)) {
+		PcodeFixupPreprocessor::fixupImportCallDeindirection(function, func, core, arch);
+	}
 	if (cfg_var_varargs.GetBool (core->config)) {
 		PcodeFixupPreprocessor::fixupVariadicFormatCalls(function, func, core, arch);
 	}
