@@ -322,6 +322,10 @@ struct FunctionVars {
 				typelock = false;
 			}
 
+			// Array extents do not prove that adjacent stack storage is unaliased.
+			if (!var->isarg && type->getMetatype () == TYPE_ARRAY && arch->alias_block_level > 1) {
+				arch->alias_block_level = 1;
+			}
 			ranges.insertRange (sa.getSpace (), sa.getOffset (), last);
 
 			Element *symbolElement = emitSymbol (symbollistElement, var->name, type, sa,

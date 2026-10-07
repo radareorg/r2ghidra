@@ -81,6 +81,58 @@ static void FillHarvestVar(R2Architecture &arch, const std::string &name, bool n
 	HarvestStorage (arch, addr, size, defaultSize, out);
 }
 
+// C type spellings can change register classes without changing the value size.
+static bool PrototypeStorageMatches(R2Architecture &arch, const FuncProto &proto, std::vector<bool> &paramsMatch) {
+	PrototypePieces pieces;
+	proto.getPieces (pieces);
+	if (!pieces.model) {
+		return false;
+	}
+	auto roundTrip = [&](Datatype *type) {
+		std::string name = R2TypeFactory::toCString (type);
+		return name.empty () ? nullptr : arch.getTypeFactory ()->fromCString (name);
+	};
+	pieces.outtype = roundTrip (pieces.outtype);
+	if (!pieces.outtype) {
+		return false;
+	}
+	for (int4 i = 0; i < proto.numParams (); i++) {
+		ProtoParameter *param = proto.getParam (i);
+		if (param->isHiddenReturn () || param->isIndirectStorage ()) {
+			return false;
+		}
+		pieces.intypes[i] = roundTrip (pieces.intypes[i]);
+		if (!pieces.intypes[i]) {
+			return false;
+		}
+	}
+	std::vector<ParameterPieces> assigned;
+	try {
+		pieces.model->assignParameterStorage (pieces, assigned, false);
+	} catch (const LowlevelError &) {
+		return false;
+	}
+	if (assigned.size () != pieces.intypes.size () + 1) {
+		return false;
+	}
+	bool complete = true;
+	for (size_t i = 0; i < assigned.size (); i++) {
+		ProtoParameter *param = i ? proto.getParam (i - 1) : proto.getOutput ();
+		const ParameterPieces &piece = assigned[i];
+		if (piece.type->getMetatype () == TYPE_VOID && param->getType ()->getMetatype () == TYPE_VOID) {
+			continue;
+		}
+		bool matches = piece.addr == param->getAddress () && piece.type->getSize () == param->getSize ()
+			&& !param->isIndirectStorage ()
+			&& !(piece.flags & (ParameterPieces::hiddenretparm | ParameterPieces::indirectstorage));
+		if (i) {
+			paramsMatch[i - 1] = matches;
+		}
+		complete &= matches;
+	}
+	return complete;
+}
+
 void HarvestFuncdata(R2Architecture &arch, Funcdata *func, Harvest &out) {
 	const int4 defaultSize = arch.translate->getDefaultSize ();
 	out.stackHighest = arch.getStackSpace ()->getHighest ();
@@ -89,7 +141,8 @@ void HarvestFuncdata(R2Architecture &arch, Funcdata *func, Harvest &out) {
 	if (out.extraPop == ProtoModel::extrapop_unknown) {
 		out.extraPop = defaultSize;
 	}
-	out.proto.valid = true;
+	std::vector<bool> paramsMatch (proto.numParams (), false);
+	out.proto.valid = PrototypeStorageMatches (arch, proto, paramsMatch);
 	out.proto.dotdotdot = proto.isDotdotdot ();
 	out.proto.noreturn = proto.isNoReturn ();
 	out.proto.retType = R2TypeFactory::toCString (proto.getOutputType ());
@@ -100,6 +153,9 @@ void HarvestFuncdata(R2Architecture &arch, Funcdata *func, Harvest &out) {
 		}
 		HarvestVar hv;
 		FillHarvestVar (arch, param->getName (), param->isNameUndefined (), param->getType (), param->getAddress (), param->getSize (), defaultSize, hv);
+		if (!paramsMatch[i]) {
+			hv.type.clear ();
+		}
 		out.proto.params.push_back (hv);
 	}
 	ScopeLocal *scope = func->getScopeLocal ();
@@ -128,11 +184,12 @@ void HarvestFuncdata(R2Architecture &arch, Funcdata *func, Harvest &out) {
 }
 
 static bool TypeParseable(RAnal *anal, const std::string &type) {
-	const size_t end = type.find_last_not_of ("* ");
+	const std::string element = type.substr (0, type.find ('['));
+	const size_t end = element.find_last_not_of ("* ");
 	if (end == std::string::npos) {
 		return false;
 	}
-	const std::string base = type.substr (0, end + 1);
+	const std::string base = element.substr (0, end + 1);
 	return base == "void" || r_type_kind (anal->sdb_types, base.c_str ()) != R_TYPE_INVALID;
 }
 
@@ -205,7 +262,7 @@ static bool WriteSignature(RCore *core, RAnalFunction *fcn, const Harvest &h) {
 	RAnalFunctionSignature *cur = r_anal_function_get_signature (fcn);
 	const char *curRet = (cur && R_STR_ISNOTEMPTY (cur->ret_type)) ? cur->ret_type : NULL;
 	std::string ret = h.proto.retType;
-	if (ret.empty () || !TypeParseable (core->anal, ret)) {
+	if (ret.empty () || ret.find ('[') != std::string::npos || !TypeParseable (core->anal, ret)) {
 		ret = curRet ? curRet : "void";
 	} else if (ret == "void" && curRet && strcmp (curRet, "void")) {
 		// the decompiler demotes unused return values to void; never lose a known return type
@@ -219,7 +276,7 @@ static bool WriteSignature(RCore *core, RAnalFunction *fcn, const Harvest &h) {
 	bool complete = true;
 	int idx = 0;
 	for (const HarvestVar &hv : h.proto.params) {
-		if (hv.type.empty () || !TypeParseable (core->anal, hv.type)) {
+		if (hv.type.empty () || hv.type.find ('[') != std::string::npos || !TypeParseable (core->anal, hv.type)) {
 			complete = false;
 			break;
 		}
