@@ -73,3 +73,10 @@ elf/noreturn-prototypes-x86_64.o: noreturn-prototypes.c
 		-fno-unwind-tables \
 		-fno-ident \
 		-o $@ noreturn-prototypes.c
+
+# ccode regressions; built with clang's cross target so no full cross gcc is needed
+elf/x86_64-pthread-lock.so: pthread-lock.c
+	clang --target=x86_64-unknown-linux-gnu -shared -nostdlib -fuse-ld=lld -o $@ pthread-lock.c
+
+elf/x86_64-cast-test.o: cast-test.c
+	clang --target=x86_64-unknown-linux-gnu -O0 -c -o $@ cast-test.c
