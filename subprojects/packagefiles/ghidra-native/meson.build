@@ -1,4 +1,4 @@
-project('ghidra-native', 'cpp', meson_version : '>=0.60.0', version : 'bcfd3fa371327fd463cb46ece668d5211bc14f4f')
+project('ghidra-native', 'cpp', meson_version : '>=0.60.0', version : '0.7.0')
 
 fs = import('fs')
 
@@ -16,9 +16,12 @@ if fs.is_dir(gn_src / 'patches')
   # Meson keeps an existing checkout as-is (it only warns when the wrap file
   # changed), so fail loudly instead of silently building a stale revision.
   head = run_command(git, '-C', gn_src, 'rev-parse', 'HEAD', check: false)
-  if head.returncode() == 0 and head.stdout().strip() != meson.project_version()
-    error('ghidra-native: checkout is at @0@ but the wrap pins @1@; remove subprojects/ghidra-native and reconfigure'.format(
-      head.stdout().strip(), meson.project_version()))
+  if head.returncode() == 0
+    revision = run_command(git, '-C', gn_src, 'rev-parse', meson.project_version() + '^{commit}', check: true)
+    if head.stdout().strip() != revision.stdout().strip()
+      error('ghidra-native: checkout is at @0@ but the wrap pins @1@; remove subprojects/ghidra-native and reconfigure'.format(
+        head.stdout().strip(), meson.project_version()))
+    endif
   endif
   if not fs.is_file(gn_src / 'patch.done')
     # `git diff --quiet` only looks at tracked files: the packagefiles overlay
