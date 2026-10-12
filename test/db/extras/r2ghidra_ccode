@@ -39,3 +39,17 @@ EXPECT=<<EOF
     __libc_init(param_1,0,*(iRam00000424 + 0x418),&stack0xffffffec);
 EOF
 RUN
+
+NAME=ccode honors r2ghidra.casts and keeps necessary truncations
+FILE=bins/elf/x86_64-cast-test.o
+CMDS=<<EOF
+aa
+s sym.cast_test
+e r2ghidra.ccode=true
+e r2ghidra.casts=true
+pdg~return
+EOF
+EXPECT=<<EOF
+    return (int64_t)(int)arg1 + 0x100000000;
+EOF
+RUN

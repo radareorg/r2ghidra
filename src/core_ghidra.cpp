@@ -233,11 +233,12 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	bool showCasts = cfg_var_casts.GetBool (core->config);
 	r2c->setOptionNoCasts (!showCasts);
 	if (cfg_var_ccode.GetBool (core->config)) {
-		// CCODE-style output: no casts, hide implied ZEXT/SEXT extensions, drop the
+		// CCODE-style output: hide implied ZEXT/SEXT extensions and drop the
 		// calling convention from prototypes — closer to what Ghidra's toggleCCode
-		// emits and closer to plain standard C.
+		// emits and closer to plain standard C. Casts stay under the r2ghidra.casts
+		// option: forcing them off here would silently drop necessary truncations
+		// even when the user explicitly asked for them.
 		auto cc = dynamic_cast<PrintC *>(arch.print);
-		cc->setNoCastPrinting (true);
 		cc->setHideImpliedExts (true);
 		cc->setConvention (false);
 	}
