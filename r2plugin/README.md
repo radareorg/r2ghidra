@@ -22,6 +22,9 @@ make -C libr/xps/p/r2ghidra/r2plugin prepare
 
 The `prepare` step fetches the ghidra-native and zlib subprojects (network
 access on first run) and generates `config.h` if missing.
+It also checks dependency revisions and updates ghidra-native in place, saving
+local changes in its Git stash before switching versions. Both XPS build systems
+read the native source manifest shipped by ghidra-native.
 
 Then build radare2 as usual. With make:
 

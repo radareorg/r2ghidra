@@ -1,6 +1,5 @@
 [wrap-git]
 url = https://github.com/radareorg/ghidra-native
-revision = 0.7.0
+revision = 0.7.2
 directory = ghidra-native
-patch_directory = ghidra-native
 depth = 1

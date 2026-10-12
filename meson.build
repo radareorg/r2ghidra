@@ -2,7 +2,7 @@ project(
   'r2ghidra',
   ['c', 'cpp'],
   license : 'LGPL3',
-  meson_version : '>=0.50.1',
+  meson_version : '>=0.60.0',
 version : '6.2.4',
   default_options : ['c_std=c11', 'cpp_std=c++20', 'b_vscrt=md']
 )
@@ -87,46 +87,25 @@ add_global_arguments('-DNDEBUG', language: ['c', 'cpp'])
 
 r2ghidra_incdirs = include_directories(incdirs)
 
-zlib = dependency('zlib', version : '>=1.2.8', required: false)
-if not zlib.found()
-  zlib_proj = subproject('zlib', default_options: ['default_library=static', 'werror=false'])
-  zlib = zlib_proj.get_variable('zlib_dep')
-  meson.override_dependency('zlib', zlib)
-endif
+ghidra = subproject('ghidra-native', version: '>=0.7.2', default_options: ['default_library=static', 'werror=false'])
 
-
-ghidra = subproject('ghidra-native', default_options: ['default_library=static', 'werror=false'])
-# ghidra_decompiler_sources = ghidra.get_variable('sources')
-# ghidra_slgh_sources = ghidra.get_variable('slgh_sources')
-ghidra_incs = ghidra.get_variable('incs')
-libdecomp_static = ghidra.get_variable('libdecomp_static')
-slgh_static = ghidra.get_variable('slgh_static')
-
-r2ghidra_deps = [r_core, zlib]
+r2ghidra_deps = [r_core, ghidra.get_variable('ghidra_dep')]
 r2ghidra_cpp_args = []
 
 r2ghidra_core_sources = [
   r2ghidra_sources,
-  # ghidra_decompiler_sources,
   'src/anal_ghidra_plugin.c',
   'src/anal_ghidra.cpp',
   'src/core_ghidra_plugin.c',
   'src/core_ghidra.cpp',
 ]
 
-sleighc_sources = [
-  r2ghidra_sources,
-  # ghidra_slgh_sources,
-  # ghidra_decompiler_sources,
-]
-
 r2ghidra_core_plugin = shared_library('core_r2ghidra',
   r2ghidra_core_sources,
-  link_with: libdecomp_static,
   dependencies: r2ghidra_deps,
   cpp_args: r2ghidra_cpp_args,
   override_options : ['c_std=c11', 'cpp_std=c++20'],
-  include_directories: [ghidra_incs, r2ghidra_incdirs],
+  include_directories: r2ghidra_incdirs,
   install: true,
   install_dir: r2_plugdir
 )

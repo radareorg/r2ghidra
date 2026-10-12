@@ -28,7 +28,7 @@ To build and install r2ghidra you need the following software installed in your 
 * pkg-config - that's how build system find libraries and include files to compile stuff
 * acr/make or meson/ninja - pick the build system you like! all of them are maintained and working
 * msvc/g++/clang++ - basically a C++ compiler (and a C compiler)
-* git/patch - needed to clone ghidra-native and build stuff
+* git/python3 - needed to clone and prepare ghidra-native
 
 If the build fails, please carefully read the error message and act accordingly, r2pm should
 handle the `PKG_CONFIG_PATH` automatically for you in any case.
@@ -149,6 +149,11 @@ $ ./configure --prefix=$(r2 -H R2_PREFIX)
 $ make
 $ make install  # or make user-install
 ```
+`make` checks the pinned subproject revisions automatically. Existing
+ghidra-native checkouts are updated in place; before switching versions,
+patched sources and local changes are saved in a named Git stash inside
+`subprojects/ghidra-native`. A matching checkout can be reused offline.
+
 At the moment there is no way to select which processors to support, so it builds them all and takes a lot of time to compile the sleighfiles.
 
 ### Meson/Ninja
@@ -160,6 +165,9 @@ meson setup b
 meson compile -C b
 meson install -C b
 ```
+
+To update an existing ghidra-native checkout after the dependency pin changes,
+run `make -C subprojects ghidra-native` before reconfiguring Meson.
 
 ### Windows
 

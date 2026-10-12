@@ -1,12 +1,11 @@
 # Sleigh compilation for processor definitions
 
 proc_file = meson.current_source_dir() / '..' / 'ghidra-processors.txt.default'
-proc_res = run_command('cat', proc_file, check: true)
-proc_list = proc_res.stdout().strip().split('\n')
+proc_list = import('fs').read(proc_file).strip().split('\n')
 
-proc_dir = meson.current_source_dir() / '..' / 'subprojects' / 'ghidra-native' / 'src' / 'Processors'
+proc_dir = ghidra.get_variable('processor_dir')
 sleigh_dir = r2_plugdir / 'r2ghidra_sleigh'
-sleigh_compile = meson.current_source_dir() / 'sleigh_compile.py'
+sleigh_compile = ghidra.get_variable('sleigh_compile')
 
 python = find_program('python3', 'python', required: true)
 
