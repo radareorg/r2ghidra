@@ -1,13 +1,14 @@
 include config.mk
 DESTDIR?=
 
-GHIDRA_NATIVE_COMMIT=0.7.0
-
-all: ghidra-processors.txt
+all: subprojects ghidra-processors.txt
 	$(MAKE) -C src
 	$(MAKE) -C ghidra
 
-c:
+subprojects:
+	$(MAKE) -C subprojects
+
+c: subprojects
 	make -C src -j4
 
 purge: clean
@@ -17,7 +18,7 @@ purge: clean
 ghidra-processors.txt: ghidra-processors.txt.default
 	cp -f ghidra-processors.txt.default ghidra-processors.txt
 
-asan: ghidra-processors.txt
+asan: subprojects ghidra-processors.txt
 	CFLAGS=-g CXXFLAGS=-g $(MAKE) -C src asan
 
 asan-run:
@@ -65,4 +66,4 @@ bindist: ghidra-processors.txt
 	cd $(BINDIST_DIR) && zip -r $(CURDIR)/$(BINDIST_ZIP) plugins bin
 	rm -rf $(BINDIST_DIR)
 
-.PHONY: mrproper clean install uninstall all dist bindist
+.PHONY: mrproper clean install uninstall all dist bindist subprojects

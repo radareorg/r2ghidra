@@ -4,6 +4,8 @@
 DEPS=ghidra-native zlib
 ALL=$(basename $(wildcard *.mk))
 
+.PHONY: $(ALL)
+
 default: $(DEPS)
 
 all: $(ALL)

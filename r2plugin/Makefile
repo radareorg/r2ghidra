@@ -3,8 +3,7 @@
 all: prepare
 
 prepare: ../config.h
-	@test -d ../subprojects/ghidra-native || $(MAKE) -C ../subprojects ghidra-native
-	@test -f ../subprojects/zlib/zlib.h || $(MAKE) -C ../subprojects zlib
+	$(MAKE) -C ../subprojects
 
 R2GHIDRA_VERSION=$(shell sed -n 's/^VERSION //p' ../configure.acr)
 
