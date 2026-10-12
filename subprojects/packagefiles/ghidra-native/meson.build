@@ -1,4 +1,59 @@
-project('ghidra-native', 'cpp', meson_version : '>=0.60.0', version : 'd2242691bf45a12e3ea483a4789f825af4651506')
+project('ghidra-native', 'cpp', meson_version : '>=0.60.0', version : 'bcfd3fa371327fd463cb46ece668d5211bc14f4f')
+
+fs = import('fs')
+
+# Wrap-git checkouts arrive pristine: apply upstream's own patch stack exactly
+# once at configure time. `make dist` archives are shipped pre-patched (they
+# carry patch.done and no .git), so this stays a no-op for them. git is
+# guaranteed to exist for wrap-git builds and keeps Windows dev machines free of
+# a GNU patch dependency.
+gn_src = meson.current_source_dir()
+if fs.is_dir(gn_src / 'patches')
+  git = find_program('git', required: false)
+  if not git.found()
+    error('Applying the ghidra-native patch stack requires git')
+  endif
+  # Meson keeps an existing checkout as-is (it only warns when the wrap file
+  # changed), so fail loudly instead of silently building a stale revision.
+  head = run_command(git, '-C', gn_src, 'rev-parse', 'HEAD', check: false)
+  if head.returncode() == 0 and head.stdout().strip() != meson.project_version()
+    error('ghidra-native: checkout is at @0@ but the wrap pins @1@; remove subprojects/ghidra-native and reconfigure'.format(
+      head.stdout().strip(), meson.project_version()))
+  endif
+  if not fs.is_file(gn_src / 'patch.done')
+    # `git diff --quiet` only looks at tracked files: the packagefiles overlay
+    # (meson.build) is untracked and must not count as "dirty".
+    status = run_command(git, '-C', gn_src, 'diff', '--quiet', check: false)
+    if status.returncode() == 0
+      # Top-level patches only, like upstream's `ls patches/*.patch | sort -n`:
+      # git lists them sorted by name and the zero-padded numeric prefixes make
+      # that the same order, with ghidra-native.patch last.
+      listing = run_command(git, '-C', gn_src, 'ls-files', 'patches', check: true)
+      patch_files = []
+      foreach p : listing.stdout().strip().split('\n')
+        p = p.strip()
+        if p.startswith('patches/') and p.endswith('.patch') and p.split('/').length() == 2
+          patch_files += p
+        endif
+      endforeach
+      if patch_files.length() == 0
+        error('ghidra-native: patches/ holds no patches to apply')
+      endif
+      foreach p : patch_files
+        applied = run_command(git, '-C', gn_src, 'apply', '--whitespace=nowarn', p, check: false)
+        if applied.returncode() != 0
+          error('ghidra-native: failed to apply @0@:\n@1@'.format(p, applied.stderr()))
+        endif
+      endforeach
+      message('ghidra-native: applied @0@ upstream patches'.format(patch_files.length()))
+    elif status.returncode() == 1
+      # Already patched (or locally modified): never apply the stack twice.
+      message('ghidra-native: sources already modified, assuming the patch stack is applied')
+    else
+      error('ghidra-native: cannot check the git working tree:\n' + status.stderr())
+    endif
+  endif
+endif
 
 base_sources = [
   'src/decompiler/marshal.cc',
