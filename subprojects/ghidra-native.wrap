@@ -1,6 +1,6 @@
 [wrap-git]
-url = https://github.com/kkuehl/ghidra-native
-revision = eb4573e45b890fd3799fa66e64d5ccdbafaea6ff
+url = https://github.com/radareorg/ghidra-native
+revision = bcfd3fa371327fd463cb46ece668d5211bc14f4f
 directory = ghidra-native
 patch_directory = ghidra-native
 depth = 1
