@@ -7,6 +7,8 @@
 #include "R2TypeFactory.h"
 #include "R2Scope.h"
 
+#include <cctype>
+#include <cstring>
 #include <functional>
 #include <funcdata.hh>
 
@@ -16,39 +18,68 @@
 
 #include "R2Utils.h"
 
+// Last `<anything>.dll_` separator in a PE import tail, or npos. radare2 6.2
+// joins the DLL name (including its case-insensitive `.dll` suffix) and the
+// function name with `_`, e.g. `KERNEL32.dll_memcpy`,
+// `api_ms_win_crt_stdio_l1_1_0.dll__set_fmode`.
+static size_t findDllSeparator(const std::string &s) {
+	for (size_t i = s.size (); i >= 5; i--) {
+		const size_t pos = i - 5;
+		if (tolower (static_cast<unsigned char> (s[pos])) == '.'
+				&& tolower (static_cast<unsigned char> (s[pos + 1])) == 'd'
+				&& tolower (static_cast<unsigned char> (s[pos + 2])) == 'l'
+				&& tolower (static_cast<unsigned char> (s[pos + 3])) == 'l'
+				&& s[pos + 4] == '_') {
+			return pos;
+		}
+	}
+	return std::string::npos;
+}
+
 // `e r2ghidra.ccode=true` asks for output that is valid C: radare2 names import
-// flags `sym.imp.<lib>_<fn>` / `imp.<lib>_<fn>` (e.g. `sym.imp.KERNEL32.dll_memcpy`),
-// plus `sub.<lib>_<fn>` stubs and anonymous/dotted symbols `fcn.ADDR` / `sym.lib.fn`,
-// none of which are legal C identifiers. Map those back to bare symbol names so
-// the emitted C uses only legal identifiers.
+// flags `sym.imp.<lib>_<fn>` / `imp.<lib>_<fn>` / `loc.imp.<fn>` (e.g.
+// `sym.imp.KERNEL32.dll_memcpy`), plus `sub.<lib>_<fn>` stubs and
+// anonymous/dotted symbols `fcn.ADDR` / `sym.lib.fn`, none of which are legal C
+// identifiers. Map those back to bare symbol names so the emitted C uses only
+// legal identifiers.
 static std::string sanitizeCName(const char *raw) {
 	std::string s = raw? raw : "";
-	// Import stubs: sub.<lib>_<fn> -> <fn>
-	if (s.compare(0, 4, "sub.") == 0) {
-		size_t pos = s.find('_');
-		if (pos != std::string::npos) {
-			return s.substr(pos + 1);
+	// Import flags/stubs: sym.imp.<tail> / loc.imp.<tail> / imp.<tail> / sub.<tail>
+	size_t prefix_len = std::string::npos;
+	for (const char *prefix : { "sym.imp.", "loc.imp.", "imp.", "sub." }) {
+		const size_t len = strlen (prefix);
+		if (s.compare (0, len, prefix) == 0) {
+			prefix_len = len;
+			break;
 		}
 	}
-	// Import flags: sym.imp.<lib>_<fn> / imp.<lib>_<fn> -> <fn>. radare2 6.2
-	// embeds the library name (including its `.dll` suffix) before the function
-	// name, so drop everything through the first `_`; with no underscore the
-	// whole tail is already the bare symbol name.
-	if (s.compare(0, 8, "sym.imp.") == 0) {
-		size_t pos = s.find('_', 8);
-		return (pos != std::string::npos) ? s.substr(pos + 1) : s.substr(8);
-	}
-	if (s.compare(0, 4, "imp.") == 0) {
-		size_t pos = s.find('_', 4);
-		return (pos != std::string::npos) ? s.substr(pos + 1) : s.substr(4);
-	}
-	// Dotted flag names (fcn.ADDR, sym.lib.fn) -> underscores.
-	for (char &c : s) {
-		if (c == '.') {
-			c = '_';
+	if (prefix_len != std::string::npos) {
+		s = s.substr (prefix_len);
+		// A PE import embeds the DLL name before the function; drop it through
+		// the real `.dll_` separator, which keeps underscores that belong to
+		// the function (`...dll__set_fmode` -> `_set_fmode`). ELF imports carry
+		// no library name (`sym.imp.pthread_mutex_lock`), so the tail must stay
+		// whole: never split at the first underscore.
+		const size_t dll = findDllSeparator (s);
+		if (dll != std::string::npos) {
+			s = s.substr (dll + 5);
 		}
 	}
-	return s;
+	// Normalize to a legal C identifier. Dots and other illegal characters
+	// become underscores; legitimate leading underscores are preserved.
+	std::string ident;
+	ident.reserve (s.size ());
+	for (char c : s) {
+		const unsigned char uc = static_cast<unsigned char> (c);
+		ident += (isalnum (uc) || c == '_') ? c : '_';
+	}
+	if (ident.empty ()) {
+		return "_";
+	}
+	if (isdigit (static_cast<unsigned char> (ident[0]))) {
+		ident.insert (ident.begin (), '_');
+	}
+	return ident;
 }
 
 R2Scope::R2Scope(R2Architecture *arch)
@@ -632,21 +663,24 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 		cdb->setVariable ("TMode", Address (arch->getDefaultCodeSpace (), fcn->addr), 1);
 	}
 
+	// like registerFunctionFlag/registerFlag, prefer radare2's clean realname
+	// when the user asked for clean output. Resolved-symbol flags carry their
+	// own namespaced name as realname (`rsym.__libc_init`), so only a realname
+	// that actually differs from the raw flag name is an improvement.
+	const bool ccode = r_config_get_b (core->config, "r2ghidra.ccode");
 	const char *fcn_name = fcn->name;
-	if (core->flags->realnames) {
+	if (core->flags->realnames || ccode) {
 		RFlagItem *flag = r2ghidra_flag_find_at (core->flags, fcn->addr, [](RFlagItem *item) {
 			return (!item->space || !item->space->name || strcmp (item->space->name, R_FLAGS_FS_SECTIONS))
-				&& R_STR_ISNOTEMPTY (item->realname);
+				&& R_STR_ISNOTEMPTY (item->realname)
+				&& strcmp (item->realname, item->name);
 		});
 		if (flag) {
 			fcn_name = flag->realname;
 		}
 	}
 
-	std::string fcn_display = fcn_name;
-	if (r_config_get_b (core->config, "r2ghidra.ccode")) {
-		fcn_display = sanitizeCName (fcn_name);
-	}
+	std::string fcn_display = ccode ? sanitizeCName (fcn_name) : fcn_name;
 	const char *fcn_display_name = fcn_display.c_str ();
 
 	auto functionElement = child (&doc, "function", {

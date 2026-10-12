@@ -1,0 +1,41 @@
+# ConsoleApplication1.exe is radare2-testbins/pe/ConsoleApplication1.exe; the ELF
+# fixtures are built by test/bins/Makefile.
+NAME=ccode strips the Windows API-set DLL prefix from import names
+FILE=bins/pe/ConsoleApplication1.exe
+CMDS=<<EOF
+aaaa
+s sub.api_ms_win_crt_stdio_l1_1_0.dll__set_fmode
+e r2ghidra.ccode=true
+pdg~_set_fmode
+EOF
+EXPECT=<<EOF
+void _set_fmode(void)
+    _set_fmode();
+EOF
+RUN
+
+NAME=ccode preserves the whole ELF import name
+FILE=bins/elf/x86_64-pthread-lock.so
+CMDS=<<EOF
+aa
+s entry0
+e r2ghidra.ccode=true
+pdg~pthread_mutex_lock
+EOF
+EXPECT=<<EOF
+    pthread_mutex_lock(arg1);
+EOF
+RUN
+
+NAME=ccode keeps leading underscores of sym.imp names
+FILE=bins/hello-arm
+CMDS=<<EOF
+aa
+s sym._start_main
+e r2ghidra.ccode=true
+pdg~__libc_init
+EOF
+EXPECT=<<EOF
+    __libc_init(param_1,0,*(iRam00000424 + 0x418),&stack0xffffffec);
+EOF
+RUN
