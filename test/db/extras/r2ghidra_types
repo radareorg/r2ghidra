@@ -531,6 +531,127 @@ EXPECT=<<EOF
       "type": "offset",
       "offset": 4198859
     }
+  ],
+  "pcode_ops": [
+    {
+      "space": "ram",
+      "offset": 4198797,
+      "uniq": 19,
+      "opcode": 19,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 4198797,
+      "uniq": 163,
+      "opcode": 64,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 4198797,
+      "uniq": 20,
+      "opcode": 2,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 4198819,
+      "uniq": 162,
+      "opcode": 66,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 4198828,
+      "uniq": 118,
+      "opcode": 61,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 4198828,
+      "uniq": 155,
+      "opcode": 61,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 4198828,
+      "uniq": 49,
+      "opcode": 7,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 4198833,
+      "uniq": 50,
+      "opcode": 1,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 4198842,
+      "uniq": 54,
+      "opcode": 19,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 4198842,
+      "uniq": 164,
+      "opcode": 64,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 4198842,
+      "uniq": 57,
+      "opcode": 2,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 4198842,
+      "uniq": 60,
+      "opcode": 12,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 4198851,
+      "uniq": 65,
+      "opcode": 5,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 4198853,
+      "uniq": 156,
+      "opcode": 61,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 4198853,
+      "uniq": 68,
+      "opcode": 7,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 4198858,
+      "uniq": 95,
+      "opcode": 60,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 4198859,
+      "uniq": 74,
+      "opcode": 10,
+      "is_dead": false
+    }
   ]
 }
 EOF
@@ -613,6 +734,29 @@ EXPECT=<<EOF
       "end": 63,
       "type": "offset",
       "offset": 134517193
+    }
+  ],
+  "pcode_ops": [
+    {
+      "space": "ram",
+      "offset": 134517187,
+      "uniq": 4,
+      "opcode": 1,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517193,
+      "uniq": 14,
+      "opcode": 1,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517193,
+      "uniq": 11,
+      "opcode": 10,
+      "is_dead": false
     }
   ]
 }
@@ -1112,6 +1256,204 @@ EXPECT=<<EOF
       "end": 606,
       "type": "offset",
       "offset": 134517469
+    }
+  ],
+  "pcode_ops": [
+    {
+      "space": "ram",
+      "offset": 134517295,
+      "uniq": 519,
+      "opcode": 1,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517295,
+      "uniq": 27,
+      "opcode": 7,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517307,
+      "uniq": 526,
+      "opcode": 64,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517307,
+      "uniq": 49,
+      "opcode": 15,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517307,
+      "uniq": 51,
+      "opcode": 5,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517334,
+      "uniq": 156,
+      "opcode": 11,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517341,
+      "uniq": 161,
+      "opcode": 5,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517443,
+      "uniq": 525,
+      "opcode": 1,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517443,
+      "uniq": 177,
+      "opcode": 7,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517451,
+      "uniq": 187,
+      "opcode": 4,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517332,
+      "uniq": 118,
+      "opcode": 6,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517425,
+      "uniq": 524,
+      "opcode": 1,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517425,
+      "uniq": 202,
+      "opcode": 7,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517433,
+      "uniq": 212,
+      "opcode": 4,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517407,
+      "uniq": 523,
+      "opcode": 1,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517407,
+      "uniq": 227,
+      "opcode": 7,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517415,
+      "uniq": 237,
+      "opcode": 4,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517389,
+      "uniq": 522,
+      "opcode": 1,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517389,
+      "uniq": 252,
+      "opcode": 7,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517397,
+      "uniq": 262,
+      "opcode": 4,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517371,
+      "uniq": 521,
+      "opcode": 1,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517371,
+      "uniq": 277,
+      "opcode": 7,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517379,
+      "uniq": 287,
+      "opcode": 4,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517353,
+      "uniq": 520,
+      "opcode": 1,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517353,
+      "uniq": 302,
+      "opcode": 7,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517361,
+      "uniq": 312,
+      "opcode": 4,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517459,
+      "uniq": 133,
+      "opcode": 7,
+      "is_dead": false
+    },
+    {
+      "space": "ram",
+      "offset": 134517469,
+      "uniq": 148,
+      "opcode": 10,
+      "is_dead": false
     }
   ]
 }

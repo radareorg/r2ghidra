@@ -73,6 +73,23 @@ inventory of all operations eliminated during decompilation. Older exports
 without this attribute leave the state unknown. Existing operation children,
 varnode references and sequence identities are preserved.
 
+`pdgj` also includes a `pcode_ops` array alongside the existing `code` and
+`annotations`. Each entry contains the operation's `space`, `offset`, `uniq`,
+`opcode` number and native `is_dead` boolean. Operations are the same retained
+basic-block operations exported by `pdgx`, so their dead state is normally
+`false`; eliminated operations are absent. Plain `pdg` continues to show the
+simplified C without p-code state labels or eliminated operations.
+
+`r2ghidra.deadcode` defaults to `false`, so Ghidra eliminates unused computations.
+Set `e r2ghidra.deadcode=true` before `pdg`, `pdgj` or
+`pdgx` to retain unused computations in the decompiled C and p-code exports.
+For example, an assignment overwritten before its value is used can remain
+visible. The output can include extra temporaries, register flags and stack
+bookkeeping. Other simplifications and unreachable-block removal still run;
+this is not an unoptimized instruction listing. Retained operations remain
+internally alive, so their native `is_dead` flag is still `false`, even when
+their computed values are unused.
+
 `pdgw` updates existing variables and the current function's signature. Unknown
 1-, 2-, 4- and 8-byte scalar types are written as fixed-width unsigned integers;
 this preserves their size without claiming that signedness was recovered. A
@@ -105,6 +122,7 @@ The following config vars (for the `e` command) can be used to adjust r2ghidra's
       r2ghidra.ccode: Emit clean C identifiers (bare import names, no fcn./sub. prefixes)
     r2ghidra.cmt.cpp: C++ comment style
  r2ghidra.cmt.indent: Comment indent
+   r2ghidra.deadcode: Preserve unused p-code computations
      r2ghidra.indent: Indent increment
        r2ghidra.lang: Custom Sleigh ID to override auto-detection (e.g. x86:LE:32:default)
     r2ghidra.linelen: Max line length

@@ -16,3 +16,104 @@ EXPECT=<<EOF
 0
 EOF
 RUN
+
+NAME=pdgj exports retained p-code identities, opcodes and boolean dead state
+FILE=-
+ARGS=-a x86 -b 64
+CMDS=<<EOF
+wx b82a000000c3
+af
+pdgj~{pcode_ops}
+EOF
+EXPECT=<<EOF
+[{"space":"ram","offset":0,"uniq":0,"opcode":1,"is_dead":false},{"space":"ram","offset":5,"uniq":3,"opcode":10,"is_dead":false}]
+EOF
+RUN
+
+NAME=pdgj and pdg omit an overwritten assignment without adding state labels to C
+FILE=-
+ARGS=-a x86 -b 64
+CMDS=<<EOF
+wx b801000000b82a000000c3
+af
+pdg~return
+pdgj~{pcode_ops[0].offset}
+pdgj~{pcode_ops[1].offset}
+pdg~is_dead~?
+EOF
+EXPECT=<<EOF
+    return 0x2a;
+5
+10
+0
+EOF
+RUN
+
+NAME=pdgj preserves a p-code address above the exact floating-point integer range
+FILE=-
+ARGS=-a x86 -b 64 -m 0x20000000000001
+CMDS=<<EOF
+wx b82a000000c3
+af
+pdgj~{pcode_ops[0].offset}
+pdgj~{pcode_ops[1].offset}
+EOF
+EXPECT=<<EOF
+9007199254740993
+9007199254740998
+EOF
+RUN
+
+NAME=pdgj includes p-code state when decompilation uses a timeout worker
+FILE=-
+ARGS=-a x86 -b 64 -e r2ghidra.timeout=5000 -e log.level=0
+CMDS=<<EOF
+wx b82a000000c3
+af
+pdgj~{pcode_ops[0].is_dead}
+pdgj~{pcode_ops[1].is_dead}
+EOF
+EXPECT=<<EOF
+false
+false
+EOF
+RUN
+
+NAME=dead code defaults hidden and can be enabled for C, JSON and XML
+FILE=-
+ARGS=-a x86 -b 64
+CMDS=<<EOF
+wx b801000000b82a000000c3
+af
+e r2ghidra.deadcode
+pdg~ = 1~?
+pdgj~ = 1~?
+pdgx~<op code=~?
+e r2ghidra.deadcode=true
+pdg~ = 1~?
+pdgj~ = 1~?
+pdgx~<op code=~?
+pdgj~{pcode_ops[0].offset}
+pdgj~{pcode_ops[0].is_dead}
+pdgx~is_dead="true"~?
+e r2ghidra.deadcode=false
+pdg~ = 1~?
+pdgj~ = 1~?
+pdgx~<op code=~?
+EOF
+EXPECT=<<EOF
+false
+0
+0
+2
+1
+1
+8
+0
+false
+0
+0
+0
+2
+EOF
+RUN

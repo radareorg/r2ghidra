@@ -82,6 +82,7 @@ CV cfg_var_rawptr     ("rawptr",      "true",     "Show unknown globals as raw a
 CV cfg_var_verbose    ("verbose",     "false",    "Show verbose warning messages while decompiling");
 CV cfg_var_casts      ("casts",       "false",    "Show type casts where needed");
 CV cfg_var_ccode      ("ccode",       "false",    "Emit clean C identifiers (bare import names, no fcn./sub. prefixes)");
+CV cfg_var_deadcode   ("deadcode",    "false",    "Preserve unused p-code computations");
 CV cfg_var_fixups     ("fixups",      "false",    "Apply pcode fixups");
 CV cfg_var_varargs    ("varargs",     "false",    "Recover printf-family varargs from literal format strings");
 CV cfg_var_vaformats  ("varargs.formats", "",     "Extra printf-style formatters for vararg recovery (bare names, comma separated)");
@@ -212,6 +213,39 @@ static void seedGlobalPointerRegister(R2Architecture &arch, RCore *core, RAnalFu
 	});
 }
 
+static void PrintCodeJSON(const Funcdata &func, RCodeMeta *code, std::ostream &stream) {
+	PJ *pj = pj_new ();
+	if (!pj) {
+		throw LowlevelError ("Failed to allocate p-code JSON");
+	}
+	pj_a (pj);
+	const BlockGraph &blocks = func.getBasicBlocks ();
+	for (int4 i = 0; i < blocks.getSize (); i++) {
+		const auto *block = static_cast<const BlockBasic *>(blocks.getBlock (i));
+		for (auto it = block->beginOp (); it != block->endOp (); ++it) {
+			const PcodeOp *op = *it;
+			pj_o (pj);
+			pj_ks (pj, "space", op->getAddr ().getSpace ()->getName ().c_str ());
+			pj_kn (pj, "offset", op->getAddr ().getOffset ());
+			pj_kn (pj, "uniq", op->getSeqNum ().getTime ());
+			pj_ki (pj, "opcode", op->code ());
+			pj_kb (pj, "is_dead", op->isDead ());
+			pj_end (pj);
+		}
+	}
+	pj_end (pj);
+	char *json = r_codemeta_print_json (code);
+	if (!json) {
+		pj_free (pj);
+		throw LowlevelError ("Failed to encode decompiled code as JSON");
+	}
+	// Extend the existing JSON object without changing its code or annotations.
+	stream.write (json, strlen (json) - 1);
+	stream << ",\"pcode_ops\":" << pj_string (pj) << '}';
+	free (json);
+	pj_free (pj);
+}
+
 static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstream &out_stream, RCodeMeta **out_code, Harvest *out_harvest = nullptr) {
 	RAnalFunction *function = r_anal_get_fcn_in (core->anal, addr, R_ANAL_FCN_TYPE_NULL);
 	if (!function) {
@@ -247,6 +281,9 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 		throw LowlevelError ("No function in Scope");
 	}
 	seedGlobalPointerRegister (arch, core, function);
+	if (cfg_var_deadcode.GetBool (core->config)) {
+		arch.allacts.toggleAction (arch.allacts.getCurrentName (), "deadcode", false);
+	}
 	arch.getCore()->sleepBegin ();
 	auto action = arch.allacts.getCurrent ();
 
@@ -321,6 +358,10 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 			if (!*out_code) {
 				std::cout << out_stream.str().c_str () << std::endl;
 				throw LowlevelError ("Failed to parse XML code from Decompiler");
+			}
+			if (mode == DecompileMode::JSON) {
+				out_stream.str ("");
+				PrintCodeJSON (*func, *out_code, out_stream);
 			}
 		}
 		break;
@@ -435,11 +476,7 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 			}
 			break;
 		case DecompileMode::JSON:
-			{
-				char *s = r_codemeta_print_json (code);
-				r_cons_println (core->cons, s);
-				free (s);
-			}
+			r_cons_println (core->cons, out_stream.str ().c_str ());
 			break;
 		case DecompileMode::XML:
 			out_stream << "</code></result>";
