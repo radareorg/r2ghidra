@@ -110,5 +110,13 @@ r2ghidra_core_plugin = shared_library('core_r2ghidra',
   install_dir: r2_plugdir
 )
 
+pcode_xml_test = executable('pcode-xml-test',
+  'test/pcode_xml.cpp',
+  dependencies: ghidra.get_variable('ghidra_dep'),
+  include_directories: r2ghidra_incdirs,
+  install: false
+)
+test('pcode-xml', pcode_xml_test)
+
 sleighc_exe = ghidra.get_variable('sleighc_exe')
 subdir('ghidra')

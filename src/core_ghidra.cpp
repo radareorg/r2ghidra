@@ -3,7 +3,7 @@
 
 #include "R2Architecture.h"
 #include "CodeXMLParse.h"
-#include "PrettyXmlEncode.h"
+#include "PcodeXmlEncode.h"
 #include "R2PrintC.h"
 #include "SleighAsm.h"
 #include "ArchMap.h"
@@ -302,10 +302,8 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	if (mode == DecompileMode::XML) {
 		out_stream << "<result><function>";
 		{
-		//func->encode (out_stream);
-		//PrettyXmlEncode enc(out_stream);
-		XmlEncode enc(out_stream);
-		func->encode(enc, 0, true, true);
+			PcodeXmlEncode enc(out_stream, *func);
+			func->encode(enc, 0, true, true);
 		}
 		out_stream << "</function><code>";
 	}

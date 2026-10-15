@@ -64,6 +64,15 @@ Usage: pdg  # Native Ghidra decompiler plugin
 | pdgx          # Dump the XML of the current decompiled function
 ```
 
+`pdgx` includes the native p-code operation's `is_dead` boolean on its
+`<seqnum>` element, after the existing `space`, `offset` and `uniq` identity
+attributes. The value comes from `PcodeOp::isDead()` for that exact operation;
+it is not a reachability, path-feasibility or runtime-execution claim. The
+function AST contains operations retained in native basic blocks, not an
+inventory of all operations eliminated during decompilation. Older exports
+without this attribute leave the state unknown. Existing operation children,
+varnode references and sequence identities are preserved.
+
 `pdgw` updates existing variables and the current function's signature. Unknown
 1-, 2-, 4- and 8-byte scalar types are written as fixed-width unsigned integers;
 this preserves their size without claiming that signedness was recovered. A

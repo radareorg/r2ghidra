@@ -1,0 +1,18 @@
+NAME=pdgx exports native dead-state metadata on each operation sequence
+FILE=-
+ARGS=-a x86 -b 64
+CMDS=<<EOF
+wx b82a000000c3
+af
+pdgx~<op code=~?
+pdgx~is_dead~?
+pdgx~is_dead="false"~?
+pdgx~is_dead~!seqnum~?
+EOF
+EXPECT=<<EOF
+2
+2
+2
+0
+EOF
+RUN

@@ -99,6 +99,8 @@ else
 sign macsign:
 endif
 
+core_ghidra.o: PcodeXmlEncode.h
+
 %.o: %.cpp
 	$(CXX) -fPIC $(CXXFLAGS) $(R2_CFLAGS) -c $<
 
