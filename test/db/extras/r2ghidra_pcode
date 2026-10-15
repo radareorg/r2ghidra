@@ -108,12 +108,61 @@ false
 2
 1
 1
-8
+11
 0
 false
-0
+3
 0
 0
 2
+EOF
+RUN
+
+NAME=one deadcode option preserves unused C and exports native removal state
+FILE=-
+ARGS=-a x86 -b 64
+CMDS=<<EOF
+wx b801000000b82a000000c3
+af
+pdgj~eliminated_ops~?
+e r2ghidra.deadcode=true
+pdgj~{eliminated_ops}
+pdgx~is_dead="true"~?
+pdg~return
+pdg~ = 1~?
+pdgj~ = 1~?
+pdgj~{pcode_ops[0].is_dead}
+e r2ghidra.deadcode=false
+pdgj~eliminated_ops~?
+pdgx~is_dead="true"~?
+EOF
+EXPECT=<<EOF
+0
+[{"space":"ram","offset":0,"uniq":0,"opcode":1,"is_dead":true},{"space":"ram","offset":10,"uniq":2,"opcode":2,"is_dead":true},{"space":"ram","offset":10,"uniq":3,"opcode":19,"is_dead":true}]
+3
+    return 0x2a;
+1
+1
+false
+0
+0
+EOF
+RUN
+
+NAME=removed operation capture preserves full addresses through a timeout worker
+FILE=-
+ARGS=-a x86 -b 64 -m 0x20000000000001 -e r2ghidra.timeout=5000 -e log.level=0
+CMDS=<<EOF
+wx b801000000b82a000000c3
+af
+e r2ghidra.deadcode=true
+pdgj~{eliminated_ops[0].offset}
+pdgj~{eliminated_ops[0].is_dead}
+pdgx~is_dead="true"~?
+EOF
+EXPECT=<<EOF
+9007199254740993
+true
+3
 EOF
 RUN

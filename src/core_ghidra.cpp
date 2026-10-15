@@ -26,6 +26,7 @@
 #endif
 
 #include <vector>
+#include <map>
 #include <mutex>
 
 #undef DEBUG_EXCEPTIONS
@@ -82,7 +83,7 @@ CV cfg_var_rawptr     ("rawptr",      "true",     "Show unknown globals as raw a
 CV cfg_var_verbose    ("verbose",     "false",    "Show verbose warning messages while decompiling");
 CV cfg_var_casts      ("casts",       "false",    "Show type casts where needed");
 CV cfg_var_ccode      ("ccode",       "false",    "Emit clean C identifiers (bare import names, no fcn./sub. prefixes)");
-CV cfg_var_deadcode   ("deadcode",    "false",    "Preserve unused p-code computations");
+CV cfg_var_deadcode   ("deadcode",    "false",    "Include unused code and removed p-code metadata");
 CV cfg_var_fixups     ("fixups",      "false",    "Apply pcode fixups");
 CV cfg_var_varargs    ("varargs",     "false",    "Recover printf-family varargs from literal format strings");
 CV cfg_var_vaformats  ("varargs.formats", "",     "Extra printf-style formatters for vararg recovery (bare names, comma separated)");
@@ -213,25 +214,117 @@ static void seedGlobalPointerRegister(R2Architecture &arch, RCore *core, RAnalFu
 	});
 }
 
-static void PrintCodeJSON(const Funcdata &func, RCodeMeta *code, std::ostream &stream) {
+struct PcodeSnapshot {
+	struct Operation {
+		// The native bank keeps retired operations allocated until analysis is cleared.
+		const PcodeOp *native;
+		OpCode opcode;
+		bool dead = false;
+
+		bool isDead() const { return dead; }
+	};
+	std::map<SeqNum, Operation> operations;
+
+	void capture(const Funcdata &func) {
+		operations.clear ();
+		for (auto it = func.beginOpAll (); it != func.endOpAll (); ++it) {
+			const PcodeOp *op = it->second;
+			if (!op->isDead ()) {
+				operations.emplace (it->first, Operation { op, op->code () });
+			}
+		}
+	}
+
+	void finish() {
+		for (auto &[sequence, operation] : operations) {
+			operation.dead = operation.native->isDead ();
+			operation.native = nullptr;
+		}
+	}
+
+	const Operation *findOp(const SeqNum &sequence) const {
+		auto it = operations.find (sequence);
+		return it == operations.end () ? nullptr : &it->second;
+	}
+};
+
+static int PerformWithSnapshot(Action &action, Funcdata &func, PcodeSnapshot *snapshot) {
+	action.reset (func);
+	if (!snapshot) {
+		return action.perform (func);
+	}
+	Action *start = action.getSubAction ("start");
+	Action *lifted = action.getSubAction ("constbase");
+	if (!start || !lifted) {
+		throw LowlevelError ("P-code capture checkpoints are unavailable");
+	}
+	start->setBreakPoint (Action::break_start, start->getName ());
+	lifted->setBreakPoint (Action::break_start, lifted->getName ());
+	int res;
+	while ((res = action.perform (func)) < 0) {
+		if (start->getStatus () == Action::status_breakstarthit) {
+			// A restart frees retired ops. Discard pointers before inspecting the new analysis.
+			snapshot->operations.clear ();
+		} else if (lifted->getStatus () == Action::status_breakstarthit) {
+			snapshot->capture (func);
+		} else {
+			break;
+		}
+	}
+	start->clearBreakPoints ();
+	lifted->clearBreakPoints ();
+	snapshot->finish ();
+	return res;
+}
+
+static void PrintPcodeOpJSON(PJ *pj, const SeqNum &sequence, OpCode opcode, bool isDead) {
+	pj_o (pj);
+	pj_ks (pj, "space", sequence.getAddr ().getSpace ()->getName ().c_str ());
+	pj_kn (pj, "offset", sequence.getAddr ().getOffset ());
+	pj_kn (pj, "uniq", sequence.getTime ());
+	pj_ki (pj, "opcode", opcode);
+	pj_kb (pj, "is_dead", isDead);
+	pj_end (pj);
+}
+
+static void PrintEliminatedXML(std::ostream &stream, const PcodeSnapshot &snapshot) {
+	stream << "<eliminated_ops>";
+	PcodeXmlEncode encoder (stream, snapshot);
+	for (const auto &[sequence, operation] : snapshot.operations) {
+		if (operation.isDead ()) {
+			encoder.openElement (ELEM_OP);
+			encoder.writeSignedInteger (ATTRIB_CODE, operation.opcode);
+			sequence.encode (encoder);
+			encoder.closeElement (ELEM_OP);
+		}
+	}
+	stream << "</eliminated_ops>";
+}
+
+static void PrintCodeJSON(const Funcdata &func, RCodeMeta *code, std::ostream &stream, const PcodeSnapshot *snapshot) {
 	PJ *pj = pj_new ();
 	if (!pj) {
 		throw LowlevelError ("Failed to allocate p-code JSON");
 	}
-	pj_a (pj);
+	pj_o (pj);
+	pj_ka (pj, "pcode_ops");
 	const BlockGraph &blocks = func.getBasicBlocks ();
 	for (int4 i = 0; i < blocks.getSize (); i++) {
 		const auto *block = static_cast<const BlockBasic *>(blocks.getBlock (i));
 		for (auto it = block->beginOp (); it != block->endOp (); ++it) {
 			const PcodeOp *op = *it;
-			pj_o (pj);
-			pj_ks (pj, "space", op->getAddr ().getSpace ()->getName ().c_str ());
-			pj_kn (pj, "offset", op->getAddr ().getOffset ());
-			pj_kn (pj, "uniq", op->getSeqNum ().getTime ());
-			pj_ki (pj, "opcode", op->code ());
-			pj_kb (pj, "is_dead", op->isDead ());
-			pj_end (pj);
+			PrintPcodeOpJSON (pj, op->getSeqNum (), op->code (), op->isDead ());
 		}
+	}
+	pj_end (pj);
+	if (snapshot) {
+		pj_ka (pj, "eliminated_ops");
+		for (const auto &[sequence, operation] : snapshot->operations) {
+			if (operation.isDead ()) {
+				PrintPcodeOpJSON (pj, sequence, operation.opcode, operation.isDead ());
+			}
+		}
+		pj_end (pj);
 	}
 	pj_end (pj);
 	char *json = r_codemeta_print_json (code);
@@ -241,7 +334,7 @@ static void PrintCodeJSON(const Funcdata &func, RCodeMeta *code, std::ostream &s
 	}
 	// Extend the existing JSON object without changing its code or annotations.
 	stream.write (json, strlen (json) - 1);
-	stream << ",\"pcode_ops\":" << pj_string (pj) << '}';
+	stream << ',' << (pj_string (pj) + 1);
 	free (json);
 	pj_free (pj);
 }
@@ -281,7 +374,9 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 		throw LowlevelError ("No function in Scope");
 	}
 	seedGlobalPointerRegister (arch, core, function);
-	if (cfg_var_deadcode.GetBool (core->config)) {
+	const bool showDeadcode = cfg_var_deadcode.GetBool (core->config);
+	const bool exportDeadcode = showDeadcode && (mode == DecompileMode::JSON || mode == DecompileMode::XML);
+	if (showDeadcode && !exportDeadcode) {
 		arch.allacts.toggleAction (arch.allacts.getCurrentName (), "deadcode", false);
 	}
 	arch.getCore()->sleepBegin ();
@@ -299,12 +394,19 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 		PcodeFixupPreprocessor::fixupVariadicFormatCalls(function, func, core, arch);
 	}
 
+	PcodeSnapshot snapshot;
+	PcodeSnapshot *capture = exportDeadcode ? &snapshot : nullptr;
 	int res;
 #ifndef DEBUG_EXCEPTIONS
 	try {
 #endif
-		action->reset (*func);
-		res = action->perform (*func);
+		res = PerformWithSnapshot (*action, *func, capture);
+		if (capture && res >= 0) {
+			// Save normal elimination results before rendering the version that preserves unused code.
+			arch.clearAnalysis (func);
+			action = arch.allacts.toggleAction (arch.allacts.getCurrentName (), "deadcode", false);
+			res = PerformWithSnapshot (*action, *func, nullptr);
+		}
 #ifndef DEBUG_EXCEPTIONS
 	} catch (const LowlevelError &error) {
 		arch.getCore()->sleepEndForce ();
@@ -342,7 +444,11 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 			PcodeXmlEncode enc(out_stream, *func);
 			func->encode(enc, 0, true, true);
 		}
-		out_stream << "</function><code>";
+		out_stream << "</function>";
+		if (capture) {
+			PrintEliminatedXML (out_stream, *capture);
+		}
+		out_stream << "<code>";
 	}
 	switch (mode) {
 	case DecompileMode::XML:
@@ -361,7 +467,7 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 			}
 			if (mode == DecompileMode::JSON) {
 				out_stream.str ("");
-				PrintCodeJSON (*func, *out_code, out_stream);
+				PrintCodeJSON (*func, *out_code, out_stream, capture);
 			}
 		}
 		break;
