@@ -66,8 +66,9 @@ RUN
 
 NAME=pdgj includes p-code state when decompilation uses a timeout worker
 FILE=-
-ARGS=-a x86 -b 64 -e r2ghidra.timeout=5000 -e log.level=0
+ARGS=-a x86 -b 64
 CMDS=<<EOF
+e r2ghidra.timeout=5000
 wx b82a000000c3
 af
 pdgj~{pcode_ops[0].is_dead}
@@ -151,8 +152,9 @@ RUN
 
 NAME=removed operation capture preserves full addresses through a timeout worker
 FILE=-
-ARGS=-a x86 -b 64 -m 0x20000000000001 -e r2ghidra.timeout=5000 -e log.level=0
+ARGS=-a x86 -b 64 -m 0x20000000000001
 CMDS=<<EOF
+e r2ghidra.timeout=5000
 wx b801000000b82a000000c3
 af
 e r2ghidra.deadcode=true

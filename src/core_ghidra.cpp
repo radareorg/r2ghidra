@@ -22,6 +22,7 @@
 
 #if R2__UNIX__ && !defined(__wasi__)
 #include <errno.h>
+#include <poll.h>
 #include <sys/wait.h>
 #endif
 
@@ -845,40 +846,79 @@ static void _cmd(RCore *core, const char *input) {
 		}
 		pid_t pid = r_sys_fork ();
 		if (pid < 0) {
+			close (fds[0]);
+			close (fds[1]);
 			R_LOG_ERROR ("Cannot fork");
 			return;
 		}
 		if (pid == 0) {
 			close (fds[0]);
+			r_cons_reset (core->cons);
 			runcmd (core, input);
-			r_cons_flush (core->cons);
-			fflush (stdout);
-			write (fds[1], "\x12", 1);
-			exit (0);
+			size_t size = 0;
+			const char *buf = r_cons_get_buffer (core->cons, &size);
+			while (size > 0) {
+				ssize_t n = write (fds[1], buf, size);
+				if (n < 0 && errno == EINTR) {
+					continue;
+				}
+				if (n <= 0) {
+					_exit (1);
+				}
+				buf += n;
+				size -= n;
+			}
+			_exit (0);
 		} else {
-			fd_set rfds;
-			struct timeval tv;
+			struct pollfd pfd = { fds[0], POLLIN, 0 };
+			ut64 deadline = r_time_now_mono () + (ut64)timeout * 1000;
+			std::string output;
 			int wstatus = 0;
-			tv.tv_sec = timeout / 1000;
-			tv.tv_usec = (timeout - (tv.tv_sec * 1000)) * 1000;
-			FD_ZERO (&rfds);
-			FD_SET (fds[0], &rfds);
+			bool complete = false;
 			// keeping our copy of the write end open would suppress eof from a crashed child until the timeout expires
 			close (fds[1]);
-			if (select (fds[0] + 1, &rfds, NULL, NULL, &tv) > 0) {
-				char ch = 0;
-				if (read (fds[0], &ch, 1) != 1 || ch != 0x12) {
-					R_LOG_ERROR ("Decompiler process died unexpectedly");
+			while (true) {
+				ut64 now = r_time_now_mono ();
+				int ready = now < deadline? poll (&pfd, 1, (deadline - now + 999) / 1000): 0;
+				if (ready < 0 && errno == EINTR) {
+					continue;
 				}
-			} else {
-				eprintf ("Timeout\n");
-				kill (pid, 9);
+				if (ready <= 0) {
+					if (!ready) {
+						eprintf ("Timeout\n");
+					} else {
+						R_LOG_ERROR ("Cannot poll decompiler output");
+					}
+					break;
+				}
+				char buf[4096];
+				ssize_t n = read (fds[0], buf, sizeof (buf));
+				if (n < 0 && errno == EINTR) {
+					continue;
+				}
+				if (n <= 0) {
+					complete = n == 0;
+					if (!complete) {
+						R_LOG_ERROR ("Cannot read decompiler output");
+					}
+					break;
+				}
+				output.append (buf, n);
 			}
-			while (waitpid (pid, &wstatus, 0) == -1 && errno == EINTR) {
+			if (!complete) {
+				kill (pid, SIGKILL);
 			}
-			fflush (stderr);
-			fflush (stdout);
 			close (fds[0]);
+			pid_t waited;
+			do {
+				waited = waitpid (pid, &wstatus, 0);
+			} while (waited == -1 && errno == EINTR);
+			if (complete && waited == pid && WIFEXITED (wstatus) && WEXITSTATUS (wstatus) == 0) {
+				// Apply filters and redirections in the parent, just like a non-worker command.
+				r_cons_write (core->cons, output.data (), output.size ());
+			} else if (complete) {
+				R_LOG_ERROR ("Decompiler process died unexpectedly");
+			}
 		}
 #else
 		R_LOG_WARN ("r2ghidra.timeout is not supported outside UNIX systems.");
