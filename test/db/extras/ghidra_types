@@ -1878,16 +1878,17 @@ CMDS=<<EOF
 aaa
 "td struct MyGlobal { int32_t val; };"
 s 0x404050
+avg-
 avg MyGlobal my_custom_global
 s sym.get_global_var
 pdg
 EOF
 EXPECT=<<EOF
 
-int sym.get_global_var(void)
+int32_t sym.get_global_var(void)
 
 {
-    return my_custom_global;
+    return my_custom_global.val;
 }
 
 EOF

@@ -996,7 +996,7 @@ aaa
 pdg @ sym.report~("%s code
 EOF2
 EXPECT=<<EOF2
-                      ("%s code=%d ratio=%f mask=%x\n",_obj.g_tag,_obj.g_code,_obj.g_ratio,_obj.g_mask);
+                      ("%s code=%d ratio=%f mask=%x\n",global.g_tag,global.g_code,global.g_ratio,global.g_mask);
 EOF2
 RUN
 
