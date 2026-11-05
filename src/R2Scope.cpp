@@ -398,7 +398,7 @@ struct FunctionVars {
 				typelock ? "true" : "false", var->isarg ? "0" : "-1", index,
 				var->isarg && var->kind == R_ANAL_VAR_KIND_REG, childRegRange);
 			if (var->isarg) {
-				if (argsByIndex.size () < index + 1) {
+				if (argsByIndex.size () < (size_t)index + 1) {
 					argsByIndex.resize (index + 1, nullptr);
 				}
 				argsByIndex[index] = symbolElement;
@@ -763,17 +763,13 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 	});
 
 	Address returnAddr(arch->getSpaceByName("register"), 0);
-	bool returnFound = false;
 	if (proto) {
 		for (auto it = proto->effectBegin (); it != proto->effectEnd(); it++) {
 			if (it->getType() == EffectRecord::return_address) {
 				returnAddr = it->getAddress();
-				returnFound = true;
 				break;
 			}
 		}
-		//if (!returnFound)
-		//	arch->addWarning("Failed to find return address in ProtoModel");
 	}
 	// TODO: should we try to get the return address from r2's cc?
 

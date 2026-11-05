@@ -87,9 +87,9 @@ add_global_arguments('-DNDEBUG', language: ['c', 'cpp'])
 
 r2ghidra_incdirs = include_directories(incdirs)
 
-ghidra = subproject('ghidra-native', version: '>=0.7.2', default_options: ['default_library=static', 'werror=false'])
+ghidra = subproject('ghidra-native', version: '>=0.7.2', default_options: ['default_library=static', 'werror=false', 'warning_level=0'])
 
-r2ghidra_deps = [r_core, ghidra.get_variable('ghidra_dep')]
+r2ghidra_deps = [r_core, ghidra.get_variable('ghidra_dep').as_system()]
 r2ghidra_cpp_args = []
 
 r2ghidra_core_sources = [
@@ -112,7 +112,7 @@ r2ghidra_core_plugin = shared_library('core_r2ghidra',
 
 pcode_xml_test = executable('pcode-xml-test',
   'test/pcode_xml.cpp',
-  dependencies: ghidra.get_variable('ghidra_dep'),
+  dependencies: ghidra.get_variable('ghidra_dep').as_system(),
   include_directories: r2ghidra_incdirs,
   install: false
 )

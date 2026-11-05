@@ -39,7 +39,6 @@ static bool isptr(const ut8 *p, size_t remain) {
 }
 
 static void addRangesWithPointers(RCoreLock &core, RangeList &list, AddrSpace *space) {
-	RIOMapRef *mapref;
 	RIO *io = core->io;
 	RIOBank *bank = r_io_bank_get (io, io->bank);
 	r_list_foreach_cpp<RIOMapRef>(bank->maprefs, [&](RIOMapRef *mapref) {
@@ -133,8 +132,6 @@ void R2LoadImage::getReadonly(RangeList &list) const {
 			break;
 		case 3:
 			{
-				RIOMapRef *mapref;
-				RListIter *iter;
 				RIO *io = core->io;
 				RIOBank *bank = r_io_bank_get (io, io->bank);
 				r_list_foreach_cpp<RIOMapRef>(bank->maprefs, [&](RIOMapRef *mapref) {

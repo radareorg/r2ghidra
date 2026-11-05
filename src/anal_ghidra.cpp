@@ -568,7 +568,6 @@ static ut32 anal_type_NOT(RAnal *anal, RAnalOp *anal_op, const std::vector<Pcode
 	SleighAnalValue in0, out;
 	in0.invalid(); out.invalid();
 	std::vector<SleighAnalValue> outs;
-	uintb unique_off = 0;
 
 	for (auto iter = raw_ops.cbegin(); iter != raw_ops.cend(); iter++) {
 		if (iter->type == key_pcode) {
@@ -1011,6 +1010,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 					case CPUI_FLOAT_SUB: ss << "F-"; break;
 					case CPUI_FLOAT_MULT: ss << "F*"; break;
 					case CPUI_FLOAT_DIV: ss << "F/"; break;
+					default: break;
 				}
 
 				if (iter->output->size != 1 && iter->output->size != 8) 
@@ -1052,6 +1052,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 					case CPUI_INT_LESSEQUAL: ss << "<="; break;
 					case CPUI_INT_NOTEQUAL: ss << "-,!,!"; break;
 					case CPUI_INT_EQUAL: ss << "-,!"; break;
+					default: break;
 				}
 				if (iter->output->is_unique()) {
 					push_stack(iter->output);
@@ -1115,6 +1116,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 					case CPUI_INT_SRIGHT:
 						ss << "SWAP," << iter->input0->size * 8 << ",~,SWAP,>>>>";
 						break;
+					default: break;
 				}
 				ss << ",1," << iter->output->size * 8 << ",<<,1,-,&";
 
@@ -1291,6 +1293,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 			case CPUI_FLOAT_ABS: ss << ",0,I2D,F<=,!,?{,-F,}"; break;
 			case CPUI_FLOAT_NEG: ss << ",-F"; break;
 			case CPUI_FLOAT_FLOAT2FLOAT: /* same as below */ break;
+			default: break;
 			}
 			if (iter->output->size != 8) {
 				switch (iter->type) {
@@ -1303,6 +1306,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 				case CPUI_FLOAT_FLOAT2FLOAT:
 					ss << "," << iter->output->size << ",SWAP,D2F";
 					break;
+				default: break;
 				}
 			}
 			if (iter->output->is_unique()) {
@@ -1311,6 +1315,7 @@ static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, 
 				ss << "," << *iter->output << ",=";
 			}
 			break;
+		default: break;
 		}
 	}
 
@@ -1609,43 +1614,6 @@ static const char *r_reg_string_arr[] = {
 	"vec256", "vec64", "fpu", "fpu", "drx", "vec256", nullptr
 };
 
-static int get_reg_type(const std::string &name) {
-	auto p = sanal->reg_mapping.cbegin();
-	for (; p != sanal->reg_mapping.cend() && p->second != name; p++) {
-	}
-	if (p == sanal->reg_mapping.cend()) {
-		throw LowlevelError("get_reg_type: reg doesn't exist.");
-	}
-	const std::string &group = sanal->reg_group[p->first];
-
-	if (group. empty()) {
-		return R_REG_TYPE_GPR;
-	}
-	for (size_t i = 0; r_reg_type_arr[i]; i++) {
-		if (group == r_reg_type_arr[i]) {
-			const char *curr = r_reg_string_arr[i];
-			switch (curr[0] | curr[1] << 8) {
-			case 'g' | 'p' << 8: return R_REG_TYPE_GPR;
-			case 'd' | 'r' << 8: return R_REG_TYPE_DRX;
-			case 'f' | 'p' << 8: return R_REG_TYPE_FPU;
-			case 'v' | 'e' << 8:
-				switch (curr[3]) {
-				case '6':
-					return R_REG_TYPE_VEC64;
-				case '1':
-					return R_REG_TYPE_VEC128;
-				case '2':
-					return R_REG_TYPE_VEC256;
-				}
-				break;
-			case 'f' | 'l' << 8: return R_REG_TYPE_FLG;
-			case 's' | 'e' << 8: return R_REG_TYPE_SEG;
-			}
-		}
-	}
-	return -1;
-}
-
 static void append_hardcoded_regs(std::stringstream &buf, const std::string &arch, bool little, int bits) {
 	if (arch.size() < 3) {
 		throw LowlevelError("append_hardcoded_regs: Unexpected arch name.");
@@ -1750,22 +1718,22 @@ static void append_hardcoded_regs(std::stringstream &buf, const std::string &arc
 
 static const char *regtype_name(const char *cpu, const std::string &regname, ut64 bits) {
 	if (!r_str_ncasecmp (cpu, "x86", 3)) {
-		if (regname.find ("cr") != -1) {
+		if (regname.find ("cr") != std::string::npos) {
 			return "drx";
 		}
-		if (regname.find ("ia32") != -1) {
+		if (regname.find ("ia32") != std::string::npos) {
 			return "drx";
 		}
 		if (regname.find ("bnd") == 0) {
 			return "fpu";
 		}
-		if (regname.find ("_offset") != -1) {
+		if (regname.find ("_offset") != std::string::npos) {
 			return "seg";
 		}
-		if (regname.find ("tr_addr") != -1) {
+		if (regname.find ("tr_addr") != std::string::npos) {
 			return "drx";
 		}
-		if (regname.find ("mm") != -1) {
+		if (regname.find ("mm") != std::string::npos) {
 			// r2 has no "mmx" type, and the narrower views must share one arena to alias
 			switch (bits) {
 			case 512: return "vec512";
@@ -1845,18 +1813,6 @@ extern "C" char *r2ghidra_regs(RArchSession *as) {
 	const std::string &res = buf.str ();
 	// fprintf(stderr, "%s\n", res.c_str());
 	return strdup (res.c_str ());
-}
-
-static constexpr int ESIL_PARM_FLOAT = 127; // Avoid conflict
-
-static bool esil_pushnum_float(REsil *esil, long double num) {
-	char str[64];
-	snprintf (str, sizeof (str) - 1, "%.*LeF", DECIMAL_DIG, num);
-#if R2_ABIVERSION >= 87
-	return r_esil_push (esil, r_strs_from (str));
-#else
-	return r_esil_push (esil, str);
-#endif
 }
 
 static bool sleigh_esil_consts_pick(REsil *esil) {

@@ -642,10 +642,10 @@ void SleighAsm::check(ut64 offset, const ut8 *buf, int len) { // To refresh cach
 	if (ctx->getParserState () > ParserContext::uninitialized) {
 		ut8 *cached = ctx->getBuffer ();
 		size_t i = 0;
-		for (; i < len && cached[i] == buf[i]; i++) {
+		for (; i < (size_t)len && cached[i] == buf[i]; i++) {
 			// just loop in here
 		}
-		if (i != len) {
+		if (i != (size_t)len) {
 			ctx->setParserState (ParserContext::uninitialized);
 		}
 	}

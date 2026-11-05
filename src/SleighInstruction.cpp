@@ -214,7 +214,7 @@ FlowType SleighInstructionPrototype::convertFlowFlags(FlowFlags flags) {
 	flags = FlowFlags(flags & (~(FLOW_CROSSBUILD | FLOW_LABEL)));
 	// NOTE: If prototype has cross-build, flow must be determined dynamically
 	// Convert flags to a standard flowtype
-	switch (flags) {
+	switch ((int)flags) {
 	case 0:
 	case FLOW_BRANCH_TO_END: return FlowType::FALL_THROUGH;
 	case FLOW_CALL: return FlowType::UNCONDITIONAL_CALL;
@@ -414,7 +414,7 @@ SleighInstructionPrototype::FlowFlags SleighInstructionPrototype::gatherFlags(Fl
 	std::vector<FlowRecord *> curlist;
 	if (secnum < 0) {
 		curlist = flowStateList;
-	} else if ((!flowStateListNamed.empty()) && (secnum < flowStateListNamed.size())) {
+	} else if ((!flowStateListNamed.empty()) && ((size_t)secnum < flowStateListNamed.size())) {
 		curlist = flowStateListNamed[secnum];
 	}
 	if (curlist.empty()) {
@@ -451,7 +451,7 @@ void SleighInstructionPrototype::gatherFlows(std::vector<Address> &res, SleighIn
 	std::vector<FlowRecord *> curlist;
 	if (secnum < 0) {
 		curlist = flowStateList;
-	} else if ((!flowStateListNamed.empty()) && (secnum < flowStateListNamed.size())) {
+	} else if ((!flowStateListNamed.empty()) && ((size_t)secnum < flowStateListNamed.size())) {
 		curlist = flowStateListNamed[secnum];
 	}
 	if (curlist.empty()) {

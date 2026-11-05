@@ -51,9 +51,9 @@ public:
 };
 
 struct PcodeOperand {
-	PcodeOperand(uintb offset, uint4 size): type(RAM), offset(offset), size(size) {}
-	PcodeOperand(uintb number): type(CONSTANT), number(number), size(0) {}
-	PcodeOperand(const std::string &name, uint4 size): type(REGISTER), name(name), size(size) {}
+	PcodeOperand(uintb offset, uint4 size): offset(offset), size(size), type(RAM) {}
+	PcodeOperand(uintb number): number(number), size(0), type(CONSTANT) {}
+	PcodeOperand(const std::string &name, uint4 size): name(name), size(size), type(REGISTER) {}
 	virtual ~PcodeOperand() {
 		if (type == REGISTER) {
 			name.~string();
@@ -136,7 +136,7 @@ struct Pcodeop {
 	/* input2 for STORE will use output to save memory space */
 
 	Pcodeop(PcodeOpType opc, PcodeOperand *in0, PcodeOperand *in1, PcodeOperand *out):
-	    type(opc), input0(in0), input1(in1), output(out) {
+	    type(opc), output(out), input0(in0), input1(in1) {
 	}
 
 	void fini() {

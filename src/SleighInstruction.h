@@ -95,7 +95,7 @@ enum FlowType {
 	CALLOTHER_OVERRIDE_JUMP,
 };
 
-static bool flowTypeHasFallthrough(FlowType t) {
+static inline bool flowTypeHasFallthrough(FlowType t) {
 	switch (t) {
 	case FlowType::INVALID:
 	case FlowType::FLOW:
@@ -286,7 +286,7 @@ private:
 	void generatePointer(const VarnodeTpl *vntpl, VarnodeData &vn, ParserWalker &walker);
 
 public:
-	R2Sleigh(LoadImage *ld, ContextDatabase *c_db): R2loader(ld), Sleigh(ld, c_db) {}
+	R2Sleigh(LoadImage *ld, ContextDatabase *c_db): Sleigh(ld, c_db), R2loader(ld) {}
 	~R2Sleigh() { clearCache(); }
 	
 	void reconstructContext(ParserContext &protoContext);
