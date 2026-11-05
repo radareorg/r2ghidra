@@ -26,7 +26,7 @@ struct ParseCodeXMLContext {
 	std::map<ut64, Symbol *> symbols;
 
 	explicit ParseCodeXMLContext(ghidra::Funcdata *func) : func (func) {
-		for (auto it=func->beginOpAll (); it != func->endOpAll (); it++) {
+		for (auto it=func->beginOpMain (); it != func->endOpMain (); it++) {
 			ops[it->first.getTime ()] = it->second;
 		}
 		for (auto it = func->beginLoc (); it != func->endLoc (); it++) {

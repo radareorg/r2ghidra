@@ -108,7 +108,7 @@ static Element *childAddr(Element *el, const std::string &name, const Address &a
 	}
 
 	// Join addresses must be marshaled with their physical pieces.
-	JoinRecord *record = space->getManager ()->findJoin (addr.getOffset ());
+	JoinRecord *record = space->findJoin (addr.getOffset ());
 	const int4 numPieces = record->numPieces ();
 	constexpr int4 maxMarshaledJoinPieces = 64; // JoinSpace::MAX_PIECES is private.
 	if (numPieces > maxMarshaledJoinPieces) {

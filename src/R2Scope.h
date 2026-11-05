@@ -67,6 +67,8 @@ public:
 	Funcdata *resolveExternalRefFunction(ExternRefSymbol *sym) const override;
 
 	MapEntry *findOverlap(const Address &addr,int4 size) const override { throw LowlevelError("findOverlap unimplemented"); }
+	MapEntry *findSymbolBefore(const Address &addr,const Address &usepoint) const override { return cache->findSymbolBefore(addr,usepoint); }
+	MapEntry *findSymbolAfter(const Address &addr,const Address &usepoint) const override { return cache->findSymbolAfter(addr,usepoint); }
 	SymbolEntry *findBefore(const Address &addr) const				{ throw LowlevelError("findBefore unimplemented"); }
 	SymbolEntry *findAfter(const Address &addr) const				{ throw LowlevelError("findAfter unimplemented"); }
 	void findByName(const string &name,vector<Symbol *> &res) const	override { throw LowlevelError("findByName unimplemented"); }

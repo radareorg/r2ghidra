@@ -36,7 +36,7 @@ e r2ghidra.ccode=true
 pdg~__libc_init
 EOF
 EXPECT=<<EOF
-    __libc_init(param_1,0,*(iRam00000424 + 0x418),&stack0xffffffec);
+    __libc_init(param_1,0,*(iRam00000424 + 0x418),&uStack_14);
 EOF
 RUN
 

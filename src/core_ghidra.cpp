@@ -229,11 +229,9 @@ struct PcodeSnapshot {
 
 	void capture(const Funcdata &func) {
 		operations.clear ();
-		for (auto it = func.beginOpAll (); it != func.endOpAll (); ++it) {
-			const PcodeOp *op = it->second;
-			if (!op->isDead ()) {
-				operations.emplace (it->first, Operation { op, op->code () });
-			}
+		for (auto it = func.beginOpAlive (); it != func.endOpAlive (); ++it) {
+			const PcodeOp *op = *it;
+			operations.emplace (op->getSeqNum (), Operation { op, op->code () });
 		}
 	}
 
