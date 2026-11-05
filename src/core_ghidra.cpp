@@ -618,18 +618,22 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 
 // see sleighexample.cc
 class AssemblyRaw : public AssemblyEmit {
+private:
+	ostream &out;
+
 public:
+	AssemblyRaw(ostream &o): out(o) {}
+
 	void dump(const Address &addr, const string &mnem, const string &body) override {
-		std::stringstream ss;
-		addr.printRaw (ss);
-		ss << ": " << mnem << ' ' << body;
-		r_cons_gprintf ("%s\n", ss.str().c_str ());
+		addr.printRaw (out);
+		out << ": " << mnem << ' ' << body << '\n';
 	}
 };
 
 class PcodeRawOut : public PcodeEmit {
 private:
 	const Translate *trans = nullptr;
+	ostream &out;
 
 	void print_vardata(ostream &s, VarnodeData &data) {
 		AddrSpace *space = data.space;
@@ -662,43 +666,43 @@ private:
 	}
 
 public:
-	PcodeRawOut(const Translate *t): trans(t) {}
+	PcodeRawOut(const Translate *t, ostream &o): trans(t), out(o) {}
 
 	void dump(const Address &addr, OpCode opc, VarnodeData *outvar, VarnodeData *vars, int4 isize) override {
-		std::stringstream ss;
+		out << "    ";
 		bool is_store = (opc == CPUI_STORE && isize == 3);
 		if (outvar) {
-			print_vardata (ss,*outvar);
-			ss << " = ";
+			print_vardata (out,*outvar);
+			out << " = ";
 		}
-		ss << get_opname(opc);
+		out << get_opname(opc);
 		// Possibly check for a code reference or a space reference
-		ss << ' ';
+		out << ' ';
 		int4 print_isize = is_store ? 2 : isize;
 		// For indirect case in SleighBuilder::dump(OpTpl *op)'s "vn->isDynamic(*walker)" branch.
 		if (print_isize > 1 && vars[0].size == sizeof(AddrSpace *) && vars[0].space->getName() == "const"
 				&& (vars[0].offset >> 24) == ((uintb)vars[1].space >> 24) && trans == ((AddrSpace*)vars[0].offset)->getTrans())
 		{
-			ss << ((AddrSpace*)vars[0].offset)->getName();
-			ss << '[';
-			print_vardata (ss, vars[1]);
-			ss << ']';
+			out << ((AddrSpace*)vars[0].offset)->getName();
+			out << '[';
+			print_vardata (out, vars[1]);
+			out << ']';
 			for (int4 i = 2; i < print_isize; i++) {
-				ss << ", ";
-				print_vardata (ss, vars[i]);
+				out << ", ";
+				print_vardata (out, vars[i]);
 			}
 		} else {
-			print_vardata (ss, vars[0]);
+			print_vardata (out, vars[0]);
 			for (int4 i = 1; i < print_isize; i++) {
-				ss << ", ";
-				print_vardata (ss, vars[i]);
+				out << ", ";
+				print_vardata (out, vars[i]);
 			}
 		}
 		if (is_store) {
-			ss << " = ";
-			print_vardata (ss, vars[2]);
+			out << " = ";
+			print_vardata (out, vars[2]);
 		}
-		r_cons_gprintf ("    %s\n", ss.str().c_str ());
+		out << '\n';
 	}
 };
 
@@ -711,8 +715,9 @@ static void Disassemble(RCore *core, ut64 ops) {
 	arch.init (store);
 
 	const Translate *trans = arch.translate;
-	PcodeRawOut emit (arch.translate);
-	AssemblyRaw assememit;
+	std::stringstream out;
+	PcodeRawOut emit (arch.translate, out);
+	AssemblyRaw assememit (out);
 
 	Address addr (trans->getDefaultCodeSpace(), core->addr);
 	for (ut64 i = 0; i < ops; i++) {
@@ -727,6 +732,7 @@ static void Disassemble(RCore *core, ut64 ops) {
 			addr = addr + trans->getAlignment();
 		}
 	}
+	r_cons_print (core->cons, out.str ().c_str ());
 }
 
 static void SetInitialSleighHome(RConfig *cfg) {
