@@ -1,6 +1,10 @@
 // SPDX-FileCopyrightText: 2020-2026 pancake
 // SPDX-License-Identifier: LGPL-3.0-only
 
+// r2 >= 6.2.6 (ABI 174) exposes struct sigaction in r_core_priv.h, hidden by strict -std=c11
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
 #include <r_lib.h>
 #include <r_anal.h>
 #include <r_arch.h>
