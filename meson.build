@@ -87,7 +87,7 @@ add_global_arguments('-DNDEBUG', language: ['c', 'cpp'])
 
 r2ghidra_incdirs = include_directories(incdirs)
 
-ghidra = subproject('ghidra-native', version: '>=0.7.2', default_options: ['default_library=static', 'werror=false', 'warning_level=0'])
+ghidra = subproject('ghidra-native', version: '>=0.7.3', default_options: ['default_library=static', 'werror=false', 'warning_level=0'])
 
 r2ghidra_deps = [r_core, ghidra.get_variable('ghidra_dep').as_system()]
 r2ghidra_cpp_args = []

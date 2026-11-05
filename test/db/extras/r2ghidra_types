@@ -1262,7 +1262,7 @@ EXPECT=<<EOF
     {
       "space": "ram",
       "offset": 134517295,
-      "uniq": 519,
+      "uniq": 522,
       "opcode": 1,
       "is_dead": false
     },
@@ -1276,7 +1276,7 @@ EXPECT=<<EOF
     {
       "space": "ram",
       "offset": 134517307,
-      "uniq": 526,
+      "uniq": 529,
       "opcode": 64,
       "is_dead": false
     },
@@ -1297,161 +1297,161 @@ EXPECT=<<EOF
     {
       "space": "ram",
       "offset": 134517334,
-      "uniq": 156,
+      "uniq": 160,
       "opcode": 11,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517341,
-      "uniq": 161,
+      "uniq": 165,
       "opcode": 5,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517443,
-      "uniq": 525,
+      "uniq": 528,
       "opcode": 1,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517443,
-      "uniq": 177,
+      "uniq": 181,
       "opcode": 7,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517451,
-      "uniq": 187,
+      "uniq": 191,
       "opcode": 4,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517332,
-      "uniq": 118,
+      "uniq": 122,
       "opcode": 6,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517425,
-      "uniq": 524,
+      "uniq": 527,
       "opcode": 1,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517425,
-      "uniq": 202,
+      "uniq": 206,
       "opcode": 7,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517433,
-      "uniq": 212,
+      "uniq": 216,
       "opcode": 4,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517407,
-      "uniq": 523,
+      "uniq": 526,
       "opcode": 1,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517407,
-      "uniq": 227,
+      "uniq": 231,
       "opcode": 7,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517415,
-      "uniq": 237,
+      "uniq": 241,
       "opcode": 4,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517389,
-      "uniq": 522,
+      "uniq": 525,
       "opcode": 1,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517389,
-      "uniq": 252,
+      "uniq": 256,
       "opcode": 7,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517397,
-      "uniq": 262,
+      "uniq": 266,
       "opcode": 4,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517371,
-      "uniq": 521,
+      "uniq": 524,
       "opcode": 1,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517371,
-      "uniq": 277,
+      "uniq": 281,
       "opcode": 7,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517379,
-      "uniq": 287,
+      "uniq": 291,
       "opcode": 4,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517353,
-      "uniq": 520,
+      "uniq": 523,
       "opcode": 1,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517353,
-      "uniq": 302,
+      "uniq": 306,
       "opcode": 7,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517361,
-      "uniq": 312,
+      "uniq": 316,
       "opcode": 4,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517459,
-      "uniq": 133,
+      "uniq": 137,
       "opcode": 7,
       "is_dead": false
     },
     {
       "space": "ram",
       "offset": 134517469,
-      "uniq": 148,
+      "uniq": 152,
       "opcode": 10,
       "is_dead": false
     }

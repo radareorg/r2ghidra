@@ -44,7 +44,7 @@ CCu base64:Jg== @ 0x804858a
   <localdb main="stack" lock="false">
       <rangelist>
         <range space="stack" first="0x4" last="0x1f7"/>
-        <range space="stack" first="0xfff0bdc0" last="0xffffff5f"/>
+        <range space="stack" first="0x80000000" last="0xffffff5f"/>
         <range space="stack" first="0xffffff68" last="0xfffffffb"/>
       </rangelist>
       <symbollist>
@@ -697,25 +697,29 @@ shr eax, 4
     (unique,0x49a00,1) = INT_AND (unique,0x49900,1), 0x1
     PF = INT_EQUAL (unique,0x49a00,1), 0x0
 0x08048557: SHR EAX,0x4
-    (unique,0xac000,4) = INT_AND 0x4, 0x1f
-    (unique,0xac100,4) = COPY EAX
-    EAX = INT_RIGHT EAX, (unique,0xac000,4)
-    (unique,0x50200,1) = INT_NOTEQUAL (unique,0xac000,4), 0x0
-    (unique,0x50300,4) = INT_SUB (unique,0xac000,4), 0x1
-    (unique,0x50400,4) = INT_RIGHT (unique,0xac100,4), (unique,0x50300,4)
-    (unique,0x50500,4) = INT_AND (unique,0x50400,4), 0x1
-    (unique,0x50700,1) = INT_NOTEQUAL (unique,0x50500,4), 0x0
-    (unique,0x50800,1) = BOOL_NEGATE (unique,0x50200,1)
-    (unique,0x50900,1) = INT_AND (unique,0x50800,1), CF
-    (unique,0x50a00,1) = INT_AND (unique,0x50200,1), (unique,0x50700,1)
-    CF = INT_OR (unique,0x50900,1), (unique,0x50a00,1)
-    (unique,0x50d00,1) = INT_EQUAL (unique,0xac000,4), 0x1
-    (unique,0x50f00,1) = INT_SLESS (unique,0xac100,4), 0x0
-    (unique,0x51000,1) = BOOL_NEGATE (unique,0x50d00,1)
-    (unique,0x51100,1) = INT_AND (unique,0x51000,1), OF
-    (unique,0x51200,1) = INT_AND (unique,0x50d00,1), (unique,0x50f00,1)
-    OF = INT_OR (unique,0x51100,1), (unique,0x51200,1)
-    (unique,0x49d00,1) = INT_NOTEQUAL (unique,0xac000,4), 0x0
+    (unique,0xa1f00,4) = INT_AND 0x4, 0x1f
+    (unique,0xa2000,4) = COPY EAX
+    EAX = INT_RIGHT EAX, (unique,0xa1f00,4)
+    (unique,0x4d300,1) = INT_EQUAL (unique,0xa1f00,4), 0x0
+    (unique,0x4d400,4) = INT_SUB (unique,0xa1f00,4), 0x1
+    (unique,0x4d500,4) = INT_RIGHT (unique,0xa2000,4), (unique,0x4d400,4)
+    (unique,0x4d600,4) = INT_AND (unique,0x4d500,4), 0x1
+    (unique,0x4d700,1) = INT_NOTEQUAL (unique,0x4d600,4), 0x0
+    (unique,0x0,1) = COPY (unique,0x4d300,1)
+    (unique,0x100,1) = INT_MULT (unique,0x0,1), CF
+    (unique,0x200,1) = BOOL_NEGATE (unique,0x4d300,1)
+    (unique,0x300,1) = COPY (unique,0x200,1)
+    (unique,0x400,1) = INT_MULT (unique,0x300,1), (unique,0x4d700,1)
+    CF = INT_OR (unique,0x100,1), (unique,0x400,1)
+    (unique,0x4d800,1) = INT_EQUAL (unique,0xa1f00,4), 0x1
+    (unique,0x4d900,1) = INT_SLESS (unique,0xa2000,4), 0x0
+    (unique,0x0,1) = COPY (unique,0x4d800,1)
+    (unique,0x100,1) = INT_MULT (unique,0x0,1), 0x0
+    (unique,0x200,1) = BOOL_NEGATE (unique,0x4d800,1)
+    (unique,0x300,1) = COPY (unique,0x200,1)
+    (unique,0x400,1) = INT_MULT (unique,0x300,1), (unique,0x4d900,1)
+    OF = INT_OR (unique,0x100,1), (unique,0x400,1)
+    (unique,0x49d00,1) = INT_NOTEQUAL (unique,0xa1f00,4), 0x0
     (unique,0x49f00,1) = INT_SLESS EAX, 0x0
     (unique,0x4a000,1) = BOOL_NEGATE (unique,0x49d00,1)
     (unique,0x4a100,1) = INT_AND (unique,0x4a000,1), SF
@@ -1053,6 +1057,6 @@ s main
 pdg~gmon_start
 EOF2
 EXPECT=<<EOF2
-        (*_reloc.__gmon_start__)();
+    (*_reloc.__gmon_start__)();
 EOF2
 RUN

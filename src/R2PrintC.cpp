@@ -69,7 +69,7 @@ fprintf (stderr, "opCast%c", 10);
 }
 #endif
 
-void R2PrintC::pushUnnamedLocation(const Address &addr, const Varnode *vn, const PcodeOp *op) {
+void R2PrintC::pushUnnamedLocation(const Address &addr, int4 size, const Varnode *vn, const PcodeOp *op) {
 //	option_nocasts = true;
 	// print (*(type *)0x0000...) instead of ram00000...
 	AddrSpace *space = addr.getSpace ();
@@ -78,7 +78,7 @@ void R2PrintC::pushUnnamedLocation(const Address &addr, const Varnode *vn, const
 		auto type = glb->types->getTypePointer (space->getAddrSize (), vn->getType (), space->getWordSize ());
 		pushConstant (addr.getOffset (), type, vartoken, vn, op, type->getDisplayFormat ());
 	} else {
-		PrintC::pushUnnamedLocation (addr,vn, op);
+		PrintC::pushUnnamedLocation (addr, size, vn, op);
 	}
 }
 
