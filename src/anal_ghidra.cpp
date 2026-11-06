@@ -738,589 +738,576 @@ static char *getIndirectReg(SleighInstruction *ins, bool &isRefed) {
 	return nullptr;
 }
 
-static int index_of_unique(const std::vector<PcodeOperand *> &esil_stack, const PcodeOperand *arg) {
-	int index = 1;
-	for (auto iter = esil_stack.crbegin(); iter != esil_stack.crend(); iter++, index++) {
-		if (*iter && **iter == *arg) {
-			return index;
+// Translate P-code into r2 ESIL using only the operations r2 implements.
+// ESIL is reverse polish with the left operand on top of the stack, so "b,a,-"
+// computes a - b and "bits,value,~" sign extends value. P-code temporaries are
+// inlined as expressions and all the writes are deferred to the end, so every
+// value is computed from the state before the instruction, then the registers,
+// memory and pc are written in program order. A conditional branch skips the
+// pcodes after it, those are guarded by the negated condition until the paths
+// merge again at the target of a forward branch inside the instruction.
+class SleighEsil {
+public:
+	explicit SleighEsil(int bits): bits(bits) {}
+	std::string translate(const std::vector<Pcodeop> &pcodes);
+
+private:
+	struct Unsupported {};
+	struct Write {
+		enum { REG, MEM, PC } kind;
+		const PcodeOperand *reg; // REG
+		std::string value;
+		std::string addr; // MEM
+		uint4 size; // MEM
+		std::string guard; // MEM and PC, empty when unconditional
+	};
+	int bits;
+	std::map<uintb, std::string> uniques;
+	std::vector<Write> writes;
+	// condition to execute the current pcode, empty when unconditional
+	std::string guard;
+	// no path reaches the current pcode
+	bool dead = false;
+	// guards of the forward branches to each pcode index
+	std::map<size_t, std::vector<std::string>> labels;
+	size_t index = 0;
+	size_t count = 0;
+
+	static std::string num(uintb n) {
+		return std::to_string (n);
+	}
+	static std::string binop(const std::string &a, const std::string &b, const char *op) {
+		return b + "," + a + "," + op;
+	}
+	static std::string unop(const std::string &a, const char *op) {
+		return a + "," + op;
+	}
+	static std::string hex(uintb n) {
+		std::stringstream ss;
+		ss << "0x" << std::hex << n;
+		return ss.str ();
+	}
+	static std::string mask(const std::string &v, uint4 size) {
+		return size >= 8? v: binop (v, hex ((1ULL << (size * 8)) - 1), "&");
+	}
+	static std::string sext(const std::string &v, uint4 size) {
+		return size >= 8? v: num (size * 8) + "," + v + ",~";
+	}
+	// r2 compares at the size of register operands, compare 64 bit numbers instead
+	// and flip the sign bits for the unsigned 64 bit comparisons
+	static std::string ucmp(const std::string &a, const std::string &b, uint4 size, const char *op) {
+		if (size < 8) {
+			return binop (snapshot (a), snapshot (b), op);
+		}
+		const char *sign = "0x8000000000000000";
+		return binop (binop (a, sign, "^"), binop (b, sign, "^"), op);
+	}
+	static std::string scmp(const std::string &a, const std::string &b, uint4 size, const char *op) {
+		return binop (snapshot (sext (a, size)), snapshot (sext (b, size)), op);
+	}
+	static std::string to_double(const std::string &v, uint4 size) {
+		return size == 8? v: num (size * 8) + "," + v + ",F2D";
+	}
+	// a when the 0 or 1 condition g is set, b otherwise
+	static std::string select(const std::string &g, const std::string &a, const std::string &b) {
+		const std::string all = binop ("0", g, "-");
+		return binop (binop (binop (a, b, "^"), all, "&"), b, "^");
+	}
+	static std::string both(const std::string &g, const std::string &c) {
+		return g.empty ()? c: binop (g, c, "&");
+	}
+	static std::string either(const std::string &g, const std::string &c) {
+		return g.empty () || c.empty ()? "": binop (g, c, "|");
+	}
+	static std::string from_double(const std::string &v, uint4 size) {
+		return size == 8? v: num (size * 8) + "," + v + ",D2F";
+	}
+	// division by zero gives 0 without raising the esil trap
+	static std::string divide(const std::string &a, const std::string &b, const char *op) {
+		const std::string nonzero = binop (b, unop (b, "!"), "|");
+		return binop (binop (a, nonzero, op), unop (unop (b, "!"), "!"), "*");
+	}
+	// a bare register is read when it is consumed, and its size changes how
+	// r2 compares it, take its value as a number
+	static std::string snapshot(const std::string &v) {
+		if (v.find (',') == std::string::npos && !isdigit ((unsigned char)v[0])) {
+			return v + ",NUM";
+		}
+		return v;
+	}
+	static void check_size(const PcodeOperand *arg) {
+		if (arg->size > 8) {
+			throw Unsupported ();
 		}
 	}
-	return -1;
+	static bool overlaps(const PcodeOperand *a, const PcodeOperand *b) {
+		return a->reg_offset < b->reg_offset + b->size && b->reg_offset < a->reg_offset + a->size;
+	}
+	static bool contains(const PcodeOperand *outer, const PcodeOperand *inner) {
+		return outer->reg_offset <= inner->reg_offset &&
+			inner->reg_offset + inner->size <= outer->reg_offset + outer->size;
+	}
+
+	std::string read(const PcodeOperand *arg);
+	std::string read_reg(const PcodeOperand *arg);
+	static void check_mem_size(uint4 size);
+	std::string load(const std::string &addr, uint4 size);
+	std::string address(const PcodeOperand *space, const PcodeOperand *offset);
+	std::string asr(const std::string &a, const std::string &b, uint4 size);
+	void write(const PcodeOperand *out, const std::string &value);
+	void write_mem(const std::string &addr, const std::string &value, uint4 size);
+	void write_pc(const std::string &target, const std::string &cond);
+	void jump(const PcodeOperand *offset, const std::string &cond);
+	void translate_op(const Pcodeop &op);
+};
+
+std::string SleighEsil::read(const PcodeOperand *arg) {
+	switch (arg->type) {
+	case PcodeOperand::CONSTANT:
+		return num (arg->number);
+	case PcodeOperand::UNIQUE: {
+		check_size (arg);
+		auto it = uniques.find (arg->offset);
+		if (it == uniques.end ()) {
+			throw Unsupported ();
+		}
+		return it->second;
+	}
+	case PcodeOperand::RAM:
+		return load (num (arg->offset), arg->size);
+	case PcodeOperand::REGISTER:
+		return read_reg (arg);
+	}
+	throw Unsupported ();
+}
+
+std::string SleighEsil::read_reg(const PcodeOperand *arg) {
+	check_size (arg);
+	if (arg->name.empty ()) {
+		throw Unsupported ();
+	}
+	for (auto w = writes.crbegin (); w != writes.crend (); w++) {
+		if (w->kind != Write::REG || !overlaps (w->reg, arg)) {
+			continue;
+		}
+		if (!contains (w->reg, arg)) {
+			throw Unsupported ();
+		}
+		const PcodeOperand *reg = w->reg;
+		const uintb shift = reg->reg_big_endian
+			? (reg->reg_offset + reg->size) - (arg->reg_offset + arg->size)
+			: arg->reg_offset - reg->reg_offset;
+		const std::string value = shift? binop (w->value, num (shift * 8), ">>"): w->value;
+		return arg->size < reg->size? mask (value, arg->size): value;
+	}
+	return arg->name;
+}
+
+void SleighEsil::check_mem_size(uint4 size) {
+	switch (size) {
+	case 1: case 2: case 3: case 4: case 8:
+		return;
+	}
+	throw Unsupported ();
+}
+
+// a load after a store in the same instruction reads the stored value
+std::string SleighEsil::load(const std::string &addr, uint4 size) {
+	check_mem_size (size);
+	for (auto w = writes.crbegin (); w != writes.crend (); w++) {
+		if (w->kind != Write::MEM) {
+			continue;
+		}
+		if (w->addr != addr || w->size != size) {
+			// the addresses may alias
+			throw Unsupported ();
+		}
+		if (w->guard.empty ()) {
+			return w->value;
+		}
+		return select (w->guard, w->value, addr + ",[" + num (size) + "]");
+	}
+	return addr + ",[" + num (size) + "]";
+}
+
+std::string SleighEsil::address(const PcodeOperand *space, const PcodeOperand *offset) {
+	std::string addr = read (offset);
+	if (space->is_const ()) {
+		const int4 wordsize = ((AddrSpace *)space->offset)->getWordSize ();
+		if (wordsize != 1) {
+			addr = binop (addr, num (wordsize), "*");
+		}
+	}
+	return addr;
+}
+
+// r2 narrows ASR to 32 bits when asm.bits is 32, wider values shift by hand
+std::string SleighEsil::asr(const std::string &a, const std::string &b, uint4 size) {
+	const std::string value = sext (a, size);
+	if (bits != 32 || size <= 4) {
+		return binop (value, b, "ASR");
+	}
+	const std::string fill = binop ("0", binop (value, "63", ">>"), "-");
+	return binop (binop (value, b, ">>"), binop (fill, binop ("64", b, "-"), "<<"), "|");
+}
+
+void SleighEsil::write(const PcodeOperand *out, const std::string &value) {
+	switch (out->type) {
+	case PcodeOperand::UNIQUE: {
+		auto it = uniques.find (out->offset);
+		uniques[out->offset] = guard.empty () || it == uniques.end ()? value: select (guard, value, it->second);
+		return;
+	}
+	case PcodeOperand::REGISTER: {
+		check_size (out);
+		if (out->name.empty ()) {
+			throw Unsupported ();
+		}
+		const std::string reg_value = guard.empty ()? value: select (guard, value, read_reg (out));
+		// earlier writes to the same bits are dead, reads already inlined their values
+		writes.erase (std::remove_if (writes.begin (), writes.end (), [out](const Write &w) {
+			return w.kind == Write::REG && contains (out, w.reg);
+		}), writes.end ());
+		writes.push_back ({Write::REG, out, reg_value, "", 0, ""});
+		return;
+	}
+	case PcodeOperand::RAM:
+		write_mem (num (out->offset), value, out->size);
+		return;
+	default:
+		throw Unsupported ();
+	}
+}
+
+void SleighEsil::write_mem(const std::string &addr, const std::string &value, uint4 size) {
+	check_mem_size (size);
+	writes.push_back ({Write::MEM, nullptr, value, addr, size, guard});
+}
+
+// the pcodes after a branch only run when it is not taken
+void SleighEsil::write_pc(const std::string &target, const std::string &cond) {
+	writes.push_back ({Write::PC, nullptr, target, "", 0, both (guard, cond)});
+	if (cond.empty ()) {
+		dead = true;
+	} else {
+		guard = both (guard, unop (cond, "!"));
+	}
+}
+
+// a constant target is a relative jump between the pcodes of the instruction
+void SleighEsil::jump(const PcodeOperand *offset, const std::string &cond) {
+	const int shift = offset->size > 0 && offset->size < 8? 64 - offset->size * 8: 0;
+	const intb delta = (intb)(offset->number << shift) >> shift;
+	if (delta <= 0 || index + delta > count) {
+		// loops can not be expressed
+		throw Unsupported ();
+	}
+	labels[index + delta].push_back (both (guard, cond));
+	if (cond.empty ()) {
+		dead = true;
+	} else {
+		guard = both (guard, unop (cond, "!"));
+	}
+}
+
+void SleighEsil::translate_op(const Pcodeop &op) {
+	const PcodeOperand *in0 = op.input0;
+	const PcodeOperand *in1 = op.input1;
+	const PcodeOperand *out = op.output;
+	const bool unary = in0 && out;
+	const bool binary = unary && in1;
+	switch (op.type) {
+	case CPUI_COPY:
+	case CPUI_INT_ZEXT:
+		if (!unary) break;
+		write (out, read (in0));
+		return;
+	case CPUI_INT_SEXT:
+		if (!unary) break;
+		write (out, mask (sext (read (in0), in0->size), out->size));
+		return;
+	case CPUI_LOAD:
+		if (!binary) break;
+		write (out, load (address (in0, in1), out->size));
+		return;
+	case CPUI_STORE: {
+		// the stored value is kept in the output field
+		if (!binary) break;
+		write_mem (address (in0, in1), read (out), out->size);
+		return;
+	}
+	case CPUI_BRANCH:
+	case CPUI_CALL:
+		if (!in0) break;
+		if (in0->is_const ()) {
+			jump (in0, "");
+			return;
+		}
+		write_pc (in0->is_ram ()? num (in0->offset): read (in0), "");
+		return;
+	case CPUI_BRANCHIND:
+	case CPUI_CALLIND:
+	case CPUI_RETURN:
+		if (!in0) break;
+		write_pc (read (in0), "");
+		return;
+	case CPUI_CBRANCH: {
+		if (!in0 || !in1) break;
+		const std::string cond = unop (unop (read (in1), "!"), "!");
+		if (in0->is_const ()) {
+			jump (in0, cond);
+		} else {
+			write_pc (in0->is_ram ()? num (in0->offset): read (in0), cond);
+		}
+		return;
+	}
+	case CPUI_PIECE:
+		if (!binary) break;
+		write (out, binop (binop (read (in0), num (in1->size * 8), "<<"), read (in1), "|"));
+		return;
+	case CPUI_SUBPIECE: {
+		if (!binary || !in1->is_const ()) break;
+		std::string value = read (in0);
+		if (in1->number) {
+			value = binop (value, num (in1->number * 8), ">>");
+		}
+		write (out, mask (value, out->size));
+		return;
+	}
+	case CPUI_INT_ADD:
+	case CPUI_INT_SUB:
+	case CPUI_INT_MULT:
+	case CPUI_INT_XOR:
+	case CPUI_INT_AND:
+	case CPUI_INT_OR:
+	case CPUI_INT_LEFT:
+	case CPUI_INT_RIGHT:
+	case CPUI_BOOL_XOR:
+	case CPUI_BOOL_AND:
+	case CPUI_BOOL_OR: {
+		if (!binary) break;
+		const char *esil_op = nullptr;
+		switch (op.type) {
+		case CPUI_INT_ADD: esil_op = "+"; break;
+		case CPUI_INT_SUB: esil_op = "-"; break;
+		case CPUI_INT_MULT: esil_op = "*"; break;
+		case CPUI_INT_XOR: case CPUI_BOOL_XOR: esil_op = "^"; break;
+		case CPUI_INT_AND: case CPUI_BOOL_AND: esil_op = "&"; break;
+		case CPUI_INT_OR: case CPUI_BOOL_OR: esil_op = "|"; break;
+		case CPUI_INT_LEFT: esil_op = "<<"; break;
+		default: esil_op = ">>"; break;
+		}
+		write (out, mask (binop (read (in0), read (in1), esil_op), out->size));
+		return;
+	}
+	case CPUI_INT_SRIGHT:
+		if (!binary) break;
+		write (out, mask (asr (read (in0), read (in1), in0->size), out->size));
+		return;
+	case CPUI_INT_DIV:
+	case CPUI_INT_REM:
+		if (!binary) break;
+		write (out, mask (divide (read (in0), read (in1), op.type == CPUI_INT_DIV? "/": "%"), out->size));
+		return;
+	case CPUI_INT_SDIV:
+	case CPUI_INT_SREM:
+		if (!binary) break;
+		write (out, mask (divide (sext (read (in0), in0->size), sext (read (in1), in1->size),
+			op.type == CPUI_INT_SDIV? "~/": "~%"), out->size));
+		return;
+	case CPUI_INT_EQUAL:
+		if (!binary) break;
+		write (out, unop (binop (read (in0), read (in1), "-"), "!"));
+		return;
+	case CPUI_INT_NOTEQUAL:
+		if (!binary) break;
+		write (out, unop (unop (binop (read (in0), read (in1), "-"), "!"), "!"));
+		return;
+	case CPUI_INT_LESS:
+		if (!binary) break;
+		write (out, ucmp (read (in0), read (in1), in0->size, "<"));
+		return;
+	case CPUI_INT_LESSEQUAL:
+		if (!binary) break;
+		write (out, ucmp (read (in0), read (in1), in0->size, "<="));
+		return;
+	case CPUI_INT_SLESS:
+		if (!binary) break;
+		write (out, scmp (read (in0), read (in1), in0->size, "<"));
+		return;
+	case CPUI_INT_SLESSEQUAL:
+		if (!binary) break;
+		write (out, scmp (read (in0), read (in1), in0->size, "<="));
+		return;
+	case CPUI_INT_CARRY: {
+		if (!binary) break;
+		const std::string a = read (in0);
+		write (out, ucmp (mask (binop (a, read (in1), "+"), in0->size), a, in0->size, "<"));
+		return;
+	}
+	case CPUI_INT_SCARRY:
+	case CPUI_INT_SBORROW: {
+		// signed overflow when the sign of the result is not the expected one
+		if (!binary) break;
+		const std::string a = read (in0);
+		const std::string b = read (in1);
+		const bool add = op.type == CPUI_INT_SCARRY;
+		const std::string res = mask (binop (a, b, add? "+": "-"), in0->size);
+		const std::string overflow = add
+			? binop (binop (a, res, "^"), binop (b, res, "^"), "&")
+			: binop (binop (a, b, "^"), binop (a, res, "^"), "&");
+		write (out, binop (binop (overflow, num (in0->size * 8 - 1), ">>"), "1", "&"));
+		return;
+	}
+	case CPUI_INT_NEGATE:
+		if (!unary) break;
+		write (out, binop (read (in0), out->size >= 8? "0xffffffffffffffff": num ((1ULL << (out->size * 8)) - 1), "^"));
+		return;
+	case CPUI_INT_2COMP:
+		if (!unary) break;
+		write (out, mask (binop ("0", read (in0), "-"), out->size));
+		return;
+	case CPUI_BOOL_NEGATE:
+		if (!unary) break;
+		write (out, unop (read (in0), "!"));
+		return;
+	case CPUI_POPCOUNT:
+		if (!unary) break;
+		write (out, unop (read (in0), "POPCNT"));
+		return;
+	case CPUI_LZCOUNT:
+		if (!unary) break;
+		write (out, num (in0->size * 8) + "," + read (in0) + ",CLZ");
+		return;
+	case CPUI_FLOAT_EQUAL:
+	case CPUI_FLOAT_NOTEQUAL:
+	case CPUI_FLOAT_LESS:
+	case CPUI_FLOAT_LESSEQUAL:
+	case CPUI_FLOAT_ADD:
+	case CPUI_FLOAT_SUB:
+	case CPUI_FLOAT_MULT:
+	case CPUI_FLOAT_DIV: {
+		if (!binary) break;
+		const char *esil_op = nullptr;
+		bool compare = true;
+		switch (op.type) {
+		case CPUI_FLOAT_EQUAL: esil_op = "F=="; break;
+		case CPUI_FLOAT_NOTEQUAL: esil_op = "F!="; break;
+		case CPUI_FLOAT_LESS: esil_op = "F<"; break;
+		case CPUI_FLOAT_LESSEQUAL: esil_op = "F<="; break;
+		case CPUI_FLOAT_ADD: esil_op = "F+"; compare = false; break;
+		case CPUI_FLOAT_SUB: esil_op = "F-"; compare = false; break;
+		case CPUI_FLOAT_MULT: esil_op = "F*"; compare = false; break;
+		default: esil_op = "F/"; compare = false; break;
+		}
+		const std::string res = binop (to_double (read (in0), in0->size), to_double (read (in1), in1->size), esil_op);
+		write (out, compare? res: from_double (res, out->size));
+		return;
+	}
+	case CPUI_FLOAT_INT2FLOAT:
+		if (!unary) break;
+		write (out, from_double (unop (sext (read (in0), in0->size), "I2D"), out->size));
+		return;
+	case CPUI_FLOAT_FLOAT2FLOAT:
+		if (!unary) break;
+		write (out, from_double (to_double (read (in0), in0->size), out->size));
+		return;
+	case CPUI_FLOAT_TRUNC:
+		if (!unary) break;
+		write (out, mask (unop (to_double (read (in0), in0->size), "D2I"), out->size));
+		return;
+	case CPUI_FLOAT_NAN:
+		if (!unary) break;
+		write (out, unop (to_double (read (in0), in0->size), "NAN"));
+		return;
+	case CPUI_FLOAT_ABS:
+		if (!unary) break;
+		write (out, from_double (binop (to_double (read (in0), in0->size), "0x7fffffffffffffff", "&"), out->size));
+		return;
+	case CPUI_FLOAT_NEG:
+	case CPUI_FLOAT_CEIL:
+	case CPUI_FLOAT_FLOOR:
+	case CPUI_FLOAT_ROUND:
+	case CPUI_FLOAT_SQRT: {
+		if (!unary) break;
+		const char *esil_op = nullptr;
+		switch (op.type) {
+		case CPUI_FLOAT_NEG: esil_op = "-F"; break;
+		case CPUI_FLOAT_CEIL: esil_op = "CEIL"; break;
+		case CPUI_FLOAT_FLOOR: esil_op = "FLOOR"; break;
+		case CPUI_FLOAT_ROUND: esil_op = "ROUND"; break;
+		default: esil_op = "SQRT"; break;
+		}
+		write (out, from_double (unop (to_double (read (in0), in0->size), esil_op), out->size));
+		return;
+	}
+	default:
+		// CALLOTHER, CPOOLREF, NEW, SEGMENTOP, INSERT, EXTRACT and the non raw pcodes
+		break;
+	}
+	throw Unsupported ();
+}
+
+std::string SleighEsil::translate(const std::vector<Pcodeop> &pcodes) {
+	try {
+		count = pcodes.size ();
+		for (index = 0; index < count; index++) {
+			auto label = labels.find (index);
+			if (label != labels.end ()) {
+				// the paths merge, run when any of them reaches here
+				std::string merged = dead? label->second.front (): guard;
+				for (const auto &g : label->second) {
+					merged = either (merged, g);
+				}
+				guard = merged;
+				dead = false;
+				labels.erase (label);
+			}
+			if (!dead) {
+				translate_op (pcodes[index]);
+			}
+		}
+	} catch (const Unsupported &) {
+		return "";
+	}
+	// push the values of the last write first, so the writes pop them in program order
+	std::vector<std::string> words;
+	for (auto w = writes.crbegin (); w != writes.crend (); w++) {
+		words.push_back (snapshot (w->value));
+		if (w->kind == Write::MEM) {
+			words.push_back (snapshot (w->addr));
+		}
+		if (!w->guard.empty ()) {
+			words.push_back (w->guard);
+		}
+	}
+	const std::string &pc = sanal->reg_mapping[sanal->pc_name];
+	for (const auto &w : writes) {
+		std::string word;
+		switch (w.kind) {
+		case Write::REG: word = w.reg->name + ",="; break;
+		case Write::MEM: word = "=[" + num (w.size) + "]"; break;
+		case Write::PC: word = pc + ",="; break;
+		}
+		if (!w.guard.empty ()) {
+			// drop the values when the condition is not met
+			word = "?{," + word + ",}{,POP" + (w.kind == Write::MEM? ",POP": "") + ",}";
+		}
+		words.push_back (word);
+	}
+	std::string esil;
+	for (const auto &word : words) {
+		if (!esil.empty ()) {
+			esil += ",";
+		}
+		esil += word;
+	}
+	return esil;
 }
 
 static void sleigh_esil(RAnal *a, RAnalOp *anal_op, ut64 addr, const ut8 *data, int len, const std::vector<Pcodeop> &Pcodes) {
-	std::vector<PcodeOperand *> esil_stack;
-	std::stringstream ss;
-
-	auto print_if_unique = [&esil_stack, &ss](const PcodeOperand *arg, int offset = 0) -> bool {
-		if (arg->is_unique()) {
-			int index = index_of_unique(esil_stack, arg);
-			if (-1 == index) {
-				throw LowlevelError(
-				    "print_if_unique: Can't find required unique varnodes in stack.");
-			}
-			ss << index + offset << ",PICK";
-			return true;
-		}
-		return false;
-	};
-
-	auto print_operand = [&esil_stack, &ss](const PcodeOperand *arg, int offset = 0, bool is_float = false) -> bool {
-		if (arg->is_unique()) {
-			int index = index_of_unique(esil_stack, arg);
-			if (-1 == index) {
-				throw LowlevelError(
-				    "print_if_unique: Can't find required unique varnodes in stack.");
-			}
-			if (index + offset > 1) {
-				ss << index + offset << ",PICK";
-			} else {
-				ss << "DUP";
-			}
-		} else {
-			if (!arg->is_ram()) {
-				// idky but these NUMs are actually necessary
-				ss << *arg << (arg->is_reg()? ",NUM": "");
-			} else {
-				ss << *arg << ",[" << arg->size << "]";
-			}
-		}
-		if (is_float && arg->size != 8) {
-			ss << "," << arg->size << ",SWAP,F2D";
-		}
-		return true;
-	};
-	
-	auto push_stack = [&esil_stack](PcodeOperand *arg = nullptr) {
-		if (arg == nullptr) {
-			throw LowlevelError("push_stack: arg is nullptr.");
-		}
-		esil_stack.push_back (arg);
-	};
-
-	for (auto iter = Pcodes.cbegin(); iter != Pcodes.cend(); iter++) {
-		switch (iter->type) {
-		// FIXME: Maybe some of P-codes below can be processed
-		// In dalvik: 0x00000234: array_length 0x1008,0x1008
-		//                v2 = CPOOLREF v2, 0x0, 0x6
-		case CPUI_CPOOLREF:
-		case CPUI_CALLOTHER:
-		case CPUI_NEW:
-		case CPUI_SEGMENTOP:
-		case CPUI_INSERT: /* Above don't have explicit definition */
-		case CPUI_MULTIEQUAL:
-		case CPUI_INDIRECT:
-		case CPUI_CAST:
-		case CPUI_PTRADD:
-		case CPUI_PTRSUB: /* Above are not raw P-code */
-		branch_in_pcodes:
-			// ss << ",CLEAR,TODO";
-			ss.str("");
-			esil_stack.clear();
-			iter = --Pcodes.cend(); // Jump out
-			break;
-
-		case CPUI_INT_ZEXT:
-		case CPUI_INT_SEXT:
-		{
-			if (iter->input0 && iter->output) {
-				ss << ",";
-				print_operand (iter->input0);
-				if (iter->type == CPUI_INT_SEXT) {
-					ss << "," << iter->input0->size * 8 << ",~";
-					ss << ",1," << iter->output->size * 8 << ",<<,1,-,&";
-				}
-
-				if (iter->output->is_unique()) {
-					push_stack(iter->output);
-				} else {
-					ss << "," << *iter->output << ",=";
-				}
-			} else {
-				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
-			}
-			break;
-		}
-
-		case CPUI_COPY:
-		{
-			if (iter->input0 && iter->output) {
-				ss << ",";
-				print_operand (iter->input0);
-
-				if (iter->output->is_unique()) {
-					push_stack(iter->output);
-				} else if (iter->output->is_ram()) {
-					ss << "," << *iter->output << ",=[" << iter->output->size << "]";
-				} else {
-					ss << "," << *iter->output << ",=";
-				}
-			} else {
-				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
-			}
-			break;
-		}
-		case CPUI_LOAD:
-		{
-			if (iter->input0 && iter->input1 && iter->output) {
-				ss << ",";
-				print_operand (iter->input1);
-				if (iter->input0->is_const() &&
-				   ((AddrSpace *)iter->input0->offset)->getWordSize() != 1)
-					ss << "," << ((AddrSpace *)iter->input0->offset)->getWordSize() << ",*";
-				ss << ",[" << iter->output->size << "]";
-				if (iter->output->is_unique()) {
-					push_stack(iter->output);
-				} else {
-					ss << "," << *iter->output << ",=";
-				}
-			} else {
-				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
-			}
-			break;
-		}
-
-		case CPUI_STORE:
-		{
-			if (iter->input0 && iter->input1 && iter->output) {
-				ss << ",";
-				print_operand (iter->output);
-
-				ss << ",";
-				if (!print_if_unique(iter->input1, 1))
-					ss << *iter->input1;
-				if (iter->input0->is_const() &&
-				   ((AddrSpace *)iter->input0->offset)->getWordSize() != 1)
-					ss << "," << ((AddrSpace *)iter->input0->offset)->getWordSize() << ",*";
-				ss << ",=[" << iter->output->size << "]";
-			} else {
-				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
-			}
-			break;
-		}
-
-		// TODO: CPUI_BRANCH can jump in the other P-codes of instruction
-		// Three P-codes below are all indirect style
-		case CPUI_RETURN:
-		case CPUI_CALLIND:
-		case CPUI_BRANCHIND: // Actually, I have some suspect about this.
-		// End here.
-		case CPUI_CALL:
-		case CPUI_BRANCH:
-		{
-			if (iter->input0)
-			{
-				if (iter->input0->is_const())
-					// throw LowlevelError("Sleigh_esil: const input case of BRANCH appear.");
-					// This means conditional jump in P-codes
-					goto branch_in_pcodes;
-				ss << ",";
-				if (!print_if_unique(iter->input0))
-					ss << *iter->input0;
-
-				ss << "," << sanal->reg_mapping[sanal->pc_name] << ",=";
-			} else {
-				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
-			}
-			break;
-		}
-		case CPUI_CBRANCH:
-		{
-			if (iter->input0 && iter->input1) {
-				ss << ",";
-				print_operand (iter->input1);
-
-				ss << ",?{";
-
-				if (iter->input0->is_const ()) {
-					// throw LowlevelError("Sleigh_esil: const input case of BRANCH appear.");
-					// This means conditional jump in P-codes
-					goto branch_in_pcodes;
-				}
-				ss << ",";
-				if (!print_if_unique (iter->input0)) {
-					ss << *iter->input0;
-				}
-
-				ss << "," << sanal->reg_mapping[sanal->pc_name] << ",=,}";
-			} else {
-				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
-			}
-			break;
-		case CPUI_PIECE:
-			if (iter->input0 && iter->input1 && iter->output) {
-				ss << ",";
-				print_operand (iter->input0);
-				ss << "," << iter->input1->size * 8 << ",SWAP,<<,";
-				print_operand (iter->input1, 1);
-
-				ss << ",|";
-				if (iter->output->is_unique())
-					push_stack(iter->output);
-				else
-					ss << "," << *iter->output << ",=";
-			} else {
-				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
-			}
-			break;
-		}
-		case CPUI_SUBPIECE:
-			if (iter->input0 && iter->input1 && iter->output) {
-				ss << ",";
-				print_operand (iter->input0);
-				if (!iter->input1->is_const ())
-					throw LowlevelError ("sleigh_esil: input1 is not consts in SUBPIECE.");
-				ss << "," << iter->input1->number * 8 << ",>>";
-
-				if (iter->output->size < iter->input0->size + iter->input1->number) {
-					ss << ",1," << iter->output->size * 8 << ",<<,1,-,&";
-				}
-				if (iter->output->is_unique()) {
-					push_stack(iter->output);
-				} else {
-					ss << "," << *iter->output << ",=";
-				}
-			} else {
-				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
-			}
-			break;
-		case CPUI_FLOAT_EQUAL:
-		case CPUI_FLOAT_NOTEQUAL:
-		case CPUI_FLOAT_LESS:
-		case CPUI_FLOAT_LESSEQUAL:
-		case CPUI_FLOAT_ADD:
-		case CPUI_FLOAT_SUB:
-		case CPUI_FLOAT_MULT:
-		case CPUI_FLOAT_DIV:
-			if (iter->input0 && iter->input1 && iter->output) {
-				ss << ",";
-				print_operand (iter->input0, 0, true);
-
-				ss << ",";
-				print_operand (iter->input1, 1, true);
-
-				ss << ",";
-				switch (iter->type)
-				{
-					case CPUI_FLOAT_EQUAL: ss << "F=="; break;
-					case CPUI_FLOAT_NOTEQUAL: ss << "F!="; break;
-					case CPUI_FLOAT_LESS: ss << "F<"; break;
-					case CPUI_FLOAT_LESSEQUAL: ss << "F<="; break;
-					case CPUI_FLOAT_ADD: ss << "F+"; break;
-					case CPUI_FLOAT_SUB: ss << "F-"; break;
-					case CPUI_FLOAT_MULT: ss << "F*"; break;
-					case CPUI_FLOAT_DIV: ss << "F/"; break;
-					default: break;
-				}
-
-				if (iter->output->size != 1 && iter->output->size != 8) 
-					ss << "," << iter->output->size << ",SWAP,D2F";
-
-				if (iter->output->is_unique())
-					push_stack(iter->output);
-				else
-					ss << "," << *iter->output << ",=";
-			} else {
-				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
-			}
-			break;
-		case CPUI_INT_LESS:
-		case CPUI_INT_SLESS:
-		case CPUI_INT_LESSEQUAL:
-		case CPUI_INT_SLESSEQUAL:
-		case CPUI_INT_NOTEQUAL:
-		case CPUI_INT_EQUAL:
-		{
-			if (iter->input0 && iter->input1 && iter->output)
-			{
-				ss << ",";
-				print_operand (iter->input0);
-
-				ss << ",";
-				print_operand (iter->input1, 1);
-
-				ss << ",";
-				switch (iter->type)
-				{
-					case CPUI_INT_SLESS:
-						ss << iter->input1->size * 8 << ",~,SWAP,"
-						   << iter->input0->size * 8 << ",~,SWAP,";
-					case CPUI_INT_LESS: ss << "<"; break;
-					case CPUI_INT_SLESSEQUAL:
-						ss << iter->input1->size * 8 << ",~,SWAP,"
-						   << iter->input0->size * 8 << ",~,SWAP,";
-					case CPUI_INT_LESSEQUAL: ss << "<="; break;
-					case CPUI_INT_NOTEQUAL: ss << "-,!,!"; break;
-					case CPUI_INT_EQUAL: ss << "-,!"; break;
-					default: break;
-				}
-				if (iter->output->is_unique()) {
-					push_stack(iter->output);
-				} else {
-					ss << "," << *iter->output << ",=";
-				}
-			} else {
-				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
-			}
-			break;
-		}
-		case CPUI_INT_MULT:
-		case CPUI_INT_DIV:
-		case CPUI_INT_REM:
-		case CPUI_INT_SDIV:
-		case CPUI_INT_SREM:
-		case CPUI_BOOL_XOR:
-		case CPUI_INT_XOR:
-		case CPUI_BOOL_AND:
-		case CPUI_INT_AND:
-		case CPUI_BOOL_OR:
-		case CPUI_INT_OR:
-		case CPUI_INT_LEFT:
-		case CPUI_INT_RIGHT:
-		case CPUI_INT_SRIGHT:
-		case CPUI_INT_SUB:
-		case CPUI_INT_ADD:
-			if (iter->input0 && iter->input1 && iter->output) {
-				ss << ",";
-				print_operand (iter->input0);
-
-				ss << ",";
-				print_operand (iter->input1, 1);
-				ss << ",";
-				switch (iter->type)
-				{
-					case CPUI_INT_MULT: ss << "*"; break;
-					// If divide by zero happen, give out 0
-					case CPUI_INT_DIV: ss << "DUP,!,?{,1,|,SWAP,0,&,},/"; break;
-					case CPUI_INT_REM: ss << "DUP,!,?{,1,|,SWAP,0,&,},%"; break;
-					case CPUI_INT_SDIV:
-						ss << iter->input1->size * 8 << ",~,SWAP,"
-						   << iter->input0->size * 8 << ",~,SWAP,"
-						   << "DUP,!,?{,1,|,SWAP,0,&,},~/";
-						break;
-					case CPUI_INT_SREM:
-						ss << iter->input1->size * 8 << ",~,SWAP,"
-						   << iter->input0->size * 8 << ",~,SWAP,"
-						   << "DUP,!,?{,1,|,SWAP,0,&,},~%";
-						break;
-					case CPUI_INT_SUB: ss << "-"; break;
-					case CPUI_INT_ADD: ss << "+"; break;
-					case CPUI_BOOL_XOR:
-					case CPUI_INT_XOR: ss << "^"; break;
-					case CPUI_BOOL_AND:
-					case CPUI_INT_AND: ss << "&"; break;
-					case CPUI_BOOL_OR:
-					case CPUI_INT_OR: ss << "|"; break;
-					case CPUI_INT_LEFT: ss << "<<"; break;
-					case CPUI_INT_RIGHT: ss << ">>"; break;
-					case CPUI_INT_SRIGHT:
-						ss << "SWAP," << iter->input0->size * 8 << ",~,SWAP,>>>>";
-						break;
-					default: break;
-				}
-				ss << ",1," << iter->output->size * 8 << ",<<,1,-,&";
-
-				if (iter->output->is_unique())
-					push_stack(iter->output);
-				else
-					ss << "," << *iter->output << ",=";
-			} else {
-				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
-			}
-			break;
-		case CPUI_INT_CARRY:
-			if (iter->input0 && iter->input1 && iter->output) {
-				ss << ",";
-				print_operand (iter->input0);
-
-				ss << ",";
-				print_operand (iter->input1, 1);
-
-				ss << ",+,1," << iter->input0->size * 8 << ",<<,1,-,&";
-
-				ss << ",";
-				print_operand (iter->input0, 1);
-
-				ss << ",<";
-
-				if (iter->output->is_unique()) {
-					push_stack(iter->output);
-				} else {
-					ss << "," << *iter->output << ",=";
-				}
-			} else {
-				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
-			}
-			break;
-		case CPUI_INT_SCARRY:
-			if (iter->input0 && iter->input1 && iter->output) {
-				ss << ",";
-				print_operand (iter->input0);
-				ss << "," << iter->input0->size * 8 - 1 << ",>>,1,&";
-				ss << ",DUP,";
-				print_operand (iter->input1, 2);
-
-				ss << "," << iter->input1->size * 8 - 1 << ",>>,1,&";
-
-				ss << ",^,1,^,SWAP";
-
-				ss << ",";
-				print_operand (iter->input0, 2);
-
-				ss << ",";
-				print_operand (iter->input1, 3);
-				ss << ",+," << iter->input0->size * 8 - 1 << ",>>,1,&"; // (a^b^1), a, c
-				ss << ",^,&";
-				if (iter->output->is_unique()) {
-					push_stack(iter->output);
-				} else {
-					ss << "," << *iter->output << ",=";
-				}
-			} else {
-				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
-			}
-			break;
-		case CPUI_INT_SBORROW:
-			if (iter->input0 && iter->input1 && iter->output) {
-				ss << ",";
-				print_operand (iter->input0);
-
-				ss << ",";
-				print_operand (iter->input1, 1);
-
-				ss << ",-," << iter->input0->size * 8 - 1 << ",>>,1,&";
-
-				ss << ",DUP,";
-				print_operand (iter->input1, 2);
-
-				ss << "," << iter->input1->size * 8 - 1 << ",>>,1,&";
-
-				ss << ",^,1,^,SWAP";
-
-				ss << ",";
-				print_operand (iter->input0, 2);
-
-				ss << "," << iter->input0->size * 8 - 1 << ",>>,1,&"; // (r^b^1), a, r
-
-				ss << ",^,&";
-
-				if (iter->output->is_unique()) {
-					push_stack(iter->output);
-				} else {
-					ss << "," << *iter->output << ",=";
-				}
-			} else {
-				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
-			}
-			break;
-		case CPUI_BOOL_NEGATE:
-		case CPUI_INT_NEGATE:
-		case CPUI_INT_2COMP:
-			if (iter->input0 && iter->output) {
-				ss << ",";
-				print_operand (iter->input0);
-
-				if (iter->type == CPUI_BOOL_NEGATE) {
-					ss << ",!";
-				} else {
-					ss << ",1," << iter->output->size * 8 << ",<<,1,-,^";
-					ss << ((iter->type == CPUI_INT_2COMP)? ",1,+": "");
-				}
-				if (iter->output->is_unique()) {
-					push_stack(iter->output);
-				} else {
-					ss << "," << *iter->output << ",=";
-				}
-			} else {
-				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
-			}
-			break;
-		case CPUI_POPCOUNT:
-			if (iter->input0 && iter->output) {
-				ss << ",";
-				print_operand (iter->input0);
-				ss << ",POPCOUNT";
-				if (iter->output->is_unique()) {
-					push_stack (iter->output);
-				} else {
-					ss << "," << *iter->output << ",=";
-				}
-			} else {
-				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
-			}
-			break;
-		case CPUI_FLOAT_INT2FLOAT:
-			if (iter->input0 && iter->output) {
-				ss << ",";
-				print_operand (iter->input0);
-				ss << ",I2D";
-				if (iter->output->size != 8) {
-					ss << "," << iter->output->size << ",SWAP,D2F";
-				}
-				if (iter->output->is_unique()) {
-					push_stack (iter->output);
-				} else {
-					ss << "," << *iter->output << ",=";
-				}
-			} else {
-				throw LowlevelError("sleigh_esil: arguments of Pcodes are not well inited.");
-			}
-			break;
-		case CPUI_FLOAT_NAN:
-		case CPUI_FLOAT_TRUNC:
-		case CPUI_FLOAT_CEIL:
-		case CPUI_FLOAT_FLOOR:
-		case CPUI_FLOAT_ROUND:
-		case CPUI_FLOAT_SQRT:
-		case CPUI_FLOAT_ABS:
-		case CPUI_FLOAT_NEG:
-		case CPUI_FLOAT_FLOAT2FLOAT:
-			if (!iter->input0 || !iter->output) {
-				throw LowlevelError ("sleigh_esil: arguments of Pcodes are not well inited.");
-			}
-			ss << ",";
-			print_operand (iter->input0, 0, true);
-
-			switch (iter->type) {
-			case CPUI_FLOAT_NAN: ss << ",NAN"; break;
-			case CPUI_FLOAT_TRUNC:
-				     ss << ",D2I,1," << iter->output->size * 8 << ",<<,1,-,&";
-				     break;
-			case CPUI_FLOAT_CEIL: ss << ",CEIL"; break;
-			case CPUI_FLOAT_FLOOR: ss << ",FLOOR"; break;
-			case CPUI_FLOAT_ROUND: ss << ",ROUND"; break;
-			case CPUI_FLOAT_SQRT: ss << ",SQRT"; break;
-			case CPUI_FLOAT_ABS: ss << ",0,I2D,F<=,!,?{,-F,}"; break;
-			case CPUI_FLOAT_NEG: ss << ",-F"; break;
-			case CPUI_FLOAT_FLOAT2FLOAT: /* same as below */ break;
-			default: break;
-			}
-			if (iter->output->size != 8) {
-				switch (iter->type) {
-				case CPUI_FLOAT_CEIL:
-				case CPUI_FLOAT_FLOOR:
-				case CPUI_FLOAT_ROUND:
-				case CPUI_FLOAT_SQRT:
-				case CPUI_FLOAT_ABS:
-				case CPUI_FLOAT_NEG:
-				case CPUI_FLOAT_FLOAT2FLOAT:
-					ss << "," << iter->output->size << ",SWAP,D2F";
-					break;
-				default: break;
-				}
-			}
-			if (iter->output->is_unique()) {
-				push_stack(iter->output);
-			} else {
-				ss << "," << *iter->output << ",=";
-			}
-			break;
-		default: break;
-		}
-	}
-
-	// std::cerr << hex << anal_op->addr << " " << ss.str() << endl;
-	esilprintf (anal_op, "%s", ss.str()[0] == ','? ss.str().c_str() + 1: ss.str().c_str());
+	SleighEsil translator (a->config->bits);
+	esilprintf (anal_op, "%s", translator.translate (Pcodes).c_str ());
 }
 
 #if 0
@@ -1815,117 +1802,10 @@ extern "C" char *r2ghidra_regs(RArchSession *as) {
 	return strdup (res.c_str ());
 }
 
-static bool sleigh_esil_consts_pick(REsil *esil) {
-	if (!esil || !esil->stack) {
-		return false;
-	}
-#if R2_ABIVERSION >= 87
-	RStrs idx = r_esil_pop (esil);
-	ut64 i;
-
-	if (R_ESIL_PARM_REG == r_esil_get_parm_type (esil, idx)) {
-		R_LOG_DEBUG ("sleigh_esil_consts_pick: argument is consts only");
-		return false;
-	}
-	if (r_strs_empty (idx) || !r_esil_get_parm (esil, idx, &i)) {
-		R_LOG_DEBUG ("esil_pick: invalid index number");
-		return false;
-	}
-	if ((ut64)esil->stackptr < i) {
-		R_LOG_DEBUG ("esil_pick: index out of stack bounds.");
-		return false;
-	}
-	RStrs slot = esil->stack[esil->stackptr - i];
-	if (r_strs_empty (slot)) {
-		R_LOG_DEBUG ("esil_pick: undefined element.");
-		return false;
-	}
-	if (!r_esil_push (esil, slot)) {
-		R_LOG_DEBUG ("ESIL stack is full.");
-		esil->trap = 1;
-		esil->trap_code = 1;
-		return false;
-	}
-	return true;
-#else
-	char *idx = r_esil_pop (esil);
-	ut64 i;
-	int ret = false;
-
-	if (R_ESIL_PARM_REG == r_esil_get_parm_type(esil, idx)) {
-		R_LOG_DEBUG ("sleigh_esil_consts_pick: argument is consts only");
-		goto end;
-	}
-	if (!idx || !r_esil_get_parm(esil, idx, &i)) {
-		R_LOG_DEBUG ("esil_pick: invalid index number");
-		goto end;
-	}
-	if (esil->stackptr < i) {
-		R_LOG_DEBUG ("esil_pick: index out of stack bounds.");
-		goto end;
-	}
-	if (!esil->stack[esil->stackptr - i]) {
-		R_LOG_DEBUG ("esil_pick: undefined element.");
-		goto end;
-	}
-	if (!r_esil_push (esil, esil->stack[esil->stackptr - i])) {
-		R_LOG_DEBUG ("ESIL stack is full.");
-		esil->trap = 1;
-		esil->trap_code = 1;
-		goto end;
-	}
-	ret = true;
-end:
-	free (idx);
-	return ret;
-#endif
-}
-
-static bool sleigh_esil_popcount(REsil *esil) {
-	bool ret = false;
-	ut64 s, res = 0;
-#if R2_ABIVERSION >= 87
-	RStrs src = r_esil_pop (esil);
-	if (!r_strs_empty (src)) {
-		if (r_esil_get_parm (esil, src, &s)) {
-			while (s) {
-				s &= s - 1;
-				++res;
-			}
-			ret = r_esil_pushnum (esil, res);
-		} else {
-			R_LOG_DEBUG ("sleigh_esil_popcount: invalid parameters.");
-		}
-	} else {
-		R_LOG_DEBUG ("sleigh_esil_popcount: fail to get element from stack.");
-	}
-#else
-	char *src = r_esil_pop (esil);
-	if (src) {
-		if (r_esil_get_parm (esil, src, &s)) {
-			while (s) {
-				s &= s - 1;
-				++res;
-			}
-			ret = r_esil_pushnum (esil, res);
-		} else {
-			R_LOG_DEBUG ("sleigh_esil_popcount: invalid parameters.");
-		}
-		free (src);
-	} else {
-		R_LOG_DEBUG ("sleigh_esil_popcount: fail to get element from stack.");
-	}
-#endif
-	return ret;
-}
-
-
 extern "C" int esil_sleigh_init(REsil *esil) {
 	if (!esil) {
 		return false;
 	}
-	r_esil_set_op (esil, "PICK", sleigh_esil_consts_pick, 1, 0, R_ESIL_OP_TYPE_CUSTOM, "");
-	r_esil_set_op (esil, "POPCOUNT", sleigh_esil_popcount, 1, 2, R_ESIL_OP_TYPE_CUSTOM, "");
 	return true;
 }
 

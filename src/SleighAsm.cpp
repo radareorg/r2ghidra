@@ -620,6 +620,8 @@ PcodeOperand *PcodeSlg::parse_vardata(VarnodeData &data) {
 		operand = new PcodeOperand(sanal->reg_mapping[space->getTrans()->getRegisterName(
 					data.space, data.offset, data.size)], data.size);
 		operand->type = PcodeOperand::REGISTER;
+		operand->reg_offset = data.offset;
+		operand->reg_big_endian = space->isBigEndian ();
 	} else if (name == "ram" || name == "DATA" || name == "code") {
 		operand = new PcodeOperand(data.offset, data.size);
 		operand->type = PcodeOperand::RAM;

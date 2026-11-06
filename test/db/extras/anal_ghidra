@@ -216,7 +216,7 @@ size: 2
 sign: true
 type: cmp
 cycles: 0
-esil: r6,NUM,r7,NUM,-,1,32,<<,1,-,&,r6,NUM,r7,NUM,<,cyf,=,r6,NUM,r7,NUM,-,31,>>,1,&,DUP,r7,NUM,31,>>,1,&,^,1,^,SWAP,r6,NUM,31,>>,1,&,^,&,ovf,=,DUP,0,32,~,SWAP,32,~,SWAP,<,sf,=,DUP,0,-,!,zf,=
+esil: 0xffffffff,0,0xffffffff,r7,r6,-,&,-,!,0xffffffff,4294967294,0xffffffff,0xffffffff,1,32,0,~,32,0xffffffff,r7,r6,-,&,~,<,<<,&,0xffffffff,4294967293,0xffffffff,0xffffffff,2,0xff,0xff,1,0xff,0xffffffff,31,0xffffffff,r7,r6,-,&,>>,&,&,&,&,0xff,0xffffffff,31,r7,>>,&,&,-,!,0xff,0xffffffff,31,r7,>>,&,&,0xff,0xffffffff,31,r6,>>,&,&,-,!,!,&,&,<<,&,0xffffffff,4294967291,0xffffffff,0xffffffff,3,r7,NUM,r6,NUM,<,<<,&,0xffffffff,4294967287,psw,&,&,|,&,&,&,|,&,&,&,|,&,&,&,|,&,psw,=
 family: cpu
 EOF
 RUN
@@ -245,7 +245,7 @@ size: 4
 sign: true
 type: load
 cycles: 0
-esil: r29,NUM,4,+,1,32,<<,1,-,&,DUP,[4],r11,=
+esil: 0xffffffff,4,r29,+,&,[4],r11,=
 family: cpu
 EOF
 RUN
@@ -268,11 +268,11 @@ EOF
 EXPECT=<<EOF
 type: load
 esilcost: 8
-esil: x9,NUM,3856,+,1,64,<<,1,-,&,DUP,[8],x9,=
+esil: 3856,x9,+,[8],x9,=
 ----
 type: store
 esilcost: 24
-esil: x19,NUM,x9,NUM,2,PICK,=[8]
+esil: x9,NUM,x19,NUM,=[8]
 EOF
 RUN
 
@@ -288,5 +288,153 @@ EOF
 EXPECT=<<EOF
 type: cmp
 esilcost: 0
+EOF
+RUN
+
+NAME=x86_64 esil emulation
+ARGS=-a x86 -b 64
+FILE=malloc://0x200000
+CMDS=<<EOF
+e log.level=0
+e asm.cpu=x86
+pdga
+e asm.bits=64
+aei
+aeim 0x100000 0x10000
+?e sub eax, ebx
+wx 29d8 @ 0x100
+ar rax=1
+ar rbx=0xffffffff
+ar rip=0x100
+aes
+ar rax
+ar cf
+?e push rax
+wx 50 @ 0x200
+ar rax=0x1122334455667788
+ar rsp=0x108000
+ar rip=0x200
+aes
+ar rsp
+pv8 @ 0x107ff8
+?e cmovb eax, ebx
+wx 0f42c3 @ 0x300
+ar rax=0xffffffff00001234
+ar rbx=0x5678
+ar cf=0
+ar rip=0x300
+aes
+ar rax
+ar rax=0xffffffff00001234
+ar cf=1
+ar rip=0x300
+aes
+ar rax
+?e add dword [rsp], ebx
+wx 011c24 @ 0x400
+ar rsp=0x108000
+wv4 0x7fffffff @ 0x108000
+ar rbx=1
+ar rip=0x400
+aes
+pv4 @ 0x108000
+ar of
+ar sf
+ar zf
+?e xchg rax, rbx
+wx 4893 @ 0x500
+ar rax=1
+ar rbx=2
+ar rip=0x500
+aes
+ar rax
+ar rbx
+?e call 0x100
+wx e8fb000000 @ 0x600
+ar rsp=0x108000
+ar rip=0x600
+aes
+ar rip
+pv8 @ 0x107ff8
+EOF
+EXPECT=<<EOF
+sub eax, ebx
+0x00000002
+0x00000001
+push rax
+0x00107ff8
+0x1122334455667788
+cmovb eax, ebx
+0x00001234
+0x00005678
+add dword [rsp], ebx
+0x80000000
+0x00000001
+0x00000001
+0x00000000
+xchg rax, rbx
+0x00000002
+0x00000001
+call 0x100
+0x00000700
+0x0000000000000605
+EOF
+RUN
+
+NAME=AARCH64 esil emulation
+FILE=malloc://0x200000
+CMDS=<<EOF
+e log.level=0
+e asm.arch=r2ghidra
+e asm.cpu=arm
+e asm.bits=64
+aei
+aeim 0x100000 0x10000
+?e csel x0, x1, x2, lt
+wx 20b0829a @ 0x100
+ar x1=1
+ar x2=2
+ar ng=1
+ar ov=0
+ar pc=0x100
+aes
+ar x0
+ar ng=0
+ar pc=0x100
+aes
+ar x0
+?e udiv x0, x1, x2
+wx 2008c29a @ 0x200
+ar x1=7
+ar x2=2
+ar pc=0x200
+aes
+ar x0
+ar x2=0
+ar pc=0x200
+aes
+ar x0
+?e stp x0, x1, [sp, -16]!
+wx e007bfa9 @ 0x300
+ar sp=0x108000
+ar x0=0x11
+ar x1=0x22
+ar pc=0x300
+aes
+ar sp
+pv8 @ 0x107ff0
+pv8 @ 0x107ff8
+EOF
+EXPECT=<<EOF
+csel x0, x1, x2, lt
+0x00000001
+0x00000002
+udiv x0, x1, x2
+0x00000003
+0x00000000
+stp x0, x1, [sp, -16]!
+0x00107ff0
+0x0000000000000011
+0x0000000000000022
 EOF
 RUN

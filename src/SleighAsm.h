@@ -66,6 +66,9 @@ struct PcodeOperand {
 		uintb number;
 	};
 	uint4 size;
+	// location in the register space, to find overlapping registers
+	uintb reg_offset = 0;
+	bool reg_big_endian = false;
 
 	enum {
 		REGISTER,
@@ -77,6 +80,8 @@ struct PcodeOperand {
 	PcodeOperand(const PcodeOperand &rhs) {
 		type = rhs.type;
 		size = rhs.size;
+		reg_offset = rhs.reg_offset;
+		reg_big_endian = rhs.reg_big_endian;
 
 		switch (type) {
 		case REGISTER: new (&name) std::string(rhs.name); break;
@@ -94,6 +99,8 @@ struct PcodeOperand {
 			}
 			type = rhs.type;
 			size = rhs.size;
+			reg_offset = rhs.reg_offset;
+			reg_big_endian = rhs.reg_big_endian;
 			switch (type) {
 			case REGISTER: new (&name) std::string(rhs.name); break;
 			case UNIQUE:
