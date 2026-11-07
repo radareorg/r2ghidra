@@ -216,7 +216,7 @@ size: 2
 sign: true
 type: cmp
 cycles: 0
-esil: 0xffffffff,0,0xffffffff,r7,r6,-,&,-,!,0xffffffff,4294967294,0xffffffff,0xffffffff,1,32,0,~,32,0xffffffff,r7,r6,-,&,~,<,<<,&,0xffffffff,4294967293,0xffffffff,0xffffffff,2,0xff,0xff,1,0xff,0xffffffff,31,0xffffffff,r7,r6,-,&,>>,&,&,&,&,0xff,0xffffffff,31,r7,>>,&,&,-,!,0xff,0xffffffff,31,r7,>>,&,&,0xff,0xffffffff,31,r6,>>,&,&,-,!,!,&,&,<<,&,0xffffffff,4294967291,0xffffffff,0xffffffff,3,r7,NUM,r6,NUM,<,<<,&,0xffffffff,4294967287,psw,&,&,|,&,&,&,|,&,&,&,|,&,&,&,|,&,psw,=
+esil: 0,0xffffffff,r7,r6,-,&,-,!,32,0,~,32,0xffffffff,r7,r6,-,&,~,<,1,31,0xffffffff,r7,r6,-,&,r6,^,r7,r6,^,&,>>,&,r7,NUM,r6,NUM,<,cyf,=,ovf,=,sf,=,zf,=
 family: cpu
 EOF
 RUN
@@ -382,12 +382,12 @@ EOF
 RUN
 
 NAME=AARCH64 esil emulation
+ARGS=-a arm -b 64
 FILE=malloc://0x200000
 CMDS=<<EOF
 e log.level=0
-e asm.arch=r2ghidra
 e asm.cpu=arm
-e asm.bits=64
+e asm.arch=r2ghidra
 aei
 aeim 0x100000 0x10000
 ?e csel x0, x1, x2, lt
