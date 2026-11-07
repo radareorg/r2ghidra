@@ -89,7 +89,7 @@ CV cfg_var_fixups     ("fixups",      "false",    "Apply pcode fixups");
 CV cfg_var_inline     ("inline",      "true",     "Inline functions marked with the inline attribute");
 CV cfg_var_varargs    ("varargs",     "false",    "Recover printf-family varargs from literal format strings");
 CV cfg_var_vaformats  ("varargs.formats", "",     "Extra printf-style formatters for vararg recovery (bare names, comma separated)");
-CV cfg_var_roprop     ("roprop",      "0",        "Propagate read-only constants (0,1,2,3,4)");
+CV cfg_var_roprop     ("roprop",      "0",        "Propagate read-only constants (0=off,1=symbols only,2=pointer scan,3=read-only maps,4=force)");
 CV cfg_var_timeout    ("timeout",     "0",        "Run decompilation in a separate process and kill it after a specific time");
 CV cfg_var_compiler   ("compiler",    "default",  "Select compiler for calling conventions", ConfigCompiler);
 CV cfg_var_write_vars ("write.vars",  "true",     "pdgw: write recovered variable names and types");
