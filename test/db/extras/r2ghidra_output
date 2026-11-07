@@ -1060,3 +1060,36 @@ EXPECT=<<EOF2
     (*_reloc.__gmon_start__)();
 EOF2
 RUN
+
+NAME=readonly propagation respects adjacent and overlapping writable maps
+FILE=-
+ARGS=-a x86 -b 32
+CMDS=<<EOF2
+on malloc://24 0x1000 rwx
+wx a1fc2f0000c39090a100300000c39090a104300000c3 @ 0x1000
+on malloc://8 0x2ffc rw-
+wx 0040000000500000 @ 0x2ffc
+omp 3 r--
+on malloc://4 0x3000 rw-
+wx 2a000000 @ 0x3000
+on malloc://4 0x3004 rw-
+wx 2b000000 @ 0x3004
+af @ 0x1000
+af @ 0x1008
+af @ 0x1010
+e r2ghidra.roprop=3
+pdg @ 0x1000~return
+pdg @ 0x1008~return
+pdg @ 0x1010~return
+e r2ghidra.roprop=2
+pdg @ 0x1000~return
+pdg @ 0x1008~return
+EOF2
+EXPECT=<<EOF2
+    return 0x4000;
+    return *0x3000;
+    return *0x3004;
+    return 0x4000;
+    return *0x3000;
+EOF2
+RUN
