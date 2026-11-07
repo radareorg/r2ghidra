@@ -78,7 +78,7 @@ plugins: $(R2G_CORE_PLUGIN) sleighc
 deps=$(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(R2G_PLUGIN_OBJS)
 
 # zlib's configure rewrites zconf.h, racing any object that includes zlib.h under -j
-$(R2GHIDRA_OBJS) $(GHIDRA_OBJS) $(R2G_PLUGIN_OBJS): | ../subprojects/zlib/libz.a
+$(deps) $(SLEIGHTC_OBJS): | ../subprojects/zlib/libz.a
 
 asan:
 	LDFLAGS="-fsanitize=address" CFLAGS="-fsanitize=address -g" $(MAKE) -j
