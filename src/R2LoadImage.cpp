@@ -5,7 +5,8 @@
 #include "R2LoadImage.h"
 #include "R2Utils.h"
 
-#include <cstring>
+#include <memory>
+#include <new>
 
 R2LoadImage::R2LoadImage(RCoreMutex *coreMutex, AddrSpaceManager *addr_space_manager) : LoadImage("radare2_program"),
 	coreMutex(coreMutex),
@@ -26,66 +27,59 @@ string R2LoadImage::getArchType() const {
 void R2LoadImage::adjustVma(long adjust) {
 	throw LowlevelError("Cannot adjust radare2 virtual memory");
 }
-static bool isptr(const ut8 *p, size_t remain) {
-	if (remain < sizeof(ut32)) {
-		return false;
+static void addRangesWithPointers(RIO *io, RangeList &list, AddrSpace *space, ut64 begin, int size, int bits) {
+	std::unique_ptr<ut8[]> buf (new (std::nothrow) ut8[size]);
+	if (!buf) {
+		return;
 	}
-	ut32 ptr = 0;
-	memcpy (&ptr, p, sizeof(ptr));
-	if (ptr < 0x1000) {
-		return false;
+	const int nread = r_io_nread_at (io, begin, buf.get (), size);
+	const int width = bits / 8;
+	const ut64 maxptr = bits == 64? UT64_MAX: UT32_MAX;
+	int start = 0;
+	int i = 0;
+	for (; i <= nread - width; i += width) {
+		const ut64 ptr = r_read_ble (buf.get () + i, space->isBigEndian (), bits);
+		if (ptr < 0x1000 || ptr == maxptr) {
+			if (start < i) {
+				list.insertRange (space, begin + start, begin + i - 1);
+			}
+			start = i + width;
+		}
 	}
-	return ptr != UT32_MAX;
+	if (start < i) {
+		list.insertRange (space, begin + start, begin + i - 1);
+	}
 }
 
-static void addRangesWithPointers(RCoreLock &core, RangeList &list, AddrSpace *space) {
+static void addReadonlyMapRanges(RCoreLock &core, RangeList &list, AddrSpace *space, bool scan) {
 	RIO *io = core->io;
 	RIOBank *bank = r_io_bank_get (io, io->bank);
-	r_list_foreach_cpp<RIOMapRef>(bank->maprefs, [&](RIOMapRef *mapref) {
-		RIOMap *map = r_io_map_get (io, mapref->id);
-		ut64 begin = r_io_map_begin (map);
-		ut64 end = r_io_map_end (map);
-		if (map->perm & R_PERM_W) {
-			return;
+	if (!io->va || !bank) {
+		return;
+	}
+	// The submap tree only includes ranges visible after applying map priority.
+	r_io_bank_drain (io, io->bank);
+	const int bits = core->rasm->config->bits == 64? 64: 32;
+	const int width = bits / 8;
+	RRBNode *node;
+	RIOSubMap *submap;
+	r_crbtree_foreach (bank->submaps, node, RIOSubMap, submap) {
+		RIOMap *map = r_io_map_get_by_ref (io, &submap->mapref);
+		if (!map || !(map->perm & R_PERM_R) || (map->perm & R_PERM_W)) {
+			continue;
 		}
-		ut64 fin = end - begin;
-		if (fin > 0xffffff) {
-			list.insertRange(space, begin, end);
-			return;
-		}
-		ut8 *buf = (ut8 *)malloc (fin);
-		if (!buf) {
-			list.insertRange(space, begin, end);
-			return;
-		}
-		r_io_read_at (io, begin, buf, fin);
-		ut64 base = begin;
-		ut64 basefin = begin;
-		ut8 *data = buf;
-		bool hasdata = false;
-		int inc = (core->rasm->config->bits == 64)? 8: 4;
-		for (ut64 i = 0; i < fin; i += inc) {
-			basefin = begin + i;
-			if (isptr (data + i, fin - i)) {
-				// eprintf ("valid %llx\n", data[i]);
-				hasdata = true;
-			} else {
-				if (hasdata) {
-					// eprintf ("0 append %llx %llx because of 0x%llx\n", base, basefin, *((ut64*)(data +i)));
-					if (base > 0) {
-						list.insertRange(space, base, basefin); // begin, end);
-					}
-					hasdata = false;
-					base = basefin;
-				}
+		const ut64 begin = r_io_map_begin (submap);
+		const ut64 size = r_io_map_size (submap);
+		if (scan && size <= 0xffffff) {
+			const ut64 misalignment = (begin - r_io_map_begin (map)) % width;
+			const ut64 skip = misalignment? width - misalignment: 0;
+			if (size >= skip + width) {
+				addRangesWithPointers (io, list, space, begin + skip, size - skip, bits);
 			}
+		} else {
+			list.insertRange (space, begin, r_io_map_to (submap));
 		}
-		free (buf);
-		if (hasdata) {
-			// eprintf ("1 append %llx %llx\n", base, basefin);
-			list.insertRange(space, base, basefin);
-		}
-	});
+	}
 }
 
 // the loader fills relocation targets in at runtime, so their on-disk bytes are not constants
@@ -127,23 +121,8 @@ void R2LoadImage::getReadonly(RangeList &list) const {
 		case 1:
 			break;
 		case 2:
-			// find ranges with pointers
-			addRangesWithPointers(core, list, space);
-			break;
 		case 3:
-			{
-				RIO *io = core->io;
-				RIOBank *bank = r_io_bank_get (io, io->bank);
-				r_list_foreach_cpp<RIOMapRef>(bank->maprefs, [&](RIOMapRef *mapref) {
-					RIOMap *map = r_io_map_get (io, mapref->id);
-					ut64 begin = r_io_map_begin (map);
-					ut64 end = r_io_map_end (map);
-					if (map->perm & R_PERM_W) {
-						return;
-					}
-					list.insertRange(space, begin, end);
-				});
-			}
+			addReadonlyMapRanges (core, list, space, roprop == 2);
 			break;
 		case 4:
 			list.insertRange(space, 0x1000, ST64_MAX - 1);
