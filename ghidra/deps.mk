@@ -69,8 +69,12 @@ GHIDRA_SLEIGH_FILES+=$(GHIDRA_SLEIGH_HOME)/*.pspec
 ../ghidra-processors.txt: ../ghidra-processors.txt.default
 	cp -f ../ghidra-processors.txt.default ../ghidra-processors.txt
 
+.PHONY: sleigh-build sleigh-force
 sleigh-build: sleighc ../ghidra-processors.txt
-	for a in DATA $(shell cat ../ghidra-processors.txt) ; do ./sleighc -a $(GHIDRA_SLEIGH_HOME)/$$a ; done
+	$(MAKE) $(addprefix sleigh-,$(sort DATA $(shell cat ../ghidra-processors.txt)))
+
+sleigh-%: sleighc sleigh-force
+	./sleighc -a "$(GHIDRA_SLEIGH_HOME)/$*"
 
 GHIDRA_PROCS=$(GHIDRA_SLEIGH_HOME)/*/*/*
 
