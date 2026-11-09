@@ -6,14 +6,14 @@ WRAP_wrap_git_directory:=zlib
 WRAP_wrap_git_patch_directory:=zlib
 WRAP_wrap_git_depth:=1
 
-.PHONY: zlib_clean zlib_all
+.PHONY: zlib zlib_clean zlib_all
 
 zlib:
-	if [ ! -d "zlib" -o "51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf" != "$(shell cd zlib 2>/dev/null && git rev-parse HEAD)" ]; then rm -rf "zlib"; ${MAKE} zlib_all; fi
+	if [ ! -d "zlib" ] || ! (cd "zlib" 2>/dev/null && test "$$(git rev-parse HEAD 2>/dev/null)" = "$$(git rev-parse --verify 'refs/acr-wrap/51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf^{commit}' 2>/dev/null || git rev-parse --verify '51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf^{commit}' 2>/dev/null)"); then rm -rf "zlib"; ${MAKE} zlib_all; fi
 
 zlib_all:
 	git clone --no-checkout --depth=1 https://github.com/madler/zlib.git zlib
-	cd zlib && git fetch --depth=1 origin 51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf
+	cd zlib && git fetch --depth=1 origin 51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf:refs/acr-wrap/51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf
 	cd zlib && git checkout FETCH_HEAD
 	cp -rf packagefiles/zlib/* zlib
 
