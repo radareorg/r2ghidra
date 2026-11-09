@@ -38,6 +38,37 @@ jobs:
 #    - name: Running Testsuite
 #      run: make -C test
 
+  linux-alpine:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7
+    # Run checkout on the host; build and test against Alpine's musl libc.
+    - name: Building and testing radare2 and r2ghidra on Alpine
+      run: |
+        docker run --rm -v "$GITHUB_WORKSPACE:/src" -w /src alpine:3.23 sh -euxc '
+          apk add --no-cache bash build-base ca-certificates coreutils git \
+            linux-headers ncurses-dev openssl-dev patch pkgconf python3
+          git config --global --add safe.directory /src
+          git clone --depth=1 https://github.com/radareorg/radare2 /tmp/radare2
+          cd /tmp/radare2
+          MAKE_JOBS=2 sys/install.sh --install /usr
+          r2 -v
+          cd /src
+          ./preconfigure
+          ./configure --prefix=/usr
+          make -j2
+          make install
+          R2_DEBUG=1 r2 -qc "af;pdg" /bin/ls > /tmp/decompiled.c
+          cat /tmp/decompiled.c
+          grep entry0 /tmp/decompiled.c
+        '
+
   linux-deb:
     runs-on: ubuntu-24.04
     strategy:
