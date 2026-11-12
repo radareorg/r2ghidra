@@ -60,8 +60,32 @@ Usage: pdg  # Native Ghidra decompiler plugin
 | pdgs          # Display loaded Sleigh Languages
 | pdgsd N       # Disassemble N instructions with Sleigh and print pcode
 | pdgss         # Display automatically matched Sleigh Language ID
+| pdgt          # Dump Ghidra's structured control-flow tree
+| pdgtj         # Dump Ghidra's structured control-flow tree as JSON
 | pdgw          # Write recovered variable types, names and signatures to r2
 | pdgx          # Dump the XML of the current decompiled function
+```
+
+`pdgt` is the Ghidra equivalent of `pdct`: it prints the recovered control-flow
+hierarchy directly from `Funcdata::getStructure()`, using Ghidra's native tree
+printer. Nodes describe sequences, conditionals, loops, switches and gotos;
+leaves describe basic blocks. This is a control-flow tree, not a C expression
+AST or the p-code graph exported in the `<ast>` section of `pdgx`.
+
+`pdgtj` exports the same hierarchy as a JSON object. Each node has a `type`
+(Ghidra's native block type name), an `index` (Ghidra's block index) and an
+ordered `children` array. Basic-block leaves also have `space`, `start` and
+`stop` address fields, with the numeric bounds reported by Ghidra (the stop is
+the last instruction address, not the byte after the block).
+Block-copy wrappers are resolved to their underlying basic blocks, as in the
+text output. Indices can repeat across nesting levels; they are not unique
+tree-node IDs. Errors use an `errors` array, like `pdgj`. Trees exceeding the
+JSON writer's nesting limit return an error; `pdgt` can still print them.
+
+```
+af
+pdgt
+pdgtj > function-tree.json
 ```
 
 With radare2 ABI 163 or newer, `pdg` inlines analyzed callees whose `inline`

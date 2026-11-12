@@ -139,6 +139,8 @@ static const char* r2ghidra_help[] = {
 	"pd:gs", "", "# Display loaded Sleigh Languages (alias for pdgL)",
 	"pd:gsd", " N", "# Disassemble N instructions with Sleigh and print pcode",
 	"pd:gss", "", "# Display automatically matched Sleigh Language ID",
+	"pd:gt", "", "# Dump Ghidra's structured control-flow tree",
+	"pd:gtj", "", "# Dump Ghidra's structured control-flow tree as JSON",
 	"pd:gw", "", "# Decompile and write recovered names, types and signature back into r2",
 	"pd:gx", "", "# Dump the XML of the current decompiled function",
 	"Environment:", "", "",
@@ -161,6 +163,8 @@ enum class DecompileMode {
 	STATEMENTS,
 	DISASM,
 	JSON,
+	TREE,
+	TREE_JSON,
 	WRITE
 };
 
@@ -339,6 +343,39 @@ static void PrintCodeJSON(const Funcdata &func, RCodeMeta *code, std::ostream &s
 	pj_free (pj);
 }
 
+static bool PrintStructureJSON(PJ *pj, const FlowBlock &block) {
+	// Match BlockCopy::printTree: expose the underlying basic block as a leaf.
+	if (block.getType () == FlowBlock::t_copy) {
+		return PrintStructureJSON (pj, *block.subBlock (0));
+	}
+	if (!pj_o (pj)) {
+		return false;
+	}
+	pj_ks (pj, "type", FlowBlock::typeToName (block.getType ()).c_str ());
+	pj_ki (pj, "index", block.getIndex ());
+	const Address start = block.getStart ();
+	const Address stop = block.getStop ();
+	if (!start.isInvalid () && !stop.isInvalid ()) {
+		pj_ks (pj, "space", start.getSpace ()->getName ().c_str ());
+		pj_kn (pj, "start", start.getOffset ());
+		pj_kn (pj, "stop", stop.getOffset ());
+	}
+	pj_k (pj, "children");
+	if (!pj_a (pj)) {
+		return false;
+	}
+	if (const auto *graph = dynamic_cast<const BlockGraph *> (&block)) {
+		for (const FlowBlock *child : graph->getList ()) {
+			if (!PrintStructureJSON (pj, *child)) {
+				return false;
+			}
+		}
+	}
+	pj_end (pj);
+	pj_end (pj);
+	return true;
+}
+
 static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstream &out_stream, RCodeMeta **out_code, Harvest *out_harvest = nullptr) {
 	RAnalFunction *function = r_anal_get_fcn_in (core->anal, addr, R_ANAL_FCN_TYPE_NULL);
 	if (!function) {
@@ -424,6 +461,26 @@ static void Decompile(RCore *core, ut64 addr, DecompileMode mode, std::stringstr
 	}
 	if (out_harvest) {
 		HarvestFuncdata (arch, func, *out_harvest);
+		return;
+	}
+	if (mode == DecompileMode::TREE || mode == DecompileMode::TREE_JSON) {
+		if (!func->isProcStarted () || func->hasNoStructBlocks ()) {
+			throw LowlevelError ("Function not fully decompiled. No structure present.");
+		}
+		if (mode == DecompileMode::TREE) {
+			func->getStructure ().printTree (out_stream, 0);
+		} else {
+			PJ *pj = pj_new ();
+			if (!pj) {
+				throw LowlevelError ("Failed to allocate control-flow tree JSON");
+			}
+			if (!PrintStructureJSON (pj, func->getStructure ())) {
+				pj_free (pj);
+				throw LowlevelError ("Control-flow tree exceeds JSON depth limit");
+			}
+			out_stream << pj_string (pj);
+			pj_free (pj);
+		}
 		return;
 	}
 	switch (mode) {
@@ -581,6 +638,10 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 				free (s);
 			}
 			break;
+		case DecompileMode::TREE:
+			r_cons_print (core->cons, out_stream.str ().c_str ());
+			break;
+		case DecompileMode::TREE_JSON:
 		case DecompileMode::JSON:
 			r_cons_println (core->cons, out_stream.str ().c_str ());
 			break;
@@ -595,7 +656,7 @@ static void DecompileCmd (RCore *core, DecompileMode mode) {
 #ifndef DEBUG_EXCEPTIONS
 	} catch (const LowlevelError &error) {
 		std::string s = "Ghidra Decompiler Error: " + error.explain;
-		if (mode == DecompileMode::JSON) {
+		if (mode == DecompileMode::JSON || mode == DecompileMode::TREE_JSON) {
 			PJ *pj = pj_new ();
 			if (pj) {
 				pj_o (pj);
@@ -794,6 +855,15 @@ static void runcmd(RCore *core, const char *input) {
 		break;
 	case 'j': // "pdgj"
 		DecompileCmd (core, DecompileMode::JSON);
+		break;
+	case 't': // "pdgt", "pdgtj"
+		if (!input[1]) {
+			DecompileCmd (core, DecompileMode::TREE);
+		} else if (input[1] == 'j' && !input[2]) {
+			DecompileCmd (core, DecompileMode::TREE_JSON);
+		} else {
+			PrintUsage (core);
+		}
 		break;
 	case 'o': // "pdgo"
 		DecompileCmd (core, DecompileMode::OFFSET);

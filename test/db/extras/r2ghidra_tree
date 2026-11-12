@@ -1,0 +1,124 @@
+NAME=pdgt and pdgtj single basic block
+FILE=malloc://64
+ARGS=-a x86 -b 64
+CMDS=<<EOF
+wx b82a000000c3
+af
+pdgt
+pdgtj
+EOF
+EXPECT=<<EOF
+0
+  Basic Block 0 0x00000000-0x00000005
+{"type":"graph","index":0,"children":[{"type":"basic","index":0,"space":"ram","start":0,"stop":5,"children":[]}]}
+EOF
+RUN
+
+NAME=pdgt and pdgtj if-else diamond with shared return
+FILE=malloc://64
+ARGS=-a x86 -b 64
+CMDS=<<EOF
+wx 83ff017507b801000000eb05b802000000c3
+af
+pdgt
+pdgtj
+EOF
+EXPECT=<<EOF
+0
+  List block 0
+    If/else block 0
+      Basic Block 0 0x00000000-0x00000003
+      Basic Block 2 0x00000005-0x0000000a
+      Basic Block 1 0x0000000c-0x0000000c
+    Basic Block 3 0x00000011-0x00000011
+{"type":"graph","index":0,"children":[{"type":"list","index":0,"children":[{"type":"ifelse","index":0,"children":[{"type":"basic","index":0,"space":"ram","start":0,"stop":3,"children":[]},{"type":"basic","index":2,"space":"ram","start":5,"stop":10,"children":[]},{"type":"basic","index":1,"space":"ram","start":12,"stop":12,"children":[]}]},{"type":"basic","index":3,"space":"ram","start":17,"stop":17,"children":[]}]}]}
+EOF
+RUN
+
+NAME=pdgt and pdgtj while loop keeps condition and body inside the loop
+FILE=malloc://64
+ARGS=-a x86 -b 64
+CMDS=<<EOF
+wx b80000000083f80a7d0783c001ebf60000c3
+af
+pdgt
+pdgtj
+EOF
+EXPECT=<<EOF
+0
+  List block 0
+    Basic Block 0 0x00000000-0x00000000
+    Whiledo block 1
+      Basic Block 1 0x00000005-0x00000008
+      Basic Block 3 0x0000000a-0x0000000d
+    Basic Block 2 0x00000011-0x00000011
+{"type":"graph","index":0,"children":[{"type":"list","index":0,"children":[{"type":"basic","index":0,"space":"ram","start":0,"stop":0,"children":[]},{"type":"whiledo","index":1,"children":[{"type":"basic","index":1,"space":"ram","start":5,"stop":8,"children":[]},{"type":"basic","index":3,"space":"ram","start":10,"stop":13,"children":[]}]},{"type":"basic","index":2,"space":"ram","start":17,"stop":17,"children":[]}]}]}
+EOF
+RUN
+
+NAME=pdgt and pdgtj distinguish a bottom-tested loop
+FILE=malloc://64
+ARGS=-a x86 -b 64
+CMDS=<<EOF
+wx 89f883e80175fbc3
+af
+pdgt
+pdgtj~{children[0].children[1]}
+EOF
+EXPECT=<<EOF
+0
+  List block 0
+    Basic Block 0 0x00000000-0x00000000
+    Dowhile block 1
+      Basic Block 1 0x00000002-0x00000005
+    Basic Block 2 0x00000007-0x00000007
+{"type":"dowhile","index":1,"children":[{"type":"basic","index":1,"space":"ram","start":2,"stop":5,"children":[]}]}
+EOF
+RUN
+
+NAME=pdgtj returns a JSON error without an analyzed function
+FILE=malloc://64
+ARGS=-a x86 -b 64
+CMDS=<<EOF
+pdgtj
+wx b82a000000c3
+af
+pdgtj @ 0x30
+EOF
+EXPECT=<<EOF
+{"errors":["Ghidra Decompiler Error: No function at this offset"]}
+{"errors":["Ghidra Decompiler Error: No function at this offset"]}
+EOF
+RUN
+
+NAME=pdgtj preserves addresses above the exact floating-point integer range
+FILE=malloc://64
+ARGS=-a x86 -b 64 -m 0x20000000000001
+CMDS=<<EOF
+wx b82a000000c3
+af
+pdgtj~{children[0].start}
+pdgtj~{children[0].stop}
+EOF
+EXPECT=<<EOF
+9007199254740993
+9007199254740998
+EOF
+RUN
+
+NAME=pdgt and pdgtj work in the timeout worker
+FILE=malloc://64
+ARGS=-a x86 -b 64
+CMDS=<<EOF
+e r2ghidra.timeout=5000
+wx b82a000000c3
+af
+pdgt
+pdgtj
+EOF
+EXPECT=<<EOF
+0
+  Basic Block 0 0x00000000-0x00000005
+{"type":"graph","index":0,"children":[{"type":"basic","index":0,"space":"ram","start":0,"stop":5,"children":[]}]}
+EOF
+RUN
