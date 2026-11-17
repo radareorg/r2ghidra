@@ -163,7 +163,7 @@ void PcodeFixupPreprocessor::fixupSharedReturnJumpToRelocs(RAnalFunction *r2Func
 #if 0
 	auto ops = ghFunc->getBasicBlocks();
 #endif
-	if (r2Func->is_noreturn) {
+	if (r_anal_function_is_noreturn_cpp (r2Func)) {
 		ghFunc->getFuncProto().setNoReturn(true);
 	}
 	R_VEC_FOREACH (refs, refi) {

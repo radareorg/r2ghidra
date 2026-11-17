@@ -803,11 +803,11 @@ FunctionSymbol *R2Scope::registerFunction(RAnalFunction *fcn) const {
 			fd->getFuncProto().setPieces(sig_proto);
 		}
 	}
-	if (fcn->is_noreturn) {
+	if (r_anal_function_is_noreturn_cpp (fcn)) {
 		markNoReturn (funcsym, noreturnHasNoArgs (core, fcn, fcn_name));
 	}
 #if R2_ABIVERSION >= 163
-	if (funcsym && r_config_get_b (core->config, "r2ghidra.inline") && r_anal_function_is_inline (fcn)) {
+	if (funcsym && r_config_get_b (core->config, "r2ghidra.inline") && r_anal_function_is_inline_cpp (fcn)) {
 		if (Funcdata *fd = funcsym->getFunction ()) {
 			fd->getFuncProto ().setInline (true);
 		}

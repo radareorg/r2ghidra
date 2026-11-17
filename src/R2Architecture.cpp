@@ -318,7 +318,7 @@ void R2Architecture::postSpecFile() {
 	registerR2DalvikPostSpecInjects (this);
 	RCoreLock core(getCore());
 	r_list_foreach_cpp<RAnalFunction>(core->anal->fcns, [&](RAnalFunction *func) {
-		if (func->is_noreturn) {
+		if (r_anal_function_is_noreturn_cpp (func)) {
 			// Configure noreturn functions
 			Funcdata *infd = symboltab->getGlobalScope()->queryFunction(Address(getDefaultCodeSpace(), func->addr));
 			if (!infd) {

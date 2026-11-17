@@ -3,6 +3,7 @@
 
 #include "r2harvest.h"
 #include "R2TypeFactory.h"
+#include "R2Utils.h"
 
 #include <funcdata.hh>
 #include <fspec.hh>
@@ -271,7 +272,7 @@ static bool WriteSignature(RCore *core, RAnalFunction *fcn, const Harvest &h) {
 	RAnalFunctionSignature sig = {};
 	sig.ret_type = (char *)ret.c_str ();
 	sig.callconv = (char *)fcn->callconv;
-	sig.noreturn = h.proto.noreturn || fcn->is_noreturn;
+	sig.noreturn = h.proto.noreturn || r_anal_function_is_noreturn_cpp (fcn);
 	sig.params = r_list_newf (param_free);
 	bool complete = true;
 	int idx = 0;

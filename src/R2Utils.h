@@ -10,6 +10,24 @@
 typedef struct r_list_t RList;
 typedef struct r_list_iter_t RListIter;
 
+static inline bool r_anal_function_is_noreturn_cpp(const RAnalFunction *function) {
+#if R2_ABIVERSION >= 183
+	return (function->attrs & R_ANAL_FCN_ATTR_NORETURN) != 0;
+#else
+	return function->is_noreturn;
+#endif
+}
+
+#if R2_ABIVERSION >= 163
+static inline bool r_anal_function_is_inline_cpp(RAnalFunction *function) {
+#if R2_ABIVERSION >= 183
+	return (function->attrs & R_ANAL_FCN_ATTR_INLINE) != 0;
+#else
+	return r_anal_function_is_inline (function);
+#endif
+}
+#endif
+
 template<typename T, typename F> void r_list_foreach_cpp(RList *list, const F &cb) {
 	for (RListIter *it = list->head; it; it = it->n) {
 		cb (reinterpret_cast<T *>(it->data));
