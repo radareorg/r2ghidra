@@ -294,8 +294,8 @@ static void ParseNode(RXmlNode *node, ParseCodeXMLContext *ctx, std::ostream &st
 	// an annotation applies for a node an all its children
 	for (auto &annotation : annotations) {
 		annotation.end = stream.tellp();
-		RCodeMetaItem *item = r_codemeta_item_clone(&annotation);
-		r_codemeta_add_item(code, item);
+		r_codemeta_add_item(code, &annotation);
+		r_codemeta_item_fini(&annotation);
 	}
 }
 
