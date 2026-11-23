@@ -36,12 +36,56 @@ static size_t findDllSeparator(const std::string &s) {
 	return std::string::npos;
 }
 
+// Keywords of C up to C23 (6.4.1): none of them can name a function or an object.
+static bool isCKeyword(const std::string &s) {
+	static const char *const keywords[] = {
+		"alignas", "alignof", "auto", "bool", "break", "case", "char", "const",
+		"constexpr", "continue", "default", "do", "double", "else", "enum", "extern",
+		"false", "float", "for", "goto", "if", "inline", "int", "long", "nullptr",
+		"register", "restrict", "return", "short", "signed", "sizeof", "static",
+		"static_assert", "struct", "switch", "thread_local", "true", "typedef",
+		"typeof", "typeof_unqual", "union", "unsigned", "void", "volatile", "while",
+		"_Alignas", "_Alignof", "_Atomic", "_BitInt", "_Bool", "_Complex",
+		"_Decimal128", "_Decimal32", "_Decimal64", "_Generic", "_Imaginary",
+		"_Noreturn", "_Static_assert", "_Thread_local"
+	};
+	for (const char *keyword : keywords) {
+		if (s == keyword) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// Turn any name into a legal C identifier, leaving legal ones untouched. Dots
+// and other illegal characters become underscores (legitimate leading
+// underscores are preserved), a leading digit gets an underscore in front and a
+// C keyword gets one behind (`while` -> `while_`).
+static std::string toCIdentifier(const std::string &s) {
+	std::string ident;
+	ident.reserve (s.size () + 1);
+	for (char c : s) {
+		const unsigned char uc = static_cast<unsigned char> (c);
+		ident += (isalnum (uc) || c == '_') ? c : '_';
+	}
+	if (ident.empty ()) {
+		return "_";
+	}
+	if (isdigit (static_cast<unsigned char> (ident[0]))) {
+		ident.insert (ident.begin (), '_');
+	}
+	if (isCKeyword (ident)) {
+		ident += '_';
+	}
+	return ident;
+}
+
 // `e r2ghidra.ccode=true` asks for output that is valid C: radare2 names import
 // flags `sym.imp.<lib>_<fn>` / `imp.<lib>_<fn>` / `loc.imp.<fn>` (e.g.
 // `sym.imp.KERNEL32.dll_memcpy`), plus `sub.<lib>_<fn>` stubs and
-// anonymous/dotted symbols `fcn.ADDR` / `sym.lib.fn`, none of which are legal C
-// identifiers. Map those back to bare symbol names so the emitted C uses only
-// legal identifiers.
+// anonymous/dotted symbols `fcn.ADDR` / `sym.lib.fn` / `global.0xADDR`, none of
+// which are legal C identifiers. Map those back to bare symbol names so the
+// emitted C uses only legal identifiers.
 static std::string sanitizeCName(const char *raw) {
 	std::string s = raw? raw : "";
 	// Import flags/stubs: sym.imp.<tail> / loc.imp.<tail> / imp.<tail> / sub.<tail>
@@ -65,21 +109,7 @@ static std::string sanitizeCName(const char *raw) {
 			s = s.substr (dll + 5);
 		}
 	}
-	// Normalize to a legal C identifier. Dots and other illegal characters
-	// become underscores; legitimate leading underscores are preserved.
-	std::string ident;
-	ident.reserve (s.size ());
-	for (char c : s) {
-		const unsigned char uc = static_cast<unsigned char> (c);
-		ident += (isalnum (uc) || c == '_') ? c : '_';
-	}
-	if (ident.empty ()) {
-		return "_";
-	}
-	if (isdigit (static_cast<unsigned char> (ident[0]))) {
-		ident.insert (ident.begin (), '_');
-	}
-	return ident;
+	return toCIdentifier (s);
 }
 
 R2Scope::R2Scope(R2Architecture *arch)
@@ -200,11 +230,12 @@ struct FunctionVars {
 	ParamActive params;
 	RangeList ranges;
 	std::map<RAnalVar *, Datatype *> types;
-	bool have_arg_vars = false, enabled;
+	bool have_arg_vars = false, enabled, ccode;
 
 	FunctionVars(RCore *core, R2Architecture *arch, RAnalFunction *fcn, ProtoModel *proto, int4 extraPop, int default_size)
 		: core (core), arch (arch), fcn (fcn), proto (proto), extraPop (extraPop), default_size (default_size),
-		  params (false), enabled (r_config_get_b (core->config, "r2ghidra.vars")) {
+		  params (false), enabled (r_config_get_b (core->config, "r2ghidra.vars")),
+		  ccode (r_config_get_b (core->config, "r2ghidra.ccode")) {
 		collect ();
 	}
 	int4 paramSize(RAnalVar *var, Datatype *type) const {
@@ -394,7 +425,9 @@ struct FunctionVars {
 			}
 			ranges.insertRange (sa.getSpace (), sa.getOffset (), last);
 
-			Element *symbolElement = emitSymbol (symbollistElement, var->name, type, sa,
+			// afvn accepts names that are not C identifiers (`a-b`, `while`)
+			const std::string name = ccode ? toCIdentifier (var->name) : std::string (var->name);
+			Element *symbolElement = emitSymbol (symbollistElement, name, type, sa,
 				typelock ? "true" : "false", var->isarg ? "0" : "-1", index,
 				var->isarg && var->kind == R_ANAL_VAR_KIND_REG, childRegRange);
 			if (var->isarg) {
@@ -497,6 +530,10 @@ static void processFunctionSignature(
 				std::string name = (R_STR_ISNOTEMPTY (arg_name))
 					? std::string (arg_name)
 					: ("arg" + to_string (i));
+				// the type database holds names like `fenv_t*` (fesetenv) or ` n` (strlcpy)
+				if (r_config_get_b (core_lock->config, "r2ghidra.ccode")) {
+					name = toCIdentifier (r_str_trim_head_ro (name.c_str ()));
+				}
 
 				std::string typeError;
 				Datatype *type = arch->getTypeFactory ()->fromCString (arg_type_str.c_str (), &typeError);
@@ -937,13 +974,22 @@ Symbol *R2Scope::registerGlobalVar(RFlagItem *glob, const char *type_str) const 
 		return nullptr;
 	}
 
-	const char *name = (core->flags->realnames && glob->realname)
+	// like registerFlag, ccode output takes the realname radare2 keeps for a
+	// global that comes from a symbol (`global.g_tag` -> `g_tag`). The globals
+	// radare2 infers from code accesses have none and keep their own name,
+	// made legal: `global.0x140014900` -> `global_0x140014900`.
+	const bool ccode = r_config_get_b (core->config, "r2ghidra.ccode");
+	const char *name = ((core->flags->realnames || ccode) && glob->realname)
 		? glob->realname : glob->name;
+	std::string clean = name;
+	if (ccode) {
+		clean = sanitizeCName (name);
+	}
 	if (type->getSize () > 0 && addr + type->getSize () - 1 < addr) {
 		arch->addWarning ("Global " + to_string (name) + " extends beyond the end of the address space");
 		return nullptr;
 	}
-	SymbolEntry *entry = cache->addSymbol (name, type,
+	SymbolEntry *entry = cache->addSymbol (clean.c_str (), type,
 		Address (arch->getDefaultCodeSpace (), addr), Address ());
 	if (!entry) {
 		return nullptr;

@@ -53,3 +53,96 @@ EXPECT=<<EOF
     return (int64_t)(int)arg1 + 0x100000000;
 EOF
 RUN
+
+NAME=ccode turns the global.0xADDR names of inferred globals into C identifiers
+FILE=bins/pe/ConsoleApplication1.exe
+CMDS=<<EOF
+aaa
+e r2ghidra.ccode=true
+pdg @ 0x4017e6~0x1f
+pdg @ 0x4017e6~_register_onexit_function
+EOF
+EXPECT=<<EOF
+    uVar2 = global_0x403004 & 0x1f;
+        iVar1 = _register_onexit_function(&global_0x40333c,arg_8h);
+EOF
+RUN
+
+NAME=ccode names a symbol global by its realname
+FILE=bins/dectest64
+CMDS=<<EOF
+aaa
+e r2ghidra.ccode=true
+pdg @ sym.get_global_var~return
+pdg @ entry.fini0~completed
+EOF
+EXPECT=<<EOF
+    return global_var;
+    if (completed_7392 == 0) {
+        completed_7392 = 1;
+EOF
+RUN
+
+NAME=ccode keeps a global named with a C keyword legal
+FILE=bins/dectest64
+CMDS=<<EOF
+aaa
+avg- @ 0x404050
+avg uint32_t switch @ 0x404050
+e r2ghidra.ccode=true
+pdg @ sym.get_global_var~return
+EOF
+EXPECT=<<EOF
+    return switch_;
+EOF
+RUN
+
+NAME=ccode keeps a function named with a C keyword or a leading digit legal
+FILE=bins/pe/ConsoleApplication1.exe
+CMDS=<<EOF
+aaa
+e r2ghidra.ccode=true
+afn while @ 0x401d6f
+pdg @ 0x401d6f~while
+pdg @ 0x40167d~while
+afn sub.123 @ 0x401d6f
+pdg @ 0x40167d~123
+EOF
+EXPECT=<<EOF
+bool while_(void)
+    iVar3 = while_();
+    iVar3 = _123();
+EOF
+RUN
+
+NAME=ccode makes local variable names legal C identifiers
+FILE=bins/dectest64
+CMDS=<<EOF
+aaa
+s main
+afvn while var_20h
+afvn a-b var_24h
+e r2ghidra.ccode=true
+pdg~while
+pdg~a_b
+EOF
+EXPECT=<<EOF
+    int64_t while_;
+    Aeropause(&while_,argc,argv);
+    int32_t a_b;
+EOF
+RUN
+
+NAME=ccode makes prototype argument names legal C identifiers
+FILE=bins/dectest64
+CMDS=<<EOF
+aaa
+s main
+afs int main(int register, char **do.it, char **envp)
+e r2ghidra.ccode=true
+pdg~main
+EOF
+EXPECT=<<EOF
+int main(int register_,char **do_it,char **envp)
+EOF
+RUN
